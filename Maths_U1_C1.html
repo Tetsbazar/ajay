@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Maths 3rd Sem | Unit 1 Ch 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- MathJax for rendering mathematical equations -->
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+/* ================= COLOR SCHEME & VARIABLES ================= */
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+
+/* Top Bar */
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+
+/* Hub View */
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+
+/* Quiz View */
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main);}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; }
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; overflow-x: auto;}
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+
+/* Result View */
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+
+/* Login Modal */
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+    <div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+    <div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+
+<div class="main">
+
+    <!-- ================= LOGIN MODAL ================= -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <h2>লগইন করুন</h2>
+            <p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+            <div class="login-set-name" id="loginSetName">📚 Set 1</div>
+            <div class="input-group">
+                <label>ইউজারনেম</label>
+                <input type="text" id="loginUsername" placeholder="Username">
+            </div>
+            <div class="input-group">
+                <label>পাসওয়ার্ড</label>
+                <input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+            </div>
+            <button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+            <button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+            <div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+        </div>
+    </div>
+
+    <!-- ================= HUB PAGE ================= -->
+    <div id="hubPage">
+        <div class="hub-header">
+            <h1>গণিত 3rd Sem Unit 1:<br>সম্বন্ধ ও অপেক্ষক (Relations & Functions)</h1>
+            <p>মোট ৩০টি প্রশ্ন সম্বলিত ২টি সেট। Test শুরু করতে সেটে ক্লিক করুন।</p>
+        </div>
+        <div class="set-grid" id="setGrid"></div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+        </div>
+    </div>
+
+    <!-- ================= QUIZ AREA ================= -->
+    <div id="testArea" class="hidden">
+        <div class="quiz-info">
+            <div class="info-item">🎓 <strong>Mathematics</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+            <div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="q-card">
+            <div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+            <div class="q-text" id="qText">Question Text</div>
+            <div class="opts" id="qOpts"></div>
+            <div class="explanation" id="explanation"><p id="explanationText"></p></div>
+            <div class="nav-row">
+                <div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+                <button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RESULT AREA ================= -->
+    <div class="result-wrap" id="resultWrap">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-score en-font" id="finalScore">100%</div>
+        <div class="result-total">স্কোর</div>
+        <div class="result-grade" id="resultGrade">অসাধারণ!</div>
+        <div class="result-bars">
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+                <div class="rb-label">সঠিক</div>
+            </div>
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+                <div class="rb-label">ভুল/স্কিপ</div>
+            </div>
+        </div>
+        <div class="attempt-info-box" id="attemptInfo"></div>
+        <div class="action-btns">
+            <button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+            <button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+            <button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// Global Config & Database
+// ============================================================
+const MAX_ATTEMPTS = 10; 
+const TIME_LIMIT = 10 * 60; // 10 Minutes
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+    1: {
+        name: 'Set 1', icon: '🔗', topic: 'সাধারণ MCQ (Basic & Conceptual)',
+        questions: [
+            { q: "১. শূন্য সেট নয় এমন যে-কোনো সেট A-এর ওপর সংজ্ঞাত একটি সম্বন্ধ R-কে A-এর ওপর সমতুল্যতা সম্বন্ধ বলা হবে যদি R সম্বন্ধটি A-এর ওপর-", opts: ["স্বসম", "প্রতিসম", "স্বসম, প্রতিসম এবং সংক্রমণ হয়", "কোনোটিই নয়"], ans: 2, exp: "ব্যাখ্যা: সমতুল্যতা সম্বন্ধের গাণিতিক সংজ্ঞানুযায়ী, কোনো সম্বন্ধকে সমতুল্যতা হতে হলে তা একইসঙ্গে স্বসম (reflexive), প্রতিসম (symmetric) এবং সংক্রমণ (transitive) হতে হয়।" },
+            { q: "২. \\(A=\\{a,b,c\\}\\) সেট থেকে \\(B=\\{d,e\\}\\) সেটে সংজ্ঞাত মোট সম্বন্ধসমূহের সংখ্যা হয়-", opts: ["\\(2^6\\)", "\\(2^8\\)", "\\(2^4\\)", "\\(2^{15}\\)"], ans: 0, exp: "ব্যাখ্যা: A সেটে ৩টি এবং B সেটে ২টি পদ আছে। A থেকে B সেটে সংজ্ঞাত মোট সম্বন্ধের সংখ্যা হবে উপসেটের সূত্র অনুযায়ী \\(2^{m \\times n} = 2^{3 \\times 2} = 2^6\\)।" },
+            { q: "৩. \\(A=\\{8,9,10,11\\}\\) এবং \\(B=\\{2,3,4,5\\}\\) এবং A থেকে B-তে একটি সম্বন্ধ \\(xRy \\Rightarrow x, y\\) দিয়ে বিভাজ্য। R-এর ক্ষেত্র (Domain) হবে-", opts: ["{2,3,4,5}", "{8,9,10,11}", "{8,9,10}", "{8,10}"], ans: 2, exp: "ব্যাখ্যা: শর্তানুযায়ী, A সেটের ৪ বিভাজ্য 2 ও 4 দিয়ে; 9 বিভাজ্য 3 দিয়ে; 10 বিভাজ্য 2 ও 5 দিয়ে। কিন্তু 11, B সেটের কোনো পদ দিয়ে বিভাজ্য নয়। তাই প্রথম পদগুলির সেট বা ক্ষেত্র হলো {8,9,10}।" },
+            { q: "৪. \\(R=\\{(x,y) : x\\) একটি পূর্ণসংখ্যা এবং \\(|x|<3\\) এবং \\(y=|x-3|\\}\\) হলে, R-এর পাল্লা (Range) হবে-", opts: ["{-2,-1,0}", "{4,3,2,1}", "{-2,-1,0,1,2}", "{5,4,3,2,1}"], ans: 3, exp: "ব্যাখ্যা: \\(|x|<3\\) এবং x পূর্ণসংখ্যা হওয়ায় x-এর সম্ভাব্য মানগুলি হলো -2, -1, 0, 1, 2। \\(y=|x-3|\\) সমীকরণে বসালে y-এর মানগুলি পাওয়া যায় 5, 4, 3, 2, 1। অতএব পাল্লা বা প্রসার হবে {5,4,3,2,1}।" },
+            { q: "৫. \\(A=\\{1,2,3\\}\\) সেটের ওপর R সম্বন্ধটির দুটি পদ (1,2) ও (1,3)। R সম্বন্ধটি স্বসম ও প্রতিসম হবে কিন্তু সংক্রমণ হবে না এরকম যতগুলি R পাওয়া যাবে, তার সংখ্যা হল-", opts: ["1", "2", "3", "4"], ans: 0, exp: "ব্যাখ্যা: স্বসম হওয়ার জন্য (1,1), (2,2), (3,3) থাকতে হবে। প্রতিসম হওয়ার জন্য (1,2) ও (1,3)-এর সাথে (2,1) ও (3,1) থাকতেই হবে। সুতরাং সেটটি হবে \\(R = \\{(1,1), (2,2), (3,3), (1,2), (2,1), (1,3), (3,1)\\}\\)। এটি সংক্রমণ নয় কারণ (2,1) ও (1,3) থাকলেও এতে (2,3) নেই। এমন সম্বন্ধ কেবল ১টিই তৈরি করা সম্ভব।" },
+            { q: "৬. \\(X=\\{1,2,3,4\\}\\) এবং X-এর ওপর একটি সম্বন্ধ R-এর সংজ্ঞা হয়: \\(R=\\{(1,2),(3,4),(2,2),(4,3),(2,3)\\}\\); X-এর ওপর R সম্বন্ধ-", opts: ["স্বসম", "প্রতিসম নয়", "স্বসম নয় কিন্তু প্রতিসম", "সংক্রমণ"], ans: 1, exp: "ব্যাখ্যা: R-এ (1,2) পদটি আছে কিন্তু তার বিপরীত (2,1) নেই। তাই এটি প্রতিসম নয়। এছাড়া (1,1) না থাকায় এটি স্বসমও নয়।" },
+            { q: "৭. {1,2,3,4} সেটের ওপর R সম্বন্ধ নিম্নরূপে প্রদত্ত: \\(R=\\{(1,2),(2,2),(1,1),(4,4),(1,3),(3,3),(3,2)\\}\\)। তাহলে নীচের কোন্টি সঠিক উক্তি?", opts: ["R সম্বন্ধ স্বসম ও প্রতিসম কিন্তু সংক্রমণ নয়", "R সম্বন্ধ স্বসম ও সংক্রমণ কিন্তু প্রতিসম নয়", "R সম্বন্ধ প্রতিসম ও সংক্রমণ কিন্তু স্বসম নয়", "R একটি সমতুল্যতা সম্বন্ধ"], ans: 1, exp: "ব্যাখ্যা: প্রতিটি উপাদানের জন্য (1,1), (2,2), (3,3), (4,4) আছে, তাই এটি স্বসম। (1,2) আছে কিন্তু (2,1) নেই, তাই প্রতিসম নয়। এটি সংক্রমণের সব গাণিতিক শর্ত সিদ্ধ করে, তাই এটি সংক্রমণ।" },
+            { q: "৮. বাস্তব সংখ্যাসমূহের সেটের ওপর সংজ্ঞাত 'অপেক্ষা বড়ো (>)' সম্বন্ধটি কীরূপ?", opts: ["সংক্রমণ কিন্তু স্বসম কিংবা প্রতিসম নয়", "স্বসম এবং প্রতিসম কিন্তু সংক্রমণ নয়", "প্রতিসম কিন্তু স্বসম বা সংক্রমণ নয়", "সমতুল্যতা"], ans: 0, exp: "ব্যাখ্যা: কোনো সংখ্যা নিজের থেকে বড়ো হতে পারে না অর্থাৎ \\(x>x\\) মিথ্যা (স্বসম নয়)। \\(x>y\\) হলে \\(y>x\\) হতে পারে না (প্রতিসম নয়)। কিন্তু \\(x>y\\) এবং \\(y>z\\) হলে গাণিতিকভাবে \\(x>z\\) হয়, তাই এটি কেবল সংক্রমণ সম্বন্ধ।" },
+            { q: "৯. কোনো সমতলে অঙ্কিত সরলরেখাসমূহের সেট L-এর ওপর সংজ্ঞাত '\\(l_1\\) সরলরেখা \\(l_2\\)-এর ওপর লম্ব' সম্বন্ধ L-এর ওপর-", opts: ["সংক্রমণ, কিন্তু স্বসম কিংবা প্রতিসম নয়", "স্বসম এবং প্রতিসম কিন্তু সংক্রমণ নয়", "প্রতিসম কিন্তু স্বসম বা সংক্রমণ নয়", "সমতুল্যতা"], ans: 2, exp: "ব্যাখ্যা: কোনো সরলরেখা নিজের ওপর লম্ব হতে পারে না (স্বসম নয়)। \\(l_1 \\perp l_2\\) হলে উল্টোভাবে \\(l_2 \\perp l_1\\) হবেই (প্রতিসম)। কিন্তু \\(l_1 \\perp l_2\\) এবং \\(l_2 \\perp l_3\\) হলে \\(l_1 \\parallel l_3\\) (সমান্তরাল) হয়ে যায়, লম্ব থাকে না (সংক্রমণ নয়)।" },
+            { q: "১০. স্বাভাবিক সংখ্যাসমূহের সেট N-এর ওপর একটি সম্বন্ধ R নিম্নরূপে সংজ্ঞাত: \\((x,y) \\in R \\Rightarrow y\\), x দিয়ে বিভাজ্য। N-এর ওপর R সম্বন্ধ-", opts: ["স্বসম এবং সংক্রমণ কিন্তু প্রতিসম নয়", "স্বসম এবং প্রতিসম কিন্তু সংক্রমণ নয়", "প্রতিসম এবং সংক্রমণ কিন্তু স্বসম নয়", "সমতুল্যতা"], ans: 0, exp: "ব্যাখ্যা: যেকোনো সংখ্যা নিজেকে দিয়ে বিভাজ্য (স্বসম)। y, x দিয়ে এবং z, y দিয়ে বিভাজ্য হলে z, x দিয়েও বিভাজ্য হবে (সংক্রমণ)। কিন্তু 6, 3 দিয়ে বিভাজ্য হলেও 3, 6 দিয়ে বিভাজ্য নয়, তাই এটি প্রতিসম নয়।" },
+            { q: "১১. স্বাভাবিক সংখ্যাসমূহের সেট N-এর ওপর একটি সম্বন্ধ R নিম্নরূপে সংজ্ঞাত: \\((x,y) \\in R \\Rightarrow x+y=12\\), সব \\(x,y \\in \\mathbb{N}\\) এর জন্য। N-এর ওপর R সম্বন্ধ-", opts: ["স্বসম এবং প্রতিসম কিন্তু সংক্রমণ নয়", "স্বসম কিন্তু প্রতিসম কিংবা সংক্রমণ নয়", "প্রতিসম, কিন্তু স্বসম কিংবা সংক্রমণ নয়", "সমতুল্যতা"], ans: 2, exp: "ব্যাখ্যা: \\(x+x=12 \\Rightarrow x=6\\), যা সব স্বাভাবিক সংখ্যার জন্য সত্য নয় (স্বসম নয়)। \\(x+y=12\\) হলে \\(y+x=12\\) হবেই (প্রতিসম)। (1,11) ও (11,1) থাকলে (1,1) থাকতে হবে যা এই শর্তে সম্ভব নয় (সংক্রমণ নয়)।" },
+            { q: "১২. মনে করো, সব সেটসমূহের সেট S এবং S-এর ওপর R সম্বন্ধের সংজ্ঞা হয়: XRY যদি এবং কেবলমাত্র যদি \\(X \\subseteq Y\\) হয়। তবে S-এর ওপর R সম্বন্ধ-", opts: ["স্বসম এবং সংক্রমণ কিন্তু প্রতিসম নয়", "স্বসম এবং প্রতিসম কিন্তু সংক্রমণ নয়", "প্রতিসম কিন্তু স্বসম বা সংক্রমণ নয়", "সমতুল্যতা"], ans: 0, exp: "ব্যাখ্যা: যেকোনো সেট তার নিজের উপসেট, অর্থাৎ \\(X \\subseteq X\\) (স্বসম)। \\(X \\subseteq Y\\) ও \\(Y \\subseteq Z\\) হলে উপপাদ্য অনুযায়ী \\(X \\subseteq Z\\) হবে (সংক্রমণ)। কিন্তু \\(X \\subseteq Y\\) হলে \\(Y \\subseteq X\\) সর্বদা সত্য হয় না (প্রতিসম নয়)।" },
+            { q: "১৩. পূর্ণসংখ্যাসমূহের সেট Z-এর ওপর একটি সম্বন্ধ R নিম্নরূপে সংজ্ঞাত: \\(R=\\{(x,y):x,y \\in Z\\) এবং \\((x-y)\\)-এর মান জোড়\\}\\)। তবে Z-এর ওপর R সম্বন্ধ-", opts: ["প্রতিসম নয়", "স্বসম এবং প্রতিসম কিন্তু সংক্রমণ নয়", "প্রতিসম কিন্তু স্বসম বা সংক্রমণ নয়", "সমতুল্যতা"], ans: 3, exp: "ব্যাখ্যা: \\(x-x=0\\) যা একটি জোড় সংখ্যা (স্বসম)। \\(x-y\\) জোড় হলে \\(y-x\\) ও জোড় হয় (প্রতিসম)। \\(x-y\\) ও \\(y-z\\) জোড় হলে তাদের যোগফল \\(x-z\\) ও জোড় হয় (সংক্রমণ)। তিনটি শর্তই সিদ্ধ হওয়ায় এটি সমতুল্যতা।" },
+            { q: "১৪. \\(A=\\{1,2,3,4\\}\\) সেটের ওপর উপাদানস্থির সম্বন্ধ (Identity relation) \\(I_A\\) হলে নিচের কোনটি \\(I_A\\)-তে থাকবে?", opts: ["(1,2)", "(2,2)", "(2,1)", "(3,4)"], ans: 1, exp: "ব্যাখ্যা: উপাদানস্থির বা কর্ণ সম্বন্ধে প্রতিটি উপাদান কেবল নিজের সাথেই সম্পর্কিত হয়, অর্থাৎ \\(I_A = \\{(x,x) : x \\in A\\}\\)। তাই (2,2) পদটি অবশ্যই থাকবে।" },
+            { q: "১৫. মনে করো, \\(A=\\{a,b,c,d\\}\\) এবং A-র ওপর একটি সম্বন্ধ হল R, যেখানে \\(R=\\{(a,a),(a,c),(c,a),(c,c),(d,d)\\}\\); A-র ওপর R সম্বন্ধটি কীরূপ হবে?", opts: ["সার্বিক সম্বন্ধ", "স্বসম", "প্রতিসম ও সংক্রমণ", "শুধুমাত্র প্রতিসম"], ans: 2, exp: "ব্যাখ্যা: সেটটিতে (b,b) নেই তাই এটি স্বসম নয়। তবে (a,c) ও (c,a) উপস্থিত থাকায় এটি প্রতিসম এবং এটি সংক্রমণের কোনো নিয়ম ভঙ্গ করছে ধর্ম। তাই এটি প্রতিসম ও সংক্রমণ।" }
+        ]
+    },
+    2: {
+        name: 'Set 2', icon: '🧠', topic: 'Statement, Assertion-Reasoning & Case-Based',
+        questions: [
+            { q: "১৬. <strong>বিবৃতি-A:</strong> কোনো সেটের ওপর P, Q দুটি সমতুল্যতা সম্বন্ধ হলে \\(P \\cup Q\\) সমতুল্যতা সম্বন্ধ নাও হতে পারে।<br><strong>বিবৃতি-B:</strong> P, Q সমতুল্যতা হলে \\(P \\cup Q\\) সংক্রমণ নাও হতে পারে।", opts: ["বিবৃতি A এবং B পরস্পরবিরোধী", "বিবৃতি B হল বিবৃতি A এর কারণ", "বিবৃতি A হল সত্য কিন্তু B মিথ্যা", "বিবৃতি A এবং B পরস্পর নির্ভরশীল নয়"], ans: 1, exp: "ব্যাখ্যা: গাণিতিকভাবে প্রমাণিত যে দুটি সমতুল্যতা সম্বন্ধের যোগফল (Union) সর্বদা সমতুল্যতা হয় না, কারণ যোগফলটি প্রায়শই সংক্রমণ (Transitive) হওয়ার শর্তটি সিদ্ধ করে না।" },
+            { q: "১৭. <strong>বিবৃতি-I:</strong> পূর্ণসংখ্যাসমূহের সেট Z-এর ওপর একটি সম্বন্ধ R: \\((x-y)\\)-এর মান n দিয়ে বিভাজ্য। R স্বসম এবং প্রতিসম কিন্তু সংক্রমণ নয়।<br><strong>বিবৃতি-II:</strong> R সমতুল্যতা সম্বন্ধ।", opts: ["I সঠিক, II সঠিক এবং II, I-এর কারণ", "I সঠিক, II সঠিক এবং II, I-এর কারণ নয়", "I সঠিক এবং II সঠিক নয়", "I সঠিক নয় এবং II সঠিক"], ans: 3, exp: "ব্যাখ্যা: \\((x-y)\\) যদি n দ্বারা বিভাজ্য হয়, তবে সেটি স্বসম, প্রতিসম ও সংক্রমণ—এই তিনটি ধর্মই মেনে চলে। তাই এটি সর্বদা একটি সমতুল্যতা সম্বন্ধ। ফলে বিবৃতি I সম্পূর্ণ মিথ্যা।" },
+            { q: "১৮. <strong>বিবৃতি-A:</strong> \\(R = \\{(x,y)| x\\) ও y পূর্ণসংখ্যা এবং \\(xy=4\\}\\)। R-এর ক্ষেত্র = \\(\\{-4,-2,-1,1,2,4\\}\\)।<br><strong>বিবৃতি-B:</strong> R-এর পাল্লা = \\(\\{-4,-2,-1,0,1,2,4\\}\\)।", opts: ["বিবৃতি A এবং B পরস্পরবিরোধী", "বিবৃতি B হল বিবৃতি A এর কারণ", "বিবৃতি A হল সত্য কিন্তু B মিথ্যা", "বিবৃতি A এবং B পরস্পর নির্ভরশীল নয়"], ans: 2, exp: "ব্যাখ্যা: \\(xy=4\\) হলে x বা y কারো মানই 0 হতে পারে না। তাই ক্ষেত্র ও পাল্লা উভয়েই হবে \\(\\{-4,-2,-1,1,2,4\\}\\)। বিবৃতি B-তে 0 থাকায় তা মিথ্যা।" },
+            { q: "১৯. <strong>বিবৃতি-I:</strong> \\(A=\\{1,3,5\\}, B=\\{2,4,6\\}\\) এবং A থেকে B সেটে R সম্বন্ধ: \\(xRy \\Rightarrow (x+y)\\)-এর মান জোড়। A থেকে B-তে R একটি শূন্য সম্বন্ধ প্রকাশ করে।<br><strong>বিবৃতি-II:</strong> A থেকে B-তে R একটি সার্বিক সম্বন্ধ প্রকাশ করে।", opts: ["বিবৃতি I সত্য", "বিবৃতি I, II সত্য", "বিবৃতি II সত্য", "বিবৃতি I, II মিথ্যা"], ans: 0, exp: "ব্যাখ্যা: A সেটের সব পদ বিজোড় এবং B সেটের সব পদ জোড়। একটি বিজোড় ও একটি জোড় সংখ্যার যোগফল সর্বদা বিজোড় হয়। তাই \\((x+y)\\) কখনোই জোড় হবে না, ফলে এটি একটি শূন্য সম্বন্ধ বা Empty relation।" },
+            { q: "২০. <strong>বিবৃতি-I:</strong> শূন্য সেট নয় এমন যে-কোনো সেট A-এর ওপর সংজ্ঞাত একটি স্বসম সম্বন্ধ সর্বদাই প্রতিসম হয়।<br><strong>বিবৃতি-II:</strong> শূন্য সেট নয় এমন যে-কোনো সেট A-এর ওপর সংজ্ঞাত সার্বিক সম্বন্ধ সংক্রমণ।", opts: ["বিবৃতি I সত্য", "বিবৃতি II সত্য", "বিবৃতি I, II সত্য", "বিবৃতি I, II মিথ্যা"], ans: 1, exp: "ব্যাখ্যা: স্বসম সম্বন্ধ সর্বদা প্রতিসম হয় না (যেমন (1,2) থাকলে (2,1) না থাকতে পারে)। কিন্তু সার্বিক সম্বন্ধ সর্বদা সমতুল্যতা সম্বন্ধ হওয়ায় এটি অবশ্যই সংক্রমণ।" },
+            { q: "(Case Based: ২১ থেকে ২৫ নং প্রশ্নগুলি নিচের তথ্যের ওপর ভিত্তি করে)<br><br><i>তথ্য: \\(A=\\{1,2,3,4,5,6,7\\}, B=\\{1,4,7\\}\\)। R হলো A থেকে B তে সংজ্ঞাত একটি সম্বন্ধ যেখানে \\(R=\\{(x,y): x>y, x \\in A, y \\in B\\}\\)।</i><br><br>২১. \\(R\\)-এর ক্ষেত্র (Domain) হবে-", opts: ["{1,4}", "{1,4,7}", "{2,3,4,5,6,7}", "এদের কোনোটিই নয়"], ans: 2, exp: "ব্যাখ্যা: \\(y=1\\) হলে \\(x>1 \\Rightarrow x \\in \\{2,3,4,5,6,7\\}\\)। \\(y=4\\) হলে \\(x>4 \\Rightarrow x \\in \\{5,6,7\\}\\)। \\(y=7\\) এর জন্য কোনো x নেই। তাই প্রথম পদগুলির সেট বা ক্ষেত্র হলো {2,3,4,5,6,7}।" },
+            { q: "২২. \\(R^{-1}\\) এর ক্ষেত্র হবে-", opts: ["{1,4}", "{1,4,7}", "{2,3,4,5,6,7}", "এদের কোনোটিই নয়"], ans: 0, exp: "ব্যাখ্যা: \\(R^{-1}\\) এর ক্ষেত্র হলো মূল R-এর পাল্লা বা Range। ওপরের ব্যাখ্যা থেকে আমরা দেখেছি y-এর মান কেবল 1 এবং 4 ব্যবহৃত হয়েছে। তাই পাল্লা {1,4}।" },
+            { q: "২৩. \\(A=\\{1,2,3\\}\\) এবং \\(R=\\{(1,1), (2,2), (1,2), (2,3), (3,2)\\}\\)। R স্বসম নয় কারণ-", opts: ["\\((2,1) \\notin R\\)", "\\((3,3) \\notin R\\)", "\\((1,1) \\in R\\)", "এদের কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: স্বসম হতে হলে A এর প্রতিটি উপাদানের জন্য নিজের সাথে নিজের জোড় \\((a,a)\\) থাকতে হবে। এখানে (3,3) নেই।" },
+            { q: "২৪. ২৩ নং প্রশ্নের ক্ষেত্রে, R প্রতিসম নয় কারণ-", opts: ["\\((3,3) \\notin R\\)", "\\((1,1) \\in R\\)", "\\((2,1) \\notin R\\)", "\\((1,3) \\notin R\\)"], ans: 2, exp: "ব্যাখ্যা: প্রতিসম হওয়ার নিয়ম হলো \\((x,y)\\) থাকলে \\((y,x)\\) থাকতে হবে। এখানে \\((1,2)\\) আছে কিন্তু এর বিপরীত \\((2,1)\\) নেই।" },
+            { q: "২৫. ২৩ নং প্রশ্নের ক্ষেত্রে, R সংক্রমণ নয় কারণ-", opts: ["\\((3,3) \\notin R\\)", "\\((2,2) \\in R\\)", "\\((2,1) \\notin R\\)", "\\((1,3) \\notin R\\)"], ans: 3, exp: "ব্যাখ্যা: \\((1,2)\\) এবং \\((2,3)\\) উভয়েই থাকায় সংক্রমণের সূত্রানুযায়ী \\((1,3)\\) থাকা উচিত ছিল, কিন্তু তা নেই।" },
+            { q: "২৬. <strong>বিবৃতি-I:</strong> শূন্য সেট নয় এমন যে-কোনো সেট A-এর ওপর সংজ্ঞাত একটি স্বসম সম্বন্ধ A-এর ওপর একটি উপাদানস্থির সম্বন্ধ নাও হতে পারে।", opts: ["বিবৃতি I সত্য", "বিবৃতি II সত্য", "বিবৃতি I, II সত্য", "বিবৃতি I, II মিথ্যা"], ans: 0, exp: "ব্যাখ্যা: উপাদানস্থির (Identity) সম্বন্ধে কেবল \\((x,x)\\) থাকে, কিন্তু স্বসম (Reflexive) সম্বন্ধে \\((x,x)\\) ছাড়াও অন্যান্য উপাদান \\((x,y)\\) থাকতে পারে, তাই সব স্বসম সম্বন্ধ উপাদানস্থির নয়।" },
+            { q: "২৭. <strong>বিবৃতি-I:</strong> A সেটে m-সংখ্যক ও B সেটে n-সংখ্যক পদ থাকলে A থেকে B-তে মোট \\(2^{mn}\\)-সংখ্যক সম্বন্ধ সংজ্ঞায়িত করা যায়。<br><strong>বিবৃতি-II:</strong> \\(A \\times B\\) সেটের পদসংখ্যা হবে mn।", opts: ["I সঠিক, II সঠিক এবং II, I-এর কারণ", "I সঠিক, II সঠিক এবং II, I-এর কারণ নয়", "I সঠিক এবং II সঠিক নয়", "I সঠিক নয় এবং II সঠিক"], ans: 0, exp: "ব্যাখ্যা: সম্বন্ধ হলো \\(A \\times B\\) এর উপসেট। \\(A \\times B\\) এর মোট পদসংখ্যা mn হলে, তার সম্ভাব্য সমস্ত উপসেটের সংখ্যা বা সম্বন্ধের সংখ্যা \\(2^{mn}\\) হয়। তাই বিবৃতি II হলো বিবৃতি I এর সঠিক কারণ।" },
+            { q: "২৮. মনে করো, কোনো সমতলে O হল মূলবিন্দু এবং P ও Q ওই সমতলে অন্য দুটি বিন্দু। P ও Q-র মধ্যে S সম্বন্ধ এমনভাবে সংজ্ঞাত করা হল, যাতে \\(OP=OQ\\) হয়। তবে-", opts: ["শুধুমাত্র বিবৃতি I, II সত্য", "শুধুমাত্র বিবৃতি II, III সত্য", "শুধুমাত্র বিবৃতি I, III সত্য", "বিবৃতি I, II, III (স্বসম, প্রতিসম, সংক্রমণ) তিনটিই সত্য"], ans: 3, exp: "ব্যাখ্যা: \\(OP=OP\\) (স্বসম), \\(OP=OQ \\Rightarrow OQ=OP\\) (প্রতিসম), এবং \\(OP=OQ\\) ও \\(OQ=OR\\) হলে \\(OP=OR\\) (সংক্রমণ)। অর্থাৎ এটি একটি সমতুল্যতা সম্বন্ধ।" },
+            { q: "২৯. A এবং B দুটি সেটের উপাদান সংখ্যা m এবং 1। A থেকে B সেটে যতগুলি সম্বন্ধ পাওয়া যায় তার সংখ্যা-", opts: ["\\(2^m\\)", "\\(m^2\\)", "\\(2^{m+1}\\)", "\\(2^{m \\times 1}\\)"], ans: 0, exp: "ব্যাখ্যা: সম্বন্ধের সংখ্যা = \\(2^{n(A) \\times n(B)} = 2^{m \\times 1} = 2^m\\)।" },
+            { q: "৩০. R এবং S উভয়ই A সেটের ওপর প্রতিসম সম্বন্ধ হলে \\(R \\cap S\\) কী হবে?", opts: ["প্রতিসম", "স্বসম", "সংক্রমণ", "সমতুল্যতা"], ans: 0, exp: "ব্যাখ্যা: সেট তত্ত্বে প্রমাণিত যে, দুটি প্রতিসম সম্বন্ধের ছেদ (Intersection) বা \\(R \\cap S\\) সর্বদা প্রতিসম হয়।" }
+        ]
+    }
+};
+
+// ================== STATE VARIABLES ==================
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+// ================== LOCAL STORAGE LOGIC ==================
+function getGlobalUsers() {
+    const data = localStorage.getItem("testBazarGlobalUsers");
+    return data ? JSON.parse(data) : {};
+}
+
+// Keeping attempts separate for Maths Unit 1 Chapter 1
+function getAttemptsData() {
+    const data = localStorage.getItem("testBazarAttemptsMath3U1C1_v1");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    attempts[key] = (attempts[key] || 0) + 1;
+    localStorage.setItem("testBazarAttemptsMath3U1C1_v1", JSON.stringify(attempts));
+    return attempts[key];
+}
+
+// ================== INITIALIZATION ==================
+window.onload = () => {
+    renderHub();
+};
+
+function renderHub() {
+    const grid = document.getElementById("setGrid");
+    grid.innerHTML = "";
+    
+    for(let id in ALL_SETS) {
+        const set = ALL_SETS[id];
+        const div = document.createElement("div");
+        div.className = "set-card";
+        
+        let attemptCount = 0;
+        let isLocked = false;
+        
+        if (currentUser) {
+            attemptCount = getAttemptCount(currentUser, id);
+            isLocked = attemptCount >= MAX_ATTEMPTS;
+            if (isLocked) div.classList.add("locked");
+        }
+        
+        div.innerHTML = `
+            <div class="icon">${set.icon}</div>
+            <div class="set-num">${set.name}</div>
+            <div class="set-title">${set.topic}</div>
+            <div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+            ${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+        `;
+        
+        div.onclick = () => {
+            if (isLocked) {
+                alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+                return;
+            }
+            handleSetClick(id);
+        };
+        grid.appendChild(div);
+    }
+}
+
+function handleSetClick(setId) {
+    activeSetId = setId;
+    if (!currentUser) {
+        document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+        document.getElementById("loginOverlay").classList.add("active");
+        document.getElementById("loginUsername").value = "";
+        document.getElementById("loginPassword").value = "";
+        document.getElementById("loginError").style.display = "none";
+    } else {
+        startQuiz(setId);
+    }
+}
+
+function doLogin() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+    const err = document.getElementById("loginError");
+    const GLOBAL_USERS = getGlobalUsers();
+
+    if(!u || !p) {
+        err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!";
+        err.style.display = "block";
+        return;
+    }
+
+    if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+        let attempts = getAttemptCount(u, activeSetId);
+        if (attempts >= MAX_ATTEMPTS) {
+            err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+            err.style.display = "block";
+            return;
+        }
+        currentUser = u;
+        document.getElementById("loginOverlay").classList.remove("active");
+        document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+        document.getElementById("userDisplay").classList.remove("hidden");
+        renderHub();
+        startQuiz(activeSetId);
+    } else {
+        err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+        err.style.display = "block";
+    }
+}
+
+function closeLogin() {
+    document.getElementById("loginOverlay").classList.remove("active");
+}
+
+function goToHub() {
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("hubPage").style.display = "block";
+    document.getElementById("timerBox").classList.add("hidden");
+    clearInterval(timerInterval);
+    renderHub();
+}
+
+// ================== QUIZ LOGIC ==================
+function startQuiz(setId) {
+    incrementAttempt(currentUser, setId);
+    questions = ALL_SETS[setId].questions;
+    currentQIndex = 0;
+    score = 0;
+    wrongAnswers = 0;
+    userAnswers = {};
+    isReviewMode = false;
+    timeLeft = TIME_LIMIT;
+
+    document.getElementById("hubPage").style.display = "none";
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    document.getElementById("timerBox").classList.remove("hidden");
+    document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+    document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+
+    startTimer();
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const qData = questions[currentQIndex];
+    document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+    document.getElementById("qText").innerHTML = qData.q;
+    const progress = ((currentQIndex) / questions.length) * 100;
+    document.getElementById("progressFill").style.width = `${progress}%`;
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    
+    const optsBox = document.getElementById("qOpts");
+    optsBox.innerHTML = "";
+    document.getElementById("explanation").classList.remove("show");
+    document.getElementById("nextBtn").disabled = true;
+    document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+    qData.opts.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "opt";
+        btn.innerHTML = `<div class="opt-circle">${LABELS[idx]}</div> <div class="opt-text">${optText}</div>`;
+        
+        if (isReviewMode) {
+            btn.classList.add("disabled");
+            if (idx === qData.ans) btn.classList.add("correct");
+            else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+        } else {
+            btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+        }
+        optsBox.appendChild(btn);
+    });
+
+    if (isReviewMode) {
+        document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+        document.getElementById("explanation").classList.add("show");
+        document.getElementById("nextBtn").disabled = false;
+        if (currentQIndex === questions.length - 1) {
+            document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন";
+        }
+    }
+    
+    // Refresh MathJax for the new content
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+    const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+    allBtns.forEach(b => b.classList.add("disabled"));
+    userAnswers[currentQIndex] = selectedIdx; 
+
+    if (selectedIdx === correctIdx) {
+        btn.classList.add("correct");
+        score++;
+    } else {
+        btn.classList.add("wrong");
+        allBtns[correctIdx].classList.add("correct");
+        wrongAnswers++;
+    }
+    
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+    document.getElementById("explanation").classList.add("show");
+    document.getElementById("nextBtn").disabled = false;
+    
+    // Refresh MathJax for explanation text
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function nextQ() {
+    if (isReviewMode && currentQIndex === questions.length - 1) {
+        document.getElementById("testArea").classList.add("hidden");
+        document.getElementById("resultWrap").classList.add("show");
+        return;
+    }
+    if (!isReviewMode && currentQIndex === questions.length - 1) {
+        finishQuiz();
+        return;
+    }
+    currentQIndex++;
+    loadQuestion();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    const tBox = document.getElementById("timerBox");
+    tBox.classList.remove("danger");
+    
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishQuiz();
+            return;
+        }
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        if (timeLeft < 60) tBox.classList.add("danger");
+    }, 1000);
+}
+
+function finishQuiz() {
+    clearInterval(timerInterval);
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("timerBox").classList.add("hidden");
+    document.getElementById("resultWrap").classList.add("show");
+    
+    const total = questions.length;
+    const skipped = total - (score + wrongAnswers);
+    const percent = Math.round((score / total) * 100);
+    
+    document.getElementById("finalScore").innerText = `${percent}%`;
+    document.getElementById("rbCorrect").innerText = score;
+    document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+    
+    const gradeEl = document.getElementById("resultGrade");
+    if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+    else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+    else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+    
+    const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+    document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+    if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+        alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+        return;
+    }
+    startQuiz(activeSetId);
+}
+
+function showReview() {
+    isReviewMode = true;
+    currentQIndex = 0;
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    loadQuestion();
+}
+</script>
+</body>
+</html>
