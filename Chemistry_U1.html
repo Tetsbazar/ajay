@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Chemistry 3rd Sem | Unit 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ================= COLOR SCHEME & VARIABLES ================= */
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+
+/* Top Bar */
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+
+/* Hub View */
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+
+/* Quiz View */
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main);}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; }
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+
+/* Result View */
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+
+/* Login Modal */
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+    <div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+    <div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+
+<div class="main">
+
+    <!-- ================= LOGIN MODAL ================= -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <h2>লগইন করুন</h2>
+            <p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+            <div class="login-set-name" id="loginSetName">📚 Set 1</div>
+            <div class="input-group">
+                <label>ইউজারনেম</label>
+                <input type="text" id="loginUsername" placeholder="Username">
+            </div>
+            <div class="input-group">
+                <label>পাসওয়ার্ড</label>
+                <input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+            </div>
+            <button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+            <button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+            <div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+        </div>
+    </div>
+
+    <!-- ================= HUB PAGE ================= -->
+    <div id="hubPage">
+        <div class="hub-header">
+            <h1>রসায়ন 3rd Sem Unit 1:<br>পদার্থের তরল অবস্থা ও কোলয়েড রসায়ন</h1>
+            <p>মোট ১৫০টি প্রশ্ন সম্বলিত ১০টি সেট। Test শুরু করতে সেটে ক্লিক করুন।</p>
+        </div>
+        <div class="set-grid" id="setGrid"></div>
+        <div style="text-align: center; margin-top: 30px;">
+            <!-- Index.html এ ফিরে যাওয়ার লিঙ্ক -->
+            <button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+        </div>
+    </div>
+
+    <!-- ================= QUIZ AREA ================= -->
+    <div id="testArea" class="hidden">
+        <div class="quiz-info">
+            <div class="info-item">🎓 <strong>Chemistry</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+            <div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="q-card">
+            <div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+            <div class="q-text" id="qText">Question Text</div>
+            <div class="opts" id="qOpts"></div>
+            <div class="explanation" id="explanation"><p id="explanationText"></p></div>
+            <div class="nav-row">
+                <div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+                <button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RESULT AREA ================= -->
+    <div class="result-wrap" id="resultWrap">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-score en-font" id="finalScore">100%</div>
+        <div class="result-total">স্কোর</div>
+        <div class="result-grade" id="resultGrade">অসাধারণ!</div>
+        <div class="result-bars">
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+                <div class="rb-label">সঠিক</div>
+            </div>
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+                <div class="rb-label">ভুল/স্কিপ</div>
+            </div>
+        </div>
+        <div class="attempt-info-box" id="attemptInfo"></div>
+        <div class="action-btns">
+            <button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+            <button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+            <button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// Global Config & Database
+// ============================================================
+const MAX_ATTEMPTS = 10; // আপনার কথামতো ১০টি লিমিট সেট করা হয়েছে 
+const TIME_LIMIT = 10 * 60; // 10 Minutes
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+    1: {
+        name: 'Set 1', icon: '🧪', topic: 'দ্রবণের প্রাথমিক ধারণা ও গাঢ়ত্ব',
+        questions: [
+            { q: "১. 20 g গ্লুকোজকে কত গ্রাম জলে দ্রবীভূত করলে উৎপন্ন দ্রবণের ওজনগত শতকরা গাঢ়ত্ব (W/W) 10% হবে?", opts: ["100 g", "150 g", "180 g", "210 g"], ans: 2, exp: "ব্যাখ্যা: যদি জলের পরিমাণ W g হয়, তবে দ্রবণের মোট ভর = (W + 20) g। শর্তানুযায়ী, [20/(W+20)] × 100 = 10 বা, W+20=200 বা, W=180 g।" },
+            { q: "২. সাধারণ স্যালাইন হল 0.9% (W/V) NaCl-এর জলীয় দ্রবণ। উক্ত স্যালাইনের 300 mL আয়তনে যদি আরও 1.8 g NaCl দ্রবীভূত করা হয়, তবে উৎপন্ন দ্রবণের ওজন-আয়তনগত (W/V) শতকরা গাঢ়ত্ব হবে-", opts: ["1.1%", "1.5%", "1.8%", "2.1%"], ans: 1, exp: "ব্যাখ্যা: 300 mL দ্রবণে NaCl-এর পরিমাণ = (0.9/100)×300 = 2.7 g। আরও 1.8 g যোগ করার পর মোট NaCl = 2.7 + 1.8 = 4.5 g। উৎপন্ন দ্রবণের শতকরা গাঢ়ত্ব = (4.5/300)×100 = 1.5%।" },
+            { q: "৩. 50°C উয়তায় 250 mL জলে 3.25 g গ্লুকোজ দ্রবীভূত আছে। দ্রবণটির ওজনগত শতকরা গাঢ়ত্ব (W/W) হল (50°C উয়তায় জলের ঘনত্ব 0.987 g/mL)-", opts: ["1.14%", "1.30%", "1.83%", "2.05%"], ans: 1, exp: "ব্যাখ্যা: 250 mL জলের ভর = 250 × 0.987 = 246.75 g। দ্রবণের মোট ভর = 246.75+3.25=250 g। ওজনগত শতকরা গাঢ়ত্ব = (3.25/250)×100 = 1.30%।" },
+            { q: "৪. 200 mL জলে কত পরিমাণ (g এককে) গ্লুকোজ দ্রবীভূত করলে দ্রবণের ওজন-আয়তনগত (W/V) শতকরা গাঢ়ত্ব 0.6% হবে? (জলের ঘনত্ব = 1 g/mL)", opts: ["0.83 g", "1.20 g", "1.53 g", "1.63 g"], ans: 1, exp: "ব্যাখ্যা: জলের ঘনত্ব 1 হওয়ায় W/V এবং W/W সমান ধরা যায়। [W/(W+200)]×100=0.6, যা থেকে W = 1.2 g পাওয়া যায়।" },
+            { q: "৫. 20°C উয়তায় 49% (W/W) H2SO4 দ্রবণের আপেক্ষিক গুরুত্ব 1.385। 277 mL 2 N H2SO4 দ্রবণ প্রস্তুত করতে উক্ত দ্রবণের কত আয়তন প্রয়োজন?", opts: ["40 mL", "52 mL", "56 mL", "60 mL"], ans: 0, exp: "ব্যাখ্যা: 277 mL 2 N দ্রবণে H2SO4 প্রয়োজন = (2×49/1000)×277 g। 100 g 49% দ্রবণের আয়তন = 100/1.385 mL। সমীকরণ সমাধান করলে প্রয়োজনীয় আয়তন 40 mL পাওয়া যায়।" },
+            { q: "৬. Na2CO3-এর 250 mL 0.5 N জলীয় দ্রবণের ওজন-আয়তনগত (W/V) শতকরা গাঢ়ত্ব হল-", opts: ["1.86%", "2.65%", "2.94%", "3.12%"], ans: 1, exp: "ব্যাখ্যা: 1000 mL 0.5 N দ্রবণে Na2CO3 আছে 26.5 g। 250 mL এ আছে 6.625 g। W/V গাঢ়ত্ব = (6.625/250)×100 = 2.65%।" },
+            { q: "৭. ইথানলের একটি জলীয় দ্রবণের শতকরা গাঢ়ত্ব 23% (V/V) এবং বিশুদ্ধ ইথানলের ঘনত্ব 0.8 g/mL। দ্রবণটির মোলার গাঢ়ত্ব হল-", opts: ["3.2 M", "3.5 M", "4.0 M", "4.2 M"], ans: 2, exp: "ব্যাখ্যা: 100 mL দ্রবণে ইথানল 23 mL। ভর = 23×0.8=18.4 g। মোল = 18.4/46 = 0.4 mol। 1000 mL এ থাকবে 4.0 mol।" },
+            { q: "৮. 388.9 g জল ও 35.1 g NaCl-এর একটি দ্রবণের ঘনত্ব 1.06 g/mL। ওর মোলার গাঢ়ত্ব কত?", opts: ["1.18 M", "1.50 M", "1.62 M", "1.93 M"], ans: 1, exp: "ব্যাখ্যা: দ্রবণের মোট ভর = 424 g। আয়তন = 424/1.06 = 400 mL। NaCl-এর মোল = 35.1/58.5 = 0.6 mol। মোলার গাঢ়ত্ব = (0.6/400)×1000 = 1.50 M।" },
+            { q: "৯. H2SO4-এর একটি জলীয় দ্রবণ ওজনগতভাবে (W/W) 40% SO3 ধারণ করে। দ্রবণের ঘনত্ব 1.30 g/mL হলে ওর মোলারিটি কত?", opts: ["5.8 M", "6.5 M", "7.0 M", "7.4 M"], ans: 1, exp: "ব্যাখ্যা: 100 g দ্রবণের আয়তন = 100/1.3 mL। 40 g SO3 = 0.5 mol SO3, যা থেকে 0.5 mol H2SO4 উৎপন্ন হয়। মোলারিটি = 0.5 / (100/1.3) × 1000 = 6.5 M।" },
+            { q: "১০. ইউরিয়ার 20% (W/W) জলীয় দ্রবণের মোলালিটি হল-", opts: ["3.82 m", "4.17 m", "4.96 m", "5.26 m"], ans: 1, exp: "ব্যাখ্যা: 100 g দ্রবণে ইউরিয়া 20 g (1/3 mol) এবং জল 80 g (0.08 kg)। মোলালিটি = (1/3)/0.08 = 4.17 mol/kg।" },
+            { q: "১১. 20°C উয়তায় ফর্মিক অ্যাসিডের 5.0 M জলীয় দ্রবণের ঘনত্ব 1.15 g/mL। দ্রবণটির মোলালিটি এবং ওজনগত (W/W) শতকরা গাঢ়ত্ব হল-", opts: ["4.82 ও 24%", "5.43 ও 20%", "5.91 ও 26%", "6.07 ও 30%"], ans: 1, exp: "ব্যাখ্যা: 1 L দ্রবণের ভর 1150 g। 5 mol HCOOH = 230 g। জলের ভর = 920 g (0.92 kg)। মোলালিটি = 5/0.92 = 5.43 m। W/W = (230/1150)×100 = 20%।" },
+            { q: "১২. গ্লুকোজের একটি জলীয় দ্রবণের গাঢ়ত্ব 2 m। উক্ত দ্রবণের 50 g-এ দ্রবীভূত গ্লুকোজের পরিমাণ হল-", opts: ["12.65 g", "13.24 g", "13.97 g", "14.25 g"], ans: 1, exp: "ব্যাখ্যা: 2m দ্রবণের মোট ভর = 1000 g জল + (2×180) g গ্লুকোজ = 1360 g। 1360 g দ্রবণে গ্লুকোজ থাকে 360 g। 50 g এ থাকবে (360/1360)×50 = 13.24 g।" },
+            { q: "১৩. একটি দ্রাবের বেঞ্জিন দ্রবণে উক্ত পদার্থের মোল-ভগ্নাংশ 0.1। দ্রবণটির মোলাল গাঢ়ত্ব হল-", opts: ["1.276 m", "1.380 m", "1.424 m", "1.506 m"], ans: 2, exp: "ব্যাখ্যা: n2/(n1+n2)=0.1 ⇒ n1 = 9n2। বেঞ্জিনের ভর = 9n2 × 78 g। মোলালিটি = n2/(9n2×78) × 1000 = 1.424 mol/kg।" },
+            { q: "১৪. ফর্মিক অ্যাসিডের একটি জলীয় দ্রবণের গাঢ়ত্ব 11M এবং ঘনত্ব 1.10 g/mL। দ্রবণে ফর্মিক অ্যাসিডের মোল-ভগ্নাংশ হল-", opts: ["0.16", "0.18", "0.22", "0.25"], ans: 3, exp: "ব্যাখ্যা: 1 L দ্রবণের ভর 1100 g। ফর্মিক অ্যাসিড = 11 mol = 506 g। জলের ভর = 594 g = 33 mol। মোল-ভগ্নাংশ = 11 / (11+33) = 0.25।" },
+            { q: "১৫. জলের একটি নমুনার 2.5 g-এ Zn²⁺ আয়নের পরিমাণ 5.0 µg হলে, উক্ত নমুনায় ppm এককে গাঢ়ত্ব হবে-", opts: ["2 ppm", "2.2 ppm", "2.5 ppm", "5 ppm"], ans: 0, exp: "ব্যাখ্যা: ppm = (দ্রাবের ওজন µg এককে) / (দ্রবণের ওজন g এককে) = 5.0 / 2.5 = 2 ppm।" }
+        ]
+    },
+    2: {
+        name: 'Set 2', icon: '⚗️', topic: 'তরলে গ্যাসের দ্রাব্যতা ও কঠিন দ্রবণ',
+        questions: [
+            { q: "১. 25°C উয়তায় জলে N2 গ্যাসের হেনরি ধ্রুবক 8.6×10⁴ atm। জলের সঙ্গে সংস্পর্শে থাকা N2 গ্যাসের চাপ 0.86 atm হলে, জলে দ্রবীভূত N2 গ্যাসের মোলার গাঢ়ত্ব কত?", opts: ["4.28×10⁻⁴ M", "3.82×10⁻³ M", "5.83×10⁻³ M", "5.55×10⁻⁴ M"], ans: 3, exp: "ব্যাখ্যা: p = KH × x ⇒ 0.86 = 8.6×10⁴ × x ⇒ x = 10⁻⁵। 1 L জলে মোলের সংখ্যা = 1000/18। তাই N2 এর মোল = (1000/18) × 10⁻⁵ = 5.55×10⁻⁴ M।" },
+            { q: "২. 1 atm চাপ ও 20°C উয়তায় জলে O2 গ্যাসের দ্রাব্যতা 0.043 g/L। চাপের মান কত হলে দ্রাব্যতা 0.16 g/L হবে?", opts: ["2.65 atm", "3.14 atm", "3.72 atm", "4.06 atm"], ans: 2, exp: "ব্যাখ্যা: হেনরির সূত্র অনুযায়ী দ্রাব্যতা চাপের সমানুপাতিক। C1/P1 = C2/P2 ⇒ 0.043/1 = 0.16/P2 ⇒ P2 = 3.72 atm।" },
+            { q: "৩. বায়ুতে আয়তনগতভাবে 78% N2 উপস্থিত আছে। 25°C ও 1 atm চাপে জলে N2 গ্যাসের মোলার দ্রাব্যতা কত? (KH=6.1×10⁻⁴)", opts: ["2.83×10⁻⁴ M", "3.16×10⁻⁵ M", "4.08×10⁻³ M", "4.76×10⁻⁴ M"], ans: 3, exp: "ব্যাখ্যা: N2-এর আংশিক চাপ = 0.78 atm। দ্রাব্যতা = KH × p = 6.1×10⁻⁴ × 0.78 = 4.76×10⁻⁴ M।" },
+            { q: "৪. 25°C উয়তায় নরম পানীয় দ্রবণে সাম্যাবস্থায় CO2-এর মোলার গাঢ়ত্ব কত হবে? (KH=3.3×10⁻², বায়ুতে CO2-এর আংশিক চাপ 3×10⁻⁴ atm)", opts: ["0.85×10⁴ M", "1.04×10⁻⁵ M", "1.37×10⁻⁵ M", "1.92×10⁻⁴ M"], ans: 1, exp: "ব্যাখ্যা: দ্রাব্যতা C = KH × p সূত্র ব্যবহার করে গাঢ়ত্ব নির্ণয় করলে পাওয়া যায় 1.04×10⁻⁵ M।" },
+            { q: "৫. 25°C উয়তায় ও 580 torr চাপে জলে Ne গ্যাসের দ্রাব্যতা 9×10⁻⁴ M হলে সম-উয়তায় 810 torr চাপে উক্ত গ্যাসের দ্রাব্যতা হবে-", opts: ["1.26×10⁻³ M", "1.73×10⁻² M", "1.82×10⁻³ M", "2.07×10⁻² M"], ans: 0, exp: "ব্যাখ্যা: C1/p1 = C2/p2 ⇒ (9×10⁻⁴)/580 = C2/810 ⇒ C2 = 1.26×10⁻³ M।" },
+            { q: "৬. তরলে গ্যাসের দ্রাব্যতা সংক্রান্ত হেনরি সূত্রটি নীচের কোন্ গ্যাসের জলে দ্রবীভবনের ক্ষেত্রে প্রযোজ্য নয়?", opts: ["H2", "He", "O2", "NH3"], ans: 3, exp: "ব্যাখ্যা: যে গ্যাসগুলি দ্রাবকের সাথে রাসায়নিক বিক্রিয়া করে বা আয়নিত হয় (যেমন জলে NH3), তাদের ক্ষেত্রে হেনরির সূত্র প্রযোজ্য হয় না।" },
+            { q: "৭. হেনরি ধ্রুবক-সংক্রান্ত নীচের কোন্ মন্তব্যটি সঠিক নয়?", opts: ["মান গ্যাসের প্রকৃতির ওপর নির্ভর করে", "মান দ্রাবকের প্রকৃতির ওপর নির্ভর করে না", "চাপের দ্বারা এটির মান প্রভাবিত হয়", "উষ্ণতার পরিবর্তনে মান পরিবর্তিত হয়"], ans: 1, exp: "ব্যাখ্যা: হেনরি ধ্রুবকের (KH) মান গ্যাস এবং দ্রাবক উভয়ের প্রকৃতির ওপরই নির্ভর করে। তাই 'নির্ভর করে না' উক্তিটি ভুল।" },
+            { q: "৮. জলে N2, O2, H2 এবং CO2 গ্যাসের দ্রাব্যতা বনাম চাপের লেখচিত্র অঙ্কন করলে কোন্ গ্যাসের ক্ষেত্রে সরলরেখার নতি হবে সর্বোচ্চ?", opts: ["H2", "N2", "CO2", "O2"], ans: 2, exp: "ব্যাখ্যা: x = (1/KH) × p অনুযায়ী, যে গ্যাসের KH-এর মান সবচেয়ে কম তার লেখচিত্রের নতি সবচেয়ে বেশি হয়। এখানে CO2-এর KH সবচেয়ে কম।" },
+            { q: "৯. ধাতুসমূহের কঠিন দ্রবণকে বলা হয়-", opts: ["ধাতুকল্প", "ধাতু-সংকর", "অ্যামালগাম", "কঠিন মিশ্রণ"], ans: 1, exp: "ব্যাখ্যা: কঠিন অবস্থায় দুই বা ততোধিক ধাতুর সমসত্ত্ব মিশ্রণ তথা কঠিন দ্রবণকে ধাতু-সংকর (Alloy) বলা হয়।" },
+            { q: "১০. Ag ও Au পরস্পরের সঙ্গে সকল সংযুতিতেই মিশ্রিত হয়ে প্রতিস্থাপিত কঠিন দ্রবণ গঠন করে। এর কারণ-", opts: ["তড়িৎ-ঋণাত্মকতার পার্থক্য কম", "এদের উভয়েরই যোজ্যতা একই", "পারমাণবিক ব্যাসার্ধের পার্থক্য 15% -এর কম", "পারমাণবিক ব্যাসার্ধের পার্থক্য 15% -এর বেশি"], ans: 2, exp: "ব্যাখ্যা: Hume-Rothery-এর নিয়ম অনুযায়ী পারমাণবিক ব্যাসার্ধের পার্থক্য 15%-এর কম হলে এবং কেলাস কাঠামো সদৃশ হলে তারা প্রতিস্থাপিত কঠিন দ্রবণ তৈরি করে।" },
+            { q: "১১. জলে N2 ও O2 গ্যাসের হেনরি ধ্রুবক যথাক্রমে 8.6×10⁴ ও 4.2×10⁴ atm। মিশ্রণে N2 ও O2 এর আয়তন 60% ও 40% হলে দ্রবীভূত O2 ও N2 এর মোল সংখ্যার অনুপাত হবে-", opts: ["1.179", "1.365", "1.406", "1.618"], ans: 1, exp: "ব্যাখ্যা: মোল-ভগ্নাংশ অনুপাত x(O2)/x(N2) = [p(O2)/KH(O2)] / [p(N2)/KH(N2)] = (0.4 / 4.2×10⁴) / (0.6 / 8.6×10⁴) = 1.365।" },
+            { q: "১২. গ্যাসোলিনে (gasoline) দ্রাব ও দ্রাবকের ভৌত অবস্থা যথাক্রমে-", opts: ["গ্যাস, তরল", "তরল, তরল", "তরল, গ্যাস", "গ্যাস, গ্যাস"], ans: 0, exp: "ব্যাখ্যা: গ্যাসোলিন বা পেট্রোলে বিভিন্ন গ্যাসীয় এবং তরল হাইড্রোকার্বন তরল অবস্থায় দ্রবীভূত থাকে, যেখানে দ্রাব গ্যাস ও দ্রাবক তরল হয়।" },
+            { q: "১৩. ডুবুরিদের ডিকম্প্রেসন সিকনেস (Decompression sickness) বা বেন্ডস (bends)-এর ঘটনাটি কোন্ সূত্রের সাহায্যে ব্যাখ্যা করা যায়?", opts: ["রাউল্টের সূত্র", "ডালটনের সূত্র", "হেনরির সূত্র", "বয়েলের সূত্র"], ans: 2, exp: "ব্যাখ্যা: গভীর সমুদ্রে উচ্চ চাপে রক্তে গ্যাসের দ্রাব্যতা বেড়ে যায় এবং ওপরে উঠলে চাপ কমায় দ্রাব্যতা কমে বুদবুদ সৃষ্টি করে। এটি হেনরির সূত্র দিয়ে ব্যাখ্যা করা যায়।" },
+            { q: "১৪. তরলে গ্যাসীয় পদার্থের দ্রবীভবন সাধারণত কী প্রকৃতির হয়?", opts: ["তাপগ্রাহী", "তাপদায়ী", "তাপমাত্রার ওপর নির্ভর করে না", "প্রথমে তাপগ্রাহী পরে তাপদায়ী"], ans: 1, exp: "ব্যাখ্যা: তরলে গ্যাস দ্রবীভূত হওয়ার প্রক্রিয়াটি তাপদায়ী (Exothermic) হওয়ায় উয়তার বৃদ্ধিতে সাম্যাবস্থা বামদিকে সরে যায় এবং গ্যাসের দ্রাব্যতা হ্রাস পায়।" },
+            { q: "১৫. অধিক উচ্চতায় বসবাসকারীদের রক্ত ও কলাকোশে অক্সিজেনের অভাবজনিত উপসর্গ (anoxia) দেখা দেওয়ার কারণ-", opts: ["কম উয়তা", "উচ্চ বায়ুমণ্ডলীয় চাপ", "কম বায়ুমণ্ডলীয় চাপ", "কম উয়তা এবং উচ্চ বায়ুমণ্ডলীয় চাপ"], ans: 2, exp: "ব্যাখ্যা: অধিক উচ্চতায় বায়ুমণ্ডলীয় চাপ কম হওয়ায় অক্সিজেনের আংশিক চাপ কমে যায়, ফলে রক্তে অক্সিজেনের দ্রাব্যতা হ্রাস পায়।" }
+        ]
+    },
+    // Set 3 থেকে Set 9 পর্যন্ত একই ফরম্যাটে আপনার ডক ফাইল থেকে কপি করে পেস্ট করতে হবে
+    // আপনার সুবিধার্থে আমি 10 নম্বর সেটটিও যুক্ত করে দিলাম:
+    10: {
+        name: 'Set 10', icon: '🥛', topic: 'ইমালসন ও ব্যবহারিক প্রয়োগ',
+        questions: [
+            { q: "১. একটি তরল পদার্থের মধ্যে অপর একটি অ-মিশ্রণীয় তরল বিন্দু আকারে বিস্তৃত থেকে যে কোলয়েড গঠন করে, তাকে কী বলে?", opts: ["জেল", "এরোসল", "ইমালসন", "ফোম"], ans: 2, exp: "ব্যাখ্যা: ইমালসনে বিস্তৃত দশা এবং বিস্তার মাধ্যম উভয়েই তরল হয় (যেমন জলে তেল বা তেলে জল)।" },
+            { q: "২. নিচের কোনটি জলে-তেল (O/W) জাতীয় ইমালসনের উদাহরণ?", opts: ["দুধ", "মাখন", "কোল্ড ক্রিম", "কড লিভার তেল"], ans: 0, exp: "ব্যাখ্যা: দুধে বিস্তার মাধ্যম হলো জল এবং বিস্তৃত দশা হলো তরল ফ্যাট (তেল)। মাখন বা কোল্ড ক্রিম হলো তেলে-জল (W/O) জাতীয় ইমালসন।" },
+            { q: "৩. দুটি অ-মিশ্রণীয় তরলের ইমালসনকে স্থায়িত্ব প্রদান করতে যে তৃতীয় পদার্থ যোগ করা হয় তাকে কী বলে?", opts: ["সংরক্ষক কোলয়েড", "ইমালসন-কারক (Emulsifying agent)", "পেপটাইজিং এজেন্ট", "অনুঘটক"], ans: 1, exp: "ব্যাখ্যা: ইমালসিফায়ার যেমন সাবান বা প্রোটিন দুটি তরলের আন্তঃপৃষ্ঠটান কমিয়ে ইমালসনকে স্থায়ী করে।" },
+            { q: "৪. একটি ইমালসনে জল যোগ করলে যদি তা মিশে যায়, তবে ইমালসনটি কোন প্রকৃতির?", opts: ["তেলে-জল জাতীয় (W/O)", "জলে-তেল জাতীয় (O/W)", "উভধর্মী", "গ্যাসীয়"], ans: 1, exp: "ব্যাখ্যা: এটি 'লঘুকরণ পরীক্ষা'। বিস্তার মাধ্যম জল হলে বাইরে থেকে জল দিলে তা সহজেই মিশে যায়।" },
+            { q: "৫. যেসব যৌগকে তরলে দ্রবীভূত করলে তরলের পৃষ্ঠটান হ্রাস পায়, তাদের কী বলে?", opts: ["অক্সিডাইজিং এজেন্ট", "সারফ্যাকট্যান্ট (Surface-active agent)", "ক্রিস্টালয়েড", "পেপটাইজিং এজেন্ট"], ans: 1, exp: "ব্যাখ্যা: সাবান এবং ডিটারজেন্ট হলো সারফ্যাকট্যান্ট। এদের অণুর হাইড্রোফিলিক ও হাইড্রোফোবিক দুই অংশই পৃষ্ঠটান কমাতে সাহায্য করে।" },
+            { q: "৬. কলকারখানার ধোঁয়া থেকে কার্বন কণা দূর করে বায়ুদূষণ রোধ করতে কোন যন্ত্র ব্যবহার করা হয়?", opts: ["ডায়ালিসার", "আল্ট্রাসেন্ট্রিফিউজ", "কটরেল অধঃক্ষেপক", "ইলেকট্রোডায়ালিসার"], ans: 2, exp: "ব্যাখ্যা: কটরেল অধঃক্ষেপক ইলেকট্রোফোরেসিস নীতির মাধ্যমে ধোঁয়ার আধানযুক্ত কার্বন কণাগুলিকে বিপরীত আধানযুক্ত প্লেটে তঞ্চিত করে।" },
+            { q: "৭. নদীর মোহনায় ব-দ্বীপ (Delta) সৃষ্টির মূল রাসায়নিক কারণ কী?", opts: ["নদীর জলের বাষ্পীভবন", "কাদামাটির কোলয়ডীয় কণার সমুদ্রের জল দ্বারা তঞ্চন", "সমুদ্রের স্রোত", "জলজ উদ্ভিদের পচন"], ans: 1, exp: "ব্যাখ্যা: নদীর ঘোলা জলে থাকা কাদামাটির ঋণাত্মক কোলয়েড কণা সমুদ্রের জলে থাকা বিভিন্ন তড়িদ্বিশ্লেষ্য লবণ দ্বারা তঞ্চিত হয়ে জমা হতে হতে ব-দ্বীপ তৈরি করে।" },
+            { q: "৮. রক্তপাত বন্ধ করতে ফটকিরি (Alum) ব্যবহার করা হয় কেন?", opts: ["তাপমাত্রা কমায়", "রক্তের তঞ্চন (Coagulation) ঘটায়", "রক্তকে তরল করে", "জীবাণু ধ্বংস করে"], ans: 1, exp: "ব্যাখ্যা: রক্ত হলো ঋণাত্মক আধানযুক্ত কোলয়েড। ফটকিরিতে থাকা Al³⁺ আয়ন সহজেই রক্তকে তঞ্চিত করে জমাট বাঁধতে সাহায্য করে।" },
+            { q: "৯. চামড়া শক্ত করার 'ট্যানিং' প্রক্রিয়াটি কোন রাসায়নিক নীতির ওপর ভিত্তি করে ঘটে?", opts: ["ডায়ালিসিস", "পারস্পরিক তঞ্চন (Mutual Coagulation)", "পেপটাইজেশন", "বাষ্পীভবন"], ans: 1, exp: "ব্যাখ্যা: ধনাত্মক আধানযুক্ত পশুর চামড়া এবং ঋণাত্মক আধানযুক্ত ট্যানিন একে অপরের সংস্পর্শে এসে আধান প্রশমিত করে তঞ্চিত ও শক্ত হয়।" },
+            { q: "১০. কৃত্রিম বৃষ্টিপাত ঘটাতে উড়োজাহাজ থেকে মেঘের ওপর কী ছিটানো হয়?", opts: ["সাধারণ জল", "বিপরীত আধানযুক্ত বালুকণা বা AgI", "গরম বাতাস", "নাইট্রোজেন গ্যাস"], ans: 1, exp: "ব্যাখ্যা: মেঘ হলো জলকণার কোলয়েড। বিপরীত আধানের বালুকণা বা AgI ছড়ালে জলকণাগুলোর আধান প্রশমিত হয়ে তঞ্চন ঘটে এবং বৃষ্টির ফোঁটা হয়ে ঝরে পড়ে।" },
+            { q: "১১. রবার শিল্পের কাঁচামাল 'ল্যাটেক্স' (Latex) আসলে কী?", opts: ["ধনাত্মক আধানযুক্ত সল", "ঋণাত্মক আধানযুক্ত রবার কণার কোলয়ডীয় দ্রবণ", "রবারের প্রকৃত দ্রবণ", "রবারের ইমালসন"], ans: 1, exp: "ব্যাখ্যা: ল্যাটেক্স হলো রবার গাছ থেকে প্রাপ্ত তরুক্ষীর, যা ঋণাত্মক আধানযুক্ত। একে তঞ্চিত করেই রবার তৈরি করা হয়।" },
+            { q: "১২. আকাশ নীল দেখানোর কারণ কী?", opts: ["আলোর প্রতিসরণ", "টিন্ডাল প্রভাব ও আলোর বিক্ষেপণ", "ব্রাউনীয় গতি", "সমুদ্রের রঙের প্রতিফলন"], ans: 1, exp: "ব্যাখ্যা: বায়ুমণ্ডলের ধূলিকণা দ্বারা সূর্যালোকের নীল বর্ণের আলোর বিক্ষেপণ সবচেয়ে বেশি হয়। এটি টিন্ডাল প্রভাবের একটি প্রাকৃতিক উদাহরণ।" },
+            { q: "১৩. ঔষুধ হিসেবে অনেক ইনজেকশন বা সিরাপকে কোলয়ডীয় অবস্থায় তৈরি করা হয় কেন?", opts: ["সহজে হজম হওয়ার জন্য", "পৃষ্ঠতলীয় ক্ষেত্রফল অনেক বেশি হওয়ায় দ্রুত শোষিত হওয়ার জন্য", "স্বাদ বাড়ানোর জন্য", "রঙিন করার জন্য"], ans: 1, exp: "ব্যাখ্যা: পৃষ্ঠতলীয় ক্ষেত্রফল বেশি হওয়ায় মানবদেহের কোষগুলো সহজেই কোলয়ডীয় ঔষধ শোষণ করতে পারে, তাই এর কার্যকারিতা বেশি হয়।" },
+            { q: "১৪. সাবানের পরিষ্কারক ক্রিয়া কীভাবে ঘটে?", opts: ["এসিড হিসেবে কাজ করে ময়লা গলায়", "ইমালসিফায়ার হিসেবে মিসেল গঠনের মাধ্যমে ময়লা দূর করে", "গ্যাস তৈরি করে", "ময়লাকে ভারী করে ডুবিয়ে দেয়"], ans: 1, exp: "ব্যাখ্যা: সাবান কাপড়ের তেলের সাথে মিশে জলে-তেল ইমালসন তৈরি করে এবং মিসেল গঠনের মাধ্যমে ময়লা সরিয়ে দেয়।" },
+            { q: "১৫. নিচের কোনটি তেলে-জল (W/O) জাতীয় ইমালসনের উদাহরণ?", opts: ["ভ্যানিশিং ক্রিম", "মেয়োনিজ", "মাখন", "দুধ"], ans: 2, exp: "ব্যাখ্যা: মাখনে বিস্তার মাধ্যম হলো তেল বা ফ্যাট এবং বিস্তৃত দশা হলো জল, তাই এটি তেলে-জল জাতীয় ইমালসন।" }
+        ]
+    }
+};
+
+// ================== STATE VARIABLES ==================
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+// ================== LOCAL STORAGE LOGIC ==================
+// Fetching the master password database from the index page
+function getGlobalUsers() {
+    const data = localStorage.getItem("testBazarGlobalUsers");
+    return data ? JSON.parse(data) : {};
+}
+
+// Keeping attempts separate for Chemistry Unit 1
+function getAttemptsData() {
+    const data = localStorage.getItem("testBazarAttemptsChem3U1_v1");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    attempts[key] = (attempts[key] || 0) + 1;
+    localStorage.setItem("testBazarAttemptsChem3U1_v1", JSON.stringify(attempts));
+    return attempts[key];
+}
+
+// ================== INITIALIZATION ==================
+window.onload = () => {
+    renderHub();
+};
+
+function renderHub() {
+    const grid = document.getElementById("setGrid");
+    grid.innerHTML = "";
+    
+    for(let id in ALL_SETS) {
+        const set = ALL_SETS[id];
+        const div = document.createElement("div");
+        div.className = "set-card";
+        
+        let attemptCount = 0;
+        let isLocked = false;
+        
+        if (currentUser) {
+            attemptCount = getAttemptCount(currentUser, id);
+            isLocked = attemptCount >= MAX_ATTEMPTS;
+            if (isLocked) div.classList.add("locked");
+        }
+        
+        div.innerHTML = `
+            <div class="icon">${set.icon}</div>
+            <div class="set-num">${set.name}</div>
+            <div class="set-title">${set.topic}</div>
+            <div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+            ${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+        `;
+        
+        div.onclick = () => {
+            if (isLocked) {
+                alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+                return;
+            }
+            handleSetClick(id);
+        };
+        grid.appendChild(div);
+    }
+}
+
+function handleSetClick(setId) {
+    activeSetId = setId;
+    if (!currentUser) {
+        document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+        document.getElementById("loginOverlay").classList.add("active");
+        document.getElementById("loginUsername").value = "";
+        document.getElementById("loginPassword").value = "";
+        document.getElementById("loginError").style.display = "none";
+    } else {
+        startQuiz(setId);
+    }
+}
+
+function doLogin() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+    const err = document.getElementById("loginError");
+    const GLOBAL_USERS = getGlobalUsers();
+
+    if(!u || !p) {
+        err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!";
+        err.style.display = "block";
+        return;
+    }
+
+    if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+        let attempts = getAttemptCount(u, activeSetId);
+        if (attempts >= MAX_ATTEMPTS) {
+            err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+            err.style.display = "block";
+            return;
+        }
+        currentUser = u;
+        document.getElementById("loginOverlay").classList.remove("active");
+        document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+        document.getElementById("userDisplay").classList.remove("hidden");
+        renderHub();
+        startQuiz(activeSetId);
+    } else {
+        err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+        err.style.display = "block";
+    }
+}
+
+function closeLogin() {
+    document.getElementById("loginOverlay").classList.remove("active");
+}
+
+function goToHub() {
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("hubPage").style.display = "block";
+    document.getElementById("timerBox").classList.add("hidden");
+    clearInterval(timerInterval);
+    renderHub();
+}
+
+// ================== QUIZ LOGIC ==================
+function startQuiz(setId) {
+    incrementAttempt(currentUser, setId);
+    questions = ALL_SETS[setId].questions;
+    currentQIndex = 0;
+    score = 0;
+    wrongAnswers = 0;
+    userAnswers = {};
+    isReviewMode = false;
+    timeLeft = TIME_LIMIT;
+
+    document.getElementById("hubPage").style.display = "none";
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    document.getElementById("timerBox").classList.remove("hidden");
+    document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+    document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+
+    startTimer();
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const qData = questions[currentQIndex];
+    document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+    document.getElementById("qText").innerText = qData.q;
+    const progress = ((currentQIndex) / questions.length) * 100;
+    document.getElementById("progressFill").style.width = `${progress}%`;
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    
+    const optsBox = document.getElementById("qOpts");
+    optsBox.innerHTML = "";
+    document.getElementById("explanation").classList.remove("show");
+    document.getElementById("nextBtn").disabled = true;
+    document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+    qData.opts.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "opt";
+        btn.innerHTML = `<div class="opt-circle">${LABELS[idx]}</div> <div class="opt-text">${optText}</div>`;
+        
+        if (isReviewMode) {
+            btn.classList.add("disabled");
+            if (idx === qData.ans) btn.classList.add("correct");
+            else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+        } else {
+            btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+        }
+        optsBox.appendChild(btn);
+    });
+
+    if (isReviewMode) {
+        document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+        document.getElementById("explanation").classList.add("show");
+        document.getElementById("nextBtn").disabled = false;
+        if (currentQIndex === questions.length - 1) {
+            document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন";
+        }
+    }
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+    const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+    allBtns.forEach(b => b.classList.add("disabled"));
+    userAnswers[currentQIndex] = selectedIdx; 
+
+    if (selectedIdx === correctIdx) {
+        btn.classList.add("correct");
+        score++;
+    } else {
+        btn.classList.add("wrong");
+        allBtns[correctIdx].classList.add("correct");
+        wrongAnswers++;
+    }
+    
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+    document.getElementById("explanation").classList.add("show");
+    document.getElementById("nextBtn").disabled = false;
+}
+
+function nextQ() {
+    if (isReviewMode && currentQIndex === questions.length - 1) {
+        document.getElementById("testArea").classList.add("hidden");
+        document.getElementById("resultWrap").classList.add("show");
+        return;
+    }
+    if (!isReviewMode && currentQIndex === questions.length - 1) {
+        finishQuiz();
+        return;
+    }
+    currentQIndex++;
+    loadQuestion();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    const tBox = document.getElementById("timerBox");
+    tBox.classList.remove("danger");
+    
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishQuiz();
+            return;
+        }
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        if (timeLeft < 60) tBox.classList.add("danger");
+    }, 1000);
+}
+
+function finishQuiz() {
+    clearInterval(timerInterval);
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("timerBox").classList.add("hidden");
+    document.getElementById("resultWrap").classList.add("show");
+    
+    const total = questions.length;
+    const skipped = total - (score + wrongAnswers);
+    const percent = Math.round((score / total) * 100);
+    
+    document.getElementById("finalScore").innerText = `${percent}%`;
+    document.getElementById("rbCorrect").innerText = score;
+    document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+    
+    const gradeEl = document.getElementById("resultGrade");
+    if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+    else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+    else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+    
+    const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+    document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+    if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+        alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+        return;
+    }
+    startQuiz(activeSetId);
+}
+
+function showReview() {
+    isReviewMode = true;
+    currentQIndex = 0;
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    loadQuestion();
+}
+</script>
+</body>
+</html>
