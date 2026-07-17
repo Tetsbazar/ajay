@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Maths 3rd Sem | Unit 1 Ch 3</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- MathJax for rendering mathematical equations -->
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+/* ================= COLOR SCHEME & VARIABLES ================= */
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+
+/* Top Bar */
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+
+/* Hub View */
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+
+/* Quiz View */
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; overflow-x: auto; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main); overflow-x: auto;}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; overflow-x: auto;}
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+
+/* Result View */
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+
+/* Login Modal */
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+    <div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+    <div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+
+<div class="main">
+
+    <!-- ================= LOGIN MODAL ================= -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <h2>লগইন করুন</h2>
+            <p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+            <div class="login-set-name" id="loginSetName">📚 Set 1</div>
+            <div class="input-group">
+                <label>ইউজারনেম</label>
+                <input type="text" id="loginUsername" placeholder="Username">
+            </div>
+            <div class="input-group">
+                <label>পাসওয়ার্ড</label>
+                <input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+            </div>
+            <button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+            <button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+            <div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+        </div>
+    </div>
+
+    <!-- ================= HUB PAGE ================= -->
+    <div id="hubPage">
+        <div class="hub-header">
+            <h1>গণিত 3rd Sem Unit 1:<br>বিপরীত ত্রিকোণমিতিক অপেক্ষক (Inverse Trigonometric Functions)</h1>
+            <p>মোট ৪৫টি প্রশ্ন সম্বলিত ৩টি সেট। Test শুরু করতে সেটে ক্লিক করুন।</p>
+        </div>
+        <div class="set-grid" id="setGrid"></div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+        </div>
+    </div>
+
+    <!-- ================= QUIZ AREA ================= -->
+    <div id="testArea" class="hidden">
+        <div class="quiz-info">
+            <div class="info-item">🎓 <strong>Mathematics</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+            <div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="q-card">
+            <div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+            <div class="q-text" id="qText">Question Text</div>
+            <div class="opts" id="qOpts"></div>
+            <div class="explanation" id="explanation"><p id="explanationText"></p></div>
+            <div class="nav-row">
+                <div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+                <button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RESULT AREA ================= -->
+    <div class="result-wrap" id="resultWrap">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-score en-font" id="finalScore">100%</div>
+        <div class="result-total">স্কোর</div>
+        <div class="result-grade" id="resultGrade">অসাধারণ!</div>
+        <div class="result-bars">
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+                <div class="rb-label">সঠিক</div>
+            </div>
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+                <div class="rb-label">ভুল/স্কিপ</div>
+            </div>
+        </div>
+        <div class="attempt-info-box" id="attemptInfo"></div>
+        <div class="action-btns">
+            <button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+            <button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+            <button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// Global Config & Database
+// ============================================================
+const MAX_ATTEMPTS = 10;
+const TIME_LIMIT = 10 * 60; // 10 Minutes
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+    1: {
+        name: 'Set 1', icon: '📐', topic: 'মুখ্য মান ও প্রাথমিক ধারণা',
+        questions: [
+            { q: "১. \\(\\cos^{-1}(-\\frac{1}{2})\\)-এর মুখ্য মান কত?", opts: ["\\(\\frac{\\pi}{3}\\)", "\\(\\frac{2\\pi}{3}\\)", "\\(\\frac{3\\pi}{4}\\)", "\\(-\\frac{\\pi}{3}\\)"], ans: 1, exp: "ব্যাখ্যা: আমরা জানি \\(\\cos(\\pi - \\frac{\\pi}{3}) = -\\cos\\frac{\\pi}{3} = -\\frac{1}{2}\\)। যেহেতু \\(\\cos^{-1}x\\)-এর মুখ্য মানের প্রসার \\([0, \\pi]\\), তাই নির্ণেয় মান হবে \\(\\frac{2\\pi}{3}\\)।" },
+            { q: "২. \\(\\text{cosec}^{-1}(-\\sqrt{2})\\)-এর মুখ্য মান কত?", opts: ["\\(\\frac{\\pi}{4}\\)", "\\(-\\frac{\\pi}{4}\\)", "\\(\\frac{3\\pi}{4}\\)", "\\(-\\frac{3\\pi}{4}\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\text{cosec}(-\\frac{\\pi}{4}) = -\\sqrt{2}\\)। \\(\\text{cosec}^{-1}x\\)-এর মুখ্য মানের প্রসার \\([-\\frac{\\pi}{2}, \\frac{\\pi}{2}]\\) (0 বাদে), তাই মানটি \\(-\\frac{\\pi}{4}\\) হবে।" },
+            { q: "৩. \\(\\cot^{-1}(\\frac{1}{\\sqrt{3}})\\)-এর মুখ্য মান কত?", opts: ["\\(\\frac{\\pi}{6}\\)", "\\(\\frac{\\pi}{3}\\)", "\\(\\frac{\\pi}{4}\\)", "\\(\\frac{2\\pi}{3}\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\cot\\frac{\\pi}{3} = \\frac{1}{\\sqrt{3}}\\) এবং \\(\\frac{\\pi}{3}\\) মানটি \\((0, \\pi)\\) অন্তরালের মধ্যে অবস্থিত, তাই এটিই মুখ্য মান।" },
+            { q: "৪. \\(\\tan^{-1}(-\\sqrt{3})\\)-এর মুখ্য মান কত?", opts: ["\\(\\frac{\\pi}{3}\\)", "\\(\\frac{2\\pi}{3}\\)", "\\(-\\frac{\\pi}{3}\\)", "\\(-\\frac{\\pi}{6}\\)"], ans: 2, exp: "ব্যাখ্যা: \\(\\tan(-\\frac{\\pi}{3}) = -\\sqrt{3}\\)। \\(\\tan^{-1}x\\)-এর মুখ্য মানের প্রসার \\((-\\frac{\\pi}{2}, \\frac{\\pi}{2})\\), সুতরাং মানটি \\(-\\frac{\\pi}{3}\\)।" },
+            { q: "৫. \\(\\sec^{-1}(-2)\\)-এর মুখ্য মান কত?", opts: ["\\(\\frac{\\pi}{3}\\)", "\\(\\frac{2\\pi}{3}\\)", "\\(-\\frac{\\pi}{3}\\)", "\\(\\frac{5\\pi}{6}\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\sec\\frac{2\\pi}{3} = \\sec(\\pi - \\frac{\\pi}{3}) = -\\sec\\frac{\\pi}{3} = -2\\)। এটি \\([0, \\pi]\\) অন্তরালে অবস্থিত।" },
+            { q: "৬. \\(\\sin(\\sin^{-1}\\frac{1}{2} + \\cos^{-1}\\frac{1}{2})\\)-এর মান কত?", opts: ["0", "\\(\\frac{1}{2}\\)", "1", "-1"], ans: 2, exp: "ব্যাখ্যা: আমরা জানি, \\(\\sin^{-1}x + \\cos^{-1}x = \\frac{\\pi}{2}\\)। অতএব, প্রদত্ত রাশিটি হলো \\(\\sin(\\frac{\\pi}{2}) = 1\\)।" },
+            { q: "৭. \\(\\tan(\\cot^{-1}(-\\frac{4}{3}))\\)-এর মান কত?", opts: ["\\(\\frac{3}{4}\\)", "\\(-\\frac{3}{4}\\)", "\\(\\frac{4}{3}\\)", "\\(-\\frac{4}{3}\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\cot^{-1}(-x) = \\pi - \\cot^{-1}x\\) সূত্র অনুযায়ী, এটি \\(\\tan(\\pi - \\cot^{-1}\\frac{4}{3})\\) হয়। যা \\(-\\tan(\\cot^{-1}\\frac{4}{3}) = -\\tan(\\tan^{-1}\\frac{3}{4}) = -\\frac{3}{4}\\)।" },
+            { q: "৮. \\(\\cos(\\sin^{-1}\\frac{3}{5})\\)-এর মান কত?", opts: ["\\(\\frac{3}{5}\\)", "\\(\\frac{4}{5}\\)", "\\(\\frac{5}{3}\\)", "\\(\\frac{5}{4}\\)"], ans: 1, exp: "ব্যাখ্যা: ধরি \\(\\sin^{-1}\\frac{3}{5} = \\alpha\\), তাহলে \\(\\sin\\alpha = \\frac{3}{5}\\)। পিথাগোরাসের সূত্র থেকে \\(\\cos\\alpha = \\sqrt{1 - (\\frac{3}{5})^2} = \\frac{4}{5}\\)।" },
+            { q: "৯. \\(\\cot(\\text{cosec}^{-1}2 + \\cos^{-1}\\frac{1}{2})\\)-এর মান কত?", opts: ["1", "0", "\\(\\frac{1}{\\sqrt{3}}\\)", "\\(\\sqrt{3}\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\text{cosec}^{-1}2 = \\frac{\\pi}{6}\\) এবং \\(\\cos^{-1}\\frac{1}{2} = \\frac{\\pi}{3}\\)। এদের যোগফল \\(\\frac{\\pi}{6} + \\frac{\\pi}{3} = \\frac{\\pi}{2}\\)। আর \\(\\cot\\frac{\\pi}{2} = 0\\)।" },
+            { q: "১০. \\(\\sin^{-1}(\\sin\\frac{5\\pi}{6})\\)-এর মুখ্য মান কত?", opts: ["\\(\\frac{5\\pi}{6}\\)", "\\(\\frac{7\\pi}{6}\\)", "\\(\\frac{\\pi}{6}\\)", "\\(-\\frac{\\pi}{6}\\)"], ans: 2, exp: "ব্যাখ্যা: \\(\\sin\\frac{5\\pi}{6} = \\sin(\\pi - \\frac{\\pi}{6}) = \\sin\\frac{\\pi}{6}\\)। যেহেতু \\(\\frac{\\pi}{6}\\) মানটি \\([-\\frac{\\pi}{2}, \\frac{\\pi}{2}]\\) এর মধ্যে আছে, তাই এটিই মুখ্য মান।" },
+            { q: "১১. \\(\\sin^{-1}\\tan(\\frac{3\\pi}{4})\\)-এর মান কত?", opts: ["\\(\\frac{\\pi}{4}\\)", "\\(-\\frac{\\pi}{4}\\)", "\\(\\frac{\\pi}{2}\\)", "\\(-\\frac{\\pi}{2}\\)"], ans: 3, exp: "ব্যাখ্যা: \\(\\tan\\frac{3\\pi}{4} = -1\\)। এবার \\(\\sin^{-1}(-1) = -\\frac{\\pi}{2}\\)।" },
+            { q: "১২. \\((\\cos^{-1}\\frac{1}{2} + 2 \\sin^{-1}\\frac{1}{2})\\)-এর মান কত?", opts: ["\\(\\frac{\\pi}{3}\\)", "\\(\\frac{2\\pi}{3}\\)", "\\(\\frac{5\\pi}{6}\\)", "\\(\\pi\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\cos^{-1}\\frac{1}{2} = \\frac{\\pi}{3}\\) এবং \\(\\sin^{-1}\\frac{1}{2} = \\frac{\\pi}{6}\\)। যোগফল হলো \\(\\frac{\\pi}{3} + 2(\\frac{\\pi}{6}) = \\frac{\\pi}{3} + \\frac{\\pi}{3} = \\frac{2\\pi}{3}\\)।" },
+            { q: "১৩. \\(\\cos^{-1}(-x)\\)-এর সূত্র কোনটি?", opts: ["\\(-\\cos^{-1}x\\)", "\\(\\pi - \\cos^{-1}x\\)", "\\(\\frac{\\pi}{2} - \\cos^{-1}x\\)", "\\(\\pi + \\cos^{-1}x\\)"], ans: 1, exp: "ব্যাখ্যা: এটি বিপরীত ত্রিকোণমিতিক অপেক্ষকের একটি মৌলিক ধর্ম। \\(\\cos^{-1}(-x) = \\pi - \\cos^{-1}x\\)।" },
+            { q: "১৪. \\(\\sec^{-1}x = \\text{cosec}^{-1}y\\) হলে \\((\\cos^{-1}\\frac{1}{x} + \\cos^{-1}\\frac{1}{y})\\)-এর মান কত?", opts: ["\\(\\pi\\)", "\\(\\frac{\\pi}{3}\\)", "\\(\\frac{\\pi}{2}\\)", "\\(\\frac{2\\pi}{3}\\)"], ans: 2, exp: "ব্যাখ্যা: \\(\\sec^{-1}x = \\cos^{-1}\\frac{1}{x}\\) এবং \\(\\text{cosec}^{-1}y = \\sin^{-1}\\frac{1}{y}\\)। শর্তানুযায়ী \\(\\cos^{-1}\\frac{1}{x} = \\sin^{-1}\\frac{1}{y}\\)। সুতরাং \\((\\cos^{-1}\\frac{1}{x} + \\cos^{-1}\\frac{1}{y}) = \\sin^{-1}\\frac{1}{y} + \\cos^{-1}\\frac{1}{y} = \\frac{\\pi}{2}\\)।" },
+            { q: "১৫. \\(\\tan^{-1}x + \\cot^{-1}x = ?\\)", opts: ["\\(\\frac{\\pi}{4}\\)", "\\(\\frac{\\pi}{2}\\)", "\\(\\pi\\)", "0"], ans: 1, exp: "ব্যাখ্যা: সকল বাস্তব সংখ্যার জন্য \\(\\tan^{-1}x + \\cot^{-1}x = \\frac{\\pi}{2}\\) হয়।" }
+        ]
+    },
+    2: {
+        name: 'Set 2', icon: '📝', topic: 'সূত্রের প্রয়োগ ও সরলীকরণ',
+        questions: [
+            { q: "১. যদি \\(2 \\tan^{-1}x = \\sin^{-1}k\\) হয়, তবে \\(k\\)-এর মান কত?", opts: ["\\(\\frac{1-x^2}{1+x^2}\\)", "\\(\\frac{2x}{1-x^2}\\)", "\\(\\frac{2x}{1+x^2}\\)", "\\(\\frac{1+x^2}{2x}\\)"], ans: 2, exp: "ব্যাখ্যা: আমরা জানি, \\(2\\tan^{-1}x = \\sin^{-1}(\\frac{2x}{1+x^2})\\)। তুলনা করলে পাওয়া যায় \\(k = \\frac{2x}{1+x^2}\\)।" },
+            { q: "২. \\(\\tan^{-1}\\frac{x-y}{1+xy} + \\tan^{-1}\\frac{y-z}{1+yz} + \\tan^{-1}\\frac{z-x}{1+zx} = ?\\)", opts: ["1", "0", "\\(xyz\\)", "-1"], ans: 1, exp: "ব্যাখ্যা: সূত্র অনুযায়ী পদগুলিকে ভাঙলে পাওয়া যায়: \\((\\tan^{-1}x - \\tan^{-1}y) + (\\tan^{-1}y - \\tan^{-1}z) + (\\tan^{-1}z - \\tan^{-1}x)\\)। সব পদ কেটে গিয়ে 0 হয়ে যায়।" },
+            { q: "৩. \\(2 \\tan^{-1}\\frac{1}{3} + \\tan^{-1}\\frac{1}{7} = ?\\)", opts: ["\\(\\frac{\\pi}{2}\\)", "\\(\\frac{\\pi}{3}\\)", "\\(\\frac{\\pi}{4}\\)", "\\(\\frac{\\pi}{6}\\)"], ans: 2, exp: "ব্যাখ্যা: \\(2 \\tan^{-1}\\frac{1}{3} = \\tan^{-1}\\frac{2/3}{1 - 1/9} = \\tan^{-1}\\frac{3}{4}\\)। এবার \\(\\tan^{-1}\\frac{3}{4} + \\tan^{-1}\\frac{1}{7} = \\tan^{-1}\\frac{3/4 + 1/7}{1 - 3/28} = \\tan^{-1}1 = \\frac{\\pi}{4}\\)।" },
+            { q: "৪. \\(\\tan^{-1}\\sqrt{x} = ?\\)", opts: ["\\(\\frac{1}{2}\\cos^{-1}\\frac{1-x}{1+x}\\)", "\\(\\cos^{-1}\\frac{1-x}{1+x}\\)", "\\(\\frac{1}{2}\\sin^{-1}\\frac{1-x}{1+x}\\)", "\\(\\sin^{-1}\\frac{1-x}{1+x}\\)"], ans: 0, exp: "ব্যাখ্যা: ধরি \\(\\tan^{-1}\\sqrt{x} = \\theta \\Rightarrow \\sqrt{x} = \\tan\\theta \\Rightarrow x = \\tan^2\\theta\\)। এবার \\(\\frac{1-x}{1+x} = \\frac{1-\\tan^2\\theta}{1+\\tan^2\\theta} = \\cos2\\theta\\)। অতএব \\(\\theta = \\frac{1}{2}\\cos^{-1}\\frac{1-x}{1+x}\\)।" },
+            { q: "৫. \\(\\tan^{-1}\\frac{1}{2} + \\tan^{-1}\\frac{1}{3} = ?\\)", opts: ["\\(\\frac{\\pi}{2}\\)", "\\(\\frac{\\pi}{4}\\)", "\\(\\frac{\\pi}{3}\\)", "\\(\\pi\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\tan^{-1}(\\frac{1/2 + 1/3}{1 - 1/2 \\cdot 1/3}) = \\tan^{-1}(\\frac{5/6}{5/6}) = \\tan^{-1}1 = \\frac{\\pi}{4}\\)।" },
+            { q: "৬. \\(\\cot^{-1}2 + \\cot^{-1}3 = ?\\)", opts: ["\\(\\frac{\\pi}{4}\\)", "\\(\\frac{\\pi}{2}\\)", "\\(\\frac{\\pi}{3}\\)", "\\(\\frac{\\pi}{6}\\)"], ans: 0, exp: "ব্যাখ্যা: \\(\\cot^{-1}2 = \\tan^{-1}\\frac{1}{2}\\) এবং \\(\\cot^{-1}3 = \\tan^{-1}\\frac{1}{3}\\)। উপরের প্রশ্নের মতোই এদের যোগফল \\(\\frac{\\pi}{4}\\)।" },
+            { q: "৭. \\(\\sin^{-1}\\frac{2a}{1+a^2} + \\sin^{-1}\\frac{2b}{1+b^2} = 2 \\tan^{-1}x\\) হলে \\(x\\) = ?", opts: ["\\(a+b\\)", "\\(ab\\)", "\\(\\frac{a+b}{1-ab}\\)", "\\(\\frac{a-b}{1+ab}\\)"], ans: 2, exp: "ব্যাখ্যা: বামপক্ষটি হলো \\(2\\tan^{-1}a + 2\\tan^{-1}b\\)। অতএব \\(2\\tan^{-1}x = 2(\\tan^{-1}a + \\tan^{-1}b) \\Rightarrow \\tan^{-1}x = \\tan^{-1}(\\frac{a+b}{1-ab})\\)। সুতরাং \\(x = \\frac{a+b}{1-ab}\\)।" },
+            { q: "৮. \\(\\tan^{-1}\\frac{1}{x} + \\tan^{-1}2 = \\frac{\\pi}{2}\\) হলে \\(x\\) = ?", opts: ["1", "-1", "0", "2"], ans: 3, exp: "ব্যাখ্যা: \\(\\tan^{-1}\\frac{1}{x} = \\frac{\\pi}{2} - \\tan^{-1}2 = \\cot^{-1}2\\)। আবার \\(\\cot^{-1}2 = \\tan^{-1}\\frac{1}{2}\\)। অতএব \\(x = 2\\)।" },
+            { q: "৯. \\(\\sin(\\sin^{-1}\\frac{1}{3} + \\sec^{-1}3) + \\cos(\\tan^{-1}\\frac{1}{2} + \\tan^{-1}2) = ?\\)", opts: ["0", "1", "2", "-1"], ans: 1, exp: "ব্যাখ্যা: \\(\\sec^{-1}3 = \\cos^{-1}\\frac{1}{3}\\)। প্রথম অংশটি হলো \\(\\sin(\\sin^{-1}\\frac{1}{3} + \\cos^{-1}\\frac{1}{3}) = \\sin(\\frac{\\pi}{2}) = 1\\)। দ্বিতীয় অংশটি হলো \\(\\cos(\\tan^{-1}\\frac{1}{2} + \\cot^{-1}\\frac{1}{2}) = \\cos(\\frac{\\pi}{2}) = 0\\)। মোট মান \\(1+0=1\\)।" },
+            { q: "১০. \\(\\cos^{-1}\\frac{5}{x} + \\cos^{-1}\\frac{12}{x} = \\frac{\\pi}{2}\\) হলে \\(x\\) = ?", opts: ["13", "12", "5", "17"], ans: 0, exp: "ব্যাখ্যা: \\(\\cos^{-1}\\frac{5}{x} = \\frac{\\pi}{2} - \\cos^{-1}\\frac{12}{x} = \\sin^{-1}\\frac{12}{x}\\)। অতএব \\(\\frac{5}{x} = \\sqrt{1 - (\\frac{12}{x})^2}\\)। স্কোয়ার করলে \\(\\frac{25}{x^2} = 1 - \\frac{144}{x^2} \\Rightarrow x^2 = 169 \\Rightarrow x = 13\\)।" },
+            { q: "১১. \\(\\tan(\\cos^{-1}x) = \\sin(\\cot^{-1}\\frac{1}{2})\\) হলে \\(x\\) = ?", opts: ["\\(\\frac{\\sqrt{3}}{5}\\)", "\\(\\pm\\frac{\\sqrt{5}}{3}\\)", "\\(-\\frac{\\sqrt{3}}{5}\\)", "\\(\\frac{1}{2}\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\cot^{-1}\\frac{1}{2} = \\theta\\) ধরলে \\(\\cot\\theta = \\frac{1}{2} \\Rightarrow \\sin\\theta = \\frac{2}{\\sqrt{5}}\\)। অন্যদিকে \\(\\cos^{-1}x = \\alpha\\) ধরলে \\(\\tan\\alpha = \\frac{\\sqrt{1-x^2}}{x}\\)। তাহলে \\(\\frac{\\sqrt{1-x^2}}{x} = \\frac{2}{\\sqrt{5}}\\) সমাধান করলে \\(x = \\pm\\frac{\\sqrt{5}}{3}\\) পাওয়া যায়।" },
+            { q: "১২. \\(2 \\sin^{-1}x = \\cos^{-1}x\\) হলে x = ?", opts: ["1", "0", "\\(\\frac{1}{2}\\)", "\\(\\frac{1}{4}\\)"], ans: 2, exp: "ব্যাখ্যা: আমরা জানি \\(\\sin^{-1}x + \\cos^{-1}x = \\frac{\\pi}{2}\\)। \\(\\cos^{-1}x\\)-এর জায়গায় \\(2\\sin^{-1}x\\) বসালে \\(3\\sin^{-1}x = \\frac{\\pi}{2} \\Rightarrow \\sin^{-1}x = \\frac{\\pi}{6} \\Rightarrow x = \\sin\\frac{\\pi}{6} = \\frac{1}{2}\\)।" },
+            { q: "১৩. \\(\\tan^{-1}x + \\cot^{-1}(x+1) = ?\\)", opts: ["\\(\\tan^{-1}(1+x+x^2)\\)", "\\(\\cot^{-1}(1+x+x^2)\\)", "\\(\\tan^{-1}\\frac{x}{x+1}\\)", "\\(\\frac{\\pi}{4}\\)"], ans: 0, exp: "ব্যাখ্যা: \\(\\cot^{-1}(x+1) = \\tan^{-1}\\frac{1}{x+1}\\)। যোগফল \\(\\tan^{-1}\\left(\\frac{x + \\frac{1}{x+1}}{1 - \\frac{x}{x+1}}\\right) = \\tan^{-1}(x^2+x+1)\\)।" },
+            { q: "১৪. \\(\\sin^{-1}(\\sqrt{3}x) + \\sin^{-1}x = \\frac{\\pi}{2}\\) হলে \\(x\\) = ?", opts: ["\\(\\frac{1}{2}\\)", "\\(\\frac{\\sqrt{3}}{2}\\)", "\\(\\frac{1}{\\sqrt{2}}\\)", "1"], ans: 0, exp: "ব্যাখ্যা: \\(\\sin^{-1}(\\sqrt{3}x) = \\frac{\\pi}{2} - \\sin^{-1}x = \\cos^{-1}x = \\sin^{-1}\\sqrt{1-x^2}\\)। অর্থাৎ \\(3x^2 = 1-x^2 \\Rightarrow 4x^2 = 1 \\Rightarrow x = \\frac{1}{2}\\) (যেহেতু x > 0)।" },
+            { q: "১৫. \\(\\cot^{-1}(-\\frac{1}{\\sqrt{3}}) + \\tan^{-1}\\sqrt{3} = ?\\)", opts: ["\\(\\frac{\\pi}{2}\\)", "\\(\\pi\\)", "\\(\\frac{2\\pi}{3}\\)", "\\(\\frac{\\pi}{3}\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\cot^{-1}(-\\frac{1}{\\sqrt{3}}) = \\pi - \\cot^{-1}\\frac{1}{\\sqrt{3}} = \\pi - \\frac{\\pi}{3} = \\frac{2\\pi}{3}\\)। এবং \\(\\tan^{-1}\\sqrt{3} = \\frac{\\pi}{3}\\)। যোগফল \\(\\frac{2\\pi}{3} + \\frac{\\pi}{3} = \\pi\\)।" }
+        ]
+    },
+    3: {
+        name: 'Set 3', icon: '🧠', topic: 'সমীকরণ সমাধান ও ধারণাভিত্তিক প্রয়োগ',
+        questions: [
+            { q: "১. একটি ত্রিভুজের দুটি কোণ \\(\\tan^{-1}\\frac{1}{2}\\) এবং \\(\\tan^{-1}\\frac{1}{3}\\) হলে তৃতীয় কোণটি কত?", opts: ["\\(\\frac{\\pi}{4}\\)", "\\(\\frac{3\\pi}{4}\\)", "\\(\\frac{\\pi}{6}\\)", "\\(\\frac{\\pi}{3}\\)"], ans: 1, exp: "ব্যাখ্যা: ত্রিভুজের প্রদত্ত কোণ দুটির সমষ্টি \\(\\tan^{-1}\\frac{1}{2} + \\tan^{-1}\\frac{1}{3} = \\frac{\\pi}{4}\\)। যেহেতু ত্রিভুজের তিন কোণের সমষ্টি \\(\\pi\\), তাই তৃতীয় কোণটি হলো \\(\\pi - \\frac{\\pi}{4} = \\frac{3\\pi}{4}\\)।" },
+            { q: "২. \\(\\tan^{-1}\\frac{x-1}{x-2} + \\tan^{-1}\\frac{x+1}{x+2} = \\frac{\\pi}{4}\\) হলে x = ?", opts: ["\\(\\pm\\frac{1}{2}\\)", "\\(\\frac{1}{2}\\)", "\\(\\pm\\frac{1}{\\sqrt{2}}\\)", "\\(\\frac{1}{\\sqrt{2}}\\)"], ans: 2, exp: "ব্যাখ্যা: \\(\\tan^{-1}\\) এর যোগের সূত্র প্রয়োগ করলে সমীকরণটি দাঁড়ায় \\(\\frac{2x^2 - 4}{-3} = 1 \\Rightarrow 2x^2 - 4 = -3 \\Rightarrow 2x^2 = 1 \\Rightarrow x = \\pm\\frac{1}{\\sqrt{2}}\\)।" },
+            { q: "৩. \\(\\sin^{-1}x + \\sin^{-1}y = \\frac{2\\pi}{3}\\) এবং \\(\\cos^{-1}x - \\cos^{-1}y = \\frac{\\pi}{3}\\) হলে x ও y এর মান যথাক্রমে:", opts: ["\\(\\frac{1}{2}, \\frac{1}{2}\\)", "\\(\\frac{1}{2}, 1\\)", "\\(1, \\frac{1}{2}\\)", "\\(\\frac{\\sqrt{3}}{2}, 1\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\sin^{-1}x + \\sin^{-1}y = \\frac{2\\pi}{3}\\) এবং \\(\\cos^{-1}x - \\cos^{-1}y = (\\frac{\\pi}{2} - \\sin^{-1}x) - (\\frac{\\pi}{2} - \\sin^{-1}y) = \\sin^{-1}y - \\sin^{-1}x = \\frac{\\pi}{3}\\)। যোগ ও বিয়োগ করলে পাওয়া যায় \\(\\sin^{-1}y = \\frac{\\pi}{2} \\Rightarrow y = 1\\) এবং \\(\\sin^{-1}x = \\frac{\\pi}{6} \\Rightarrow x = \\frac{1}{2}\\)।" },
+            { q: "৪. \\(\\tan^{-1}x + \\tan^{-1}y + \\tan^{-1}z = \\frac{\\pi}{2}\\) হলে নিচের কোন সম্পর্কটি সত্য?", opts: ["\\(x+y+z=xyz\\)", "\\(xy+yz+zx=1\\)", "\\(x+y+z=1\\)", "\\(xyz=1\\)"], ans: 1, exp: "ব্যাখ্যা: তিন পদের \\(\\tan^{-1}\\) এর যোগের সূত্র থেকে আমরা পাই \\(\\tan^{-1}(\\frac{x+y+z-xyz}{1-xy-yz-zx}) = \\frac{\\pi}{2}\\)। অতএব এর হর শূন্য হতে হবে, অর্থাৎ \\(1-xy-yz-zx=0 \\Rightarrow xy+yz+zx=1\\)।" },
+            { q: "৫. \\(\\sin^{-1}x + \\sin^{-1}(1-x) = \\cos^{-1}x\\) হলে x = ?", opts: ["1, \\(\\frac{1}{2}\\)", "0, \\(\\frac{1}{2}\\)", "0, \\(-\\frac{1}{2}\\)", "1"], ans: 1, exp: "ব্যাখ্যা: সমীকরণটিকে লেখা যায় \\(\\sin^{-1}(1-x) = \\cos^{-1}x - \\sin^{-1}x = \\frac{\\pi}{2} - 2\\sin^{-1}x\\)। উভয়পক্ষে sin নিলে \\(1-x = \\cos(2\\sin^{-1}x) = 1 - 2x^2\\)। সমাধান করলে \\(2x^2 - x = 0 \\Rightarrow x(2x-1) = 0 \\Rightarrow x=0, 1/2\\)।" },
+            { q: "৬. যদি \\(\\cos^{-1}x + \\cos^{-1}y + \\cos^{-1}z = 3\\pi\\) হয়, তবে \\(xy+yz+zx\\) এর মান কত?", opts: ["0", "1", "2", "3"], ans: 3, exp: "ব্যাখ্যা: \\(\\cos^{-1}\\) অপেক্ষকের সর্বোচ্চ মান \\(\\pi\\)। তিনটির যোগফল \\(3\\pi\\) হলে প্রত্যেকটিকেই \\(\\pi\\) হতে হবে। অর্থাৎ \\(\\cos^{-1}x = \\pi \\Rightarrow x = -1\\), একইভাবে \\(y = -1, z = -1\\)। তাহলে \\(xy+yz+zx = 1+1+1 = 3\\)।" },
+            { q: "৭. \\(2 \\tan^{-1}(\\cos x) = \\tan^{-1}(2 \\text{cosec } x)\\) হলে x = ?", opts: ["\\(\\frac{\\pi}{4}\\)", "\\(\\frac{\\pi}{3}\\)", "\\(\\frac{\\pi}{6}\\)", "\\(\\frac{\\pi}{2}\\)"], ans: 0, exp: "ব্যাখ্যা: বামপক্ষে সূত্র প্রয়োগ করলে \\(\\tan^{-1}(\\frac{2\\cos x}{1-\\cos^2x}) = \\tan^{-1}(\\frac{2\\cos x}{\\sin^2x})\\)। এটি ডানপক্ষের সাথে সমান করলে \\(\\frac{2\\cos x}{\\sin^2x} = \\frac{2}{\\sin x} \\Rightarrow \\frac{\\cos x}{\\sin x} = 1 \\Rightarrow \\tan x = 1 \\Rightarrow x = \\frac{\\pi}{4}\\)।" },
+            { q: "৮. \\(\\tan^{-1}\\frac{1-x}{1+x} = \\frac{1}{2}\\sin^{-1}\\frac{x}{\\sqrt{1+x^2}}\\) হলে x = ?", opts: ["\\(\\sqrt{3}\\)", "\\(\\frac{1}{\\sqrt{3}}\\)", "1", "0"], ans: 1, exp: "ব্যাখ্যা: \\(\\sin^{-1}\\frac{x}{\\sqrt{1+x^2}}\\) হলো \\(\\tan^{-1}x\\)-এর সমতুল্য। বামপক্ষ হলো \\(\\tan^{-1}1 - \\tan^{-1}x\\)। অতএব \\(\\frac{\\pi}{4} - \\tan^{-1}x = \\frac{1}{2}\\tan^{-1}x \\Rightarrow \\frac{3}{2}\\tan^{-1}x = \\frac{\\pi}{4} \\Rightarrow \\tan^{-1}x = \\frac{\\pi}{6} \\Rightarrow x = \\frac{1}{\\sqrt{3}}\\)।" },
+            { q: "৯. \\(\\sec^2(\\tan^{-1}2) + \\text{cosec}^2(\\cot^{-1}3)\\) এর মান কত?", opts: ["12", "13", "15", "5"], ans: 2, exp: "ব্যাখ্যা: \\(\\sec^2\\theta = 1+\\tan^2\\theta\\) এবং \\(\\text{cosec}^2\\theta = 1+\\cot^2\\theta\\) ব্যবহার করলে পাই: \\((1 + 2^2) + (1 + 3^2) = 1 + 4 + 1 + 9 = 15\\)।" },
+            { q: "১০. \\(\\sin^{-1}\\frac{12}{13} + \\cos^{-1}\\frac{4}{5} + \\tan^{-1}\\frac{63}{16} = ?\\)", opts: ["\\(\\frac{\\pi}{2}\\)", "\\(\\pi\\)", "\\(\\frac{3\\pi}{4}\\)", "\\(\\frac{\\pi}{4}\\)"], ans: 1, exp: "ব্যাখ্যা: সবগুলোকে \\(\\tan^{-1}\\)-এ রূপান্তরিত করলে পাই \\(\\tan^{-1}\\frac{12}{5} + \\tan^{-1}\\frac{3}{4} + \\tan^{-1}\\frac{63}{16}\\)। প্রথম দুটির যোগফল \\(\\pi - \\tan^{-1}\\frac{63}{16}\\) (যেহেতু \\(\\frac{12}{5} \\times \\frac{3}{4} > 1\\))। শেষে \\(\\tan^{-1}\\frac{63}{16}\\) যোগ করলে মোট মান \\(\\pi\\) হয়।" },
+            { q: "১১. \\(\\sin^{-1}\\frac{3}{5} + \\sin^{-1}\\frac{4}{5} = ?\\)", opts: ["\\(\\frac{\\pi}{4}\\)", "\\(\\frac{\\pi}{2}\\)", "\\(\\pi\\)", "\\(\\frac{3\\pi}{4}\\)"], ans: 1, exp: "ব্যাখ্যা: একটি সমকোণী ত্রিভুজের ক্ষেত্রে লম্ব 3, ভূমি 4 হলে অতিভুজ 5। তাই \\(\\sin^{-1}\\frac{3}{5} = \\cos^{-1}\\frac{4}{5}\\)। অতএব যোগফল \\(\\cos^{-1}\\frac{4}{5} + \\sin^{-1}\\frac{4}{5} = \\frac{\\pi}{2}\\)।" },
+            { q: "১২. \\(\\tan^{-1}(x+1) + \\tan^{-1}(x-1) = \\tan^{-1}\\frac{8}{31}\\) হলে x = ?", opts: ["\\(\\frac{1}{4}\\)", "\\(-\\frac{1}{4}\\)", "\\(\\frac{1}{2}\\)", "-8"], ans: 0, exp: "ব্যাখ্যা: \\(\\tan^{-1}\\frac{(x+1)+(x-1)}{1-(x^2-1)} = \\tan^{-1}\\frac{8}{31} \\Rightarrow \\frac{2x}{2-x^2} = \\frac{8}{31}\\)। সরল করলে \\(8x^2+62x-16=0 \\Rightarrow 4x^2+31x-8=0\\)। সমাধান করলে \\(x = \\frac{1}{4}, -8\\) পাওয়া যায়, যেখানে 1/4 সঠিক অপশন।" },
+            { q: "১৩. \\(3 \\cot^{-1}\\frac{1}{2-\\sqrt{3}} + \\cot^{-1}x = \\frac{\\pi}{2}\\) হলে x = ?", opts: ["\\(\\pm 1\\)", "1", "0", "\\(\\sqrt{3}\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\frac{1}{2-\\sqrt{3}} = 2+\\sqrt{3}\\)। \\(\\cot^{-1}(2+\\sqrt{3}) = 15^\\circ = \\frac{\\pi}{12}\\)। তাহলে \\(3 \\times \\frac{\\pi}{12} + \\cot^{-1}x = \\frac{\\pi}{2} \\Rightarrow \\frac{\\pi}{4} + \\cot^{-1}x = \\frac{\\pi}{2} \\Rightarrow \\cot^{-1}x = \\frac{\\pi}{4} \\Rightarrow x = 1\\)।" },
+            { q: "১৪. \\(2 \\tan^{-1}\\frac{1+x}{1-x} + \\sin^{-1}\\frac{1-x^2}{1+x^2} = ?\\)", opts: ["\\(\\frac{\\pi}{2}\\)", "\\(\\pi\\)", "\\(\\frac{\\pi}{4}\\)", "0"], ans: 1, exp: "ব্যাখ্যা: \\(x = \\tan\\theta\\) বসালে, প্রথম অংশ \\(2 \\tan^{-1}(\\tan(\\frac{\\pi}{4}+\\theta)) = \\frac{\\pi}{2} + 2\\theta\\)। দ্বিতীয় অংশ \\(\\sin^{-1}(\\cos 2\\theta) = \\frac{\\pi}{2} - 2\\theta\\)। দুটি যোগ করলে \\(\\frac{\\pi}{2} + 2\\theta + \\frac{\\pi}{2} - 2\\theta = \\pi\\) হয়।" },
+            { q: "১৫. \\(\\sin^{-1}x + \\sin^{-1}y + \\sin^{-1}z = \\frac{3\\pi}{2}\\) হলে \\(x^9+y^9+z^9 - \\frac{1}{x^9y^9z^9}\\) এর মান কত?", opts: ["0", "1", "2", "-2"], ans: 2, exp: "ব্যাখ্যা: \\(\\sin^{-1}\\) এর সর্বোচ্চ মান \\(\\frac{\\pi}{2}\\)। ৩টির যোগফল \\(\\frac{3\\pi}{2}\\) হতে হলে প্রত্যেকটিকে \\(\\frac{\\pi}{2}\\) হতে হবে। অতএব \\(x=y=z=1\\)। সুতরাং প্রদত্ত রাশিতে মান বসালে \\(1 + 1 + 1 - 1 = 2\\)।" }
+        ]
+    }
+};
+
+// ================== STATE VARIABLES ==================
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+// ================== LOCAL STORAGE LOGIC ==================
+function getGlobalUsers() {
+    const data = localStorage.getItem("testBazarGlobalUsers");
+    return data ? JSON.parse(data) : {};
+}
+
+// Keeping attempts separate for Maths Unit 1 Chapter 3
+function getAttemptsData() {
+    const data = localStorage.getItem("testBazarAttemptsMath3U1C3_v1");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    attempts[key] = (attempts[key] || 0) + 1;
+    localStorage.setItem("testBazarAttemptsMath3U1C3_v1", JSON.stringify(attempts));
+    return attempts[key];
+}
+
+// ================== INITIALIZATION ==================
+window.onload = () => {
+    renderHub();
+};
+
+function renderHub() {
+    const grid = document.getElementById("setGrid");
+    grid.innerHTML = "";
+
+    for(let id in ALL_SETS) {
+        const set = ALL_SETS[id];
+        const div = document.createElement("div");
+        div.className = "set-card";
+
+        let attemptCount = 0;
+        let isLocked = false;
+
+        if (currentUser) {
+            attemptCount = getAttemptCount(currentUser, id);
+            isLocked = attemptCount >= MAX_ATTEMPTS;
+            if (isLocked) div.classList.add("locked");
+        }
+
+        div.innerHTML = `
+            <div class="icon">${set.icon}</div>
+            <div class="set-num">${set.name}</div>
+            <div class="set-title">${set.topic}</div>
+            <div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+            ${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+        `;
+
+        div.onclick = () => {
+            if (isLocked) {
+                alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+                return;
+            }
+            handleSetClick(id);
+        };
+        grid.appendChild(div);
+    }
+}
+
+function handleSetClick(setId) {
+    activeSetId = setId;
+    if (!currentUser) {
+        document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+        document.getElementById("loginOverlay").classList.add("active");
+        document.getElementById("loginUsername").value = "";
+        document.getElementById("loginPassword").value = "";
+        document.getElementById("loginError").style.display = "none";
+    } else {
+        startQuiz(setId);
+    }
+}
+
+function doLogin() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+    const err = document.getElementById("loginError");
+    const GLOBAL_USERS = getGlobalUsers();
+
+    if(!u || !p) {
+        err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!";
+        err.style.display = "block";
+        return;
+    }
+
+    if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+        let attempts = getAttemptCount(u, activeSetId);
+        if (attempts >= MAX_ATTEMPTS) {
+            err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+            err.style.display = "block";
+            return;
+        }
+        currentUser = u;
+        document.getElementById("loginOverlay").classList.remove("active");
+        document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+        document.getElementById("userDisplay").classList.remove("hidden");
+        renderHub();
+        startQuiz(activeSetId);
+    } else {
+        err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+        err.style.display = "block";
+    }
+}
+
+function closeLogin() {
+    document.getElementById("loginOverlay").classList.remove("active");
+}
+
+function goToHub() {
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("hubPage").style.display = "block";
+    document.getElementById("timerBox").classList.add("hidden");
+    clearInterval(timerInterval);
+    renderHub();
+}
+
+// ================== QUIZ LOGIC ==================
+function startQuiz(setId) {
+    incrementAttempt(currentUser, setId);
+    questions = ALL_SETS[setId].questions;
+    currentQIndex = 0;
+    score = 0;
+    wrongAnswers = 0;
+    userAnswers = {};
+    isReviewMode = false;
+    timeLeft = TIME_LIMIT;
+
+    document.getElementById("hubPage").style.display = "none";
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    document.getElementById("timerBox").classList.remove("hidden");
+    document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+    document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+
+    startTimer();
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const qData = questions[currentQIndex];
+    document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+    document.getElementById("qText").innerHTML = qData.q;
+    const progress = ((currentQIndex) / questions.length) * 100;
+    document.getElementById("progressFill").style.width = `${progress}%`;
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+
+    const optsBox = document.getElementById("qOpts");
+    optsBox.innerHTML = "";
+    document.getElementById("explanation").classList.remove("show");
+    document.getElementById("nextBtn").disabled = true;
+    document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+    qData.opts.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "opt";
+        btn.innerHTML = `<div class="opt-circle">${LABELS[idx] || '—'}</div> <div class="opt-text">${optText}</div>`;
+
+        if (isReviewMode) {
+            btn.classList.add("disabled");
+            if (idx === qData.ans) btn.classList.add("correct");
+            else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+        } else {
+            btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+        }
+        optsBox.appendChild(btn);
+    });
+
+    if (isReviewMode) {
+        document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+        document.getElementById("explanation").classList.add("show");
+        document.getElementById("nextBtn").disabled = false;
+        if (currentQIndex === questions.length - 1) {
+            document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন";
+        }
+    }
+
+    // Refresh MathJax for the new content
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+    const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+    allBtns.forEach(b => b.classList.add("disabled"));
+    userAnswers[currentQIndex] = selectedIdx;
+
+    if (selectedIdx === correctIdx) {
+        btn.classList.add("correct");
+        score++;
+    } else {
+        btn.classList.add("wrong");
+        allBtns[correctIdx].classList.add("correct");
+        wrongAnswers++;
+    }
+
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+    document.getElementById("explanation").classList.add("show");
+    document.getElementById("nextBtn").disabled = false;
+
+    // Refresh MathJax for explanation text
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function nextQ() {
+    if (isReviewMode && currentQIndex === questions.length - 1) {
+        document.getElementById("testArea").classList.add("hidden");
+        document.getElementById("resultWrap").classList.add("show");
+        return;
+    }
+    if (!isReviewMode && currentQIndex === questions.length - 1) {
+        finishQuiz();
+        return;
+    }
+    currentQIndex++;
+    loadQuestion();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    const tBox = document.getElementById("timerBox");
+    tBox.classList.remove("danger");
+
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishQuiz();
+            return;
+        }
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        if (timeLeft < 60) tBox.classList.add("danger");
+    }, 1000);
+}
+
+function finishQuiz() {
+    clearInterval(timerInterval);
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("timerBox").classList.add("hidden");
+    document.getElementById("resultWrap").classList.add("show");
+
+    const total = questions.length;
+    const skipped = total - (score + wrongAnswers);
+    const percent = Math.round((score / total) * 100);
+
+    document.getElementById("finalScore").innerText = `${percent}%`;
+    document.getElementById("rbCorrect").innerText = score;
+    document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+
+    const gradeEl = document.getElementById("resultGrade");
+    if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+    else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+    else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+
+    const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+    document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+    if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+        alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+        return;
+    }
+    startQuiz(activeSetId);
+}
+
+function showReview() {
+    isReviewMode = true;
+    currentQIndex = 0;
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    loadQuestion();
+}
+</script>
+</body>
+</html>
+
+
