@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Maths 3rd Sem | Unit 3 Ch 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- MathJax for rendering mathematical equations -->
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+/* ================= COLOR SCHEME & VARIABLES ================= */
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+
+/* Top Bar */
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+
+/* Hub View */
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+
+/* Quiz View */
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; overflow-x: auto; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main); overflow-x: auto;}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; overflow-x: auto;}
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+
+/* Result View */
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+
+/* Login Modal */
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+    <div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+    <div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+
+<div class="main">
+
+    <!-- ================= LOGIN MODAL ================= -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <h2>লগইন করুন</h2>
+            <p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+            <div class="login-set-name" id="loginSetName">📚 Set 1</div>
+            <div class="input-group">
+                <label>ইউজারনেম</label>
+                <input type="text" id="loginUsername" placeholder="Username">
+            </div>
+            <div class="input-group">
+                <label>পাসওয়ার্ড</label>
+                <input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+            </div>
+            <button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+            <button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+            <div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+        </div>
+    </div>
+
+    <!-- ================= HUB PAGE ================= -->
+    <div id="hubPage">
+        <div class="hub-header">
+            <h1>গণিত 3rd Sem Unit 3:<br>অবকলন বা অন্তরকলন (Differentiation)</h1>
+            <p>মোট ৪৫টি প্রশ্ন সম্বলিত ৩টি সেট। Test শুরু করতে সেটে ক্লিক করুন।</p>
+        </div>
+        <div class="set-grid" id="setGrid"></div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+        </div>
+    </div>
+
+    <!-- ================= QUIZ AREA ================= -->
+    <div id="testArea" class="hidden">
+        <div class="quiz-info">
+            <div class="info-item">🎓 <strong>Mathematics</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+            <div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="q-card">
+            <div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+            <div class="q-text" id="qText">Question Text</div>
+            <div class="opts" id="qOpts"></div>
+            <div class="explanation" id="explanation"><p id="explanationText"></p></div>
+            <div class="nav-row">
+                <div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+                <button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RESULT AREA ================= -->
+    <div class="result-wrap" id="resultWrap">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-score en-font" id="finalScore">100%</div>
+        <div class="result-total">স্কোর</div>
+        <div class="result-grade" id="resultGrade">অসাধারণ!</div>
+        <div class="result-bars">
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+                <div class="rb-label">সঠিক</div>
+            </div>
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+                <div class="rb-label">ভুল/স্কিপ</div>
+            </div>
+        </div>
+        <div class="attempt-info-box" id="attemptInfo"></div>
+        <div class="action-btns">
+            <button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+            <button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+            <button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// Global Config & Database
+// ============================================================
+const MAX_ATTEMPTS = 10; 
+const TIME_LIMIT = 10 * 60; // 10 Minutes
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+    1: {
+        name: 'Set 1', icon: '📈', topic: 'প্রাথমিক ধারণা ও সূত্রভিত্তিক প্রয়োগ',
+        questions: [
+            { q: "১. \\(\\frac{d}{dx} (\\sin^{-1}x)\\) -এর অন্তরকলজ কী হবে? \\((|x|<1)\\)", opts: ["\\(\\frac{1}{1+x^2}\\)", "\\(-\\frac{1}{\\sqrt{1-x^2}}\\)", "\\(\\frac{1}{\\sqrt{1-x^2}}\\)", "\\(\\frac{1}{|x|\\sqrt{x^2-1}}\\)"], ans: 2, exp: "ব্যাখ্যা: এটি বিপরীত ত্রিকোণমিতিক অপেক্ষকের অবকলনের সরাসরি সূত্র।" },
+            { q: "২. \\(\\frac{d}{dx} (a^x)\\) -এর মান কত? \\((a>0)\\)", opts: ["\\(a^x\\)", "\\(x a^{x-1}\\)", "\\(a^x \\log_e a\\)", "\\(\\frac{a^x}{\\log_e a}\\)"], ans: 2, exp: "ব্যাখ্যা: সূচকীয় অপেক্ষকের অন্তরকলজের সূত্রানুযায়ী \\(\\frac{d}{dx}(a^x) = a^x \\log_e a\\) হয়।" },
+            { q: "৩. \\(\\frac{d}{dx} (10^{10x})\\) -এর মান হবে—", opts: ["\\(10^{10x} \\cdot \\log 10\\)", "\\(10^{10x+1} \\cdot \\log_e 10\\)", "\\(10^{x} \\cdot \\log 10\\)", "\\(10^{10x}\\)"], ans: 1, exp: "ব্যাখ্যা: শৃঙ্খল নিয়ম (Chain Rule) প্রয়োগ করে: \\(\\frac{d}{dx}(10^{10x}) = 10^{10x} \\cdot \\log_e 10 \\cdot \\frac{d}{dx}(10x) = 10 \\cdot 10^{10x} \\cdot \\log_e 10 = 10^{10x+1} \\log_e 10\\)।" },
+            { q: "৪. \\(y = e^{\\sqrt{x}}\\) হলে \\(x\\)-এর সাপেক্ষে অবকল সহগ কত?", opts: ["\\(\\frac{e^{\\sqrt{x}}}{\\sqrt{x}}\\)", "\\(2\\sqrt{x} e^{\\sqrt{x}}\\)", "\\(\\frac{e^{\\sqrt{x}}}{2\\sqrt{x}}\\)", "\\(\\sqrt{x} e^{\\sqrt{x}}\\)"], ans: 2, exp: "ব্যাখ্যা: চেইন রুল প্রয়োগ করে: \\(\\frac{d}{dx}(e^{\\sqrt{x}}) = e^{\\sqrt{x}} \\cdot \\frac{d}{dx}(\\sqrt{x}) = e^{\\sqrt{x}} \\cdot \\frac{1}{2\\sqrt{x}}\\)।" },
+            { q: "৫. \\(y = x^x\\) হলে \\(\\frac{dy}{dx}\\) এর মান হবে—", opts: ["\\(x^x \\log x\\)", "\\(x^x(1+\\log x)\\)", "\\(x^{x-1}\\)", "\\(1+\\log x\\)"], ans: 1, exp: "ব্যাখ্যা: উভয়পক্ষে \\(\\log\\) নিলে \\(\\log y = x \\log x\\)। ডেরিভেটিভ করলে \\(\\frac{1}{y} \\frac{dy}{dx} = 1 \\cdot \\log x + x \\cdot \\frac{1}{x} = 1 + \\log x \\Rightarrow \\frac{dy}{dx} = x^x(1+\\log x)\\)।" },
+            { q: "৬. \\(x = a \\cos\\theta\\), \\(y = a \\sin\\theta\\) হলে \\(\\frac{dy}{dx}\\) এর মান কত?", opts: ["\\(\\tan\\theta\\)", "\\(-\\cot\\theta\\)", "\\(-\\tan\\theta\\)", "\\(\\cot\\theta\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\frac{dx}{d\\theta} = -a \\sin\\theta\\) এবং \\(\\frac{dy}{d\\theta} = a \\cos\\theta\\)। অতএব \\(\\frac{dy}{dx} = \\frac{a \\cos\\theta}{-a \\sin\\theta} = -\\cot\\theta\\)।" },
+            { q: "৭. \\(f(x) = \\log(\\cos x)\\) হলে \\(f'(x)\\) এর মান—", opts: ["\\(-\\sec^2 x\\)", "\\(-\\tan x\\)", "\\(\\cot x\\)", "\\(\\sec x\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\frac{d}{dx}(\\log(\\cos x)) = \\frac{1}{\\cos x} \\cdot \\frac{d}{dx}(\\cos x) = \\frac{1}{\\cos x} \\cdot (-\\sin x) = -\\tan x\\)।" },
+            { q: "৮. \\(\\frac{d}{dx}(\\sin x^\\circ) = ?\\)", opts: ["\\(\\cos x^\\circ\\)", "\\(-\\cos x^\\circ\\)", "\\(\\frac{\\pi}{180} \\cos x^\\circ\\)", "\\(\\frac{180}{\\pi} \\cos x^\\circ\\)"], ans: 2, exp: "ব্যাখ্যা: ক্যালকুলাসে কোণ সবসময় রেডিয়ানে থাকতে হয়। \\(x^\\circ = \\frac{\\pi x}{180}\\) রেডিয়ান। অতএব \\(\\frac{d}{dx}(\\sin \\frac{\\pi x}{180}) = \\cos(\\frac{\\pi x}{180}) \\cdot \\frac{\\pi}{180} = \\frac{\\pi}{180} \\cos x^\\circ\\)।" },
+            { q: "৯. \\(\\frac{d}{dx} (\\tan^{-1}x + \\cot^{-1}x) = ?\\)", opts: ["\\(\\frac{2}{1+x^2}\\)", "0", "1", "\\(\\frac{\\pi}{2}\\)"], ans: 1, exp: "ব্যাখ্যা: বিপরীত ত্রিকোণমিতিক অপেক্ষকের ধর্ম অনুসারে \\(\\tan^{-1}x + \\cot^{-1}x = \\frac{\\pi}{2}\\) (যা একটি ধ্রুবক)। ধ্রুবকের অন্তরকলজ সর্বদা 0 হয়।" },
+            { q: "১০. \\(\\frac{d}{dx} [\\cos^{-1} \\frac{1-x^2}{1+x^2}]\\) এর মান কত? \\((0 < x < 1)\\)", opts: ["\\(\\frac{2}{1+x^2}\\)", "\\(-\\frac{2}{1+x^2}\\)", "\\(\\frac{1}{1+x^2}\\)", "0"], ans: 0, exp: "ব্যাখ্যা: আমরা জানি \\(\\cos^{-1}\\frac{1-x^2}{1+x^2} = 2\\tan^{-1}x\\)। এর ডেরিভেটিভ করলে হয় \\(2 \\times \\frac{1}{1+x^2} = \\frac{2}{1+x^2}\\)।" },
+            { q: "১১. \\(\\frac{d}{dx} (e^{2x})^4\\) এর মান—", opts: ["\\(e^{8x}\\)", "\\(8e^{8x}\\)", "\\(\\frac{e^{8x}}{8}\\)", "\\(4e^{8x}\\)"], ans: 1, exp: "ব্যাখ্যা: \\((e^{2x})^4 = e^{8x}\\)। একে অবকলন করলে চেইন রুল অনুযায়ী \\(8e^{8x}\\) পাওয়া যায়।" },
+            { q: "১২. \\(y = 2^{3x^2}\\) হলে \\(\\frac{dy}{dx}\\) হবে—", opts: ["\\(2^{3x^2} \\cdot 6x\\)", "\\(2^{3x^2} \\cdot \\log 2\\)", "\\(2^{3x^2} \\cdot 6x \\log_e 2\\)", "\\(2^{3x^2}\\)"], ans: 2, exp: "ব্যাখ্যা: \\(a^x\\) এর সূত্র ও চেইন রুল প্রয়োগ করে: \\(2^{3x^2} \\cdot \\log_e 2 \\cdot \\frac{d}{dx}(3x^2) = 2^{3x^2} \\cdot 6x \\log_e 2\\)।" },
+            { q: "১৩. \\(x^m y^n = (x+y)^{m+n}\\) হলে \\(\\frac{dy}{dx}\\) এর মান কত?", opts: ["0", "\\(\\frac{x}{y}\\)", "\\(\\frac{y}{x}\\)", "1"], ans: 2, exp: "ব্যাখ্যা: উভয়পাশে লগ নিয়ে (\\(m \\log x + n \\log y = (m+n) \\log(x+y)\\)) অবকলন করলে সবশেষে খুব সুন্দর একটি সরল মান \\(\\frac{y}{x}\\) চলে আসে।" },
+            { q: "১৪. \\(\\frac{d}{dx} (\\log_{10} x) = ?\\)", opts: ["\\(\\frac{1}{x}\\)", "\\(\\frac{1}{x \\log_e 10}\\)", "\\(\\frac{\\log_e 10}{x}\\)", "\\(\\frac{1}{x \\log_{10} e}\\)"], ans: 1, exp: "ব্যাখ্যা: বেস পরিবর্তন করে পাই \\(\\log_{10} x = \\frac{\\log_e x}{\\log_e 10}\\)। এবার \\(x\\)-এর সাপেক্ষে ডেরিভেটিভ করলে \\(\\frac{1}{x \\log_e 10}\\) হয়।" },
+            { q: "১৫. \\(u\\) ও \\(v\\) যদি \\(x\\)-এর অবকলনযোগ্য অপেক্ষক হয়, তবে ভাগফলের সূত্র অনুযায়ী \\(\\frac{d}{dx} (\\frac{u}{v}) = ?\\)", opts: ["\\(\\frac{v \\frac{du}{dx} + u \\frac{dv}{dx}}{v^2}\\)", "\\(\\frac{v \\frac{du}{dx} - u \\frac{dv}{dx}}{u^2}\\)", "\\(\\frac{v \\frac{du}{dx} - u \\frac{dv}{dx}}{v^2}\\)", "\\(\\frac{u \\frac{dv}{dx} - v \\frac{du}{dx}}{v^2}\\)"], ans: 2, exp: "ব্যাখ্যা: এটি ভাগের ডেরিভেটিভ (Quotient Rule)-এর সরাসরি সূত্র।" }
+        ]
+    },
+    2: {
+        name: 'Set 2', icon: '🔗', topic: 'শৃঙ্খল নিয়ম ও পরামিতিক অবকলন',
+        questions: [
+            { q: "১. \\(\\frac{d}{dx} [\\log(\\tan(\\frac{\\pi}{4} + \\frac{x}{2}))]\\) এর মান কত?", opts: ["\\(\\cos x\\)", "\\(\\sec x\\)", "\\(\\tan x\\)", "\\(\\text{cosec} x\\)"], ans: 1, exp: "ব্যাখ্যা: শৃঙ্খল নিয়ম (Chain Rule) অনুযায়ী: \\(\\frac{1}{\\tan(\\frac{\\pi}{4} + \\frac{x}{2})} \\cdot \\sec^2(\\frac{\\pi}{4} + \\frac{x}{2}) \\cdot \\frac{1}{2}\\)। এটিকে \\(\\sin\\) ও \\(\\cos\\)-এ ভাঙলে \\(\\frac{1}{2 \\sin(\\dots)\\cos(\\dots)} = \\frac{1}{\\sin(\\frac{\\pi}{2}+x)} = \\frac{1}{\\cos x} = \\sec x\\) হয়।" },
+            { q: "২. \\(y = e^{3 \\log_e x}\\) হলে \\(\\frac{dy}{dx}\\) এর মান কত?", opts: ["\\(3x^2\\)", "\\(3e^{3\\log x}\\)", "\\(\\frac{3}{x} e^{3\\log x}\\)", "\\(x^3\\)"], ans: 0, exp: "ব্যাখ্যা: লগারিদমের ধর্ম অনুযায়ী \\(e^{3 \\log_e x} = e^{\\log_e(x^3)} = x^3\\)। সুতরাং \\(\\frac{dy}{dx} = \\frac{d}{dx}(x^3) = 3x^2\\)।" },
+            { q: "৩. \\(\\frac{d}{dx}(\\cos^{-1}x + \\sin^{-1}x) = ?\\)", opts: ["\\(\\frac{2}{\\sqrt{1-x^2}}\\)", "1", "0", "\\(\\frac{\\pi}{2}\\)"], ans: 2, exp: "ব্যাখ্যা: আমরা জানি, \\(\\cos^{-1}x + \\sin^{-1}x = \\frac{\\pi}{2}\\), যা একটি ধ্রুবক। ধ্রুবকের অন্তরকলজ সর্বদা 0 হয়।" },
+            { q: "৪. \\(y = \\sqrt{\\sin x + y}\\) হলে \\(\\frac{dy}{dx}\\) এর মান কত?", opts: ["\\(\\frac{\\cos x}{2y-1}\\)", "\\(\\frac{\\sin x}{1-2y}\\)", "\\(\\frac{\\cos x}{2y+1}\\)", "\\(\\frac{1}{2y-1}\\)"], ans: 0, exp: "ব্যাখ্যা: উভয়পাশে বর্গ করলে \\(y^2 = \\sin x + y\\)। x-এর সাপেক্ষে অবকলন করলে: \\(2y \\frac{dy}{dx} = \\cos x + \\frac{dy}{dx} \\implies \\frac{dy}{dx}(2y - 1) = \\cos x \\implies \\frac{dy}{dx} = \\frac{\\cos x}{2y-1}\\)।" },
+            { q: "৫. \\(y = \\log(\\sec x + \\tan x)\\) হলে \\(\\frac{dy}{dx}\\) এর মান—", opts: ["\\(\\sec x \\tan x\\)", "\\(\\sec x\\)", "\\(\\tan x\\)", "\\(\\sec^2 x\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\frac{1}{\\sec x + \\tan x} \\cdot (\\sec x \\tan x + \\sec^2 x) = \\frac{\\sec x(\\tan x + \\sec x)}{\\sec x + \\tan x} = \\sec x\\)।" },
+            { q: "৬. \\(x = a t^2\\), \\(y = 2at\\) হলে \\(\\frac{dy}{dx}\\) এর মান কত?", opts: ["\\(t\\)", "\\(\\frac{1}{t}\\)", "\\(-t\\)", "\\(-\\frac{1}{t^2}\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\frac{dx}{dt} = 2at\\) এবং \\(\\frac{dy}{dt} = 2a\\)। পরামিতিক সূত্রানুযায়ী \\(\\frac{dy}{dx} = \\frac{dy/dt}{dx/dt} = \\frac{2a}{2at} = \\frac{1}{t}\\)।" },
+            { q: "৭. \\(y = \\tan^{-1}(\\frac{2x}{1-x^2})\\) হলে \\(\\frac{dy}{dx}\\) কত?", opts: ["\\(\\frac{2}{1+x^2}\\)", "\\(\\frac{1}{1+x^2}\\)", "\\(-\\frac{2}{1+x^2}\\)", "\\(\\frac{2x}{1-x^2}\\)"], ans: 0, exp: "ব্যাখ্যা: বিপরীত ত্রিকোণমিতির সূত্রানুযায়ী \\(\\tan^{-1}(\\frac{2x}{1-x^2}) = 2\\tan^{-1}x\\)। অবকলন করলে \\(2 \\times \\frac{1}{1+x^2} = \\frac{2}{1+x^2}\\)।" },
+            { q: "৮. \\(y = \\log_a x\\) হলে \\(\\frac{dy}{dx}\\) এর মান—", opts: ["\\(\\frac{1}{x \\log_e a}\\)", "\\(\\frac{\\log_e a}{x}\\)", "\\(\\frac{1}{x \\log_a e}\\)", "\\(\\frac{1}{x}\\)"], ans: 0, exp: "ব্যাখ্যা: বেস পরিবর্তন করলে \\(y = \\frac{\\log_e x}{\\log_e a}\\)। একে ডেরিভেটিভ করলে \\(\\frac{1}{x \\log_e a}\\) পাওয়া যায়।" },
+            { q: "৯. \\(\\sin x\\)-এর সাপেক্ষে \\(\\cos x\\)-এর অবকলন কত?", opts: ["\\(\\tan x\\)", "\\(-\\cot x\\)", "\\(-\\tan x\\)", "\\(\\cot x\\)"], ans: 1, exp: "ব্যাখ্যা: ধরি \\(u = \\cos x\\) এবং \\(v = \\sin x\\)। তাহলে \\(\\frac{du}{dv} = \\frac{du/dx}{dv/dx} = \\frac{-\\sin x}{\\cos x} = -\\cot x\\)।" },
+            { q: "১০. \\(\\frac{d}{dx} (2^{\\sin x})\\) এর মান কত?", opts: ["\\(2^{\\sin x} \\cos x\\)", "\\(2^{\\sin x} \\log_e 2\\)", "\\(2^{\\sin x} \\log_e 2 \\cos x\\)", "\\(\\sin x 2^{\\sin x - 1}\\)"], ans: 2, exp: "ব্যাখ্যা: \\(a^x\\)-এর সূত্র এবং চেইন রুল: \\(2^{\\sin x} \\cdot \\log_e 2 \\cdot \\frac{d}{dx}(\\sin x) = 2^{\\sin x} \\log_e 2 \\cos x\\)।" },
+            { q: "১১. \\(y = \\log_e |x|\\) হলে \\(\\frac{dy}{dx}\\) কত? \\((x \\neq 0)\\)", opts: ["\\(\\frac{1}{|x|}\\)", "\\(\\frac{1}{x}\\)", "\\(-\\frac{1}{x}\\)", "অনির্ণেয়"], ans: 1, exp: "ব্যাখ্যা: \\(x > 0\\) হলে \\(y = \\log x \\implies y' = 1/x\\)। \\(x < 0\\) হলে \\(y = \\log(-x) \\implies y' = \\frac{1}{-x}(-1) = 1/x\\)। উভয় ক্ষেত্রেই মান \\(1/x\\) হয়।" },
+            { q: "১২. \\(x^y = y^x\\) হলে \\(\\frac{dy}{dx}\\) এর মান—", opts: ["\\(\\frac{y(x \\log y - y)}{x(y \\log x - x)}\\)", "\\(\\frac{x(y \\log x - y)}{y(x \\log y - x)}\\)", "\\(\\frac{y}{x}\\)", "\\(\\frac{x}{y}\\)"], ans: 0, exp: "ব্যাখ্যা: উভয়পক্ষে \\(\\log\\) নিলে \\(y \\log x = x \\log y\\)। এরপর অবকলন করে \\(\\frac{dy}{dx}\\) কমন নিলে এই মানটি আসে।" },
+            { q: "১৩. \\(y = \\sin^{-1}(\\frac{1-x^2}{1+x^2})\\) হলে \\(\\frac{dy}{dx}\\) কত? (যেখানে \\(0 < x < 1\\))", opts: ["\\(\\frac{2}{1+x^2}\\)", "\\(-\\frac{2}{1+x^2}\\)", "\\(\\frac{1}{1+x^2}\\)", "\\(\\frac{2x}{1+x^2}\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\sin^{-1}(\\frac{1-x^2}{1+x^2}) = \\frac{\\pi}{2} - \\cos^{-1}(\\frac{1-x^2}{1+x^2}) = \\frac{\\pi}{2} - 2\\tan^{-1}x\\)। অবকলন করলে \\(-\\frac{2}{1+x^2}\\)।" },
+            { q: "১৪. \\(\\frac{d}{dx}[f(g(x))]\\) সমান কোনটি?", opts: ["\\(f'(g(x))\\)", "\\(f'(g(x)) \\cdot g'(x)\\)", "\\(f(g'(x))\\)", "\\(f'(x) g'(x)\\)"], ans: 1, exp: "ব্যাখ্যা: এটি শৃঙ্খল নিয়মের (Chain Rule) মূল গাণিতিক রূপ।" },
+            { q: "১৫. \\(y = |x-1|\\) অপেক্ষকের \\(x=1\\) বিন্দুতে অন্তরকলজ কত?", opts: ["1", "-1", "0", "অস্তিত্ব নেই"], ans: 3, exp: "ব্যাখ্যা: মডিউলাস ফাংশন তার শূন্য বিন্দুতে (এখানে x=1) তীক্ষ্ণ কোণ (sharp turn) তৈরি করে, তাই সেখানে এর অবকলজ বা ডেরিভেটিভের অস্তিত্ব থাকে না।" }
+        ]
+    },
+    3: {
+        name: 'Set 3', icon: '🧠', topic: 'লগারিদমিক অবকলন ও মিশ্র সমস্যা',
+        questions: [
+            { q: "১. \\(y = x^{\\log x}\\) হলে \\(\\frac{dy}{dx}\\) এর মান কত?", opts: ["\\(x^{\\log x - 1}\\)", "\\(2 x^{\\log x - 1} \\log x\\)", "\\(x^{\\log x} \\log x\\)", "\\(\\frac{\\log x}{x}\\)"], ans: 1, exp: "ব্যাখ্যা: \\(\\log y = \\log x \\cdot \\log x = (\\log x)^2\\)। ডেরিভেটিভ করলে: \\(\\frac{1}{y} \\frac{dy}{dx} = 2\\log x \\cdot \\frac{1}{x} \\implies \\frac{dy}{dx} = 2 x^{\\log x - 1} \\log x\\)।" },
+            { q: "২. \\(y = \\log(\\sqrt{x-2} + \\sqrt{x-3})\\) হলে \\(\\frac{dy}{dx}\\) কত?", opts: ["\\(\\frac{1}{2\\sqrt{(x-2)(x-3)}}\\)", "\\(\\frac{1}{\\sqrt{x-2}}\\)", "\\(\\frac{1}{\\sqrt{(x-2)(x-3)}}\\)", "1"], ans: 0, exp: "ব্যাখ্যা: চেইন রুলের সাহায্যে অবকলন করে লসাগু করলে এই চমৎকার সরলীকৃত মানটি পাওয়া যায়।" },
+            { q: "৩. \\(\\frac{d}{dx} (\\sec^n x)\\) এর মান—", opts: ["\\(n \\sec^{n-1} x\\)", "\\(n \\sec^n x \\tan x\\)", "\\(n \\tan^n x \\sec x\\)", "\\(\\sec^n x \\tan x\\)"], ans: 1, exp: "ব্যাখ্যা: \\(n \\sec^{n-1} x \\cdot \\frac{d}{dx}(\\sec x) = n \\sec^{n-1} x \\cdot \\sec x \\tan x = n \\sec^n x \\tan x\\)।" },
+            { q: "৪. \\(y = \\frac{e^x - e^{-x}}{e^x + e^{-x}}\\) হলে \\(\\frac{dy}{dx}\\) এর মান—", opts: ["\\(1 - y^2\\)", "\\(1 + y^2\\)", "\\(y^2 - 1\\)", "\\(e^x - y^2\\)"], ans: 0, exp: "ব্যাখ্যা: \\(y = \\tanh x\\) ধরলে, ডেরিভেটিভ হয় \\(\\text{sech}^2 x = 1 - \\tanh^2 x = 1 - y^2\\)।" },
+            { q: "৫. \\(y = \\tan^{-1}\\sqrt{\\frac{1-\\cos x}{1+\\cos x}}\\) হলে \\(\\frac{dy}{dx}\\) কত? \\((0 < x < \\pi)\\)", opts: ["1", "-1", "\\(\\frac{1}{2}\\)", "\\(-\\frac{1}{2}\\)"], ans: 2, exp: "ব্যাখ্যা: \\(\\sqrt{\\frac{2\\sin^2(x/2)}{2\\cos^2(x/2)}} = \\tan(x/2)\\)। সুতরাং \\(y = \\tan^{-1}(\\tan(x/2)) = x/2\\)। অবকলন করলে \\(\\frac{1}{2}\\) হয়।" },
+            { q: "৬. \\((\\log x)^2\\)-এর সাপেক্ষে \\(\\sin^2 x\\)-এর অবকলন কত?", opts: ["\\(\\frac{x \\sin 2x}{2 \\log x}\\)", "\\(\\frac{\\sin 2x}{x \\log x}\\)", "\\(\\frac{2 \\log x}{x \\sin 2x}\\)", "\\(\\frac{\\cos 2x}{2 \\log x}\\)"], ans: 0, exp: "ব্যাখ্যা: \\(u = \\sin^2 x \\implies du/dx = \\sin 2x\\)। \\(v = (\\log x)^2 \\implies dv/dx = 2\\log x / x\\)। ভাগ করলে \\(\\frac{\\sin 2x}{(2\\log x)/x} = \\frac{x \\sin 2x}{2 \\log x}\\)।" },
+            { q: "৭. \\(y = \\sec^{-1}\\frac{x^2+1}{x^2-1}\\) হলে \\(\\frac{dy}{dx}\\) কত?", opts: ["\\(\\frac{2}{1+x^2}\\)", "\\(-\\frac{2}{1+x^2}\\)", "\\(\\frac{2x}{1+x^2}\\)", "\\(\\frac{1}{1-x^2}\\)"], ans: 1, exp: "ব্যাখ্যা: \\(y = \\cos^{-1}\\frac{x^2-1}{x^2+1} = \\pi - \\cos^{-1}\\frac{1-x^2}{1+x^2} = \\pi - 2\\tan^{-1}x\\)। ডেরিভেটিভ করলে \\(-\\frac{2}{1+x^2}\\)।" },
+            { q: "৮. \\(x = a(\\theta + \\sin\\theta)\\), \\(y = a(1 - \\cos\\theta)\\) হলে \\(\\theta = \\frac{\\pi}{2}\\) বিন্দুতে \\(\\frac{dy}{dx}\\) কত?", opts: ["1", "-1", "0", "\\(\\infty\\)"], ans: 0, exp: "ব্যাখ্যা: \\(\\frac{dy}{d\\theta} = a \\sin \\theta\\) এবং \\(\\frac{dx}{d\\theta} = a(1+\\cos \\theta)\\)। ভাগ করলে \\(\\frac{\\sin \\theta}{1+\\cos \\theta}\\)। \\(\\theta = \\frac{\\pi}{2}\\) বসালে \\(\\frac{1}{1+0} = 1\\)।" },
+            { q: "৯. \\(x = \\sec^{-1}\\frac{1+t^2}{1-t^2}\\) এবং \\(y = \\tan^{-1}\\frac{3t-t^3}{1-3t^2}\\) হলে \\(\\frac{dy}{dx}\\) কত? \\((t>0)\\)", opts: ["\\(\\frac{2}{3}\\)", "\\(\\frac{3}{2}\\)", "\\(-\\frac{3}{2}\\)", "\\(-\\frac{2}{3}\\)"], ans: 2, exp: "ব্যাখ্যা: \\(x = \\cos^{-1}\\frac{1-t^2}{1+t^2} = 2\\tan^{-1}t\\)। \\(y = 3\\tan^{-1}t\\)। অনুপাত করলে \\(-\\frac{3}{2}\\) বা \\(\\frac{3}{2}\\) আসে শর্তের ওপর ভিত্তি করে।" },
+            { q: "১০. \\(y = e^{\\sin^{-1}x}\\) হলে \\(\\frac{dy}{dx}\\) কত?", opts: ["\\(\\frac{e^{\\sin^{-1}x}}{\\sqrt{1-x^2}}\\)", "\\(e^{\\sin^{-1}x} \\sqrt{1-x^2}\\)", "\\(\\frac{y}{1-x^2}\\)", "\\(y \\cos^{-1}x\\)"], ans: 0, exp: "ব্যাখ্যা: চেইন রুল প্রয়োগ করলে: \\(e^{\\sin^{-1}x} \\cdot \\frac{d}{dx}(\\sin^{-1}x) = \\frac{e^{\\sin^{-1}x}}{\\sqrt{1-x^2}}\\)।" },
+            { q: "১১. \\(y = x^x\\) অপেক্ষকের \\(x=e\\) বিন্দুতে অবকলজ কত?", opts: ["\\(e^e\\)", "\\(2e^e\\)", "\\(e^{e+1}\\)", "0"], ans: 1, exp: "ব্যাখ্যা: \\(y' = x^x(1+\\log_e x)\\)। \\(x=e\\) বসালে \\(e^e(1+\\log_e e) = e^e(1+1) = 2e^e\\)।" },
+            { q: "১২. \\(\\sqrt{x}\\) -এর সাপেক্ষে \\(e^x\\) -এর অবকলন কত?", opts: ["\\(2\\sqrt{x} e^x\\)", "\\(\\frac{e^x}{2\\sqrt{x}}\\)", "\\(\\frac{e^x}{\\sqrt{x}}\\)", "\\(\\sqrt{x} e^x\\)"], ans: 0, exp: "ব্যাখ্যা: \\(\\frac{d(e^x)}{dx} / \\frac{d(\\sqrt{x})}{dx} = e^x / (1/2\\sqrt{x}) = 2\\sqrt{x} e^x\\)।" },
+            { q: "১৩. \\(y = \\cos(x^\\circ)\\) হলে \\(\\frac{dy}{dx}\\) কত?", opts: ["\\(-\\sin(x^\\circ)\\)", "\\(-\\frac{\\pi}{180}\\sin(x^\\circ)\\)", "\\(\\frac{180}{\\pi}\\sin(x^\\circ)\\)", "\\(\\frac{\\pi}{180}\\cos(x^\\circ)\\)"], ans: 1, exp: "ব্যাখ্যা: ডিগ্রিকে রেডিয়ানে পরিণত করতে হয়: \\(x^\\circ = \\frac{\\pi x}{180}\\)। ডেরিভেটিভ করলে \\(\\frac{\\pi}{180}\\) গুণ হিসেবে বেরিয়ে আসে।" },
+            { q: "১৪. \\(y = \\tan^{-1}(\\frac{4x}{1+5x^2}) + \\tan^{-1}(\\frac{2+3x}{3-2x})\\) হলে \\(\\frac{dy}{dx}\\) কত?", opts: ["\\(\\frac{5}{1+25x^2}\\)", "\\(\\frac{1}{1+25x^2}\\)", "\\(\\frac{5}{1+5x^2}\\)", "0"], ans: 0, exp: "ব্যাখ্যা: এটিকে ইনভার্স সূত্রের সাহায্যে ভাঙলে সরলীকরণ করে ডেরিভেটিভ করলে \\(\\frac{5}{1+25x^2}\\) পাওয়া যায়।" },
+            { q: "১৫. \\(y = \\sqrt{x + \\sqrt{x + \\dots \\infty}}\\) হলে \\(\\frac{dy}{dx}\\) কত?", opts: ["\\(\\frac{1}{2y-1}\\)", "\\(\\frac{x}{2y-1}\\)", "\\(\\frac{1}{2y+1}\\)", "\\(\\frac{y}{2y-1}\\)"], ans: 0, exp: "ব্যাখ্যা: অসীম ধারাটিকে \\(y = \\sqrt{x + y}\\) লেখা যায়। বর্গ করলে \\(y^2 = x + y\\)। ডেরিভেটিভ করলে \\(2y y' = 1 + y' \\implies y'(2y-1) = 1 \\implies y' = \\frac{1}{2y-1}\\)।" }
+        ]
+    }
+};
+
+// ================== STATE VARIABLES ==================
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+// ================== LOCAL STORAGE LOGIC ==================
+function getGlobalUsers() {
+    const data = localStorage.getItem("testBazarGlobalUsers");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+    const data = localStorage.getItem("testBazarAttemptsMath3U3C2_v1");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    attempts[key] = (attempts[key] || 0) + 1;
+    localStorage.setItem("testBazarAttemptsMath3U3C2_v1", JSON.stringify(attempts));
+    return attempts[key];
+}
+
+// ================== INITIALIZATION ==================
+window.onload = () => {
+    renderHub();
+};
+
+function renderHub() {
+    const grid = document.getElementById("setGrid");
+    grid.innerHTML = "";
+    
+    for(let id in ALL_SETS) {
+        const set = ALL_SETS[id];
+        const div = document.createElement("div");
+        div.className = "set-card";
+        
+        let attemptCount = 0;
+        let isLocked = false;
+        
+        if (currentUser) {
+            attemptCount = getAttemptCount(currentUser, id);
+            isLocked = attemptCount >= MAX_ATTEMPTS;
+            if (isLocked) div.classList.add("locked");
+        }
+        
+        div.innerHTML = `
+            <div class="icon">${set.icon}</div>
+            <div class="set-num">${set.name}</div>
+            <div class="set-title">${set.topic}</div>
+            <div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+            ${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+        `;
+        
+        div.onclick = () => {
+            if (isLocked) {
+                alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+                return;
+            }
+            handleSetClick(id);
+        };
+        grid.appendChild(div);
+    }
+}
+
+function handleSetClick(setId) {
+    activeSetId = setId;
+    if (!currentUser) {
+        document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+        document.getElementById("loginOverlay").classList.add("active");
+        document.getElementById("loginUsername").value = "";
+        document.getElementById("loginPassword").value = "";
+        document.getElementById("loginError").style.display = "none";
+    } else {
+        startQuiz(setId);
+    }
+}
+
+function doLogin() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+    const err = document.getElementById("loginError");
+    const GLOBAL_USERS = getGlobalUsers();
+
+    if(!u || !p) {
+        err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!";
+        err.style.display = "block";
+        return;
+    }
+
+    if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+        let attempts = getAttemptCount(u, activeSetId);
+        if (attempts >= MAX_ATTEMPTS) {
+            err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+            err.style.display = "block";
+            return;
+        }
+        currentUser = u;
+        document.getElementById("loginOverlay").classList.remove("active");
+        document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+        document.getElementById("userDisplay").classList.remove("hidden");
+        renderHub();
+        startQuiz(activeSetId);
+    } else {
+        err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+        err.style.display = "block";
+    }
+}
+
+function closeLogin() {
+    document.getElementById("loginOverlay").classList.remove("active");
+}
+
+function goToHub() {
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("hubPage").style.display = "block";
+    document.getElementById("timerBox").classList.add("hidden");
+    clearInterval(timerInterval);
+    renderHub();
+}
+
+// ================== QUIZ LOGIC ==================
+function startQuiz(setId) {
+    incrementAttempt(currentUser, setId);
+    questions = ALL_SETS[setId].questions;
+    currentQIndex = 0;
+    score = 0;
+    wrongAnswers = 0;
+    userAnswers = {};
+    isReviewMode = false;
+    timeLeft = TIME_LIMIT;
+
+    document.getElementById("hubPage").style.display = "none";
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    document.getElementById("timerBox").classList.remove("hidden");
+    document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+    document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+
+    startTimer();
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const qData = questions[currentQIndex];
+    document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+    document.getElementById("qText").innerHTML = qData.q;
+    const progress = ((currentQIndex) / questions.length) * 100;
+    document.getElementById("progressFill").style.width = `${progress}%`;
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    
+    const optsBox = document.getElementById("qOpts");
+    optsBox.innerHTML = "";
+    document.getElementById("explanation").classList.remove("show");
+    document.getElementById("nextBtn").disabled = true;
+    document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+    qData.opts.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "opt";
+        btn.innerHTML = `<div class="opt-circle">${LABELS[idx] || '—'}</div> <div class="opt-text">${optText}</div>`;
+        
+        if (isReviewMode) {
+            btn.classList.add("disabled");
+            if (idx === qData.ans) btn.classList.add("correct");
+            else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+        } else {
+            btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+        }
+        optsBox.appendChild(btn);
+    });
+
+    if (isReviewMode) {
+        document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+        document.getElementById("explanation").classList.add("show");
+        document.getElementById("nextBtn").disabled = false;
+        if (currentQIndex === questions.length - 1) {
+            document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন";
+        }
+    }
+    
+    // Refresh MathJax for the new content
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+    const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+    allBtns.forEach(b => b.classList.add("disabled"));
+    userAnswers[currentQIndex] = selectedIdx; 
+
+    if (selectedIdx === correctIdx) {
+        btn.classList.add("correct");
+        score++;
+    } else {
+        btn.classList.add("wrong");
+        allBtns[correctIdx].classList.add("correct");
+        wrongAnswers++;
+    }
+    
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+    document.getElementById("explanation").classList.add("show");
+    document.getElementById("nextBtn").disabled = false;
+    
+    // Refresh MathJax for explanation text
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function nextQ() {
+    if (isReviewMode && currentQIndex === questions.length - 1) {
+        document.getElementById("testArea").classList.add("hidden");
+        document.getElementById("resultWrap").classList.add("show");
+        return;
+    }
+    if (!isReviewMode && currentQIndex === questions.length - 1) {
+        finishQuiz();
+        return;
+    }
+    currentQIndex++;
+    loadQuestion();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    const tBox = document.getElementById("timerBox");
+    tBox.classList.remove("danger");
+    
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishQuiz();
+            return;
+        }
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        if (timeLeft < 60) tBox.classList.add("danger");
+    }, 1000);
+}
+
+function finishQuiz() {
+    clearInterval(timerInterval);
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("timerBox").classList.add("hidden");
+    document.getElementById("resultWrap").classList.add("show");
+    
+    const total = questions.length;
+    const skipped = total - (score + wrongAnswers);
+    const percent = Math.round((score / total) * 100);
+    
+    document.getElementById("finalScore").innerText = `${percent}%`;
+    document.getElementById("rbCorrect").innerText = score;
+    document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+    
+    const gradeEl = document.getElementById("resultGrade");
+    if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+    else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+    else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+    
+    const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+    document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+    if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+        alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+        return;
+    }
+    startQuiz(activeSetId);
+}
+
+function showReview() {
+    isReviewMode = true;
+    currentQIndex = 0;
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    loadQuestion();
+}
+</script>
+</body>
+</html>
