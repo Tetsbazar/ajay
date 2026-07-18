@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Biology 3rd Sem | Ch 4</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+/* ================= COLOR SCHEME & VARIABLES ================= */
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+
+/* Top Bar */
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+
+/* Hub View */
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; justify-content: center; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; max-width: 350px; margin: 0 auto; width: 100%;}
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+
+/* Quiz View */
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; overflow-x: auto; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main); overflow-x: auto;}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; overflow-x: auto;}
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+
+/* Result View */
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+
+/* Login Modal */
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+    <div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+    <div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+
+<div class="main">
+
+    <!-- ================= LOGIN MODAL ================= -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <h2>লগইন করুন</h2>
+            <p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+            <div class="login-set-name" id="loginSetName">📚 Set 1</div>
+            <div class="input-group">
+                <label>ইউজারনেম</label>
+                <input type="text" id="loginUsername" placeholder="Username">
+            </div>
+            <div class="input-group">
+                <label>পাসওয়ার্ড</label>
+                <input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+            </div>
+            <button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+            <button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+            <div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+        </div>
+    </div>
+
+    <!-- ================= HUB PAGE ================= -->
+    <div id="hubPage">
+        <div class="hub-header">
+            <h1>জীববিজ্ঞান 3rd Sem <br>চতুর্থ অধ্যায়: বংশগতি ও বিভেদ</h1>
+            <p>আপনার নির্বাচিত ৮টি সেট (১, ২, ৩, ৪, ১২, ১৩, ১৪, ১৫)। Test শুরু করতে সেটে ক্লিক করুন।</p>
+        </div>
+        <div class="set-grid" id="setGrid"></div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+        </div>
+    </div>
+
+    <!-- ================= QUIZ AREA ================= -->
+    <div id="testArea" class="hidden">
+        <div class="quiz-info">
+            <div class="info-item">🎓 <strong>Biology</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+            <div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="q-card">
+            <div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+            <div class="q-text" id="qText">Question Text</div>
+            <div class="opts" id="qOpts"></div>
+            <div class="explanation" id="explanation"><p id="explanationText"></p></div>
+            <div class="nav-row">
+                <div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+                <button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RESULT AREA ================= -->
+    <div class="result-wrap" id="resultWrap">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-score en-font" id="finalScore">100%</div>
+        <div class="result-total">স্কোর</div>
+        <div class="result-grade" id="resultGrade">অসাধারণ!</div>
+        <div class="result-bars">
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+                <div class="rb-label">সঠিক</div>
+            </div>
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+                <div class="rb-label">ভুল/স্কিপ</div>
+            </div>
+        </div>
+        <div class="attempt-info-box" id="attemptInfo"></div>
+        <div class="action-btns">
+            <button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+            <button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+            <button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// Global Config & Database
+// ============================================================
+const MAX_ATTEMPTS = 10; 
+const TIME_LIMIT = 10 * 60; // 10 Minutes
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+    1: {
+        name: 'Set 1', icon: '🧬', topic: 'বংশগতি, জিনতত্ত্বের ধারণা এবং পরিভাষা (Heredity & Terminologies)',
+        questions: [
+            { q: "১. বংশগতিবিদ্যার (Genetics) জনক কাকে বলা হয়?", opts: ["উইলিয়াম বেটসন", "গ্রেগর জোহান মেন্ডেল", "চার্লস ডারউইন", "ডব্লু. এল. জোহানসেন"], ans: 1, exp: "ব্যাখ্যা: গ্রেগর জোহান মেন্ডেল মটর গাছের ওপর সংকরায়ণ পরীক্ষা চালিয়ে বংশগতির সূত্র আবিষ্কার করেন, তাই তাঁকে বংশগতিবিদ্যার জনক বলা হয়।" },
+            { q: "২. 'Genetics' বা জিনতত্ত্ব শব্দটি ১৯০৫ খ্রিস্টাব্দে সর্বপ্রথম কে প্রবর্তন করেন?", opts: ["মেন্ডেল", "জোহানসেন", "উইলিয়াম বেটসন", "টি. এইচ. মর্গ্যান"], ans: 2, exp: "ব্যাখ্যা: উইলিয়াম বেটসন ১৯০৫ সালে তাঁর 'Elements of genetics' নামক বইতে প্রথম 'Genetics' শব্দটি প্রবর্তন করেন।" },
+            { q: "৩. চারিত্রিক বৈশিষ্ট্য নির্ধারক উপাদানটিকে 'জিন' (Gene) নামে কে প্রথম অভিহিত করেন?", opts: ["জোহানসেন (Johannsen)", "বেটসন (Bateson)", "মর্গ্যান (Morgan)", "কোরেন্স (Correns)"], ans: 0, exp: "ব্যাখ্যা: ১৯০৯ খ্রিস্টাব্দে ডব্লু. এল. জোহানসেন মেন্ডেল বর্ণিত 'ফ্যাক্টর'-কে প্রথম 'জিন' (Gene) নামে অভিহিত করেন এবং জিনোটাইপ ও ফিনোটাইপ শব্দদুটিও ব্যবহার করেন।" },
+            { q: "৪. ক্রোমোজোমের ওপর যে নির্দিষ্ট স্থানে কোনো জিন অবস্থান করে, সেই স্থানটিকে কী বলে?", opts: ["অ্যালিল", "লোকাস (Locus)", "জিনোম", "কাইনেটোকোর"], ans: 1, exp: "ব্যাখ্যা: একটি নির্দিষ্ট ক্রোমোজোমের যে অংশটিতে একটি নির্দিষ্ট জিন অবস্থান করে, সেই নির্দিষ্ট অংশটিকে লোকাস বলা হয়।" },
+            { q: "৫. কোনো চরিত্রসাপেক্ষে একটি জিনের বিভিন্ন রূপভেদকে (alternative forms) কী বলা হয়?", opts: ["অ্যালিল বা অ্যালোমর্ফ", "জিনোটাইপ", "হোমোলোগাস", "ফিনোকপি"], ans: 0, exp: "ব্যাখ্যা: জীবের কোনো একটি বৈশিষ্ট্যের জন্য একজোড়া অ্যালিল থাকে, যা একই জিনের বিভিন্ন রূপভেদ হিসেবে একই লোকাসে অবস্থান করে।" },
+            { q: "৬. কোনো জীবের অন্তর্নিহিত জিনগত গঠনকে কী বলে যার জন্য জীবের চরিত্র প্রকাশ পায়?", opts: ["ফিনোটাইপ", "জিনোটাইপ", "ক্যারিওটাইপ", "অ্যালিল"], ans: 1, exp: "ব্যাখ্যা: জিনের যে সমাহারের জন্য জীবের কোনো চরিত্র প্রকাশ পায় তাকে জিনোটাইপ বলে। এর বাহ্যিক প্রকাশকে ফিনোটাইপ বলে।" },
+            { q: "৭. ডিপ্লয়েড জীবের হ্যাপ্লয়েড ক্রোমোজোম সেটে (n) যে সম্পূর্ণ জিনসম্ভার থাকে তাকে একত্রে কী বলে?", opts: ["অ্যালিল", "জিনোম (Genome)", "প্লাজমাজিন", "লোকাস"], ans: 1, exp: "ব্যাখ্যা: ডিপ্লয়েড জীবের (2n) একটি হ্যাপ্লয়েড সেটে (n) উপস্থিত সমস্ত জিনের সমষ্টিকে জিনোম বলা হয়।" },
+            { q: "৮. যদি কোনো জীবের কোনো বৈশিষ্ট্য নির্ধারণে একটিমাত্র জিন উপস্থিত থাকে (যেমন পুরুষদের X ক্রোমোজোমের জিন), তবে সেই অবস্থাকে কী বলে?", opts: ["হোমোজাইগাস", "হেটারোজাইগাস", "হেমিজাইগাস (Hemizygous)", "অ্যালিলিক"], ans: 2, exp: "ব্যাখ্যা: একটি মাত্র জিন দ্বারা বৈশিষ্ট্য নির্ধারিত হলে তাকে হেমিজাইগাস অবস্থা বলে (যেমন- পুরুষদের X-লিঙ্কড জিনের অবস্থা)।" },
+            { q: "৯. হেটারোজাইগাস (সংকর) অবস্থায় দুটি বিপরীত অ্যালিলের মধ্যে যেটি নিজের বৈশিষ্ট্য প্রকাশ করতে সক্ষম হয়, তাকে কী জিন বলে?", opts: ["প্রচ্ছন্ন জিন", "প্রকট জিন (Dominant gene)", "পরিপূরক জিন", "সুপ্ত জিন"], ans: 1, exp: "ব্যাখ্যা: হেটারোজাইগাস অবস্থায় যে জিন বিপরীতধর্মী জিনের প্রকাশে বাধা দেয় এবং নিজে প্রকাশ পায়, তাকে প্রকট জিন বলে।" },
+            { q: "১০. একই রকম ফিনোটাইপ সৃষ্টিকারী বিভিন্ন অ্যালিলগুলিকে জিনতত্ত্বে কী বলা হয়?", opts: ["সিউডোঅ্যালিল", "মাল্টিপল অ্যালিল", "আইসোঅ্যালিল (Isoallele)", "কো-অ্যালিল"], ans: 2, exp: "ব্যাখ্যা: একই রকম ফিনোটাইপ সৃষ্টিকারী অ্যালিলগুলিকে আইসোঅ্যালিল বলে। ড্রোসোফিলার চোখের রঙের ক্ষেত্রে এটি দেখা যায়।" },
+            { q: "১১. পরস্পর অ্যালিল নয় এমন কিছু জিন ক্রোমোজোমের খুব কাছাকাছি থেকে একই চরিত্র প্রকাশে সাহায্য করলে, তাদের কী বলে?", opts: ["সিউডোঅ্যালিল (Pseudoallele)", "আইসোঅ্যালিল", "প্লিওট্রপিক জিন", "এপিস্ট্যাটিক জিন"], ans: 0, exp: "ব্যাখ্যা: ভিন্ন লোকাসে থাকা জিন দৃঢ় লিংকেজ প্রদর্শন করে একই ফিনোটাইপ নিয়ন্ত্রণ করলে অ্যালিল বলে ভ্রম সৃষ্টি হয়, এদের ছদ্ম বা সিউডোঅ্যালিল বলে।" },
+            { q: "১২. জীবের যে প্রকাশিত বৈশিষ্ট্যের মূলে কোনো জিনগত গঠন থাকে না, যা শুধুমাত্র পরিবেশের প্রভাবে প্রকাশিত হয় তাকে কী বলে?", opts: ["জিনোটাইপ", "ফিনোটাইপ", "ফিনোকপি (Phenocopy)", "ট্রু ব্রিডিং"], ans: 2, exp: "ব্যাখ্যা: পরিবেশের প্রভাবে জীবের মধ্যে সাময়িক যে বৈশিষ্ট্য প্রকাশ পায় এবং জিনগত পরিবর্তন হয় না, তাকে ফিনোকপি বলে (এগুলি দিশাহীন বিভেদ)।" },
+            { q: "১৩. ক্রোমোজোমের ওপর অবস্থিত যে জিন স্থান পরিবর্তন করে এক জায়গা থেকে অন্য জায়গায় যেতে পারে, তাকে কী বলে?", opts: ["সিউডোজিন", "জাম্পিং জিন বা ট্রান্সপোজন", "প্লাজমাজিন", "হোলান্ড্রিক জিন"], ans: 1, exp: "ব্যাখ্যা: ক্রোমোজোমের ওপর স্থান পরিবর্তনশীল জিনকে জাম্পিং জিন বা ট্রান্সপোজেবল জেনেটিক এলিমেন্ট (TGE) বলে।" },
+            { q: "১৪. উন্নত প্রাণী বা উদ্ভিদে পূর্বপুরুষের অবলুপ্ত কোনো চারিত্রিক বৈশিষ্ট্য হঠাৎ করে আবার প্রকাশ পেলে তাকে কী বলে?", opts: ["মিউটেশন", "অ্যাটাভিজম (Atavism)", "লিংকেজ", "স্পিসিয়েশন"], ans: 1, exp: "ব্যাখ্যা: পূর্বপুরুষের কোনো চারিত্রিক বৈশিষ্ট্য হঠাৎ ফিরে আসাকে অ্যাটাভিজম বলে (যেমন- মানুষের লেজ নিয়ে জন্মানো বা মুখে লোম)।" },
+            { q: "১৫. নিউক্লিয়াসের বাইরে মাইটোকন্ড্রিয়া বা প্লাস্টিডের সাইটোপ্লাজমিক DNA-তে অবস্থিত জিনসমূহকে কী বলা হয়?", opts: ["প্লাজমাজিন বা সাইটোজিন", "অটোজোমাল জিন", "হোলান্ড্রিক জিন", "জাম্পিং জিন"], ans: 0, exp: "ব্যাখ্যা: নিউক্লিয়াসের বাইরে সাইটোপ্লাজমে (মাইটোকন্ড্রিয়া/ক্লোরোপ্লাস্ট) অবস্থিত জিনকে সাইটোপ্লাজমিক জিন বা প্লাজমাজিন বলে।" }
+        ]
+    },
+    2: {
+        name: 'Set 2', icon: '🌿', topic: 'প্রকরণ বা বিভেদ (Variation)',
+        questions: [
+            { q: "১৬. একই প্রজাতিভুক্ত জীবদের মধ্যে আকার, গঠন ও ব্যবহারগত যে পার্থক্য লক্ষ্য করা যায়, তাকে কী বলে?", opts: ["বংশগতি", "মিউটেশন", "বিভেদ বা প্রকরণ (Variation)", "ইভোলিউশন"], ans: 2, exp: "ব্যাখ্যা: যৌন জনন, ক্রসিং ওভার বা পরিবেশের প্রভাবে একই প্রজাতির সদস্যদের মধ্যে যে পার্থক্য তৈরি হয় তাকে বিভেদ বা ভেরিয়েশন বলে।" },
+            { q: "১৭. যে বিভেদ শুধুমাত্র দেহকোষের মধ্যে সীমাবদ্ধ থাকে এবং পরবর্তী বংশধরদের মধ্যে সঞ্চারিত হয় না, তাকে কী বলে?", opts: ["জার্মিনাল বিভেদ", "সোমাটিক বা দেহগঠনগত বিভেদ", "ব্লাস্টোজেনিক বিভেদ", "কন্টিনিউয়াস বিভেদ"], ans: 1, exp: "ব্যাখ্যা: পরিবেশ, ব্যবহার-অব্যবহার বা সচেতন প্রচেষ্টার ফলে সৃষ্ট পরিবর্তন দেহকোষে সীমাবদ্ধ থাকে, এদের সোমাটিক বিভেদ বলে, যা বংশানুসরণযোগ্য নয়।" },
+            { q: "১৮. মিউটেশন বা ক্রোমোজোমের পরিবর্তনের ফলে হঠাৎ করে জীবের মধ্যে যে বড়ো ও অসংলগ্ন বিভেদ সৃষ্টি হয়, তাকে কী বলে?", opts: ["কন্টিনিউয়াস বিভেদ", "সোমাটিক বিভেদ", "বিচ্ছিন্ন বা ডিসকন্টিনিউয়াস বিভেদ", "ফিনোকপি"], ans: 2, exp: "ব্যাখ্যা: মিউটেশনের ফলে আকস্মিক যে বড়ো পরিবর্তন আসে তাকে ডিসকন্টিনিউয়াস বিভেদ বা সলটেশন (Saltation) বলে, যা বিবর্তনে বিশেষ ভূমিকা রাখে।" },
+            { q: "১৯. মানুষের উচ্চতার তারতম্য, চোখের বা গায়ের রঙের পার্থক্য ইত্যাদি পরিমাপযোগ্য বিভেদগুলি কোন শ্রেণীর অন্তর্ভুক্ত?", opts: ["মেরিস্টিক বিভেদ", "সাবস্ট্যানটিভ বা আকৃতিগত বিভেদ", "সোমাটিক বিভেদ", "দিশাহীন বিভেদ"], ans: 1, exp: "ব্যাখ্যা: জীবের আকার, আকৃতি, বর্ণ, ওজন ইত্যাদি পরিমাপযোগ্য গুণগত বিভেদগুলিকে সাবস্ট্যানটিভ ভেরিয়েশন বলে।" },
+            { q: "২০. মটরশুঁটির বীজের সংখ্যা, তারামাছের বাহুর সংখ্যা বা মানুষের হাতের আঙুলের সংখ্যার তারতম্য কোন প্রকারের বিভেদ?", opts: ["সাবস্ট্যানটিভ বিভেদ", "সোমাটিক বিভেদ", "মেরিস্টিক বা সংখ্যাভিত্তিক বিভেদ", "দিশাহীন বিভেদ"], ans: 2, exp: "ব্যাখ্যা: যখন জীবের কোনো বৈশিষ্ট্য কেবল সংখ্যার বিচারে বিবেচিত হয় তখন সেই সংখ্যাতাত্ত্বিক পরিবর্তনকে মেরিস্টিক বিভেদ বলে।" },
+            { q: "২১. ডারউইনের মতে কোন প্রকারের বিভেদ (Variation) অভিব্যক্তির জন্য সবচেয়ে বেশি উপযোগী?", opts: ["কন্টিনিউয়াস বা নিরবচ্ছিন্ন বিভেদ", "ডিসকন্টিনিউয়াস বা বিচ্ছিন্ন বিভেদ", "সোমাটিক বিভেদ", "ইনডিটারমিনেট বিভেদ"], ans: 0, exp: "ব্যাখ্যা: ডারউইনের মতে জীবের মধ্যে সৃষ্ট ছোটো ছোটো কন্টিনিউয়াস বা চলমান বিভেদগুলিই প্রাকৃতিক নির্বাচনের মাধ্যমে অভিব্যক্তিতে সাহায্য করে।" },
+            { q: "২২. হিউগো দ্য ভ্রিস (Hugo de Vries)-এর মিউটেশন তত্ত্ব প্রধানত কোন্ ধরনের বিভেদের ওপর প্রতিষ্ঠিত?", opts: ["কন্টিনিউয়াস বিভেদ", "সোমাটিক বিভেদ", "ডিসকন্টিনিউয়াস বা বিচ্ছিন্ন বিভেদ", "ফিনোকপি"], ans: 2, exp: "ব্যাখ্যা: দ্য ভ্রিসের মতে, হঠাৎ করে ঘটা ডিসকন্টিনিউয়াস বা অসংলগ্ন বিভেদ (Saltation/Mutation) নতুন প্রজাতি সৃষ্টির প্রধান কারণ।" },
+            { q: "২৩. যে বিভেদগুলি কোনো নির্দিষ্ট লক্ষ্যে পৌঁছানোর উদ্দেশ্যে সৃষ্টি হয় এবং জীবকে অভিযোজনে সাহায্য করে, তাদের কী বলে?", opts: ["ইনডিটারমিনেট বিভেদ", "ফিনোকপি", "দিকনির্ণীত বা ডিটারমিনেট বিভেদ (Orthogenic variation)", "সোমাটিক বিভেদ"], ans: 2, exp: "ব্যাখ্যা: যে বিভেদের প্রাকৃতিক নির্বাচনে গুরুত্ব আছে এবং যা নির্দিষ্ট দিকে অগ্রসর হয়ে অভিযোজন ক্ষমতা বাড়ায়, তাকে ডিটারমিনেট বিভেদ বলে।" },
+            { q: "২৪. জনন কলা বা গ্যামেট সৃষ্টির সময় ক্রসিং ওভার বা রিকম্বিনেশনের ফলে যে বিভেদ তৈরি হয়, তাকে কী বলে?", opts: ["সোমাটিক বিভেদ", "জার্মিনাল বা ব্লাস্টোজেনিক বিভেদ", "ফিনোকপি", "অর্জিত বৈশিষ্ট্য"], ans: 1, exp: "ব্যাখ্যা: জনন কলায় বা গ্যামেট মাতৃকোষে সৃষ্ট বিভেদকে জার্মিনাল বিভেদ বলে। এটি বংশানুক্রমে সঞ্চরণশীল এবং অভিব্যক্তিতে সহায়ক।" },
+            { q: "২৫. জ্যামিতিক ছকে বা গ্রাফে উপস্থাপন করলে কোন বিভেদটি একটি 'ঘণ্টাকৃতি লেখচিত্র' (Bell-shaped curve) গঠন করে?", opts: ["ডিসকন্টিনিউয়াস বিভেদ", "সোমাটিক বিভেদ", "কন্টিনিউয়াস বা নিরবচ্ছিন্ন বিভেদ", "মেরিস্টিক বিভেদ"], ans: 2, exp: "ব্যাখ্যা: কন্টিনিউয়াস বিভেদে একটি মধ্যমান (average) থাকে এবং তার দুদিকে অন্য মানগুলি সমানভাবে বিস্তৃত হয়ে ঘণ্টাকৃতি লেখচিত্র তৈরি করে।" },
+            { q: "২৬. ফান্ডুলাস (Fundulus) নামক মাছ ম্যাগনেসিয়াম ক্লোরাইডযুক্ত সমুদ্রজলে জন্মালে তাদের একটিমাত্র চোখ বিকশিত হয়, এটি কী ধরনের বিভেদ?", opts: ["জার্মিনাল বিভেদ", "মিউটেশন", "পরিবেশগত সোমাটিক বিভেদ", "কন্টিনিউয়াস বিভেদ"], ans: 2, exp: "ব্যাখ্যা: এটি পরিবেশের রাসায়নিক প্রভাবে ঘটা একটি সাময়িক দৈহিক পরিবর্তন যা বংশানুক্রমিক নয়।" },
+            { q: "২৭. লোমহীন বিড়াল বা শিং-শূন্য গবাদি পশু সৃষ্টি হওয়া কোন্ প্রকার বিভেদের প্রকৃষ্ট উদাহরণ?", opts: ["সাবস্ট্যানটিভ কন্টিনিউয়াস বিভেদ", "সাবস্ট্যানটিভ ডিসকন্টিনিউয়াস বিভেদ", "মেরিস্টিক বিভেদ", "সোমাটিক বিভেদ"], ans: 1, exp: "ব্যাখ্যা: হঠাৎ মিউটেশনের ফলে আকৃতি বা গঠনগত পরিবর্তন ঘটায় এটি সাবস্ট্যানটিভ ডিসকন্টিনিউয়াস বিভেদের উদাহরণ।" },
+            { q: "২৮. মানুষের হাতে বা পায়ে পাঁচটি আঙুলের বদলে অতিরিক্ত আঙুল সৃষ্টি হওয়া কী ধরনের বিভেদ?", opts: ["মেরিস্টিক কন্টিনিউয়াস", "সাবস্ট্যানটিভ ডিসকন্টিনিউয়াস", "মেরিস্টিক ডিসকন্টিনিউয়াস", "ফিনোকপি"], ans: 2, exp: "ব্যাখ্যা: এটি সংখ্যার পরিবর্তন (মেরিস্টিক) এবং মিউটেশনজনিত আকস্মিক ঘটনা (ডিসকন্টিনিউয়াস)।" },
+            { q: "২৯. ক্রসিং ওভার এবং জিনের পুনর্যোজন (Recombination) প্রধানত কোন বিভেদ সৃষ্টির কারণ?", opts: ["কন্টিনিউয়াস বা চলমান বিভেদ", "সোমাটিক বিভেদ", "ফিনোকপি", "মিউটেশন"], ans: 0, exp: "ব্যাখ্যা: মিয়োসিসের সময় ক্রসিং ওভার ও রিকম্বিনেশনের ফলে সাধারণত ছোটো ছোটো মাত্রায় চলমান বা কন্টিনিউয়াস বিভেদ সৃষ্টি হয়।" },
+            { q: "৩০. পরিবর্তিত প্রাকৃতিক পরিবেশে জীবের মধ্যে কোনো চারিত্রিক পরিবর্তন আসে কিন্তু পরিবেশ স্বাভাবিক হলে তা আর থাকে না (যেমন ফিনোকপি), এটি কী ধরনের বিভেদ?", opts: ["ডিটারমিনেট বিভেদ", "দিশাহীন বা ইনডিটারমিনেট বিভেদ", "ব্লাস্টোজেনিক বিভেদ", "মিউটেশন"], ans: 1, exp: "ব্যাখ্যা: এই ধরনের অস্থায়ী পরিবেশগত পরিবর্তনের কোনো জিনগত ভিত্তি থাকে না এবং বিবর্তনে এর কোনো ভূমিকা নেই, তাই একে দিশাহীন বিভেদ বলে।" }
+        ]
+    },
+    3: {
+        name: 'Set 3', icon: '📖', topic: 'মেন্ডেলবাদ এবং মেন্ডেলের বংশগতি সূত্র (Mendelism & Laws)',
+        questions: [
+            { q: "৩১. মেন্ডেল তাঁর বংশগতি সংক্রান্ত পরীক্ষার জন্য মটর গাছের (Pisum sativum) কত জোড়া বিপরীতধর্মী বৈশিষ্ট্য নির্বাচন করেছিলেন?", opts: ["৩ জোড়া", "৭ জোড়া", "১৪ জোড়া", "২১ জোড়া"], ans: 1, exp: "ব্যাখ্যা: মেন্ডেল তাঁর সংকরায়ণ পরীক্ষার জন্য মটর গাছের কাণ্ডের দৈর্ঘ্য, ফুলের রং, বীজের আকারসহ মোট ৭ জোড়া বিপরীতধর্মী বৈশিষ্ট্য নির্বাচন করেছিলেন।" },
+            { q: "৩২. মেন্ডেলের নির্বাচিত মটর গাছের সাতটি চারিত্রিক বৈশিষ্ট্য মোট কয়টি ক্রোমোজোমে অবস্থান করে?", opts: ["৭টি ক্রোমোজোমে", "৪টি ক্রোমোজোমে (১, ৪, ৫, ৭ নং)", "২টি ক্রোমোজোমে", "১৪টি ক্রোমোজোমে"], ans: 1, exp: "ব্যাখ্যা: আধুনিক জিনতত্ত্ব অনুযায়ী, মেন্ডেলের নির্বাচিত ৭টি বৈশিষ্ট্য মটর গাছের ১, ৪, ৫ এবং ৭ নং ক্রোমোজোমের মধ্যে বিন্যস্ত থাকে।" },
+            { q: "৩৩. মেন্ডেলের একসংকর জনন (Monohybrid cross) পরীক্ষায় F2 জনুর ফিনোটাইপিক অনুপাত কত?", opts: ["১ : ২ : ১", "২ : ১", "৩ : ১", "৯ : ৩ : ৩ : ১"], ans: 2, exp: "ব্যাখ্যা: একটি বিশুদ্ধ লম্বা (TT) ও বিশুদ্ধ বেঁটে (tt) গাছের সংকরায়ণে F2 জনুতে ৩ ভাগ লম্বা এবং ১ ভাগ বেঁটে (৩ : ১) উদ্ভিদ সৃষ্টি হয়।" },
+            { q: "৩৪. মেন্ডেলের একসংকর জনন পরীক্ষায় F2 জনুর জিনোটাইপিক অনুপাত কত হয়?", opts: ["৩ : ১", "১ : ২ : ১", "৯ : ৩ : ৩ : ১", "১ : ১"], ans: 1, exp: "ব্যাখ্যা: F2 জনুতে ১ ভাগ বিশুদ্ধ লম্বা (TT), ২ ভাগ সংকর লম্বা (Tt) এবং ১ ভাগ বিশুদ্ধ বেঁটে (tt) উদ্ভিদ তৈরি হয়, তাই জিনোটাইপিক অনুপাত ১ : ২ : ১।" },
+            { q: "৩৫. মেন্ডেলের কোন্ সূত্রটি কোনো ব্যতিক্রম ছাড়াই জিনতত্ত্বে সর্বদা এবং সর্বজনীনভাবে প্রযোজ্য?", opts: ["প্রকটতার সূত্র", "পৃথক্‌ভবন সূত্র (Law of Segregation)", "স্বাধীন বিন্যাস সূত্র", "একক বৈশিষ্ট্যের সূত্র"], ans: 1, exp: "ব্যাখ্যা: গ্যামেট গঠনকালে একজোড়া অ্যালিল সর্বদা পরস্পর থেকে পৃথক হয়ে যায়। লিংকেজ থাকলেও এই সূত্রের কোনো ব্যতিক্রম হয় না।" },
+            { q: "৩৬. মেন্ডেলের দ্বিসংকর জনন (Dihybrid cross) পরীক্ষায় F2 জনুর ফিনোটাইপিক অনুপাত কত হয়?", opts: ["৩ : ১", "১ : ২ : ১ : ২ : ৪ : ২ : ১ : ২ : ১", "৯ : ৩ : ৩ : ১", "২৭ : ৯ : ৯ : ৯ : ৩ : ৩ : ৩ : ১"], ans: 2, exp: "ব্যাখ্যা: দ্বিসংকর জননে দুটি চরিত্রের সাপেক্ষে F2 জনুতে ফিনোটাইপিক অনুপাত সর্বদা ৯:৩:৩:১ হয় (যেমন- হলুদ গোল ৯ : হলুদ কুঞ্চিত ৩ : সবুজ গোল ৩ : সবুজ কুঞ্চিত ১)।" },
+            { q: "৩৭. মেন্ডেলের 'স্বাধীন বিন্যাস সূত্র' বা Law of Independent Assortment কোন্ পরীক্ষা থেকে প্রতিষ্ঠিত হয়?", opts: ["একসংকর জনন", "দ্বিসংকর জনন", "টেস্ট ক্রস", "ব্যাক ক্রস"], ans: 1, exp: "ব্যাখ্যা: দুই বা ততোধিক জোড়া বিপরীত বৈশিষ্ট্য গ্যামেট তৈরির সময় স্বাধীনভাবে সম্ভাব্য সকল সমন্বয়ে বিন্যস্ত হয়, এটি দ্বিসংকর জনন থেকে প্রমাণিত হয়।" },
+            { q: "৩৮. YyRr জিনোটাইপযুক্ত একটি সংকর উদ্ভিদ থেকে গ্যামেট তৈরির সময় স্বাধীন বিন্যাস সূত্র অনুযায়ী কয় প্রকার গ্যামেট উৎপন্ন হবে?", opts: ["২ প্রকার", "৪ প্রকার", "৮ প্রকার", "১৬ প্রকার"], ans: 1, exp: "ব্যাখ্যা: 2^n সূত্র অনুযায়ী (যেখানে n=হেটারোজাইগাস জোড়ার সংখ্যা ২), গ্যামেট সংখ্যা হবে 2^2 = 4 প্রকার (YR, Yr, yR, yr)।" },
+            { q: "৩৯. একটি ত্রিসংকর জননে (Trihybrid cross) F2 জনুতে ফিনোটাইপিক অনুপাত কত হয়?", opts: ["৯ : ৩ : ৩ : ১", "১৫ : ১", "২৭ : ৯ : ৯ : ৯ : ৩ : ৩ : ৩ : ১", "৬৪ : ১"], ans: 2, exp: "ব্যাখ্যা: তিনটি বৈশিষ্ট্যের সাপেক্ষে (যেমন YyRrPp x YyRrPp) ক্রসে F2 জনুতে ৮ প্রকার ফিনোটাইপ সৃষ্টি হয় যার অনুপাত 27:9:9:9:3:3:3:1।" },
+            { q: "৪০. মেন্ডেলের সূত্রগুলি ব্রান ন্যাচারাল হিস্ট্রি সোসাইটির পত্রিকায় কত খ্রিস্টাব্দে প্রকাশিত হয়েছিল?", opts: ["১৮৫৬", "১৮৬৫", "১৮৬৬", "১৯০০"], ans: 2, exp: "ব্যাখ্যা: মেন্ডেল ১৮৬৫ সালে তাঁর গবেষণাপত্র পাঠ করেন এবং ১৮৬৬ খ্রিস্টাব্দে তা সোসাইটির পত্রিকায় প্রকাশিত হয়।" },
+            { q: "৪১. ১৯০০ সালে কোন্ তিনজন বিজ্ঞানী পৃথকভাবে গবেষণা করে মেন্ডেলের সূত্রগুলি পুনরাবিষ্কার করেন?", opts: ["ওয়াটসন, ক্রিক এবং উইলকিন্স", "দ্য ভ্রিস, কোরেন্স এবং সেরম্যাক", "মর্গ্যান, সাটন এবং বোভেরি", "বেটসন, প্যানেট এবং জোহানসেন"], ans: 1, exp: "ব্যাখ্যা: হল্যান্ডের দ্য ভ্রিস, জার্মানির কোরেন্স এবং অস্ট্রিয়ার সেরম্যাক স্বাধীনভাবে গবেষণা করে মেন্ডেলের আবিষ্কারের সত্যতা প্রমাণ করেন।" },
+            { q: "৪২. মটর গাছের কাঁচা শুঁটির রঙের ক্ষেত্রে কোনটি প্রকট বৈশিষ্ট্য?", opts: ["হলুদ", "সবুজ", "সাদা", "খর্বাকার"], ans: 1, exp: "ব্যাখ্যা: মটর গাছে কাঁচা শুঁটির রঙের ক্ষেত্রে সবুজ রংটি প্রকট এবং হলুদ রংটি প্রচ্ছন্ন বৈশিষ্ট্য।" },
+            { q: "৪৩. মেন্ডেলের 'প্রকটতা ও প্রচ্ছন্নতার সূত্র' অনুযায়ী, বিপরীতধর্মী দুটি খাঁটি জীবের মিলনে F1 জনুতে কোন্ বৈশিষ্ট্যটি প্রকাশ পায়?", opts: ["প্রচ্ছন্ন বৈশিষ্ট্য", "মধ্যবর্তী বৈশিষ্ট্য", "প্রকট বৈশিষ্ট্য", "উভয় বৈশিষ্ট্য একসঙ্গে"], ans: 2, exp: "ব্যাখ্যা: F1 জনুতে হেটারোজাইগাস অবস্থায় যে বৈশিষ্ট্যটি প্রকাশ পায় তাকে প্রকট বৈশিষ্ট্য বলে, এটিই প্রকটতার সূত্র।" },
+            { q: "৪৪. Tt x Tt (দুটি সংকর লম্বা মটর গাছের) ক্রসে কত শতাংশ উদ্ভিদ বিশুদ্ধ লম্বা (TT) হবে?", opts: ["২৫%", "৫০%", "৭৫%", "১০০%"], ans: 0, exp: "ব্যাখ্যা: Tt x Tt ক্রসে ১ ভাগ TT (২৫%), ২ ভাগ Tt (৫০%) এবং ১ ভাগ tt (২৫%) তৈরি হয়।" },
+            { q: "৪৫. মেন্ডেলের স্বাধীন বিন্যাস সূত্রের (Law of Independent Assortment) প্রধান ব্যতিক্রম কোনটি?", opts: ["অসম্পূর্ণ প্রকটতা", "সহ-প্রকটতা", "লিংকেজ (Linkage)", "প্লিওট্রপি"], ans: 2, exp: "ব্যাখ্যা: একই ক্রোমোজোমে অবস্থিত জিনগুলি একসঙ্গে সঞ্চারিত হওয়ার প্রবণতা দেখায় (লিংকেজ), যা জিনের স্বাধীন বিন্যাসে বাধা দেয়।" }
+        ]
+    },
+    4: {
+        name: 'Set 4', icon: '✖️', topic: 'ব্যাক ক্রস, টেস্ট ক্রস এবং মেন্ডেলবাদের ব্যতিক্রম (Crosses & Exceptions)',
+        questions: [
+            { q: "৪৬. অপত্য বংশীয় (F1) কোনো জীবের সঙ্গে পিতৃপুরুষের বা জনিতৃ জনুর (Dominant বা Recessive) যে-কোনো জীবের সংকরায়ণকে কী বলে?", opts: ["টেস্ট ক্রস", "ব্যাক ক্রস", "মনোহাইব্রিড ক্রস", "রেসিপ্রোকাল ক্রস"], ans: 1, exp: "ব্যাখ্যা: F1 অপত্যের (যেমন Tt) সঙ্গে জনিতৃ জনুর (TT বা tt) যে-কোনো উদ্ভিদের মিলনকে ব্যাক ক্রস বলে।" },
+            { q: "৪৭. কোনো জীবের জিনোটাইপ অজানা থাকলে তা নির্ণয় করার জন্য ওই জীবের সঙ্গে হোমোজাইগাস প্রচ্ছন্ন (homozygous recessive) জীবের যে ক্রস ঘটানো হয়, তাকে কী বলে?", opts: ["টেস্ট ক্রস", "ব্যাক ক্রস", "আউট ক্রস", "এপিস্ট্যাসিস"], ans: 0, exp: "ব্যাখ্যা: একটি লম্বা গাছের জিনোটাইপ TT না Tt তা জানার জন্য বিশুদ্ধ প্রচ্ছন্ন (tt) গাছের সাথে ক্রস করানোকে টেস্ট ক্রস বলে।" },
+            { q: "৪৮. মেন্ডেলীয় একসংকর টেস্ট ক্রসের (Monohybrid test cross) ফিনোটাইপিক ও জিনোটাইপিক অনুপাত কত হয়?", opts: ["৩ : ১", "১ : ২ : ১", "১ : ১", "৯ : ৩ : ৩ : ১"], ans: 2, exp: "ব্যাখ্যা: হেটারোজাইগাস Tt এবং হোমোজাইগাস প্রচ্ছন্ন tt এর ক্রসে ৫০% Tt এবং ৫০% tt উৎপন্ন হয়, তাই অনুপাত ১:১।" },
+            { q: "৪৯. মেন্ডেলীয় দ্বিসংকর টেস্ট ক্রসের (Dihybrid test cross) ফিনোটাইপিক অনুপাত কত হয়?", opts: ["৯ : ৩ : ৩ : ১", "১ : ১ : ১ : ১", "৩ : ১", "১৫ : ১"], ans: 1, exp: "ব্যাখ্যা: F1 সংকর (YyRr) এর সাথে বিশুদ্ধ প্রচ্ছন্ন (yyrr) এর ক্রস ঘটালে চার প্রকার অপত্য সমান অনুপাতে (১:১:১:১) উৎপন্ন হয়।" },
+            { q: "\"৫০. সব টেস্ট ক্রসই ব্যাক ক্রস, কিন্তু সব ব্যাক ক্রস টেস্ট ক্রস নয়\"—এর কারণ কী?", opts: ["কারণ ব্যাক ক্রসে সর্বদা হোমোজাইগাস প্রচ্ছন্ন জিনের সাথেই ক্রস হয়।", "কারণ টেস্ট ক্রস মানেই জনিতৃ জনুর সাথে ক্রস, কিন্তু ব্যাক ক্রসে হোমোজাইগাস প্রকট (TT) এর সাথে ক্রস হলেও তা টেস্ট ক্রস নয়।", "কারণ টেস্ট ক্রস শুধু প্রাণীদের হয়।", "কারণ টেস্ট ক্রসে ৩:১ অনুপাত পাওয়া যায়।"], ans: 1, exp: "ব্যাখ্যা: টেস্ট ক্রসে শুধুমাত্র প্রচ্ছন্ন জনিতার (tt) সাথে ক্রস হয়, যা ব্যাক ক্রসের একটি অংশ। প্রকট জনিতার (TT) সাথে ক্রস ব্যাক ক্রস হলেও টেস্ট ক্রস নয়।" },
+            { q: "৫১. সন্ধ্যা মালতী (Mirabilis jalapa) বা স্ন্যাপড্রাগন গাছে লাল (RR) ও সাদা (rr) ফুলের সংকরায়ণে F1 জনুতে গোলাপি (Rr) ফুল ফোটে। এটি মেন্ডেলবাদের কোন ব্যতিক্রমের উদাহরণ?", opts: ["সহ-প্রকটতা", "অসম্পূর্ণ প্রকটতা (Incomplete dominance)", "প্লিওট্রপি", "লিংকেজ"], ans: 1, exp: "ব্যাখ্যা: যখন প্রকট জিনটি তার ফিনোটাইপ সম্পূর্ণরূপে প্রকাশ করতে পারে না এবং একটি মধ্যবর্তী বৈশিষ্ট্য (গোলাপি) প্রকাশ পায়, তাকে অসম্পূর্ণ প্রকটতা বলে।" },
+            { q: "৫২. অসম্পূর্ণ প্রকটতার ক্ষেত্রে F2 জনুর ফিনোটাইপিক ও জিনোটাইপিক অনুপাত কত হয়?", opts: ["ফিনোটাইপিক ৩:১, জিনোটাইপিক ১:২:১", "ফিনোটাইপিক ও জিনোটাইপিক উভয়ই ১:২:১", "ফিনোটাইপিক ৯:৩:৩:১", "জিনোটাইপিক ১:১"], ans: 1, exp: "ব্যাখ্যা: F2 জনুতে লাল (RR), গোলাপি (Rr) এবং সাদা (rr) ফুল ১:২:১ অনুপাতে উৎপন্ন হয়, যেখানে ফিনোটাইপ ও জিনোটাইপ অনুপাত হুবহু মিলে যায়।" },
+            { q: "৫৩. হেটারোজাইগাস অবস্থায় বিপরীতধর্মী দুটি অ্যালিল যখন সমানভাবে এবং একই সঙ্গে নিজেদের বৈশিষ্ট্য প্রকাশ করে, তখন তাকে কী বলে?", opts: ["অসম্পূর্ণ প্রকটতা", "সহ-প্রকটতা (Co-dominance)", "মাল্টিপল অ্যালিল", "এপিস্ট্যাসিস"], ans: 1, exp: "ব্যাখ্যা: সহ-প্রকটতার ক্ষেত্রে দুটি অ্যালিলই সমান শক্তিশালী হয়। যেমন- AB ব্লাড গ্রুপ বা গোরুর রোয়ান (Roan) গাত্রবর্ণ।" },
+            { q: "৫৪. মানুষের রক্তের 'MN' বা 'AB' গ্রুপ কোন্ জিনগত ঘটনার প্রকৃষ্ট উদাহরণ?", opts: ["প্লিওট্রপি", "মাল্টিপল জিন", "সহ-প্রকটতা (Co-dominance)", "অসম্পূর্ণ প্রকটতা"], ans: 2, exp: "ব্যাখ্যা: 'AB' ব্লাড গ্রুপের ক্ষেত্রে A এবং B উভয় অ্যান্টিজেনই লোহিত রক্তকণিকার গায়ে সমভাবে প্রকাশ পায়।" },
+            { q: "৫৫. অ্যান্ডালুসিয়ান মুরগিতে (Andalusian fowl) বিশুদ্ধ কালো (BB) এবং বিশুদ্ধ সাদা (bb) পালকযুক্ত মুরগির ক্রসে F1 জনুতে নীল (Bb) মুরগি সৃষ্টি হয়। এটি কীসের উদাহরণ?", opts: ["অসম্পূর্ণ প্রকটতা", "সহ-প্রকটতা", "মাল্টিপল অ্যালিল", "পরিপূরক জিন"], ans: 0, exp: "ব্যাখ্যা: কালো ও সাদার মধ্যবর্তী একটি ফিনোটাইপ নীল পালক সৃষ্টি হওয়ায় এটি অসম্পূর্ণ প্রকটতা।" },
+            { q: "৫৬. মানুষের সিকল সেল অ্যানিমিয়ার (Sickle cell anemia) ক্ষেত্রে হেটারোজাইগাস (HbA HbS) ব্যক্তিদের মধ্যে কোন্ প্রকটতা দেখা যায়?", opts: ["সম্পূর্ণ প্রকটতা", "অসম্পূর্ণ প্রকটতা", "সহ-প্রকটতা", "মাল্টিপল জিন"], ans: 1, exp: "ব্যাখ্যা: হেটারোজাইগাস ব্যক্তিরা (Sickle cell trait) অল্প পরিমাণ অস্বাভাবিক হিমোগ্লোবিন (HbS) তৈরি করে, তাই এটি অসম্পূর্ণ প্রকটতার উদাহরণ।" },
+            { q: "৫৭. লেডি বার্ড বিটল-এর (Harmonia axyridis) এলাইট্রাতে (elytra) হলুদ তলের উপর কালো বিন্দু এবং কালো প্রশস্ত পটি—উভয় বৈশিষ্ট্যেরই প্রকাশ ঘটে। এটি কীসের উদাহরণ?", opts: ["সহ-প্রকটতা", "অসম্পূর্ণ প্রকটতা", "এপিস্ট্যাসিস", "প্লিওট্রপি"], ans: 0, exp: "ব্যাখ্যা: দুটি বিপরীত বৈশিষ্ট্য (বিন্দু ও পটি) একইসাথে প্রকাশ পাওয়ায় এটি সহ-প্রকটতা (Co-dominance)।" },
+            { q: "৫৮. সহ-প্রকটতার (Co-dominance) ক্ষেত্রে একসংকর জননে F2 জনুর ফিনোটাইপিক অনুপাত কত হয়?", opts: ["৩ : ১", "১ : ২ : ১", "২ : ১", "১ : ১"], ans: 1, exp: "ব্যাখ্যা: অসম্পূর্ণ প্রকটতার মতোই সহ-প্রকটতাতেও F2 জনুতে ফিনোটাইপিক ও জিনোটাইপিক অনুপাত ১:২:১ হয়।" },
+            { q: "৫৯. টে-সাক্স ডিজিজে (Tay-sachs disease) হেটারোজাইগাস (Rr) শিশুদের ক্ষেত্রে হেক্সোজ-অ্যামিনিডেজ A উৎসেচকের মাত্রা প্রায় 50% হয়। এখানে স্বাভাবিক জিনটি কীরূপ আচরণ করে?", opts: ["সম্পূর্ণ প্রকট", "অসম্পূর্ণ প্রকট", "প্রচ্ছন্ন", "সহ-প্রকট"], ans: 1, exp: "ব্যাখ্যা: যেহেতু হেটারোজাইগাস অবস্থায় উৎসেচকের ক্রিয়াশীলতা 100% না হয়ে 50% হয়, তাই স্বাভাবিক অ্যালিলটি এখানে অসম্পূর্ণ প্রকট।" },
+            { q: "৬০. 'একক বৈশিষ্ট্যের সূত্র' (Law of unit character)-এর প্রধান সীমাবদ্ধতা কী?", opts: ["একটি জিন একাধিক বৈশিষ্ট্য নিয়ন্ত্রণ করে না।", "অনেক ক্ষেত্রে একটি বৈশিষ্ট্য দুই বা ততোধিক জিন দ্বারা নিয়ন্ত্রিত হয় (যেমন মানুষের গায়ের রঙ)।", "জিনগুলি সর্বদা জোড়ায় থাকে না।", "এটি শুধুমাত্র উদ্ভিদের ক্ষেত্রে প্রযোজ্য।"], ans: 1, exp: "ব্যাখ্যা: একক বৈশিষ্ট্যের সূত্র বলে একটি বৈশিষ্ট্য একটি জিন দ্বারা নিয়ন্ত্রিত, কিন্তু পলিজেনিক বংশগতিতে একটি চরিত্র একাধিক জিন দ্বারা নিয়ন্ত্রিত হয়।" }
+        ]
+    },
+    12: {
+        name: 'Set 12', icon: '🩸', topic: 'মানুষের মেন্ডেলীয় অস্বাভাবিকতা ও পেডিগ্রি (Mendelian Disorders)',
+        questions: [
+            { q: "১৬৬. পেডিগ্রি (Pedigree) চার্টে একটি বর্গক্ষেত্র এবং একটি বৃত্তের মধ্যে একটি অনুভূমিক রেখা (Horizontal line) কী নির্দেশ করে?", opts: ["ভাই-বোন সম্পর্ক", "বিবাহ বা মিলন (Mating)", "ডিভোর্স", "যমজ সন্তান"], ans: 1, exp: "ব্যাখ্যা: পেডিগ্রি চার্টে একটি বর্গক্ষেত্র (পুরুষ) এবং একটি বৃত্তের (স্ত্রী) মধ্যে অনুভূমিক রেখা তাদের বিবাহ বা মিলন (Mating) নির্দেশ করে।" },
+            { q: "১৬৭. পেডিগ্রি চার্টে কোনো বর্গক্ষেত্র বা বৃত্ত সম্পূর্ণ ভরাট (Solid) থাকলে তা কী নির্দেশ করে?", opts: ["স্বাভাবিক ব্যক্তি", "জিনগত ত্রুটিতে আক্রান্ত ব্যক্তি (Affected individual)", "বাহক", "মৃত ব্যক্তি"], ans: 1, exp: "ব্যাখ্যা: বংশতালিকা বা পেডিগ্রিতে ভরাট বা সলিড বর্গক্ষেত্র বা বৃত্ত জিনগত ত্রুটিতে আক্রান্ত ব্যক্তিকে নির্দেশ করে।" },
+            { q: "১৬৮. থ্যালাসেমিয়া (Thalassemia) কোন্ ধরনের মেন্ডেলীয় জিনগত অস্বাভাবিকতা?", opts: ["অটোজোমাল প্রকট", "অটোজোমাল প্রচ্ছন্ন", "X-লিঙ্কড প্রচ্ছন্ন", "Y-লিঙ্কড"], ans: 1, exp: "ব্যাখ্যা: থ্যালাসেমিয়া একটি অটোজোমাল প্রচ্ছন্ন জিন দ্বারা নিয়ন্ত্রিত বংশগত রোগ যেখানে ত্রুটিযুক্ত হিমোগ্লোবিন উৎপন্ন হয়।" },
+            { q: "১৬৯. আলফা (α) থ্যালাসেমিয়ার জন্য দায়ী α-গ্লোবিন জিন মানুষের কোন্ ক্রোমোজোমে অবস্থান করে?", opts: ["11 নং ক্রোমোজোমে", "16 নং ক্রোমোজোমে", "21 নং ক্রোমোজোমে", "X ক্রোমোজোমে"], ans: 1, exp: "ব্যাখ্যা: হিমোগ্লোবিনের পলিপেপটাইড তৈরির জন্য ক্রোমোজোম 16-তে দুটি α-গ্লোবিন জিন থাকে। এই জিনের ক্ষয়ের ফলেই α-থ্যালাসেমিয়া হয়।" },
+            { q: "১৭০. বিটা (β) থ্যালাসেমিয়া সৃষ্টির জন্য দায়ী β-গ্লোবিন জিন মানুষের কোন্ ক্রোমোজোমে থাকে?", opts: ["11 নং ক্রোমোজোমে", "16 নং ক্রোমোজোমে", "9 নং ক্রোমোজোমে", "Y ক্রোমোজোমে"], ans: 0, exp: "ব্যাখ্যা: β-গ্লোবিন জিন জোট ক্রোমোজোম নং 11-এ থাকে এবং এর মিউটেশনের ফলেই β-থ্যালাসেমিয়া দেখা দেয়।" },
+            { q: "১৭১. থ্যালাসেমিয়া মেজর (β^0-thalassemia) আক্রান্ত রোগীর জিনোটাইপ কীরূপ হয়?", opts: ["হোমোজাইগাস প্রকট", "হেটারোজাইগাস (মাইনর)", "হোমোজাইগাস প্রচ্ছন্ন (মিউট্যান্ট অ্যালিলের হোমোজাইগাস অবস্থা)", "হেমিজাইগাস"], ans: 2, exp: "ব্যাখ্যা: মিউট্যান্ট অ্যালিলের হোমোজাইগাস অবস্থায় থ্যালাসেমিয়া মেজর সৃষ্টি হয় এবং এই রোগীদের β-গ্লোবিন তৈরি হয় না বললেই চলে।" },
+            { q: "১৭২. অ্যালবিনিজম (Albinism) বা ধবলরোগের প্রধান কারণ কী?", opts: ["রক্ত তঞ্চন না হওয়া", "অটোজোমাল প্রচ্ছন্ন জিনের প্রভাবে চর্ম, চক্ষু ও চুলে মেলানিন তৈরি না হওয়া", "ইনসুলিন তৈরি না হওয়া", "X-ক্রোমোজোমের মিউটেশন"], ans: 1, exp: "ব্যাখ্যা: অ্যালবিনিজম একটি অটোজোমাল প্রচ্ছন্নধর্মী চরিত্র যেখানে শরীরে মেলানিন রঞ্জক থাকে না।" },
+            { q: "১৭৩. মানুষের জন্মগত বিপাকজনিত রোগ ফিনাইলকিটোনিউরিয়া (PKU) কোন্ উৎসেচকের অভাবে হয়?", opts: ["হেক্সোজ-অ্যামিনিডেজ A", "ফিনাইল অ্যালানিন হাইড্রোক্সিলেজ (PAH)", "টাইরোসিনেজ", "পেপসিন"], ans: 1, exp: "ব্যাখ্যা: PKU রোগটি ফিনাইল অ্যালানিন হাইড্রোক্সিলেজ (PAH) নামক উৎসেচকের ঘাটতি বা অভাবের কারণে ঘটে।" },
+            { q: "১৭৪. কোনো অটোজোমাল প্রচ্ছন্ন রোগের (যেমন থ্যালাসেমিয়া) ক্ষেত্রে আক্রান্ত সন্তানের পিতা ও মাতা দুজনেই যদি ফিনোটাইপিক ভাবে স্বাভাবিক হন, তবে পিতা-মাতার জিনোটাইপ কীরূপ হবে?", opts: ["দুজনেই হোমোজাইগাস প্রকট", "দুজনেই হোমোজাইগাস প্রচ্ছন্ন", "পিতা-মাতা উভয়েই হেটারোজাইগাস বা বাহক", "পিতা বাহক, মাতা বিশুদ্ধ"], ans: 2, exp: "ব্যাখ্যা: পিতা ও মাতা উভয়ই চরিত্রটি সমন্বিত (আক্রান্ত) না হলেও তারা বাহক বা হেটারোজাইগাস হলে প্রচ্ছন্ন বৈশিষ্ট্যসম্পন্ন সন্তানের জন্ম দিতে পারে (25% সম্ভাবনা)।" },
+            { q: "১৭৫. জেনেটিক কাউন্সেলিং (Genetic Counseling)-এর প্রথম ধাপ কোনটি?", opts: ["ক্রোমোজোম গোনা", "পেডিগ্রি অ্যানালিসিস (Pedigree Analysis)", "ব্লাড টেস্ট", "জিন থেরাপি"], ans: 1, exp: "ব্যাখ্যা: বংশতালিকার সাহায্যে বৈশিষ্ট্যের সঞ্চারণের পথ বোঝার জন্য পেডিগ্রি অ্যানালিসিস করা হয় যা জেনেটিক কাউন্সেলিং-এর প্রথম ধাপ।" },
+            { q: "১৭৬. রক্তের তঞ্চনক্ষমতা হ্রাস পাওয়া বা হিমোফিলিয়া (Haemophilia) কোন্ ক্রোমোজোম বাহিত রোগ?", opts: ["অটোজোমাল প্রকট", "X-ক্রোমোজোমীয় প্রচ্ছন্ন", "Y-ক্রোমোজোমীয়", "অটোজোমাল প্রচ্ছন্ন"], ans: 1, exp: "ব্যাখ্যা: হিমোফিলিয়া একটি X-ক্রোমোজোমের প্রচ্ছন্নধর্মী জিন দ্বারা ঘটিত রোগ, যেখানে রক্ততঞ্চনের অক্ষমতা দেখা দেয়।" },
+            { q: "১৭৭. কোনো পেডিগ্রিতে যদি দেখা যায় রোগটি পুরুষদের থেকে শুধুমাত্র সকল কন্যা সন্তানে সঞ্চারিত হচ্ছে কিন্তু কোনো পুত্র সন্তানে নয়, তবে এটি কী ধরনের উত্তরাধিকার?", opts: ["অটোজোমাল প্রচ্ছন্ন", "X-ক্রোমোজোমীয় প্রকটধর্মী (X-linked Dominant)", "Y-লিঙ্কড", "অটোজোমাল প্রকট"], ans: 1, exp: "ব্যাখ্যা: X-ক্রোমোজোমের প্রকটধর্মী জিনের সঞ্চারণ নীতি অনুযায়ী, পুরুষে প্রকাশিত চরিত্রটি কখনো পুত্রে বর্তায় না, বরং সকল কন্যা সন্তানে সঞ্চারিত হয়।" },
+            { q: "১৭৮. যদি কোনো রোগ শুধুমাত্র পুরুষদের মধ্যে দেখা যায় এবং পিতা থেকে সকল পুত্রে সরাসরি সঞ্চারিত হয়, তবে সেটি কী ধরনের উত্তরাধিকার?", opts: ["X-লিঙ্কড প্রচ্ছন্ন", "অটোজোমাল প্রকট", "Y-ক্রোমোজোমীয় বা হোলান্ড্রিক (Y-linked)", "মাইটোকন্ড্রিয়াল"], ans: 2, exp: "ব্যাখ্যা: Y-ক্রোমোজোমে অবস্থিত জিন কেবল পুরুষ থেকে পুরুষে সঞ্চারিত হয় এবং সকল পুত্র সন্তান চরিত্রটি অর্জন করে।" },
+            { q: "১৭৯. ডেল্টা/বিটা (δ/β)-থ্যালাসেমিয়ার ক্ষেত্রে কোন্ গ্লোবিনগুলি তৈরি হয় না, কিন্তু তার পরিবর্তে গামা (γ) গ্লোবিন তৈরি হয়?", opts: ["আলফা ও বিটা", "বিটা ও ডেল্টা", "শুধুমাত্র আলফা", "গামা ও ডেল্টা"], ans: 1, exp: "ব্যাখ্যা: (δ/β)-থ্যালাসেমিয়ার ক্ষেত্রে ক্রোমোজোমের ডিলিশনের কারণে β ও δ উভয় গ্লোবিনই লোপ পায়, তবে α-গ্লোবিনের সঙ্গে γ-গ্লোবিন তৈরি হয়।" },
+            { q: "১৮০. পিতা ও মাতা উভয়েই যদি থ্যালাসেমিয়া মাইনর (বাহক) হন, তবে তাদের সন্তানের থ্যালাসেমিয়া মেজর (আক্রান্ত) হওয়ার সম্ভাবনা শতকরা কত?", opts: ["0%", "25%", "50%", "100%"], ans: 1, exp: "ব্যাখ্যা: থ্যালাসেমিয়া একটি অটোজোমাল প্রচ্ছন্ন রোগ। পিতা (Tt) ও মাতা (Tt) উভয়েই বাহক হলে, মেন্ডেলীয় ক্রস অনুযায়ী 25% সন্তান হোমোজাইগাস প্রচ্ছন্ন (tt) অর্থাৎ থ্যালাসেমিয়া মেজরে আক্রান্ত হবে।" }
+        ]
+    },
+    13: {
+        name: 'Set 13', icon: '🔬', topic: 'মানুষের ক্রোমোজোমাল অস্বাভাবিকতা (Chromosomal Disorders)',
+        questions: [
+            { q: "১৮১. ডাউন সিন্ড্রোম (Down Syndrome) কোন্ ক্রোমোজোমাল অস্বাভাবিকতার কারণে ঘটে?", opts: ["X ক্রোমোজোমের মনোজোমি", "21 নং ক্রোমোজোমের ট্রাইসোমি (Trisomy 21)", "18 নং ক্রোমোজোমের ট্রাইসোমি", "13 নং ক্রোমোজোমের ডিলিশন"], ans: 1, exp: "ব্যাখ্যা: ডাউন সিন্ড্রোম প্রধানত 21 নং ক্রোমোজোমের ট্রাইসোমির কারণে ঘটে, যেখানে 21 নং ক্রোমোজোম 2টির পরিবর্তে 3টি থাকে।" },
+            { q: "১৮২. ডাউন সিন্ড্রোমে আক্রান্ত ব্যক্তির দেহকোশে মোট ক্রোমোজোম সংখ্যা কত হয়?", opts: ["৪৫", "৪৬", "৪৭", "৪৮"], ans: 2, exp: "ব্যাখ্যা: ডাউন সিন্ড্রোমে আক্রান্ত ব্যক্তির 45টি অটোজোম (21 নং ক্রোমোজোম 3টি) এবং 2টি সেক্স ক্রোমোজোম থাকে, অর্থাৎ মোট ক্রোমোজোম 47টি।" },
+            { q: "১৮৩. ফ্যামিলিয়াল বা ট্রান্সলোকেশন ডাউন সিন্ড্রোমের ক্ষেত্রে 21 নং ক্রোমোজোমের একটি অংশ কোন্ ক্রোমোজোমে স্থানান্তরিত হয়ে যুক্ত হয়?", opts: ["9 বা 22 নং", "14 বা 15 নং", "18 নং", "X ক্রোমোজোম"], ans: 1, exp: "ব্যাখ্যা: 21 নং ক্রোমোজোমের একটি অংশ 14 বা 15 নং ক্রোমোজোমে স্থানান্তরিত হয়ে যুক্ত হলে ট্রান্সলোকেশন ডাউন সিন্ড্রোম বা রবার্টসোনিয়ান ট্রান্সলোকেশন ঘটে।" },
+            { q: "১৮৪. টার্নার সিন্ড্রোম-এর (Turner's Syndrome) ক্রোমোজোমগত ক্যারিওটাইপ কী?", opts: ["47, XXY", "47, +21", "45, X (বা 45, XO)", "46, XY"], ans: 2, exp: "ব্যাখ্যা: টার্নার সিন্ড্রোমে স্বাভাবিক অটোজোমের সঙ্গে কেবলমাত্র 1টি X-ক্রোমোজোম থাকে, তাই এদের 45, X বা 45, XO হিসাবে চিহ্নিত করা হয়।" },
+            { q: "১৮৫. টার্নার সিন্ড্রোমে আক্রান্ত ব্যক্তি স্ত্রী না পুরুষ এবং তাদের জনন ক্ষমতা কীরূপ হয়?", opts: ["পুরুষ, জননক্ষম", "স্ত্রী, জননক্ষম", "স্ত্রী, জনন ক্ষমতাহীন (বন্ধ্যা)", "পুরুষ, বন্ধ্যা"], ans: 2, exp: "ব্যাখ্যা: টার্নার সিন্ড্রোমের লোকেরা অবয়বে স্ত্রীলোকের মতো দেখতে হয়, তবে অনুন্নত স্তন এবং মাসিক রজঃস্রাব অনুপস্থিত থাকে। এরা সাধারণভাবে জনন ক্ষমতাহীন হয়।" },
+            { q: "১৮৬. ক্লাইনফেল্টার সিন্ড্রোম-এর (Klinefelter's Syndrome) ক্রোমোজোমগত ক্যারিওটাইপ কী?", opts: ["45, XO", "47, XXY", "47, XYY", "46, XX"], ans: 1, exp: "ব্যাখ্যা: ক্লাইনফেল্টার সিন্ড্রোমে 46টি ক্রোমোজোমের বদলে 47টি ক্রোমোজোম থাকে, যেখানে পুরুষের স্বাভাবিক XY সমন্বয়ের সঙ্গে অতিরিক্ত একটি X ক্রোমোজোম থাকে (47, XXY)।" },
+            { q: "১৮৭. ক্লাইনফেল্টার সিন্ড্রোমে আক্রান্ত ব্যক্তির লিঙ্গ কী হয়?", opts: ["স্ত্রী", "পুরুষ", "সম্পূর্ণ উভলিঙ্গ", "টার্নার স্ত্রী"], ans: 1, exp: "ব্যাখ্যা: ক্লাইনফেল্টার সিন্ড্রোম মানুষের পুরুষে দেখা যায়, যেখানে অতিরিক্ত X ক্রোমোজোম থাকা সত্ত্বেও Y ক্রোমোজোমের উপস্থিতির জন্য এরা পুরুষ হয়।" },
+            { q: "১৮৮. ক্লাইনফেল্টার আক্রান্ত পুরুষদের বক্ষ পেশি বা স্তনগ্রন্থির বৃদ্ধি ঘটাকে চিকিৎসা বিজ্ঞানের ভাষায় কী বলে?", opts: ["টার্নার লক্ষণ", "গাইনাকোম্যাসটিয়া (Gynecomastia)", "প্রোগন্যাথাস", "হাইপোগোনাডিজম"], ans: 1, exp: "ব্যাখ্যা: ক্লাইনফেল্টার বালকদের বয়ঃসন্ধিকালে গাইনাকোম্যাসটিয়া বা স্তনগ্রন্থির বৃদ্ধি লক্ষ করা যায়।" },
+            { q: "১৮৯. ক্রোমোজোম সেটের ডিপ্লয়েড সংখ্যা থেকে একটি ক্রোমোজোম কম থাকলে (2n-1), সেই অবস্থাকে কী বলে?", opts: ["ট্রাইজোমি", "মনোজোমি", "নালিসোমি", "টেট্রাজোমি"], ans: 1, exp: "ব্যাখ্যা: বিশেষ একজোড়া ক্রোমোজোম থেকে একটি ক্রোমোজোম অবলুপ্ত হলে তাকে মনোজোমি (2n-1) বলে।" },
+            { q: "১৯০. ডিপ্লয়েড সেটের একজোড়া সমসংস্থ ক্রোমোজোমের সঙ্গে আরও একটি অতিরিক্ত ক্রোমোজোম যুক্ত হলে (2n+1), সেই অবস্থাকে কী বলে?", opts: ["ট্রাইজোমি", "মনোজোমি", "পলিপ্লয়ডি", "নালিসোমি"], ans: 0, exp: "ব্যাখ্যা: একজোড়া সমসংস্থ ক্রোমোজোমের সঙ্গে আরও একটি ক্রোমোজোম যুক্ত হলে তাকে ট্রাইজোমি (2n+1) বলে।" },
+            { q: "১৯১. একটি ডিপ্লয়েড সেট থেকে সম্পূর্ণ একজোড়া সমসংস্থ ক্রোমোজোম অবলুপ্ত হলে (2n-2), তাকে কী বলা হয়?", opts: ["ডাবল মনোজোমি", "ট্রাইজোমি", "নালিসোমি (Nullisomy)", "ডাবল ট্রাইজোমি"], ans: 2, exp: "ব্যাখ্যা: একটি সেট থেকে একজোড়া ক্রোমোজোম অবলুপ্ত হলে তাকে নালিসোমি (2n-2) রূপে চিহ্নিত করা হয়।" },
+            { q: "১৯২. গ্যামেট বা জননকোশ উৎপাদনের সময় সমসংস্থ ক্রোমোজোম জোড়া পৃথক না হয়ে একই গ্যামেটে প্রবেশ করাকে কী বলে?", opts: ["ক্রসিং ওভার", "নন-ডিসজাংশন (Nondisjunction) বা অবিচ্ছেদ", "লিংকেজ", "মিউটেশন"], ans: 1, exp: "ব্যাখ্যা: মিয়োসিসের সময় ক্রোমোজোমগুলি পৃথক হতে না পারাকে অবিচ্ছেদ বা নন-ডিসজাংশন বলে, যার ফলে 21 নং ট্রাইসোমি বা ক্লাইনফেল্টার সিন্ড্রোমের মতো ত্রুটি ঘটে।" },
+            { q: "১৯৩. শিশু মাতৃগর্ভে থাকাকালীন কোন্ পদ্ধতির সাহায্যে টার্নার সিন্ড্রোম বা ডাউন সিন্ড্রোম নির্ধারণ করা যায়?", opts: ["আল্ট্রাসাউন্ড", "প্রিনাটাল ডায়াগনোসিস বা অ্যামনিওসেন্টেসিস (Amniocentesis)", "এক্স-রে", "এম আর আই (MRI)"], ans: 1, exp: "ব্যাখ্যা: টার্নার সিন্ড্রোম বা ডাউন সিন্ড্রোম শিশু যখন মাতৃগর্ভে থাকে, তখনই প্রিনাটাল ডায়াগনোসিস বা অ্যামনিওসেন্টেসিস পদ্ধতির মাধ্যমে ধরা যেতে পারে।" },
+            { q: "১৯৪. ক্রোমোজোমের হ্যাপ্লয়েড বা ডিপ্লয়েড সেট যখন গুণিতক হারে বৃদ্ধি পায় (যেমন 3n, 4n), তখন তাকে কী বলে?", opts: ["অ্যানিউপ্লয়েডি", "ইউপ্লয়ডি (Euploidy) বা পলিপ্লয়ডি", "মনোজোমি", "ট্রানজিশন"], ans: 1, exp: "ব্যাখ্যা: ক্রোমোজোমের হ্যাপ্লয়েড বা ডিপ্লয়েড সেট যখন গুণিতকে বৃদ্ধি বা হ্রাস পায় তখন তাকে ইউপ্লয়ডি বলে। গুণিতক বৃদ্ধিকে পলিপ্লয়ডি (যেমন ট্রিপ্লয়ডি, টেট্রাপ্লয়ডি) বলা হয়।" },
+            { q: "১৯৫. 95% ক্ষেত্রে ডাউন সিন্ড্রোম সৃষ্টির প্রধান কারণ কী?", opts: ["বিকিরণের প্রভাব", "গ্যামেট উৎপাদনকালে মিয়োসিসে 21 নং ক্রোমোজোমের নন-ডিসজাংশন", "14 নং ক্রোমোজোমের ডিলিশন", "ভাইরাসের সংক্রমণ"], ans: 1, exp: "ব্যাখ্যা: গ্যামেট উৎপাদনকালে কোশ বিভাজন জনিত ত্রুটির (নন-ডিসজাংশন) ফলে 21 নং ক্রোমোজোম জোড়া পৃথক না হয়ে একই গ্যামেটে প্রবেশ করে, যা 95% ক্ষেত্রে ডাউন সিন্ড্রোমের প্রধান কারণ।" }
+        ]
+    },
+    14: {
+        name: 'Set 14', icon: '☢️', topic: 'পরিব্যক্তি বা মিউটেশন: আণবিক ভিত্তি ও ক্রোমোজোমগত (Mutation)',
+        questions: [
+            { q: "১৯৬. \"মিউটেশন তত্ত্ব\" (Mutation Theory) বা হঠাৎ উদয় হওয়া জীব বৈশিষ্ট্যের ধারণা প্রথম কে প্রবর্তন করেন?", opts: ["চার্লস ডারউইন", "গ্রেগর জোহান মেন্ডেল", "হুগো দ্য ভ্রিস (Hugo de Vries)", "টি. এইচ. মর্গ্যান"], ans: 2, exp: "ব্যাখ্যা: স্বাভাবিক বৈশিষ্ট্যের জীবের মধ্যে হঠাৎ করে নতুন বৈশিষ্ট্য ফুটে ওঠাকে মিউটেশন বলে এবং হুগো দ্য ভ্রিস ইভনিং প্রিমরোজের ওপর কাজ করে এই মিউটেশন তত্ত্ব প্রবর্তন করেন।" },
+            { q: "১৯৭. DNA-তে যখন একটি পিউরিন বেস (A বা G) অপর একটি পিউরিন বেস দ্বারা প্রতিস্থাপিত হয়, তখন তাকে কী বলে?", opts: ["ট্রান্সভার্শন", "ট্রানজিশন (Transition)", "ফ্রেম শিফ্ট", "ডিলিশন"], ans: 1, exp: "ব্যাখ্যা: যে প্রতিস্থাপনে পিউরিন বেস অপর একটি পিউরিন বেস দ্বারা অথবা পিরিমিডিন বেস অপর পিরিমিডিন বেস দ্বারা প্রতিস্থাপিত হয় তাকে ট্রানজিশন বলে।" },
+            { q: "১৯৮. DNA-তে একটি পিউরিন বেস যদি পিরিমিডিন বেস দ্বারা বা পিরিমিডিন বেস পিউরিন বেস দ্বারা প্রতিস্থাপিত হয়, তবে তাকে কী বলে?", opts: ["ট্রান্সভার্শন (Transversion)", "ট্রানজিশন", "ইনভারশন", "নন-সেন্স মিউটেশন"], ans: 0, exp: "ব্যাখ্যা: যখন একটি পিউরিন বেস পিরিমিডিন বেস দ্বারা অথবা পিরিমিডিন বেস পিউরিন বেস দ্বারা প্রতিস্থাপিত হয় তখন তাকে ট্রান্সভার্শন বলে।" },
+            { q: "১৯৯. 5-ব্রোমোইউরাসিল (5-BU) কী ধরনের রাসায়নিক মিউটাজেন?", opts: ["অ্যালকাইলেটিং এজেন্ট", "বেস অ্যানালগ (Base Analog)", "ডিঅ্যামিনেটিং এজেন্ট", "রঞ্জক"], ans: 1, exp: "ব্যাখ্যা: 5-BU এমন একটি বেস অ্যানালগ যা গঠনগত দিক দিয়ে থাইমিনের অনুরূপ এবং DNA-তে প্রবেশ করে মিউটেশন ঘটায়।" },
+            { q: "২০০. মানুষের সিকল সেল অ্যানিমিয়া রোগটি কোন্ ধরনের জিন মিউটেশনের প্রকৃষ্ট উদাহরণ?", opts: ["ফ্রেম শিফ্ট মিউটেশন", "ক্রোমোজোম ডিলিশন", "পয়েন্ট মিউটেশন বা বেস প্রতিস্থাপন (Point Mutation)", "ডুপ্লিকেশন"], ans: 2, exp: "ব্যাখ্যা: সিকল সেল অ্যানিমিয়া একটি পয়েন্ট মিউটেশনের উদাহরণ, যেখানে হিমোগ্লোবিনের বিটা চেনে গ্লুটামিক অ্যাসিডের পরিবর্তে ভ্যালিন যুক্ত হয়।" },
+            { q: "২০১. ক্রোমোজোমের কোনো অংশ বিচ্ছিন্ন হয়ে 180° ঘুরে গিয়ে পুনরায় একই স্থানে উল্টোভাবে যুক্ত হওয়াকে কী বলে?", opts: ["ডিলিশন", "ডুপ্লিকেশন", "ইনভারশন (Inversion)", "ট্রান্সলোকেশন"], ans: 2, exp: "ব্যাখ্যা: কোনো ক্রোমোজোমের বাহুর অংশে একই স্থানে 180° কোণে ঘুরে যখন বিপরীত সজ্জাক্রমে অবস্থান করে তখন তাকে ইনভারশন বলে।" },
+            { q: "২০২. ক্রোমোজোমের কোনো প্রান্ত থেকে বা মাঝখান থেকে কিছু অংশ অপসারিত হওয়াকে বা ক্ষয়প্রাপ্ত হওয়াকে কী বলে?", opts: ["ইনভারশন", "ডিলিশন বা ডেফিসিয়েন্সি (Deletion or Deficiency)", "ট্রান্সলোকেশন", "অ্যানিউপ্লয়ডি"], ans: 1, exp: "ব্যাখ্যা: ক্রোমোজোমের গঠনগত বিকৃতির ফলে ক্রোমোজোমের একটি অংশ অপসারিত হয় ও কিছু জিন বিলুপ্ত হয়, একে ডিলিশন বলে।" },
+            { q: "২০৩. মানুষের 5নং ক্রোমোজোমের ক্ষুদ্র বাহুর ডিলিশনের (Deletion) ফলে কোন্ রোগ দেখা যায়?", opts: ["ডাউন সিন্ড্রোম", "টার্নার সিন্ড্রোম", "ক্রাই-ডু-চ্যাট সিন্ড্রোম (Cri-du-chat syndrome)", "পাটাউ সিন্ড্রোম"], ans: 2, exp: "ব্যাখ্যা: মানুষের পঞ্চম ক্রোমোজোমের ক্ষুদ্র বাহুটির ডিলিশনের ফলে ক্রাই-ডু-চ্যাট সিন্ড্রোম রোগ হয়।" },
+            { q: "২০৪. যখন দুটি নন-হোমোলোগাস (অসমসংস্থ) ক্রোমোজোমের মধ্যে খণ্ড বিনিময় হয়, তখন তাকে কী বলে?", opts: ["রেসিপ্রোকাল ট্রান্সলোকেশন (Reciprocal Translocation)", "সাধারণ ট্রান্সলোকেশন", "ইনভারশন", "ক্রসিং ওভার"], ans: 0, exp: "ব্যাখ্যা: যখন দুটি অসমসংস্থ ক্রোমোজোমের মধ্যে অংশে বিনিময় ঘটে, তখন তাকে রেসিপ্রোকাল ট্রান্সলোকেশন বলে।" },
+            { q: "২০৫. যে ইনভারশনে (Inversion) ক্রোমোজোমের খণ্ডিত অংশের মধ্যে সেন্ট্রোমিয়ার অন্তর্ভুক্ত থাকে, তাকে কী বলে?", opts: ["প্যারাসেন্ট্রিক ইনভারশন", "পেরিসেন্ট্রিক ইনভারশন (Pericentric Inversion)", "টার্মিনাল ইনভারশন", "ইন্টারক্যালারি ইনভারশন"], ans: 1, exp: "ব্যাখ্যা: পেরিসেন্ট্রিক ইনভারশনে উল্টে যাওয়া অংশের মধ্যে ক্রোমোজোমের সেন্ট্রোমিয়ার অন্তর্ভুক্ত থাকে।" },
+            { q: "২০৬. ক্রোমোজোমের কোনো একটি খণ্ড একই ক্রোমোজোমে পরপর দুবার বা তার বেশি উপস্থিত থাকলে তাকে কী বলে?", opts: ["ডিলিশন", "ট্রান্সলোকেশন", "ডুপ্লিকেশন (Duplication)", "ইনভারশন"], ans: 2, exp: "ব্যাখ্যা: ক্রোমোজোমে কোনো অংশে দুই বা তার থেকে বেশিবার উপস্থিত থাকলে যে পরিবর্তন সংঘটিত হয় তাকে ডুপ্লিকেশন বলে।" },
+            { q: "২০৭. ড্রসোফিলা মাছির চোখের 'বার আই' (Bar eye) বৈশিষ্ট্যটি কোন্ ধরনের ক্রোমোজোমাল মিউটেশনের ফল?", opts: ["X ক্রোমোজোমের 16A অংশের ডুপ্লিকেশন", "Y ক্রোমোজোমের ডিলিশন", "অটোজোমের ইনভারশন", "21 নং ক্রোমোজোমের ট্রাইসোমি"], ans: 0, exp: "ব্যাখ্যা: ড্রসোফিলার X ক্রোমোজোমের 16A অংশটি ডুপ্লিকেশন হয়ে দু-বার এলে মাছিটির চোখ বার (Bar) আকৃতির হয়ে যায়।" },
+            { q: "২০৮. কোলচিসিন (Colchicine) নামক উপক্ষার প্রয়োগ করে উদ্ভিদ কোশে কী ধরনের জিনগত পরিবর্তন ঘটানো যায়?", opts: ["হ্যাপ্লয়ডি", "অটোপলিপ্লয়ডি (Autopolyploidy)", "ডিলিশন", "ট্রান্সলোকেশন"], ans: 1, exp: "ব্যাখ্যা: Colchicum autumnale থেকে প্রাপ্ত কোলচিসিন উপক্ষারের প্রভাবে বেমতন্তুর গঠন ব্যাহত হয়, ফলে ক্রোমোজোম সংখ্যা গুণিতকে বেড়ে অটোপলিপ্লয়েড (যেমন 4n) তৈরি হয়।" },
+            { q: "২০৯. যে ট্রান্সলোকেশনের ফলে ক্রোমোজোমের সেন্ট্রোমিয়ার অঞ্চলটি বিচ্ছিন্ন হয়ে রবার্টসোনিয়ান ক্রোমোজোম সৃষ্টি করে, তা কোন্ রোগের কারণ হতে পারে?", opts: ["টার্নার সিন্ড্রোম", "ফ্যামিলিয়াল ডাউন সিন্ড্রোম", "অ্যালবিনিজম", "বর্ণান্ধতা"], ans: 1, exp: "ব্যাখ্যা: রবার্টসোনিয়ান ট্রান্সলোকেশন 21 নং এবং 14 নং ক্রোমোজোমের মধ্যে ঘটলে ফ্যামিলিয়াল ডাউন সিন্ড্রোম দেখা দেয়।" },
+            { q: "২১০. নিউক্লিওটাইডের সজ্জা পরিবর্তনের ফলে যদি জিনের কোডনটি একটি স্টপ কোডনে (UAA, UAG, UGA) পরিণত হয়, তখন সেই মিউটেশনকে কী বলে?", opts: ["সাইলেন্ট মিউটেশন", "মিসসেন্স মিউটেশন", "নন-সেন্স বা অর্থহীন মিউটেশন (Nonsense Mutation)", "ফ্রেম শিফ্ট মিউটেশন"], ans: 2, exp: "ব্যাখ্যা: মিউটেশনের ফলে যদি কোনো জিনে অর্থহীন কোডন বা নন-সেন্স কোডনের (যেমন UAA, UAG, UGA) সৃষ্টি হয় তবে প্রোটিন সংশ্লেষ বা ট্রান্সলেশন অসম্পূর্ণ হয়ে বন্ধ হয়ে যায়।" }
+        ]
+    },
+    15: {
+        name: 'Set 15', icon: '🧮', topic: 'লজিক্যাল গাণিতিক প্রশ্ন এবং জিনগত সমস্যা (Logical & Pedigree-based Problems)',
+        questions: [
+            { q: "২১১. একজন A ব্লাড গ্রুপের পুরুষ (জিনোটাইপ I^A I^O) একজন B ব্লাড গ্রুপের মহিলাকে (জিনোটাইপ I^B I^O) বিবাহ করলে, তাদের সন্তানদের ব্লাড গ্রুপ কী কী হতে পারে?", opts: ["শুধুমাত্র AB", "A এবং B", "A, B, AB এবং O (সবকটিই 25% করে)", "শুধুমাত্র O"], ans: 2, exp: "ব্যাখ্যা: I^A I^O × I^B I^O ক্রসে গ্যামেটগুলি মিলিত হয়ে I^A I^B (AB), I^A I^O (A), I^B I^O (B) এবং I^O I^O (O) জিনোটাইপ তৈরি করে। তাই সবকটি ব্লাড গ্রুপ হওয়ার সম্ভাবনা 25% করে থাকে।" },
+            { q: "২১২. মাতা AB ব্লাড গ্রুপের (I^A I^B) এবং পিতা O ব্লাড গ্রুপের (I^O I^O) হলে, সন্তানদের ব্লাড গ্রুপ কী হতে পারে?", opts: ["100% AB", "100% O", "50% A এবং 50% B", "25% A, 25% B, 50% AB"], ans: 2, exp: "ব্যাখ্যা: I^A I^B × I^O I^O ক্রসে উৎপন্ন অপত্যরা I^A I^O (A গ্রুপ) এবং I^B I^O (B গ্রুপ) হবে। তাই 50% সন্তান A এবং 50% সন্তান B ব্লাড গ্রুপের হবে।" },
+            { q: "২১৩. বোম্বে ফিনোটাইপের (Bombay phenotype) ক্ষেত্রে A বা B অ্যান্টিজেন তৈরি না হওয়ার জন্য কোন্ জিনের হোমোজাইগাস প্রচ্ছন্ন অবস্থা দায়ী?", opts: ["I জিন", "h জিন (hh জিনোটাইপ)", "c জিন", "Rh জিন"], ans: 1, exp: "ব্যাখ্যা: H জিনের প্রচ্ছন্নধর্মী অ্যালিল h হোমোজাইগাস (hh) অবস্থায় থাকলে H বস্তু তৈরি হয় না। এর ফলে I^A বা I^B জিন থাকা সত্ত্বেও A বা B অ্যান্টিজেন তৈরি হয় না (প্রচ্ছন্ন এপিস্ট্যাসিস)।" },
+            { q: "২১৪. একটি বিশুদ্ধ কালো গিনিপিগ (BB) ও বিশুদ্ধ সাদা গিনিপিগের (bb) মধ্যে সংকরায়ণে F2 জনুতে ফিনোটাইপ অনুপাত কত হবে?", opts: ["1:2:1", "3:1 (কালো:সাদা)", "9:3:3:1", "1:1"], ans: 1, exp: "ব্যাখ্যা: মেন্ডেলের একসংকর জনন নিয়ম অনুযায়ী F1 সংকর (Bb) গিনিপিগদের মধ্যে ক্রস করালে F2 জনুতে 3 ভাগ কালো এবং 1 ভাগ সাদা গিনিপিগ (3:1) উৎপন্ন হয়।" },
+            { q: "২১৫. TtYy জিনোটাইপ যুক্ত একটি মটর গাছ থেকে স্বাধীন বিন্যাস সূত্র অনুযায়ী কত প্রকারের গ্যামেট তৈরি হবে?", opts: ["২ প্রকার", "৪ প্রকার (TY, Ty, tY, ty)", "৮ প্রকার", "১৬ প্রকার"], ans: 1, exp: "ব্যাখ্যা: TtYy দ্বিসংকর হেটারোজাইগাস থেকে 2^2 = 4 প্রকার গ্যামেট উৎপন্ন হবে: TY, Ty, tY, এবং ty।" },
+            { q: "২১৬. AaBbCc জিনোটাইপ যুক্ত একটি জীব থেকে গ্যামেট সৃষ্টির সময় কত প্রকার জিন সমন্বয় বা গ্যামেট উৎপন্ন হবে?", opts: ["৪ প্রকার", "৬ প্রকার", "৮ প্রকার", "১৬ প্রকার"], ans: 2, exp: "ব্যাখ্যা: অ্যালিল জোড়ার সংখ্যার ভিত্তিতে গ্যামেটে জিন সমন্বয় সংখ্যার সূত্র 2^n। এখানে n=3 (Aa, Bb, Cc), তাই গ্যামেট সংখ্যা 2^3 = 8 প্রকার হবে।" },
+            { q: "২১৭. দ্বিসংকর জননের টেস্ট ক্রস (Dihybrid test cross) অনুপাত কত হয়?", opts: ["9:3:3:1", "1:2:1", "1:1:1:1", "3:1"], ans: 2, exp: "ব্যাখ্যা: F1 দ্বিসংকর (যেমন YyRr)-এর সাথে বিশুদ্ধ প্রচ্ছন্ন (yyrr)-এর টেস্ট ক্রস ঘটালে চার প্রকার অপত্য সমান অনুপাতে (1:1:1:1) উৎপন্ন হয়।" },
+            { q: "২১৮. দুটি হেটারোজাইগাস লম্বা (Tt) মটর গাছের মিলনে উৎপন্ন 100 টি গাছের মধ্যে কতগুলি গাছ বিশুদ্ধ লম্বা (TT) হবে?", opts: ["25 টি (25%)", "50 টি (50%)", "75 টি (75%)", "100 টি"], ans: 0, exp: "ব্যাখ্যা: Tt x Tt ক্রসে 1/4 (25%) TT, 2/4 (50%) Tt এবং 1/4 (25%) tt উৎপন্ন হয়। তাই 100 টির মধ্যে 25 টি গাছ বিশুদ্ধ লম্বা (TT) হবে।" },
+            { q: "২১৯. একটি বর্ণান্ধ মহিলা (X^c X^c) এবং একজন স্বাভাবিক দৃষ্টিসম্পন্ন পুরুষের (X^+ Y) মধ্যে বিবাহ হলে, তাদের পুত্র সন্তানরা কীরূপ হবে?", opts: ["100% স্বাভাবিক", "50% বর্ণান্ধ", "100% বর্ণান্ধ", "25% বর্ণান্ধ"], ans: 2, exp: "ব্যাখ্যা: পুত্র সন্তানরা X ক্রোমোজোম সর্বদা মাতার কাছ থেকে পায়। যেহেতু মাতা বর্ণান্ধ (X^c X^c), তাই সমস্ত পুত্র সন্তান (X^c Y) 100% বর্ণান্ধ হবে।" },
+            { q: "২২০. মানুষের ত্বকের রং যদি 3 জোড়া পলিজিন (A, B, C) দ্বারা নিয়ন্ত্রিত হয়, তবে বিশুদ্ধ কালো (AABBCC) ও বিশুদ্ধ সাদা (aabbcc) এর মধ্যে সংকরায়ণে F2 জনুতে কতগুলি ফিনোটাইপ দেখা যায়?", opts: ["3 প্রকার", "5 প্রকার", "7 প্রকার", "9 প্রকার"], ans: 2, exp: "ব্যাখ্যা: 3 জোড়া পলিজিনের ক্ষেত্রে F2 জনুতে 7 প্রকার ফিনোটাইপ (যেমন- বিশুদ্ধ কালো, বেশি কালচে বাদামি, কালচে বাদামি, মিউলাটো, হালকা বাদামি, অত্যন্ত হালকা বাদামি ও বিশুদ্ধ সাদা) একটি ঘণ্টাকৃতি লেখচিত্র (1:6:15:20:15:6:1) তৈরি করে।" },
+            { q: "২২১. একটি হেটারোজাইগাস (AaBb) জীবের সাথে হোমোজাইগাস প্রচ্ছন্ন (aabb) জীবের ক্রস করানো হলে এটি কী ধরনের ক্রস?", opts: ["ব্যাক ক্রস (শুধুমাত্র)", "মনোহাইব্রিড ক্রস", "ডাইহাইব্রিড টেস্ট ক্রস", "অসম্পূর্ণ প্রকটতা"], ans: 2, exp: "ব্যাখ্যা: অজানা জিনোটাইপের (বা হেটারোজাইগাস) জীবের সাথে বিশুদ্ধ প্রচ্ছন্ন (aabb) জিনোটাইপযুক্ত জীবের ক্রস ঘটানোকে টেস্ট ক্রস বলে, এটি দুই জোড়া জিনের জন্য ডাইহাইব্রিড টেস্ট ক্রস।" },
+            { q: "২২২. খরগোশের গায়ের রঙের (Coat colour) ক্ষেত্রে কটি মাল্টিপল অ্যালিল (Multiple allele) দায়ী?", opts: ["২টি", "৩টি", "৪টি (C, C^ch, C^h, C^a)", "৫টি"], ans: 2, exp: "ব্যাখ্যা: খরগোশের গায়ের রং চারটি অ্যালিল দ্বারা নির্ণীত হয়— C (Agouti), C^ch (Chinchilla), C^h (Himalayan) এবং C^a (Albino)।" },
+            { q: "২২৩. একজন পুরুষ যার জিনোটাইপ I^B I^O এবং একজন স্ত্রী যার জিনোটাইপ I^A I^B তাদের সন্তানদের O ব্লাড গ্রুপ (I^O I^O) হওয়ার সম্ভাবনা কত?", opts: ["0%", "25%", "50%", "100%"], ans: 0, exp: "ব্যাখ্যা: স্ত্রী I^A I^B জিনোটাইপযুক্ত হওয়ায় তিনি গ্যামেটে I^O অ্যালিল দিতে পারবেন না। তাই সন্তানদের মধ্যে I^O I^O (O ব্লাড গ্রুপ) হওয়ার কোনো সম্ভাবনা (0%) নেই।" },
+            { q: "২২৪. মানুষের ক্ষেত্রে ডাবল ট্রাইজোমি (Double trisomy) অবস্থার ক্রোমোজোম সংখ্যা কত হবে?", opts: ["45", "46", "47", "48"], ans: 3, exp: "ব্যাখ্যা: ডাবল ট্রাইজোমি (2n+1+1) মানে ডিপ্লয়েড সেটের দু-জোড়া সমসংস্থ ক্রোমোজোমের সঙ্গে একটি করে মোট দুটি অতিরিক্ত ক্রোমোজোম যুক্ত হওয়া। মানুষের 2n=46, তাই 46+1+1 = 48 হবে।" },
+            { q: "২২৫. পিতা হিমোফিলিক (X^h Y) এবং মাতা সম্পূর্ণ স্বাভাবিক (X^H X^H) হলে, তাদের পুত্র সন্তানের হিমোফিলিয়া হওয়ার সম্ভাবনা কত?", opts: ["0%", "25%", "50%", "100%"], ans: 0, exp: "ব্যাখ্যা: পুত্র সন্তান তার একমাত্র X ক্রোমোজোমটি সর্বদা মাতার কাছ থেকে পায় এবং Y ক্রোমোজোম পিতার কাছ থেকে পায়। মাতা সম্পূর্ণ স্বাভাবিক হওয়ায় পুত্র সন্তানটি স্বাভাবিক X ক্রোমোজোম পাবে, তাই তার হিমোফিলিক হওয়ার কোনো সম্ভাবনা (0%) নেই।" }
+        ]
+    }
+};
+
+// ================== STATE VARIABLES ==================
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+// ================== LOCAL STORAGE LOGIC ==================
+function getGlobalUsers() {
+    const data = localStorage.getItem("testBazarGlobalUsers");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+    const data = localStorage.getItem("testBazarAttemptsBio3Ch4_v1");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    attempts[key] = (attempts[key] || 0) + 1;
+    localStorage.setItem("testBazarAttemptsBio3Ch4_v1", JSON.stringify(attempts));
+    return attempts[key];
+}
+
+// ================== INITIALIZATION ==================
+window.onload = () => {
+    renderHub();
+};
+
+function renderHub() {
+    const grid = document.getElementById("setGrid");
+    grid.innerHTML = "";
+    
+    for(let id in ALL_SETS) {
+        const set = ALL_SETS[id];
+        const div = document.createElement("div");
+        div.className = "set-card";
+        
+        let attemptCount = 0;
+        let isLocked = false;
+        
+        if (currentUser) {
+            attemptCount = getAttemptCount(currentUser, id);
+            isLocked = attemptCount >= MAX_ATTEMPTS;
+            if (isLocked) div.classList.add("locked");
+        }
+        
+        div.innerHTML = `
+            <div class="icon">${set.icon}</div>
+            <div class="set-num">${set.name}</div>
+            <div class="set-title">${set.topic}</div>
+            <div class="set-meta"><span>${set.questions.length} Qs</span><span>10 Mins</span></div>
+            ${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+        `;
+        
+        div.onclick = () => {
+            if (isLocked) {
+                alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+                return;
+            }
+            handleSetClick(id);
+        };
+        grid.appendChild(div);
+    }
+}
+
+function handleSetClick(setId) {
+    activeSetId = setId;
+    if (!currentUser) {
+        document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+        document.getElementById("loginOverlay").classList.add("active");
+        document.getElementById("loginUsername").value = "";
+        document.getElementById("loginPassword").value = "";
+        document.getElementById("loginError").style.display = "none";
+    } else {
+        startQuiz(setId);
+    }
+}
+
+function doLogin() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+    const err = document.getElementById("loginError");
+    const GLOBAL_USERS = getGlobalUsers();
+
+    if(!u || !p) {
+        err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!";
+        err.style.display = "block";
+        return;
+    }
+
+    if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+        let attempts = getAttemptCount(u, activeSetId);
+        if (attempts >= MAX_ATTEMPTS) {
+            err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+            err.style.display = "block";
+            return;
+        }
+        currentUser = u;
+        document.getElementById("loginOverlay").classList.remove("active");
+        document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+        document.getElementById("userDisplay").classList.remove("hidden");
+        renderHub();
+        startQuiz(activeSetId);
+    } else {
+        err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+        err.style.display = "block";
+    }
+}
+
+function closeLogin() {
+    document.getElementById("loginOverlay").classList.remove("active");
+}
+
+function goToHub() {
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("hubPage").style.display = "block";
+    document.getElementById("timerBox").classList.add("hidden");
+    clearInterval(timerInterval);
+    renderHub();
+}
+
+// ================== QUIZ LOGIC ==================
+function startQuiz(setId) {
+    incrementAttempt(currentUser, setId);
+    questions = ALL_SETS[setId].questions;
+    currentQIndex = 0;
+    score = 0;
+    wrongAnswers = 0;
+    userAnswers = {};
+    isReviewMode = false;
+    timeLeft = TIME_LIMIT;
+
+    document.getElementById("hubPage").style.display = "none";
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    document.getElementById("timerBox").classList.remove("hidden");
+    document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+    document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+
+    startTimer();
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const qData = questions[currentQIndex];
+    document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+    document.getElementById("qText").innerHTML = qData.q;
+    const progress = ((currentQIndex) / questions.length) * 100;
+    document.getElementById("progressFill").style.width = `${progress}%`;
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    
+    const optsBox = document.getElementById("qOpts");
+    optsBox.innerHTML = "";
+    document.getElementById("explanation").classList.remove("show");
+    document.getElementById("nextBtn").disabled = true;
+    document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+    qData.opts.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "opt";
+        btn.innerHTML = `<div class="opt-circle">${LABELS[idx] || '—'}</div> <div class="opt-text">${optText}</div>`;
+        
+        if (isReviewMode) {
+            btn.classList.add("disabled");
+            if (idx === qData.ans) btn.classList.add("correct");
+            else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+        } else {
+            btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+        }
+        optsBox.appendChild(btn);
+    });
+
+    if (isReviewMode) {
+        document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+        document.getElementById("explanation").classList.add("show");
+        document.getElementById("nextBtn").disabled = false;
+        if (currentQIndex === questions.length - 1) {
+            document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন";
+        }
+    }
+    
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+    const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+    allBtns.forEach(b => b.classList.add("disabled"));
+    userAnswers[currentQIndex] = selectedIdx; 
+
+    if (selectedIdx === correctIdx) {
+        btn.classList.add("correct");
+        score++;
+    } else {
+        btn.classList.add("wrong");
+        allBtns[correctIdx].classList.add("correct");
+        wrongAnswers++;
+    }
+    
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+    document.getElementById("explanation").classList.add("show");
+    document.getElementById("nextBtn").disabled = false;
+    
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function nextQ() {
+    if (isReviewMode && currentQIndex === questions.length - 1) {
+        document.getElementById("testArea").classList.add("hidden");
+        document.getElementById("resultWrap").classList.add("show");
+        return;
+    }
+    if (!isReviewMode && currentQIndex === questions.length - 1) {
+        finishQuiz();
+        return;
+    }
+    currentQIndex++;
+    loadQuestion();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    const tBox = document.getElementById("timerBox");
+    tBox.classList.remove("danger");
+    
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishQuiz();
+            return;
+        }
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        if (timeLeft < 60) tBox.classList.add("danger");
+    }, 1000);
+}
+
+function finishQuiz() {
+    clearInterval(timerInterval);
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("timerBox").classList.add("hidden");
+    document.getElementById("resultWrap").classList.add("show");
+    
+    const total = questions.length;
+    const skipped = total - (score + wrongAnswers);
+    const percent = Math.round((score / total) * 100);
+    
+    document.getElementById("finalScore").innerText = `${percent}%`;
+    document.getElementById("rbCorrect").innerText = score;
+    document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+    
+    const gradeEl = document.getElementById("resultGrade");
+    if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+    else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+    else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+    
+    const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+    document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+    if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+        alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+        return;
+    }
+    startQuiz(activeSetId);
+}
+
+function showReview() {
+    isReviewMode = true;
+    currentQIndex = 0;
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    loadQuestion();
+}
+</script>
+</body>
+</html>
