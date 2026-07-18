@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Biology 3rd Sem | Ch 3</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+/* ================= COLOR SCHEME & VARIABLES ================= */
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+
+/* Top Bar */
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+
+/* Hub View */
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; justify-content: center; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; max-width: 350px; margin: 0 auto; width: 100%;}
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+
+/* Quiz View */
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; overflow-x: auto; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main); overflow-x: auto;}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; overflow-x: auto;}
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+
+/* Result View */
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+
+/* Login Modal */
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+    <div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+    <div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+
+<div class="main">
+
+    <!-- ================= LOGIN MODAL ================= -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <h2>লগইন করুন</h2>
+            <p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+            <div class="login-set-name" id="loginSetName">📚 Set 1</div>
+            <div class="input-group">
+                <label>ইউজারনেম</label>
+                <input type="text" id="loginUsername" placeholder="Username">
+            </div>
+            <div class="input-group">
+                <label>পাসওয়ার্ড</label>
+                <input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+            </div>
+            <button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+            <button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+            <div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+        </div>
+    </div>
+
+    <!-- ================= HUB PAGE ================= -->
+    <div id="hubPage">
+        <div class="hub-header">
+            <h1>জীববিজ্ঞান 3rd Sem <br>জননগত স্বাস্থ্য (Reproductive Health)</h1>
+            <p>অধ্যায়ের গুরুত্বপূর্ণ প্রশ্ন সম্বলিত ৬টি সেট (মোট ৯০টি প্রশ্ন)। Test শুরু করতে সেটে ক্লিক করুন।</p>
+        </div>
+        <div class="set-grid" id="setGrid"></div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+        </div>
+    </div>
+
+    <!-- ================= QUIZ AREA ================= -->
+    <div id="testArea" class="hidden">
+        <div class="quiz-info">
+            <div class="info-item">🎓 <strong>Biology</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+            <div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="q-card">
+            <div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+            <div class="q-text" id="qText">Question Text</div>
+            <div class="opts" id="qOpts"></div>
+            <div class="explanation" id="explanation"><p id="explanationText"></p></div>
+            <div class="nav-row">
+                <div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+                <button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RESULT AREA ================= -->
+    <div class="result-wrap" id="resultWrap">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-score en-font" id="finalScore">100%</div>
+        <div class="result-total">স্কোর</div>
+        <div class="result-grade" id="resultGrade">অসাধারণ!</div>
+        <div class="result-bars">
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+                <div class="rb-label">সঠিক</div>
+            </div>
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+                <div class="rb-label">ভুল/স্কিপ</div>
+            </div>
+        </div>
+        <div class="attempt-info-box" id="attemptInfo"></div>
+        <div class="action-btns">
+            <button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+            <button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+            <button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// Global Config & Database
+// ============================================================
+const MAX_ATTEMPTS = 10; 
+const TIME_LIMIT = 10 * 60; // 10 Minutes
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+    1: {
+        name: 'Set 1', icon: '🩺', topic: 'জননগত স্বাস্থ্য এবং যৌন রোগ (STDs) - পার্ট ১',
+        questions: [
+            { q: "১. বিশ্ব স্বাস্থ্য সংগঠন (WHO)-এর মতে 'জননগত স্বাস্থ্য' বলতে কী বোঝায়?", opts: ["শুধুমাত্র রোগবিহীন জননাঙ্গ", "জননের সবদিক থেকে এক সামগ্রিক সুস্থতা (দৈহিক, মানসিক, আচরণগত ও সামাজিক)", "শুধুমাত্র সন্তান উৎপাদনে সক্ষমতা", "যৌন রোগ থেকে মুক্তি"], ans: 1, exp: "ব্যাখ্যা: WHO-এর সংজ্ঞা অনুসারে জননগত স্বাস্থ্য বলতে জননের সবদিক থেকে এক সামগ্রিক সুস্থতা অর্থাৎ দৈহিক, মানসিক, আচরণগত ও সামাজিক সুস্থতাকে বোঝায়।" },
+            { q: "২. RCH-এর সম্পূর্ণ রূপ কী?", opts: ["Reproductive Center for Health", "Reproductive Care of Human", "Reproductive and Child Health Care", "Research on Child Health"], ans: 2, exp: "ব্যাখ্যা: ভারতবর্ষে 1997 খ্রিস্টাব্দে RCH (Reproductive and Child Health Care) চালু হয়, যার প্রধান লক্ষ্য জননগত স্বাস্থ্য, শিশুর যত্ন এবং প্রজনন নিয়ন্ত্রণ।" },
+            { q: "৩. সিফিলিস (Syphilis) রোগের প্যাথোজেন বা জীবাণুর নাম কী?", opts: ["Neisseria gonorrhoeae", "Treponema pallidum", "Chlamydia trachomatis", "Trichomonas vaginalis"], ans: 1, exp: "ব্যাখ্যা: সিফিলিস একটি ব্যাকটেরিয়া ঘটিত যৌন সংসর্গজনিত রোগ, যা Treponema pallidum নামক ব্যাকটেরিয়ার সংক্রমণে ঘটে।" },
+            { q: "৪. গনোরিয়া (Gonorrhoea) রোগের প্যাথোজেনের নাম কী?", opts: ["Neisseria gonorrhoeae", "Candida albicans", "Herpes simplex virus", "Calymmatobacterium granulomatis"], ans: 0, exp: "ব্যাখ্যা: গনোরিয়া রোগ সৃষ্টিকারী ব্যাকটেরিয়ার নাম Neisseria gonorrhoeae।" },
+            { q: "৫. জেনিটাল হারপিস (Genital Herpes) রোগটি কীসের সংক্রমণে হয়?", opts: ["ব্যাকটেরিয়া", "প্রোটোজোয়া", "ভাইরাস", "ছত্রাক"], ans: 2, exp: "ব্যাখ্যা: জেনিটাল হারপিস রোগটি Herpes simplex virus (ভাইরাস) এর সংক্রমণে ঘটে।" },
+            { q: "৬. জননেন্দ্রিয়ের আঁচিল বা জেনিটাল ওয়ার্টস (Genital Warts) কোন্ ভাইরাসের কারণে হয়?", opts: ["HIV", "HBV", "HPV (Human papilloma virus)", "HSV"], ans: 2, exp: "ব্যাখ্যা: বহিঃজননেন্দ্রিয় ও যোনিদেশে সৃষ্ট আঁচিল বা জেনিটাল ওয়ার্টস Human papilloma Virus (HPV)-এর সংক্রমণের ফলে হয়।" },
+            { q: "৭. ট্রাইকোমোনিয়েসিস (Trichomoniasis) রোগ সৃষ্টিকারী প্যাথোজেন কী প্রকৃতির?", opts: ["ব্যাকটেরিয়া", "আদ্যপ্রাণী বা প্রোটোজোয়া", "ছত্রাক", "নিমাটোড"], ans: 1, exp: "ব্যাখ্যা: ট্রাইকোমোনিয়েসিস রোগটি Trichomonas vaginalis নামক আদ্যপ্রাণী বা প্রোটোজোয়া দ্বারা সংঘটিত হয়।" },
+            { q: "৮. ভাজাইনাইটিস (Vaginitis) রোগটি কোন্ ছত্রাকের সংক্রমণে ঘটে?", opts: ["Treponema pallidum", "Chlamydia trachomatis", "Candida albicans", "Enterobius vermicularis"], ans: 2, exp: "ব্যাখ্যা: যোনিপথে বা ভ্যাজাইনায় সংক্রমণকারী ভাজাইনাইটিস রোগটি Candida albicans (Vaginal yeast) নামক ছত্রাকের কারণে হয়।" },
+            { q: "৯. ক্ল্যামাইডিয়াসিস (Chlamydiasis) রোগের প্যাথোজেন কোনটি?", opts: ["Calymmatobacterium granulomatis", "Chlamydia trachomatis", "Neisseria gonorrhoeae", "Candida albicans"], ans: 1, exp: "ব্যাখ্যা: ক্ল্যামাইডিয়াসিস রোগটি Chlamydia trachomatis নামক ব্যাকটেরিয়ার (বাধ্যতামূলক অন্তঃকোশীয় পরজীবী) কারণে ঘটে।" },
+            { q: "১০. ডোনোভানিওসিস (Donovanosis) রোগের জীবাণুর নাম কী?", opts: ["Candida albicans", "Trichomonas vaginalis", "Calymmatobacterium granulomatis", "HIV"], ans: 2, exp: "ব্যাখ্যা: ডোনোভানিওসিস রোগটির প্যাথোজেন বা জীবাণুর বৈজ্ঞানিক নাম হলো Calymmatobacterium granulomatis।" },
+            { q: "১১. পিনওয়ার্ম বা নিমাটোড দ্বারা সৃষ্ট একটি STD-র প্যাথোজেন কোনটি?", opts: ["Enterobius vermicularis", "Trichomonas vaginalis", "Candida albicans", "Treponema pallidum"], ans: 0, exp: "ব্যাখ্যা: নিমাটোড দ্বারা সৃষ্ট যৌন সংসর্গজনিত রোগের প্যাথোজেন হলো Enterobius vermicularis (Pinworm), যা পায়ুদ্বারে প্রদাহ সৃষ্টি করে।" },
+            { q: "১২. পুরুষদের ক্ষেত্রে গনোরিয়া রোগের প্রধান লক্ষণ কী?", opts: ["লিঙ্গ দিয়ে পুঁজ নিঃসরণ এবং মূত্রত্যাগের সময় জ্বালা", "সারা দেহে ফুসকুড়ি", "যকৃতের প্রদাহ", "শ্বাসকষ্ট"], ans: 0, exp: "ব্যাখ্যা: গনোরিয়ার ফলে পুরুষদের লিঙ্গ দিয়ে পুঁজ নিঃসরণ হয় এবং মূত্রত্যাগের সময় মূত্রনালিতে জ্বালা ও ব্যথা অনুভূত হয়।" },
+            { q: "১৩. স্ত্রীলোকদের ক্ষেত্রে ট্রাইকোমোনিয়েসিসের একটি প্রধান লক্ষণ কী?", opts: ["জরায়ুতে টিউমার", "যোনিদেশ থেকে দুর্গন্ধযুক্ত হলুদ স্রাব নিঃসরণ", "স্তনগ্রন্থির প্রদাহ", "মস্তিষ্কের ক্ষতি"], ans: 1, exp: "ব্যাখ্যা: স্ত্রীলোকেরা এই রোগে বেশি আক্রান্ত হয় এবং এর প্রধান লক্ষণ হলো যোনিদেশ থেকে দুর্গন্ধযুক্ত হলুদ স্রাব বেরোনো ও যোনি প্রদাহ।" },
+            { q: "১৪. সিফিলিসের সহজাত (Congenital) সংক্রমণ কীভাবে ঘটে?", opts: ["মশার কামড় থেকে", "আক্রান্ত মা থেকে প্লাসেন্টার মাধ্যমে ভ্রূণে", "দূষিত খাবার থেকে", "বাতাসের মাধ্যমে"], ans: 1, exp: "ব্যাখ্যা: সহজাত সিফিলিস আক্রান্ত মা থেকে প্লাসেন্টার মাধ্যমে ভ্রূণে স্থানান্তরিত হয়, যার ফলে মৃত বা রুগ্ন শিশুর জন্ম হতে পারে।" },
+            { q: "১৫. সিফিলিসের প্রথম দশায় কোন্ ওষুধটি সবচেয়ে বেশি ফলপ্রদ?", opts: ["পোলিও ভ্যাকসিন", "পেনিসিলিন", "অ্যাসপিরিন", "মেট্ৰোনিডাজোল"], ans: 1, exp: "ব্যাখ্যা: সিফিলিস প্রতিরোধের জন্য পেনিসিলিন (যেমন প্রোকেন বেঞ্জাইল পেনিসিলিন) এবং টেট্রাসাইক্লিন অত্যন্ত ফলপ্রদ ওষুধ।" }
+        ]
+    },
+    2: {
+        name: 'Set 2', icon: '🦠', topic: 'যৌন রোগ (STDs) এবং অন্যান্য - পার্ট ২',
+        questions: [
+            { q: "১. AIDS এর সম্পূর্ণ নাম কী?", opts: ["Auto Immune Deficiency Syndrome", "Acquired Immuno Deficiency Syndrome", "Active Immunity Defense Syndrome", "Acquired Infection Deficiency Syndrome"], ans: 1, exp: "ব্যাখ্যা: মারণব্যাধি AIDS-এর সম্পূর্ণ নাম হলো Acquired Immuno Deficiency Syndrome।" },
+            { q: "২. AIDS রোগের জন্য দায়ী ভাইরাসের নাম কী?", opts: ["HBV", "HPV", "HIV (Human Immunodeficiency Virus)", "HCV"], ans: 2, exp: "ব্যাখ্যা: AIDS রোগটি হিউম্যান ইমিউনোডেফিসিয়েন্সি ভাইরাস (HIV) নামক ভাইরাসের সংক্রমণে ঘটে।" },
+            { q: "৩. HIV মানবদেহের প্রধানত কোন্ কোশকে আক্রমণ করে অনাক্রম্যতা কমিয়ে দেয়?", opts: ["লোহিত রক্তকণিকা", "হেল্পার T-কোশ (T_H বা CD4+ কোশ)", "সাইটোটক্সিক T-কোশ (T_C)", "অণুচক্রিকা"], ans: 1, exp: "ব্যাখ্যা: HIV মানবদেহে প্রবেশের পর প্রধানত হেল্পার T-কোশ বা CD4+ কোশকে আক্রমণ করে, ফলে দেহের রোগ প্রতিরোধ শক্তি কমে যায়।" },
+            { q: "৪. হেপাটাইটিস-B (Hepatitis-B) রোগের প্যাথোজেন কোনটি?", opts: ["HAV", "HCV", "HBV (Hepatitis B virus)", "HDV"], ans: 2, exp: "ব্যাখ্যা: হেপাটাইটিস-B রোগ সৃষ্টিকারী ভাইরাসের নাম হলো HBV।" },
+            { q: "৫. AIDS রোগ নির্ণয়ের প্রাথমিক টেস্ট কোনটি?", opts: ["VDRL", "Widal", "ELISA (Enzyme Linked Immuno Sorbent Assay)", "PCR"], ans: 2, exp: "ব্যাখ্যা: AIDS রোগ শনাক্তকরণের জন্য প্রাথমিকভাবে ELISA টেস্ট করা হয় এবং ফলাফল পজিটিভ হলে ওয়েস্টার্ন ব্লটিং টেস্ট করা হয়।" },
+            { q: "৬. ELISA টেস্টের পর এইডস রোগ নিশ্চিত করার জন্য কোন্ টেস্ট করা হয়?", opts: ["ওয়েস্টার্ন ব্লটিং টেস্ট (Western Blotting Test)", "সাউদার্ন ব্লটিং", "নর্দার্ন ব্লটিং", "TPHA টেস্ট"], ans: 0, exp: "ব্যাখ্যা: ELISA টেস্টের ফলাফল পজিটিভ পাওয়া গেলে তবেই Western Blotting Test-টি কনফারমেশন টেস্ট হিসাবে করা হয়।" },
+            { q: "৭. জেনিটাল হারপিস রোগের চিকিৎসায় সাধারণত কোন্ ওষুধ ব্যবহৃত হয়?", opts: ["পেনিসিলিন", "অ্যাসপিরিন", "Acyclovir, Valacyclovir বা Famcyclovir", "মেট্ৰোনিডাজোল"], ans: 2, exp: "ব্যাখ্যা: জেনিটাল হারপিস রোগ নিরাময়ের জন্য Acyclovir, Valacyclovir বা Famcyclovir জাতীয় অ্যান্টিভাইরাল ওষুধ ব্যবহার করা হয়।" },
+            { q: "৮. ট্রাইকোমোনিয়েসিস রোগ নিরাময়ে কোন্ ওষুধ দ্বারা চিকিৎসা করা হয়?", opts: ["পেনিসিলিন", "মেট্ৰোনিডাজোল (Metronidazole)", "AZT", "Acyclovir"], ans: 1, exp: "ব্যাখ্যা: ট্রাইকোমোনাস দ্বারা সৃষ্ট ট্রাইকোমোনিয়েসিস রোগের চিকিৎসায় সাধারণত Metronidazole ব্যবহার করা হয়।" },
+            { q: "৯. কাপোসি সারকোমা (Kaposi sarcoma) কোন্ রোগের শেষ পর্যায়ে দেখা যায়?", opts: ["সিফিলিস", "গনোরিয়া", "AIDS", "জেনিটাল হারপিস"], ans: 2, exp: "ব্যাখ্যা: AIDS রোগের শেষ পর্যায়ে CD4+ কোশের পরিমাণ কমে যায়, নিউমোনিয়া দেখা যায় এবং কাপোসি সারকোমা ও ক্যানডিডিয়াসিস নামক ঘা সৃষ্টি হয়।" },
+            { q: "১০. NACO-এর সম্পূর্ণ রূপ কী?", opts: ["National Animal Care Organization", "National Aids Control Organization", "Natural Awareness of Contraception", "National Agency for Care Operation"], ans: 1, exp: "ব্যাখ্যা: ভারতে এইডস নিয়ন্ত্রণ ও প্রতিরোধমূলক কাজের জন্য গঠিত সরকারি সংস্থাটির নাম NACO (National Aids Control Organization)।" },
+            { q: "১১. Zidovudinen (ZDV) বা AZT (Azidothymidinen) কোন্ রোগের চিকিৎসায় ব্যবহৃত হয়?", opts: ["সিফিলিস", "হেপাটাইটিস B", "AIDS", "ক্যানসার"], ans: 2, exp: "ব্যাখ্যা: এইডস সম্পূর্ণ নিরাময়যোগ্য না হলেও, ZDV, AZT এবং DDI-এর মতো ওষুধগুলি রোগীর আয়ু বাড়াতে চিকিৎসায় ব্যবহৃত হয়।" },
+            { q: "১২. হেপাটাইটিস-B কীভাবে ছড়ায়?", opts: ["মশার কামড়ে", "শুধুমাত্র দূষিত জলের মাধ্যমে", "লালা, রক্ত সঞ্চালন এবং আক্রান্ত ব্যক্তির সাথে যৌন মিলনের মাধ্যমে", "বাতাসের মাধ্যমে"], ans: 2, exp: "ব্যাখ্যা: হেপাটাইটিস-B মূলত লালা, অশ্রু, বীর্য, রক্ত সঞ্চালন এবং আক্রান্ত মায়ের থেকে প্লাসেন্টার মাধ্যমে ছড়ায়।" },
+            { q: "১৩. সিফিলিস রোগ নির্ণয়ের জন্য কোন্ সেরোলজিক্যাল টেস্ট করা হয়?", opts: ["Widal টেস্ট", "VDRL, TPHA বা RPR টেস্ট", "ELISA", "PCR"], ans: 1, exp: "ব্যাখ্যা: সিফিলিস শনাক্তকরণের জন্য VDRL (Venereal Disease Research Laboratory), TPHA, RPR এবং FTA-ABS টেস্ট করা হয়।" },
+            { q: "১৪. মানবদেহের বাইরে HIV কতক্ষণ বেঁচে থাকতে পারে?", opts: ["২ দিন", "২৪ ঘণ্টা", "মাত্র 60 সেকেন্ড", "অনন্তকাল"], ans: 2, exp: "ব্যাখ্যা: মানবদেহের বাইরে খোলা পরিবেশে HIV অত্যন্ত ক্ষণস্থায়ী এবং মাত্র 60 সেকেন্ড বেঁচে থাকতে পারে।" },
+            { q: "১৫. হেপাটাইটিস-B ভ্যাকসিন শিশুদের জন্মের কতদিন পর প্রথম দেওয়া হয় এবং কতগুলো ধাপে দেওয়া হয়?", opts: ["১টি ধাপে", "৩টি ধাপে (প্রথম দিন, ১ মাস পর এবং ৬ মাস পর)", "৫টি ধাপে", "১০ বছর বয়সে ১ বার"], ans: 1, exp: "ব্যাখ্যা: 10 বছরের কমবয়সী শিশুদের ক্ষেত্রে HBV ভ্যাকসিন ৩টি ধাপে প্রয়োগ করা হয়: প্রথম দিন, 1 মাস পর এবং 6 মাস পর।" }
+        ]
+    },
+    3: {
+        name: 'Set 3', icon: '💊', topic: 'জন্ম নিয়ন্ত্রণ: প্রাকৃতিক, বাধায়ক ও রাসায়নিক পদ্ধতি',
+        questions: [
+            { q: "১. জন্ম নিয়ন্ত্রণের স্পেসিং (Spacing) বা অস্থায়ী পদ্ধতিকে কয়ভাগে ভাগ করা যায়?", opts: ["২ ভাগে", "৩ ভাগে", "৫ ভাগে", "৭ ভাগে"], ans: 2, exp: "ব্যাখ্যা: স্পেসিং বা অস্থায়ী পদ্ধতি সাধারণত পাঁচ প্রকারের হয়— ১. প্রাকৃতিক পদ্ধতি, ২. বাধাায়ক পদ্ধতি, ৩. রাসায়নিক পদ্ধতি, ৪. ইন্ট্রাইউটেরাইন ডিভাইস, ৫. হরমোনাল পদ্ধতি।" },
+            { q: "২. ঋতুচক্রের কোন্ সময়টি 'নিরাপদ সময়' (Safe period) বা Rhythm method হিসেবে পরিচিত?", opts: ["1-5 দিন", "6-10 দিন", "14-18 দিন", "25-28 দিন"], ans: 2, exp: "ব্যাখ্যা: ঋতুচক্রের মাঝামাঝি সময় (14-18 দিন) ডিম্বনিঃসরণ ও নিষেক সম্পন্ন হওয়ার সম্ভাবনা থাকে। এই সময় যৌন মিলন বন্ধ রাখলে গর্ভসঞ্চার হয় না, একেই নিরাপদ সময় বলে।" },
+            { q: "৩. LAM (Lactational Amenorrhea Method) পদ্ধতিটি জন্ম নিয়ন্ত্রণের কোন্ পদ্ধতির অন্তর্গত?", opts: ["রাসায়নিক পদ্ধতি", "প্রাকৃতিক পদ্ধতি", "হরমোনাল পদ্ধতি", "বাধায়ক পদ্ধতি"], ans: 1, exp: "ব্যাখ্যা: ল্যাকটেশনাল অ্যামেনোরিয়া (LAM), তুলে নেওয়া পদ্ধতি এবং নিরাপদ সময় বা ক্যালেন্ডার পদ্ধতি জন্ম নিয়ন্ত্রণের প্রাকৃতিক পদ্ধতির অন্তর্ভুক্ত।" },
+            { q: "৪. স্তন্যদানকারী মায়েদের ক্ষেত্রে শিশুর জন্মের পর সাধারণত কত মাস পর্যন্ত ঋতুস্রাব বন্ধ থাকে, যা প্রাকৃতিক জন্ম নিয়ন্ত্রক হিসেবে কাজ করে (LAM)?", opts: ["১ মাস", "৩ মাস", "৯ মাস", "১২ মাস"], ans: 1, exp: "ব্যাখ্যা: জন্মের পর শিশুর স্তন্যপানকালীন তিন মাস অবধি মায়ের ঋতুস্রাব বন্ধ থাকে, যা প্রাকৃতিক জন্মনিয়ন্ত্রক (LAM) হিসেবে কাজ করে।" },
+            { q: "৫. কনডোম (Condom) জন্ম নিয়ন্ত্রণের কী ধরনের পদ্ধতি?", opts: ["প্রাকৃতিক পদ্ধতি", "রাসায়নিক পদ্ধতি", "বাধায়ক বা Barrier পদ্ধতি", "শল্য পদ্ধতি"], ans: 2, exp: "ব্যাখ্যা: কনডোম বা নিরোধ হলো গুটিয়ে থাকা নলাকার ল্যাটেক্স চাদরের মতো বাধায়ক পদ্ধতি যা বীর্যকে যোনিতে প্রবেশে বাধা দেয়।" },
+            { q: "৬. ফেম সিল্ড (Fem shield) কী?", opts: ["পুরুষদের কনডোম", "স্ত্রীলোকদের কনডোম বা পলিউরেথেন পাউচ", "একটি হরমোনাল পিল", "একটি রাসায়নিক ক্রিম"], ans: 1, exp: "ব্যাখ্যা: ফেম সিল্ডকে স্ত্রীলোকদের কনডোম বলা হয়। এটি একধরনের পলিউরেথেন পাউচ যার দু-পাশে দুটি রিং থাকে।" },
+            { q: "৭. ডায়াফ্রাম, সারভাইক্যাল ক্যাপ ও ভল্ট ক্যাপ জন্ম নিয়ন্ত্রণের কোন্ পদ্ধতির অন্তর্গত?", opts: ["প্রাকৃতিক পদ্ধতি", "সার্জিক্যাল পদ্ধতি", "বাধায়ক বা Barrier পদ্ধতি", "হরমোনাল পদ্ধতি"], ans: 2, exp: "ব্যাখ্যা: ডায়াফ্রাম, সারভাইক্যাল ক্যাপ ও ভল্ট ক্যাপ মহিলাদের জরায়ু বা সারভিক্সের মুখে পরানো হয় যা বীর্য প্রবেশে বাধা দেয়, এগুলি বাধায়ক পদ্ধতির অন্তর্গত।" },
+            { q: "৮. রাসায়নিক জন্ম নিয়ন্ত্রক হিসেবে ব্যবহৃত ফোম ট্যাবলেটে কোন্ স্পার্মিসাইডাল (শুক্রাণুনাশক) উপাদান থাকে?", opts: ["ননোক্সিনল-9 (nonoxynol-9)", "ইস্ট্রোজেন", "প্রোজেস্টেরন", "কপার আয়ন"], ans: 0, exp: "ব্যাখ্যা: ফোম ট্যাবলেট বা জেলিগুলিতে নোনোক্সিনল-9 (nonoxynol-9) স্পার্মিসাইড হিসেবে কাজ করে এবং শুক্রাণু ধ্বংস করে।" },
+            { q: "৯. স্পার্মিসাইডাল ক্রিম, জেলি ও ফোম-এ সাধারণত কোন্ রাসায়নিক উপাদান থাকে যা শুক্রাণুনাশক হিসেবে কাজ করে?", opts: ["ল্যাকটিক অ্যাসিড, বোরিক অ্যাসিড ও পটাশিয়াম পারম্যাঙ্গানেট", "সালফিউরিক অ্যাসিড", "নাইট্রিক অ্যাসিড", "অ্যাসিটিক অ্যাসিড"], ans: 0, exp: "ব্যাখ্যা: রাসায়নিক পদ্ধতিগুলিতে ল্যাকটিক অ্যাসিড, বোরিক অ্যাসিড, সাইট্রিক অ্যাসিড, জিঙ্ক সালফেট এবং পটাশিয়াম পার ম্যাঙ্গানেট উপাদান সহযোগে গঠিত ক্রিম বা জেলি ব্যবহার করা হয়।" },
+            { q: "১০. তুলে নেওয়া পদ্ধতি বা Withdrawal method কী ধরনের জন্ম নিয়ন্ত্রক পদ্ধতি?", opts: ["রাসায়নিক", "বাধায়ক", "প্রাকৃতিক", "শল্য"], ans: 2, exp: "ব্যাখ্যা: যৌন মিলনকালে বীর্যপাতের ঠিক পূর্বে লিঙ্গ যোনি থেকে বের করে নেওয়াকে তুলে নেওয়া পদ্ধতি বলে, যা একটি প্রাকৃতিক পদ্ধতি (অনিরাপদ)।" },
+            { q: "১১. কনডোম ব্যবহারের একটি অন্যতম প্রধান সুবিধা কী?", opts: ["এটি ১০০% প্রাকৃতিক", "এটি সবচেয়ে নিরাপদ গর্ভনিরোধক এবং STD (যৌন রোগ) প্রতিরোধক", "এটি হরমোনের ভারসাম্য বজায় রাখে", "এটি চিরস্থায়ী পদ্ধতি"], ans: 1, exp: "ব্যাখ্যা: কনডোম বীর্য প্রবেশে বাধা দেওয়ার পাশাপাশি সিফিলিস, গনোরিয়া, এইডস এর মতো STD প্রতিরোধে সবচেয়ে কার্যকর।" },
+            { q: "১২. পরিবার পরিকল্পনার (Family Planning) প্রতীক বা চিহ্ন কোনটি?", opts: ["সবুজ বৃত্ত", "লাল প্লাস চিহ্ন", "উল্টানো লাল ত্রিভুজ", "নীল বর্গক্ষেত্র"], ans: 2, exp: "ব্যাখ্যা: উল্টানো লাল ত্রিভুজ পরিবার পরিকল্পনার চিহ্ন বা সিম্বল, যা অফিস, হাসপাতাল ইত্যাদি জায়গায় টাঙানো থাকে।" },
+            { q: "১৩. 'ছোটো পরিবার সুখী পরিবার'—এই স্লোগানটি কোন্ কর্মসূচির মূল ভিত্তি?", opts: ["টিকাকরণ কর্মসূচি", "পরিবার পরিকল্পনা (Family Planning)", "ম্যালেরিয়া দূরীকরণ", "যক্ষ্মা নিবারণ"], ans: 1, exp: "ব্যাখ্যা: 'ছোটো পরিবার সুখী পরিবার'—এই স্লোগানটি পরিবার পরিকল্পনার একটি মূল ধাপ, যার লক্ষ্য জনসংখ্যা নিয়ন্ত্রণ ও পারিবারিক স্বাস্থ্যরক্ষা।" },
+            { q: "১৪. সারভাইক্যাল ক্যাপ (Cervical cap) শরীরের কোথায় লাগানো হয়?", opts: ["যোনিদ্বারে", "জরায়ুর সারভিক্সে (Cervix)", "ফ্যালোপিয়ান নালিতে", "ডিম্বাশয়ে"], ans: 1, exp: "ব্যাখ্যা: এই ক্যাপ জরায়ুর সারভিক্স-এ লাগিয়ে দিলে বীর্য জরায়ুর মধ্যে প্রবেশ করতে পারে।" },
+            { q: "১৫. জন্ম নিয়ন্ত্রণের জন্য বাধায়ক (Barrier) পদ্ধতির মূল কাজ কী?", opts: ["শুক্রাণু ধ্বংস করা", "ডিম্বাণু নিঃসরণ বন্ধ করা", "যৌন মিলনকালে বীর্য যাতে যোনির বা জরায়ুর মধ্যে যেতে না পারে তার ভৌত ব্যবস্থা করা", "ভ্রূণের রোপণ রোধ করা"], ans: 2, exp: "ব্যাখ্যা: বাধায়ক পদ্ধতি (যেমন কনডোম, ডায়াফ্রাম) ডিম্বাণু ও শুক্রাণুর ভৌত মিলনে বাধা সৃষ্টি করে।" }
+        ]
+    },
+    4: {
+        name: 'Set 4', icon: '💉', topic: 'জন্ম নিয়ন্ত্রণ: IUD, পিল এবং সার্জিক্যাল পদ্ধতি',
+        questions: [
+            { q: "১. জন্ম নিয়ন্ত্রণে ব্যবহৃত IUD এর সম্পূর্ণ রূপ কী?", opts: ["Intra Uterine Devices", "Internal Uterine Diseases", "Intra Urinary Devices", "Internal Urinary Ducts"], ans: 0, exp: "ব্যাখ্যা: IUD হলো Intra Uterine Devices (ইন্ট্রা ইউটেরাইন ডিভাইস), যা প্লাস্টিক বা ধাতুর তৈরি 'T' আকৃতির গঠন বিশেষ এবং যোনিপথ দিয়ে জরায়ুর মধ্যে প্রতিস্থাপন করা হয়।" },
+            { q: "২. লিপ্পেস লুপ (Lippes Loop) কী প্রকৃতির IUD?", opts: ["কপার নিঃসরণকারী", "হরমোন নিঃসরণকারী", "ননমেডিকেটেড IUD (বেরিয়াম সালফেট মিশ্রিত)", "স্টেরয়ডাল IUD"], ans: 2, exp: "ব্যাখ্যা: লিপ্পেস লুপ একটি ননমেডিকেটেড ডিভাইস যা পলিইথিলিন নির্মিত এবং এর মধ্যে বেরিয়াম সালফেট মিশ্রিত থাকে।" },
+            { q: "৩. কপার-টি (Copper T), মাল্টিলোড 375 প্রভৃতি ডিভাইস থেকে নিঃসৃত কপার আয়নের কাজ কী?", opts: ["ডিম্বাণু উৎপাদনে বাধা দেওয়া", "টক্সিন সাইটোকাইনিন নিঃসৃত করে শুক্রাণুর চলন রহিত করা এবং ফ্যাগাসাইটোসিস ত্বরান্বিত করা", "জরায়ুর আকার ছোটো করা", "হরমোনের মাত্রা কমানো"], ans: 1, exp: "ব্যাখ্যা: কপার T থেকে নিঃসৃত তামা শুক্রাণুর চলন রহিত করে এবং জরায়ুর মধ্যে শুক্রাণুর ফ্যাগাসাইটোসিসকে ত্বরান্বিত করে নিষেক আটকে দেয়।" },
+            { q: "৪. প্রোজেস্টেরন IUD বা হরমোন নিঃসরণকারী IUD কীভাবে গর্ভরোধ করে?", opts: ["শুক্রাণু মেরে ফেলে", "জরায়ুর এন্ডোমেট্রিয়াম-এর পরিবর্তন ঘটাতে বাধা দেয় এবং ডিম্বনিঃসরণ (ovulation) আটকে দেয়", "যোনিপথ বন্ধ করে দেয়", "ফ্যালোপিয়ান নালি ব্লক করে"], ans: 1, exp: "ব্যাখ্যা: হরমোন নিঃসরণকারী IUD (যেমন লিভোনোর গেস্ট্রেল IUD) ধীরে ধীরে হরমোন ক্ষরণ করে এন্ডোমেট্রিয়ামের পরিবর্তন ও ওভিউলেশন ঘটতে বাধা দেয়।" },
+            { q: "৫. MALA-D এবং MALA-N নামক মৌখিক গর্ভনিরোধক বড়িগুলিকে কী বলা হয়?", opts: ["মিনিপিল", "কম্বাইন্ড পিল", "ইমারজেন্সি পিল", "স্যালিন পিল"], ans: 1, exp: "ব্যাখ্যা: MALA-D এবং MALA-N-কে একত্রে কম্বাইন্ড পিল বলে। এটিতে কৃত্রিম প্রোজেস্টেরন ও ইস্ট্রোজেন বর্তমান যা ডিম্বনিঃসরণে বাধা দান করে।" },
+            { q: "৬. 'সহেলী' (Saheli) নামক গর্ভনিরোধক বড়িটি কোথায় আবিষ্কৃত হয়?", opts: ["ICMR, New Delhi", "CDRI, Lucknow (Central Drug Research Institute)", "WHO, Geneva", "AIIMS, New Delhi"], ans: 1, exp: "ব্যাখ্যা: 'সহেলী' একটি Non-steroidal গর্ভনিরোধক যা লখনউয়ের সেন্ট্রাল ড্রাগ রিসার্চ ইনস্টিটিউট (CDRI) এর বিজ্ঞানীরা তৈরি করেছেন।" },
+            { q: "৭. 'সহেলী' বড়িটিতে কোন্ রাসায়নিক উপাদান থাকে যা নন-স্টেরয়ডাল প্রকৃতির?", opts: ["প্রোজেস্টেরন", "ইস্ট্রোজেন", "সেন্টক্রোম্যান (Centchroman) বা প্রোজেস্টিন", "টেস্টোস্টেরন"], ans: 2, exp: "ব্যাখ্যা: এটিতে Centchroman বা প্রোজেস্টিন রাসায়নিক থাকে। এটি সপ্তাহে একবার গ্রহণ করতে হয় এবং এর কোনো পার্শ্বপ্রতিক্রিয়া নেই।" },
+            { q: "৮. ইনজেকশনের মাধ্যমে গর্ভরোধ করতে ব্যবহৃত DMPA (Depot-Medroxy Progesterone Acetate) 150 mg সাধারণত কত মাস অন্তর ইনজেক্ট করা হয়?", opts: ["১ মাস অন্তর", "২ মাস অন্তর", "৩ মাস অন্তর", "১২ মাস অন্তর"], ans: 2, exp: "ব্যাখ্যা: DMPA 150 mg তিন মাস অন্তর অথবা 300 mg ছয় মাস অন্তর ইনজেক্ট করা হয় গর্ভরোধের জন্য।" },
+            { q: "৯. Norplant নামক ইমপ্লান্টটি ত্বকের নীচে রোপণ করা হয়, এটি প্রধানত কী রিলিজ করে?", opts: ["ইস্ট্রোজেন", "প্রোজেস্টেরন", "অক্সিটোসিন", "রিলাক্সিন"], ans: 1, exp: "ব্যাখ্যা: Norplant একধরনের প্রোজেস্টেরন ইমপ্লান্ট যা 6টি ক্ষুদ্র ক্যাপসুল দিয়ে তৈরি এবং ত্বকের নীচে ঢুকিয়ে দেওয়া হয়।" },
+            { q: "১০. Implanon নামক রডের মতো ডিভাইসটি ত্বকের নীচে বসালে তা কত বছর গর্ভনিরোধক হিসেবে কাজ করে?", opts: ["১ বছর", "৩ বছর", "৫ বছর", "১০ বছর"], ans: 1, exp: "ব্যাখ্যা: Implanon একটি রডের মতো ডিভাইস (40 mm x 2 mm) যা ত্বকের নীচে বসিয়ে দেওয়া হয়। এটি 3 বছর গর্ভনিরোধক হিসেবে কাজ করে।" },
+            { q: "১১. হঠাৎ অসুরক্ষিত যৌন মিলনের পর কত ঘণ্টার মধ্যে ইমারজেন্সি গর্ভনিরোধক বড়ি (যেমন Ovral, i-pill) খেলে তাৎক্ষণিক গর্ভরোধ হয়?", opts: ["১২ ঘণ্টার মধ্যে", "২৪ ঘণ্টার মধ্যে", "৭২ ঘণ্টার মধ্যে", "১২০ ঘণ্টার মধ্যে"], ans: 2, exp: "ব্যাখ্যা: হঠাৎ অসুরক্ষিত অবস্থায় যৌন মিলন ঘটলে ৭2 ঘণ্টার মধ্যে Ovral, i-pill ইত্যাদি বড়ি খেয়ে নিলে গর্ভরোধ হয়।" },
+            { q: "১২. পুরুষদের ক্ষেত্রে স্থায়ী বন্ধ্যাত্বকরণ বা চিরস্থায়ী জন্মনিরোধক সার্জিক্যাল পদ্ধতিকে কী বলে?", opts: ["টিউবেক্টমি", "ভ্যাসেকটমি", "ল্যাপারোস্কোপি", "হিস্টেরেকটমি"], ans: 1, exp: "ব্যাখ্যা: চিরস্থায়ী জন্মনিরোধের জন্য পুরুষদের ভ্যাসেকটমি করে বন্ধ্যা করা হয়।" },
+            { q: "১৩. ভ্যাসেকটমি পদ্ধতিতে পুরুষদের কোন্ অংশটি কেটে বাঁধা (Ligation) হয়?", opts: ["এপিডিডাইমিস", "ইউরেথ্রা", "ভাস ডিফারেন্স (শুক্রনালি)", "সেমিনাল ভেসিকল"], ans: 2, exp: "ব্যাখ্যা: ভ্যাসেকটমি পদ্ধতিতে শুক্রথলির চামড়ার দু-পাশ চিরে শুক্রনালি বা ভাস ডিফারেন্স (vas deferens) বার করে কেটে লাইগেশন বা বেঁধে দেওয়া হয়।" },
+            { q: "১৪. স্ত্রীলোকদের ক্ষেত্রে স্থায়ী বন্ধ্যাত্বকরণ বা জন্মনিরোধক সার্জিক্যাল পদ্ধতিকে কী বলে?", opts: ["টিউবেক্টমি", "ভ্যাসেকটমি", "কপার-টি", "ইমপ্লান্ট"], ans: 0, exp: "ব্যাখ্যা: মহিলাদের জন্য স্থায়ী জন্মনিরোধক সার্জিক্যাল পদ্ধতিটি হলো টিউবেক্টমি।" },
+            { q: "১৫. টিউবেক্টমি পদ্ধতিতে স্ত্রীলোকদের কোন্ অংশ কেটে লাইগেশন করা হয়?", opts: ["জরায়ু", "ডিম্বাশয়", "সারভিক্স", "ফ্যালোপিয়ান নালি (Fallopian tube)"], ans: 3, exp: "ব্যাখ্যা: টিউবেক্টমি পদ্ধতিতে স্ত্রীলোকের উভয় ফ্যালোপিয়ান নালি কেটে দু-প্রান্ত লাইগেশন করে বা বেঁধে দেওয়া হয়।" }
+        ]
+    },
+    5: {
+        name: 'Set 5', icon: '🏥', topic: 'MTP (গর্ভপাত) ও অ্যামনিওসেন্টেসিস',
+        questions: [
+            { q: "১. MTP-এর সম্পূর্ণ রূপ কী?", opts: ["Maternal Transfer Program", "Medical Termination of Pregnancy", "Method of Testing Pregnancy", "Medical Treatment of Parturition"], ans: 1, exp: "ব্যাখ্যা: MTP হলো Medical Termination of Pregnancy বা আইনি ডাক্তারি পদ্ধতিতে গর্ভপাত।" },
+            { q: "২. ভারত সরকার বেআইনি গর্ভপাত রোধে ও মায়ের স্বাস্থ্য রক্ষার্থে MTP (Amendment) Act কবে চালু করে?", opts: ["১৯৭১", "১৯৯৭", "২০১৭", "২০২০"], ans: 2, exp: "ব্যাখ্যা: ভারত সরকার বেআইনি গর্ভপাতের ঘটনা ও মায়ের মৃত্যুর হার হ্রাস করতে The Medical Termination of Pregnancy (Amendment) Act 2017 চালু করেছিল।" },
+            { q: "৩. গর্ভপাত বা Abortion সাধারণত গর্ভসঞ্চারের কত সপ্তাহের মধ্যে করা চিকিৎসাগতভাবে সবচেয়ে নিরাপদ?", opts: ["৪ সপ্তাহের মধ্যে", "১২ সপ্তাহের মধ্যে", "২৮ সপ্তাহের মধ্যে", "৩২ সপ্তাহের মধ্যে"], ans: 1, exp: "ব্যাখ্যা: গর্ভসঞ্চারের ১২ সপ্তাহের মধ্যে এই কাজটা সম্পন্ন করা দরকার, তবে নতুন আইন অনুযায়ী বিশেষ ক্ষেত্রে ২৪ সপ্তাহ পর্যন্ত দুজন চিকিৎসকের মতামতে করা যেতে পারে।" },
+            { q: "৪. গর্ভস্থ ভ্রূণের বয়স 9-10 সপ্তাহের মধ্যে থাকলে গর্ভপাতের জন্য গর্ভবতী স্ত্রীলোককে কোন্ বড়ি সেবন করানো হয়?", opts: ["MALA-D", "RU 486 (Abortion pill)", "i-pill", "DMPA"], ans: 1, exp: "ব্যাখ্যা: ভ্রূণের বয়স 9-10 সপ্তাহের মধ্যে থাকলে গর্ভবতী স্ত্রীলোককে গর্ভপাত বড়ি (RU 486) সেবন করানো হয় এবং পরে প্রোস্টাগ্ল্যান্ডিন দেওয়া হয়।" },
+            { q: "৫. গর্ভপাতের D ও C পদ্ধতির পুরো নাম কী?", opts: ["Dilation and Curettage technique", "Drug and Chemical technique", "Direct and Complete technique", "Doctor and Care technique"], ans: 0, exp: "ব্যাখ্যা: গর্ভস্থ ভ্রূণের বয়স 12-16 সপ্তাহ হলে ডায়ালেটার ও কিউরেটেজ যন্ত্রের সাহায্যে ভ্রূণকে বের করার পদ্ধতিকে D ও C (Dilation and Curettage) পদ্ধতি বলে।" },
+            { q: "৬. 12 সপ্তাহের মধ্যে ভ্রূণ অপসারণের জন্য যান্ত্রিক পদ্ধতি ভ্যাকুয়াম অ্যাসপিরেশন (Vacuum aspiration) কীভাবে কাজ করে?", opts: ["শুধুমাত্র ওষুধ প্রয়োগ করে", "জরায়ুর সংকোচনের মাধ্যমে", "ভ্যাকুয়াম বা শূন্যস্থান তৈরি করে জরায়ু মধ্যস্থ তরল ও ভ্রূণ নিষ্কাশিত করে", "সার্জারির মাধ্যমে জরায়ু কেটে"], ans: 2, exp: "ব্যাখ্যা: ভ্যাকুয়াম অ্যাসপিরেশনের সাহায্যে জরায়ু মধ্যস্থ তরলকে ধীরে ধীরে নিষ্কাশিত করা হয়, যার সাথে ভ্রূণটিও নির্গত হয়ে যায়।" },
+            { q: "৭. গর্ভস্থ ভ্রূণের বয়স যখন 16 সপ্তাহ বা তার বেশি হয় তখন গর্ভপাত ঘটানোর জন্য অ্যামনিওটিক তরলে কী ইনজেক্ট করা হয়?", opts: ["অক্সিটোসিন", "ইস্ট্রোজেন", "প্রোস্টাগ্ল্যান্ডিন বা স্যালাইন ইনজেকশন", "রিলাক্সিন"], ans: 2, exp: "ব্যাখ্যা: 16 সপ্তাহের বেশি বয়সের ভ্রূণের ক্ষেত্রে অ্যামনিওটিক তরলে প্রোস্টাগ্ল্যান্ডিন বা স্যালাইন ইনজেকশন করলে জরায়ুর সংকোচনশীলতা বৃদ্ধি পেয়ে গর্ভপাত ঘটে।" },
+            { q: "৮. অ্যামনিওসেন্টেসিস (Amniocentesis) প্রক্রিয়ায় মাতৃগর্ভ থেকে কোন্ তরল সংগ্রহ করা হয়?", opts: ["সেরিব্রোস্পাইনাল ফ্লুইড", "ব্লাড প্লাজমা", "অ্যামনিওটিক তরল (Amniotic fluid)", "রক্ত"], ans: 2, exp: "ব্যাখ্যা: গর্ভাবস্থায় আল্ট্রাসোনোগ্রাফির সাহায্যে মাতৃগর্ভ থেকে সিরিঞ্জের মাধ্যমে 30-40ml অ্যামনিওটিক তরল সংগ্রহ করে ভ্রূণের ত্রুটি নির্ণয়ের পদ্ধতিকে অ্যামনিওসেন্টেসিস বলে।" },
+            { q: "৯. অ্যামনিওসেন্টেসিস পদ্ধতিটি গর্ভাবস্থার সাধারণত কত সপ্তাহ পরে করা হয়?", opts: ["৫-৬ সপ্তাহ", "১০-১২ সপ্তাহ", "১৫-১৬ সপ্তাহ", "২৫-৩০ সপ্তাহ"], ans: 2, exp: "ব্যাখ্যা: অ্যামনিওটিক তরল সংগ্রহ করার পদ্ধতিটি সাধারণত গর্ভাবস্থার 15-16 সপ্তাহ পরে করতে হয়।" },
+            { q: "১০. অ্যামনিওসেন্টেসিস পরীক্ষায় সেন্ট্রিফিউজ করা তরল থেকে কোন্ প্রোটিনের উপস্থিতি নির্ধারণ করা হয়?", opts: ["অ্যালবুমিন", "গ্লোবিউলিন", "AFP (α feto protein)", "কোলাজেন"], ans: 2, exp: "ব্যাখ্যা: সংগৃহীত তরল সেন্ট্রিফিউজ করে যে তরলটি পাওয়া যায় সেটি দিয়ে AFP অর্থাৎ (α feto protein)-র উপস্থিতি নির্ধারণ করা হয়।" },
+            { q: "১১. অ্যামনিওসেন্টেসিসের একটি প্রধান তাৎপর্য বা চিকিৎসাগত ব্যবহার কী?", opts: ["ভ্রূণের লিঙ্গ নির্ধারণ করে কন্যাভ্রূণ হত্যা করা", "ভ্রূণের ডাউন সিনড্রোম, এডওয়ার্ড সিনড্রোম বা জিনগত ত্রুটি নির্ণয় করা", "যমজ সন্তান হবে কিনা তা জানা", "মায়ের রক্তের গ্রুপ নির্ণয় করা"], ans: 1, exp: "ব্যাখ্যা: অ্যামনিওসেন্টেসিসের সাহায্যে ভ্রূণকোশের ক্রোমোজোম পর্যবেক্ষণ করে ডাউন সিনড্রোম বা অন্যান্য জিনগত ত্রুটি নির্ণয় করা যায়।" },
+            { q: "১২. অ্যামনিওসেন্টেসিসের কোন্ অপব্যবহারের (Misuse) কারণে এটিকে আইন করে নিষিদ্ধ করা হয়েছে?", opts: ["জিনগত রোগ নির্ণয়", "প্রসব বেদনা কমানো", "জন্মের আগে ভ্রূণের লিঙ্গ নির্ধারণ করে কন্যাভ্রূণ হত্যা", "পুষ্টির অবস্থা জানা"], ans: 2, exp: "ব্যাখ্যা: অ্যামনিওসেন্টেসিসের সাহায্যে কন্যাভ্রূণ নির্ধারিত হলে তার গর্ভপাত করানো হয় (কন্যাভ্রূণ হত্যা), তাই এটি নিষিদ্ধ করা হয়েছে।" },
+            { q: "১৩. ফিনাইলকিটোনিউরিয়া (Phenylketonuria) বা অ্যালবিনিজমের মতো জন্মগত বিপাকীয় ব্যাধি গর্ভাবস্থাতেই কোন্ পদ্ধতির সাহায্যে নির্ণয় করা যায়?", opts: ["MTP", "IVF", "অ্যামনিওসেন্টেসিস", "ল্যাপারোস্কোপি"], ans: 2, exp: "ব্যাখ্যা: অ্যামনিওসেন্টেসিস প্রক্রিয়ায় সংগৃহীত তরল ও কোষ পরীক্ষা করে ফিনাইলকিটোনিউরিয়া বা অ্যালবিনিজম এর মতো জিনগত বা বিপাকীয় ত্রুটি নির্ণয় করা যায়।" },
+            { q: "১৪. অ্যালবিনিজম (Albinism) নামক জন্মগত ব্যাধিতে কোন্ উৎসেচকের অভাবে মেলানিন রঞ্জক তৈরি হয় না?", opts: ["টাইরোসিনেজ", "অ্যামাইলেজ", "পেপসিন", "লাইপেজ"], ans: 0, exp: "ব্যাখ্যা: অ্যালবিনিজম জন্মগত ব্যাধিতে টাইরোসিনেজ উৎসেচকের অভাবের ফলে ত্বক ফ্যাকাশে হয়ে যায় এবং মেলানিন রঞ্জক তৈরি হয় না।" },
+            { q: "১৫. MTP বা আইনি গর্ভপাতের একটি প্রধান প্রয়োজনীয়তা কী?", opts: ["লিঙ্গ বৈষম্য করা", "গর্ভস্থ ভ্রূণ যদি মায়ের জীবনের ক্ষেত্রে ঝুঁকিপূর্ণ বা ক্ষতিকর হয় তবে তার অপসারণ", "স্বাস্থ্যকর ভ্রূণ অপসারণ", "শুধু জনসংখ্যা বৃদ্ধি করা"], ans: 1, exp: "ব্যাখ্যা: গর্ভাবস্থা চলতে থাকলে যদি গর্ভবতী মহিলার প্রাণ সংশয়ের সম্ভাবনা থাকে বা শিশুটি বিকলাঙ্গ হওয়ার ঝুঁকি থাকে, তখন MTP করা প্রয়োজন।" }
+        ]
+    },
+    6: {
+        name: 'Set 6', icon: '🔬', topic: 'ART এবং বন্ধ্যাত্ব - Assisted Reproductive Technology',
+        questions: [
+            { q: "১. ART-এর সম্পূর্ণ রূপ কী?", opts: ["Artificial Reproductive Technique", "Assisted Reproductive Technology", "Active Reproductive Therapy", "Advanced Reproduction Transfer"], ans: 1, exp: "ব্যাখ্যা: যেসব দম্পতি সন্তান ধারণে অক্ষম, তাদের আধুনিক প্রযুক্তির সাহায্যে সন্তান লাভে সহায়তা করার ব্যবস্থাকে Assisted Reproductive Technology (ART) বা সহযোগী জননগত প্রযুক্তি বলে।" },
+            { q: "২. ইন ভিট্রো ফার্টিলাইজেশন (IVF-ET) পদ্ধতিতে দেহের বাইরে নিষেকের পর কত কোশবিশিষ্ট প্রাথমিক ভ্রূণকে জরায়ুতে প্রতিস্থাপন (Embryo Transfer) করা হয়?", opts: ["২-৩ কোশবিশিষ্ট", "4-8 কোশবিশিষ্ট", "৩২-৬৪ কোশবিশিষ্ট", "১০০ কোশবিশিষ্ট"], ans: 1, exp: "ব্যাখ্যা: টেস্টটিউব বেবি প্রযুক্তিতে (IVF-ET) দেহের বাইরে নিষেক ঘটানোর পর 4-8 কোশবিশিষ্ট প্রাথমিক ভ্রূণকে মাতৃ জরায়ুতে প্রতিস্থাপন করা হয়।" },
+            { q: "৩. GIFT পদ্ধতির সম্পূর্ণ নাম কী?", opts: ["Gamete Intra Fallopian Transfer", "Gene Intra Fallopian Transfer", "Gamete Internal Fluid Transfer", "Gastric Intra Fallopian Transfer"], ans: 0, exp: "ব্যাখ্যা: স্ত্রীলোকের ফ্যালোপিয়ান নালিতে ল্যাপারোস্কোপির মাধ্যমে ডিম্বাণু ও শুক্রাণু প্রতিস্থাপন করার পদ্ধতিকে Gamete Intra Fallopian Transfer বা GIFT বলে।" },
+            { q: "৪. ZIFT (Zygote Intra Fallopian Transfer) পদ্ধতিতে ফ্যালোপিয়ান নালিতে কী প্রতিস্থাপন করা হয়?", opts: ["শুধুমাত্র শুক্রাণু", "শুধুমাত্র ডিম্বাণু", "জাইগোট বা নিষিক্ত ডিম্বাণু", "পরিণত ফিটাস"], ans: 2, exp: "ব্যাখ্যা: ZIFT পদ্ধতিতে দেহের বাইরে নিষেক ঘটিয়ে উৎপন্ন জাইগোট বা নিষিক্ত ডিম্বাণুটিকে ল্যাপারোস্কোপির সাহায্যে ফ্যালোপিয়ান নালিতে প্রতিস্থাপন করা হয়।" },
+            { q: "৫. ICSI (Intra Cytoplasmic Sperm Injection) পদ্ধতিতে ল্যাবরেটরিতে কী করা হয়?", opts: ["জরায়ুতে শুক্রাণু প্রবেশ করানো হয়", "ফ্যালোপিয়ান নালিতে গ্যামেট দেওয়া হয়", "ডিম্বাণুর সাইটোপ্লাজমের মধ্যে সরাসরি একটি শুক্রাণু ইনজেক্ট করে ভ্রূণ উৎপন্ন করা হয়", "জরায়ু থেকে ভ্রূণ বের করা হয়"], ans: 2, exp: "ব্যাখ্যা: ICSI বা Intra Cytoplasmic Sperm Injection পদ্ধতিতে ডিম্বাণুর মধ্যে সরাসরি শুক্রাণু ইনজেক্ট করে ল্যাবরেটরিতে ভ্রূণ উৎপন্ন করা হয়।" },
+            { q: "৬. বিশ্বের প্রথম টেস্টটিউব বেবি বা নলজাতক শিশুর নাম কী?", opts: ["ডলি", "লুসি জয় ব্রাউন (Louise Joy Brown)", "টুসি জয় ব্রাউন", "রোজি"], ans: 1, exp: "ব্যাখ্যা: 1978 খ্রিস্টাব্দে ড. রবার্ট এডওয়ার্ড ও ড. পেট্রিক স্টেপটোর প্রচেষ্টায় ইংল্যান্ডে বিশ্বের প্রথম টেস্টটিউব বেবি লুসি জয় ব্রাউনের জন্ম হয়।" },
+            { q: "৭. ভারতের প্রথম টেস্টটিউব বেবির (দুর্গা) স্রষ্টা কোন্ বাঙালি চিকিৎসাবিজ্ঞানী?", opts: ["ড. রবার্ট এডওয়ার্ড", "ড. বিধানচন্দ্র রায়", "ড. সুভাষ মুখোপাধ্যায়", "ড. পেট্রিক স্টেপটো"], ans: 2, exp: "ব্যাখ্যা: ভারতের প্রথম নলজাতক 'দুর্গা' (কানুপ্রিয়া আগরওয়াল)-এর স্রষ্টা হলেন বাঙালি চিকিৎসাবিজ্ঞানী ড. সুভাষ মুখোপাধ্যায়।" },
+            { q: "৮. টেস্টটিউব বেবি প্রক্রিয়ায় ডিম্বাশয় থেকে একাধিক ডিম্বাণু সৃষ্টির জন্য স্ত্রীলোককে কোন হরমোন ইনজেকশন দেওয়া হয়?", opts: ["ইনসুলিন", "থাইরক্সিন", "FSH (Follicular Stimulating Hormone)", "গ্লুকাগন"], ans: 2, exp: "ব্যাখ্যা: ডিম্বাণু সংগ্রহের আগে স্ত্রীলোকটিকে FSH ইনজেকশন দেওয়া হয় যাতে তার ডিম্বাশয়ে একাধিক ডিম্বথলি বা গ্রাফিয়ান ফলিকল পরিণত হয়।" },
+            { q: "৯. ওভা ব্যাংক বা ডিম্বাণু ব্যাংকে (Ova Bank) স্ত্রীদেহ থেকে সংগৃহীত ডিম্বাণু সংরক্ষণে তরল নাইট্রোজেনের উষ্ণতা কত থাকে?", opts: ["0°C", "-100°C", "-196°C", "+196°C"], ans: 2, exp: "ব্যাখ্যা: ওভা ব্যাংক বা ডিম্বাণু ব্যাংকে ডিম্বাণুগুলিকে তরল নাইট্রোজেনে (-196°C) হিমায়িত অবস্থায় দীর্ঘদিনের জন্য সংরক্ষণ করা হয়।" },
+            { q: "১০. স্পার্ম ব্যাংক (Sperm Bank) বা শুক্রাণু ব্যাংকে অতি নিম্ন তাপমাত্রায় শুক্রাণু যাতে নষ্ট না হয় তার জন্য শুক্রাণুকে কোন্ বিশেষ দ্রবণে রাখা হয়?", opts: ["ফর্মালিন", "Cryoprotectant দ্রবণে", "গ্লিসারল", "ইথাইল অ্যালকোহল"], ans: 1, exp: "ব্যাখ্যা: অতিরিক্ত ঠান্ডার হাত থেকে স্পার্মকে বাঁচাতে শুক্রাণুগুলিকে একটি Cryoprotectant দ্রবণে মিশিয়ে তরল নাইট্রোজেনে রাখা হয়।" },
+            { q: "১১. AI (Artificial Insemination) পদ্ধতিতে কী করা হয়?", opts: ["দেহের বাইরে ভ্রূণ তৈরি করা হয়", "ডিম্বাশয় অপসারণ করা হয়", "কৃত্রিম উপায়ে স্বামীর বা দাতার বীর্য স্ত্রীলোকের যোনি বা জরায়ুতে প্রবেশ করানো হয়", "জাইগোটকে ফ্যালোপিয়ান নালিতে পাঠানো হয়"], ans: 2, exp: "ব্যাখ্যা: পুরুষ যখন স্ত্রীলোকের জননাঙ্গে শুক্রাণু রোপণে অক্ষম হয়, তখন দাতার বীর্য কৃত্রিম উপায়ে স্ত্রীলোকের দেহে প্রবেশ করানোকে AI বা Artificial Insemination বলে।" },
+            { q: "১২. যে মহিলা অর্থের বিনিময়ে শর্তসাপেক্ষে অন্য দম্পতির ভ্রূণ নিজ জরায়ুতে ধারণ করে শিশুর জন্ম দেয়, তাকে কী বলে?", opts: ["বায়োলজিক্যাল মা", "সারোগেট মাদার বা ধাত্রী মা (Surrogate mother)", "স্টেপ মাদার", "স্পনসর মা"], ans: 1, exp: "ব্যাখ্যা: অন্য দম্পতির ভ্রূণ নিজের জরায়ুতে ধারণ করে শর্তসাপেক্ষে শিশুর জন্ম দেওয়া মহিলাকে সারোগেট মাদার বা ধাত্রী মা বলে।" },
+            { q: "১৩. ক্রিপটরকিডিজম (Cryptorchidism) পুরুষদের ক্ষেত্রে কী সমস্যা তৈরি করে?", opts: ["শুক্রাশয় স্ক্রোটামে না নেমে উদরগহ্বরেই থেকে যায়, যার ফলে পুরুষ বন্ধ্যা হতে পারে", "প্রোস্টেট গ্রন্থির ক্যানসার হয়", "শুক্রাণু অতিরিক্ত মাত্রায় উৎপন্ন হয়", "লিঙ্গ দীর্ঘ হয়"], ans: 0, exp: "ব্যাখ্যা: শুক্রাশয় উদর গহ্বর থেকে স্ক্রোটামে নেমে না এলে সেই অবস্থাকে ক্রিপটরকিডিজম বলে, এটি পুরুষদের বন্ধ্যাত্বের অন্যতম কারণ।" },
+            { q: "১৪. কৃত্রিম গর্ভসঞ্চারের একটি পদ্ধতি IUI এর পুরো নাম কী?", opts: ["Intra Uterine Insemination", "Internal Uterine Infection", "Intra Uterine Injection", "In Vitro Uterine Insemination"], ans: 0, exp: "ব্যাখ্যা: ধৌত করা শুক্রাণুগুলিকে কৃত্রিমভাবে জরায়ুতে প্রবেশ করানোকে Intra Uterine Insemination বা IUI বলে।" },
+            { q: "১৫. টেস্টটিউব বেবি উৎপাদনে ইন ভিট্রো নিষেকের পর ভ্রূণ প্রতিস্থাপনের পূর্বে গ্রহীতা মাকে জরায়ু প্রস্তুত করার জন্য কী দেওয়া হয়?", opts: ["হরমোন ইনজেকশন", "অ্যান্টিবায়োটিক", "ভিটামিন", "স্যালাইন"], ans: 0, exp: "ব্যাখ্যা: ক্যাথিটারের সাহায্যে ভ্রূণ প্রতিস্থাপনের পূর্বে গ্রহীতা মা-কে হরমোন ইনজেকশন দিয়ে জরায়ু গাত্রকে ভ্রূণ রোপণের উপযোগী করে তোলা হয়।" }
+        ]
+    }
+};
+
+// ================== STATE VARIABLES ==================
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+// ================== LOCAL STORAGE LOGIC ==================
+function getGlobalUsers() {
+    const data = localStorage.getItem("testBazarGlobalUsers");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+    const data = localStorage.getItem("testBazarAttemptsBio3Ch3_v2");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    attempts[key] = (attempts[key] || 0) + 1;
+    localStorage.setItem("testBazarAttemptsBio3Ch3_v2", JSON.stringify(attempts));
+    return attempts[key];
+}
+
+// ================== INITIALIZATION ==================
+window.onload = () => {
+    renderHub();
+};
+
+function renderHub() {
+    const grid = document.getElementById("setGrid");
+    grid.innerHTML = "";
+    
+    for(let id in ALL_SETS) {
+        const set = ALL_SETS[id];
+        const div = document.createElement("div");
+        div.className = "set-card";
+        
+        let attemptCount = 0;
+        let isLocked = false;
+        
+        if (currentUser) {
+            attemptCount = getAttemptCount(currentUser, id);
+            isLocked = attemptCount >= MAX_ATTEMPTS;
+            if (isLocked) div.classList.add("locked");
+        }
+        
+        div.innerHTML = `
+            <div class="icon">${set.icon}</div>
+            <div class="set-num">${set.name}</div>
+            <div class="set-title">${set.topic}</div>
+            <div class="set-meta"><span>${set.questions.length} Qs</span><span>10 Mins</span></div>
+            ${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+        `;
+        
+        div.onclick = () => {
+            if (isLocked) {
+                alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+                return;
+            }
+            handleSetClick(id);
+        };
+        grid.appendChild(div);
+    }
+}
+
+function handleSetClick(setId) {
+    activeSetId = setId;
+    if (!currentUser) {
+        document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+        document.getElementById("loginOverlay").classList.add("active");
+        document.getElementById("loginUsername").value = "";
+        document.getElementById("loginPassword").value = "";
+        document.getElementById("loginError").style.display = "none";
+    } else {
+        startQuiz(setId);
+    }
+}
+
+function doLogin() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+    const err = document.getElementById("loginError");
+    const GLOBAL_USERS = getGlobalUsers();
+
+    if(!u || !p) {
+        err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!";
+        err.style.display = "block";
+        return;
+    }
+
+    if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+        let attempts = getAttemptCount(u, activeSetId);
+        if (attempts >= MAX_ATTEMPTS) {
+            err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+            err.style.display = "block";
+            return;
+        }
+        currentUser = u;
+        document.getElementById("loginOverlay").classList.remove("active");
+        document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+        document.getElementById("userDisplay").classList.remove("hidden");
+        renderHub();
+        startQuiz(activeSetId);
+    } else {
+        err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+        err.style.display = "block";
+    }
+}
+
+function closeLogin() {
+    document.getElementById("loginOverlay").classList.remove("active");
+}
+
+function goToHub() {
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("hubPage").style.display = "block";
+    document.getElementById("timerBox").classList.add("hidden");
+    clearInterval(timerInterval);
+    renderHub();
+}
+
+// ================== QUIZ LOGIC ==================
+function startQuiz(setId) {
+    incrementAttempt(currentUser, setId);
+    questions = ALL_SETS[setId].questions;
+    currentQIndex = 0;
+    score = 0;
+    wrongAnswers = 0;
+    userAnswers = {};
+    isReviewMode = false;
+    timeLeft = TIME_LIMIT;
+
+    document.getElementById("hubPage").style.display = "none";
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    document.getElementById("timerBox").classList.remove("hidden");
+    document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+    document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+
+    startTimer();
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const qData = questions[currentQIndex];
+    document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+    document.getElementById("qText").innerHTML = qData.q;
+    const progress = ((currentQIndex) / questions.length) * 100;
+    document.getElementById("progressFill").style.width = `${progress}%`;
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    
+    const optsBox = document.getElementById("qOpts");
+    optsBox.innerHTML = "";
+    document.getElementById("explanation").classList.remove("show");
+    document.getElementById("nextBtn").disabled = true;
+    document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+    qData.opts.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "opt";
+        btn.innerHTML = `<div class="opt-circle">${LABELS[idx] || '—'}</div> <div class="opt-text">${optText}</div>`;
+        
+        if (isReviewMode) {
+            btn.classList.add("disabled");
+            if (idx === qData.ans) btn.classList.add("correct");
+            else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+        } else {
+            btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+        }
+        optsBox.appendChild(btn);
+    });
+
+    if (isReviewMode) {
+        document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+        document.getElementById("explanation").classList.add("show");
+        document.getElementById("nextBtn").disabled = false;
+        if (currentQIndex === questions.length - 1) {
+            document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন";
+        }
+    }
+    
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+    const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+    allBtns.forEach(b => b.classList.add("disabled"));
+    userAnswers[currentQIndex] = selectedIdx; 
+
+    if (selectedIdx === correctIdx) {
+        btn.classList.add("correct");
+        score++;
+    } else {
+        btn.classList.add("wrong");
+        allBtns[correctIdx].classList.add("correct");
+        wrongAnswers++;
+    }
+    
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+    document.getElementById("explanation").classList.add("show");
+    document.getElementById("nextBtn").disabled = false;
+    
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function nextQ() {
+    if (isReviewMode && currentQIndex === questions.length - 1) {
+        document.getElementById("testArea").classList.add("hidden");
+        document.getElementById("resultWrap").classList.add("show");
+        return;
+    }
+    if (!isReviewMode && currentQIndex === questions.length - 1) {
+        finishQuiz();
+        return;
+    }
+    currentQIndex++;
+    loadQuestion();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    const tBox = document.getElementById("timerBox");
+    tBox.classList.remove("danger");
+    
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishQuiz();
+            return;
+        }
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        if (timeLeft < 60) tBox.classList.add("danger");
+    }, 1000);
+}
+
+function finishQuiz() {
+    clearInterval(timerInterval);
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("timerBox").classList.add("hidden");
+    document.getElementById("resultWrap").classList.add("show");
+    
+    const total = questions.length;
+    const skipped = total - (score + wrongAnswers);
+    const percent = Math.round((score / total) * 100);
+    
+    document.getElementById("finalScore").innerText = `${percent}%`;
+    document.getElementById("rbCorrect").innerText = score;
+    document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+    
+    const gradeEl = document.getElementById("resultGrade");
+    if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+    else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+    else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+    
+    const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+    document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+    if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+        alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+        return;
+    }
+    startQuiz(activeSetId);
+}
+
+function showReview() {
+    isReviewMode = true;
+    currentQIndex = 0;
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    loadQuestion();
+}
+</script>
+</body>
+</html>
