@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Maths 3rd Sem | Unit 3 Ch 5</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- MathJax for rendering mathematical equations -->
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+/* ================= COLOR SCHEME & VARIABLES ================= */
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+
+/* Top Bar */
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+
+/* Hub View */
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; justify-content: center;}
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; max-width: 350px; margin: 0 auto; width: 100%;}
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+
+/* Quiz View */
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; overflow-x: auto; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main); overflow-x: auto;}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; overflow-x: auto;}
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+
+/* Result View */
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+
+/* Login Modal */
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+    <div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+    <div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+
+<div class="main">
+
+    <!-- ================= LOGIN MODAL ================= -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <h2>লগইন করুন</h2>
+            <p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+            <div class="login-set-name" id="loginSetName">📚 Set 1</div>
+            <div class="input-group">
+                <label>ইউজারনেম</label>
+                <input type="text" id="loginUsername" placeholder="Username">
+            </div>
+            <div class="input-group">
+                <label>পাসওয়ার্ড</label>
+                <input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+            </div>
+            <button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+            <button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+            <div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+        </div>
+    </div>
+
+    <!-- ================= HUB PAGE ================= -->
+    <div id="hubPage">
+        <div class="hub-header">
+            <h1>গণিত 3rd Sem Unit 3:<br>স্পর্শক ও অভিলম্ব (Tangents & Normals)</h1>
+            <p>মোট ৩০টি প্রশ্ন সম্বলিত ২টি সেট। Test শুরু করতে সেটে ক্লিক করুন।</p>
+        </div>
+        <div class="set-grid" id="setGrid"></div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+        </div>
+    </div>
+
+    <!-- ================= QUIZ AREA ================= -->
+    <div id="testArea" class="hidden">
+        <div class="quiz-info">
+            <div class="info-item">🎓 <strong>Mathematics</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+            <div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="q-card">
+            <div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+            <div class="q-text" id="qText">Question Text</div>
+            <div class="opts" id="qOpts"></div>
+            <div class="explanation" id="explanation"><p id="explanationText"></p></div>
+            <div class="nav-row">
+                <div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+                <button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RESULT AREA ================= -->
+    <div class="result-wrap" id="resultWrap">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-score en-font" id="finalScore">100%</div>
+        <div class="result-total">স্কোর</div>
+        <div class="result-grade" id="resultGrade">অসাধারণ!</div>
+        <div class="result-bars">
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+                <div class="rb-label">সঠিক</div>
+            </div>
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+                <div class="rb-label">ভুল/স্কিপ</div>
+            </div>
+        </div>
+        <div class="attempt-info-box" id="attemptInfo"></div>
+        <div class="action-btns">
+            <button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+            <button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+            <button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// Global Config & Database
+// ============================================================
+const MAX_ATTEMPTS = 10; 
+const TIME_LIMIT = 10 * 60; // 10 Minutes
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+    1: {
+        name: 'Set 1', icon: '📏', topic: 'প্রবণতা ও সাধারণ সমীকরণ (Slope & Equations Basics)',
+        questions: [
+            { q: "১. \\(y=f(x)\\) বক্রের ওপর \\((x_1, y_1)\\) বিন্দুতে অঙ্কিত অভিলম্বের নতিমাত্রা \\(m\\) হলে \\(m = ?\\)", opts: ["\\(\\left(\\frac{dy}{dx}\\right)_{(x_1, y_1)}\\)", "\\(\\left(\\frac{dx}{dy}\\right)_{(x_1, y_1)}\\)", "\\(-\\left(\\frac{dy}{dx}\\right)_{(x_1, y_1)}\\)", "\\(-\\left(\\frac{dx}{dy}\\right)_{(x_1, y_1)}\\)"], ans: 3, exp: "ব্যাখ্যা: স্পর্শকের নতিমাত্রা হলো \\(\\frac{dy}{dx}\\)। যেহেতু অভিলম্ব স্পর্শকের ওপর লম্ব, তাই এর নতিমাত্রা হবে \\(-\\frac{1}{\\frac{dy}{dx}} = -\\frac{dx}{dy}\\)।" },
+            { q: "২. \\(y=f(x)\\) বক্রের ওপর \\(P(a,b)\\) বিন্দুতে অঙ্কিত স্পর্শকটি \\(x\\)-অক্ষের সমান্তরাল হলে ওই স্পর্শকটির সমীকরণ হবে-", opts: ["\\(y=b\\)", "\\(y+b=0\\)", "\\(x=a\\)", "\\(x+a=0\\)"], ans: 0, exp: "ব্যাখ্যা: \\(x\\)-অক্ষের সমান্তরাল সরলরেখার সমীকরণ \\(y=k\\) আকারের হয়। যেহেতু এটি \\((a,b)\\) বিন্দুগামী, তাই সমীকরণটি হবে \\(y=b\\)।" },
+            { q: "৩. \\(y=f(x)\\) বক্রের ওপর \\((x_1, y_1)\\) বিন্দুতে অঙ্কিত স্পর্শকটি \\(y\\)-অক্ষের সমান্তরাল হলে ওই অভিলম্বটির সমীকরণ হবে-", opts: ["\\(y=x_1\\)", "\\(x=x_1\\)", "\\(y=y_1\\)", "\\(x=y_1\\)"], ans: 2, exp: "ব্যাখ্যা: স্পর্শক \\(y\\)-অক্ষের সমান্তরাল হলে অভিলম্বটি \\(x\\)-অক্ষের সমান্তরাল হবে। সুতরাং \\((x_1, y_1)\\) বিন্দুগামী অভিলম্বের সমীকরণ হবে \\(y=y_1\\)।" },
+            { q: "৪. \\(y=f(x)\\) বক্রের ওপর \\((x, y)\\) বিন্দুতে অঙ্কিত স্পর্শক ও অভিলম্বের প্রবণতা যথাক্রমে \\(-\\frac{dy}{dx}\\) ও \\(m\\) হলে \\(m = ?\\)", opts: ["\\(\\frac{dy}{dx}\\)", "\\(\\frac{dx}{dy}\\)", "\\(-\\frac{dx}{dy}\\)", "এদের কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: লম্ব হওয়ার শর্তানুসারে দুটি প্রবণতার গুণফল -1। অর্থাৎ \\((-\\frac{dy}{dx}) \\times m = -1 \\implies m = \\frac{dx}{dy}\\)।" },
+            { q: "৫. \\(y=f(x)\\) অপেক্ষকের লেখের ওপর \\((x_1, y_1)\\) বিন্দুতে অঙ্কিত অভিলম্বের সমীকরণ হয়-", opts: ["\\(y-y_1 = -\\frac{dx}{dy}(x-x_1)\\)", "\\(y-y_1 = \\frac{dy}{dx}(x-x_1)\\)", "\\(x-x_1 = -\\frac{dx}{dy}(y-y_1)\\)", "\\(x-x_1 = \\frac{dy}{dx}(y-y_1)\\)"], ans: 0, exp: "ব্যাখ্যা: এটি একটি বিন্দু \\((x_1, y_1)\\) এবং নতিমাত্রা \\((-\\frac{dx}{dy})\\) বিশিষ্ট সরলরেখার আদর্শ সমীকরণ।" },
+            { q: "৬. \\(x^2 = 4ay\\) অধিবৃত্তের ওপর \\((2at, at^2)\\) বিন্দুতে অঙ্কিত অভিলম্বের নতিমাত্রা হয়-", opts: ["\\(\\frac{1}{t}\\)", "\\(t\\)", "\\(-t\\)", "\\(-\\frac{1}{t}\\)"], ans: 3, exp: "ব্যাখ্যা: \\(x^2 = 4ay \\implies 2x = 4a \\frac{dy}{dx} \\implies \\frac{dy}{dx} = \\frac{x}{2a}\\)। বিন্দুটিতে স্পর্শকের নতিমাত্রা \\(\\frac{2at}{2a} = t\\)। তাই অভিলম্বের নতিমাত্রা হবে \\(-\\frac{1}{t}\\)।" },
+            { q: "৭. \\(xy=4\\) সমপরাবৃত্তের ওপর \\((2t, \\frac{2}{t})\\) বিন্দুতে অঙ্কিত অভিলম্বের নতিমাত্রা হবে-", opts: ["\\(-t^2\\)", "\\(t^2\\)", "\\(2t\\)", "\\(-2t\\)"], ans: 1, exp: "ব্যাখ্যা: \\(y = \\frac{4}{x} \\implies \\frac{dy}{dx} = -\\frac{4}{x^2}\\)। \\(x=2t\\) বিন্দুতে \\(\\frac{dy}{dx} = -\\frac{4}{4t^2} = -\\frac{1}{t^2}\\)। অভিলম্বের নতিমাত্রা হবে \\(-(-\\frac{1}{1/t^2}) = t^2\\)।" },
+            { q: "৮. \\(y^2 = 4ax\\) অধিবৃত্তের ওপর \\((at^2, 2at)\\) বিন্দুতে অঙ্কিত স্পর্শকের নতিমাত্রা হবে-", opts: ["\\(t\\)", "\\(\\frac{1}{t}\\)", "\\(-t\\)", "\\(-\\frac{1}{t}\\)"], ans: 1, exp: "ব্যাখ্যা: \\(2y \\frac{dy}{dx} = 4a \\implies \\frac{dy}{dx} = \\frac{2a}{y}\\)। \\(y=2at\\) বসালে নতিমাত্রা \\(\\frac{2a}{2at} = \\frac{1}{t}\\)।" },
+            { q: "৯. \\(x^2 + y^2 = a^2\\) বৃত্তের ওপর \\((x_1, y_1)\\) বিন্দুতে অঙ্কিত অভিলম্বের নতিমাত্রা-", opts: ["\\(\\frac{x_1}{y_1}\\)", "\\(-\\frac{x_1}{y_1}\\)", "\\(-\\frac{y_1}{x_1}\\)", "\\(\\frac{y_1}{x_1}\\)"], ans: 3, exp: "ব্যাখ্যা: \\(2x+2y\\frac{dy}{dx}=0 \\implies \\frac{dy}{dx}=-\\frac{x}{y}\\)। স্পর্শকের নতিমাত্রা \\(-\\frac{x_1}{y_1}\\)। অভিলম্বের নতিমাত্রা হবে এর নেগেটিভ ইনভার্স অর্থাৎ \\(\\frac{y_1}{x_1}\\)।" },
+            { q: "১০. \\(\\frac{x^2}{a^2} + \\frac{y^2}{b^2} = 1\\) উপবৃত্তের ওপর \\((a\\cos\\theta, b\\sin\\theta)\\) বিন্দুতে অঙ্কিত স্পর্শকের নতিমাত্রা-", opts: ["\\(\\frac{b}{a}\\tan\\theta\\)", "\\(\\frac{b}{a}\\cot\\theta\\)", "\\(-\\frac{b}{a}\\tan\\theta\\)", "\\(-\\frac{b}{a}\\cot\\theta\\)"], ans: 3, exp: "ব্যাখ্যা: অবকলন করলে \\(\\frac{dy}{dx} = -\\frac{b^2x}{a^2y}\\)। বিন্দুটির স্থানাঙ্ক বসালে \\(-\\frac{b^2(a\\cos\\theta)}{a^2(b\\sin\\theta)} = -\\frac{b}{a}\\cot\\theta\\)।" },
+            { q: "১১. \\(\\frac{x^2}{a^2} - \\frac{y^2}{b^2} = 1\\) পরাবৃত্তের ওপর \\((a\\sec\\theta, b\\tan\\theta)\\) বিন্দুতে অঙ্কিত অভিলম্বের নতিমাত্রা-", opts: ["\\(\\frac{b}{a}\\sin\\theta\\)", "\\(-\\frac{b}{a}\\sin\\theta\\)", "\\(\\frac{a}{b}\\sin\\theta\\)", "\\(-\\frac{a}{b}\\sin\\theta\\)"], ans: 3, exp: "ব্যাখ্যা: পরাবৃত্তের স্পর্শকের নতিমাত্রা \\(m_1 = \\frac{b^2x_1}{a^2y_1} = \\frac{b\\sec\\theta}{a\\tan\\theta} = \\frac{b}{a\\sin\\theta}\\)। অভিলম্বের নতিমাত্রা হবে \\(-\\frac{1}{m_1} = -\\frac{a}{b}\\sin\\theta\\)।" },
+            { q: "১২. \\(x^2 + y^2 = 8\\) বৃত্তের সেইসব বিন্দুতে, যেখানে \\(\\frac{dy}{dx} = -1\\), অভিলম্বের সমীকরণ হবে-", opts: ["\\(x+y=0\\)", "\\(x-y=0\\)", "\\(x-2y=0\\)", "\\(2x-y=0\\)"], ans: 1, exp: "ব্যাখ্যা: বৃত্তের জন্য \\(\\frac{dy}{dx} = -\\frac{x}{y} = -1 \\implies x=y\\)। অভিলম্ব কেন্দ্র \\((0,0)\\) এবং \\((x_1, x_1)\\) বিন্দুগামী। সমীকরণ হবে \\(y = x \\implies x-y=0\\)।" },
+            { q: "১৩. \\(3y^2+4y+2=x\\) অধিবৃত্তের ওপর কোন্ বিন্দুতে তার অভিলম্বের নতিমাত্রা 8 হবে?", opts: ["\\( (6, 2) \\)", "\\( (-6, 2) \\)", "\\( (6, -2) \\)", "\\( (-6, -2) \\)"], ans: 2, exp: "ব্যাখ্যা: অভিলম্বের নতিমাত্রা 8 হলে স্পর্শকের নতিমাত্রা \\(\\frac{dy}{dx} = -\\frac{1}{8}\\)। সমীকরণকে y-এর সাপেক্ষে অবকলন করলে \\(\\frac{dx}{dy} = 6y+4\\)। যেহেতু \\(\\frac{dx}{dy} = -8\\), তাই \\(6y+4 = -8 \\implies y = -2\\)। সমীকরণে বসালে \\(x = 3(4) - 8 + 2 = 6\\)। বিন্দুটি \\((6,-2)\\)।" },
+            { q: "১৪. \\(y = 2x+7\\) সরলরেখার সমান্তরালে \\(y^2 = 4x+5\\) অধিবৃত্তের স্পর্শকের সমীকরণ হবে-", opts: ["\\(y=2x+5\\)", "\\(y=2x+8\\)", "\\(y=2x+3\\)", "\\(y=2x+9\\)"], ans: 2, exp: "ব্যাখ্যা: স্পর্শকের নতিমাত্রা \\(m=2\\)। \\(y^2=4x+5 \\implies 2y y' = 4 \\implies y' = \\frac{2}{y} = 2 \\implies y = 1\\)। তাহলে \\(x = -1\\)। \\((-1,1)\\) বিন্দুতে সমীকরণ \\(y-1 = 2(x+1) \\implies y=2x+3\\)।" },
+            { q: "১৫. \\(7x^2 - 4y^2 = 28\\) পরাবৃত্তের যেসব স্পর্শক \\(x+2y=0\\) সরলরেখার ওপর লম্ব, তাদের স্পর্শবিন্দুর স্থানাঙ্ক হবে-", opts: ["\\((\\frac{8}{3}, -\\frac{7}{3})\\) ও \\((-\\frac{8}{3}, \\frac{7}{3})\\)", "\\((1,2)\\) ও \\((2,1)\\)", "\\((\\frac{8}{3}, \\frac{7}{3})\\) ও \\((-\\frac{8}{3}, -\\frac{7}{3})\\)", "এদের কোনোটিই নয়"], ans: 2, exp: "ব্যাখ্যা: লম্ব রেখার নতিমাত্রা \\(m = 2\\)। পরাবৃত্তকে অবকলন করলে \\(\\frac{dy}{dx} = \\frac{14x}{8y} = \\frac{7x}{4y} = 2 \\implies y = \\frac{7x}{8}\\)। পরাবৃত্তের সমীকরণে বসালে \\(x^2 = \\frac{64}{9} \\implies x = \\pm\\frac{8}{3}\\)। ফলে \\(y = \\pm\\frac{7}{3}\\)।" }
+        ]
+    },
+    2: {
+        name: 'Set 2', icon: '📝', topic: 'স্পর্শক ও অভিলম্বের ধর্ম ও সমীকরণ (Properties & Equations)',
+        questions: [
+            { q: "১. \\(lx+my+n=0\\) সরলরেখা \\(x^2+y^2+2gx+2fy+c=0\\) বৃত্তের কোনো বিন্দুতে স্পর্শক হলে ওই বিন্দুতে বৃত্তের অভিলম্বের সমীকরণ-", opts: ["\\(mx+ly=lf+mg\\)", "\\(mx-ly=lf-mg\\)", "\\(mx+ly=lf-mg\\)", "\\(mx-ly=lf+mg\\)"], ans: 1, exp: "ব্যাখ্যা: অভিলম্ব সর্বদা বৃত্তের কেন্দ্র \\((-g, -f)\\) দিয়ে যায় এবং এটি প্রদত্ত স্পর্শকের ওপর লম্ব (নতিমাত্রা \\(\\frac{m}{l}\\))। সমীকরণটি হলো \\(y+f = \\frac{m}{l}(x+g)\\), যা সরল করলে \\(mx-ly = lf-mg\\) পাওয়া যায়।" },
+            { q: "২. \\(4x^2+9y^2=36\\) উপবৃত্তের ওপর কোন্ বিন্দুতে স্পর্শক \\(x\\)-অক্ষের সমান্তরাল?", opts: ["\\((0,\\pm2)\\)", "\\((\\pm3,0)\\)", "\\((0,2), (0,3)\\)", "এদের কোনোটিই নয়"], ans: 0, exp: "ব্যাখ্যা: \\(x\\)-অক্ষের সমান্তরাল হলে \\(\\frac{dy}{dx} = 0\\)। অবকলন করলে \\(\\frac{dy}{dx} = -\\frac{4x}{9y} = 0 \\implies x=0\\)। সমীকরণে \\(x=0\\) বসালে \\(9y^2=36 \\implies y=\\pm2\\)।" },
+            { q: "৩. \\(x=y^2-4y\\) বক্র যে বিন্দুতে \\(y\\)-অক্ষকে ছেদ করে সেই বিন্দুতে অভিলম্বের সমীকরণ হবে-", opts: ["\\(4x-y=0\\) এবং \\(4x+y=1\\)", "\\(x-4y=0\\) এবং \\(4x-y=4\\)", "\\(x+4y=0\\) এবং \\(x-4y=4\\)", "\\(4x-y=0\\) এবং \\(4x+y=4\\)"], ans: 3, exp: "ব্যাখ্যা: \\(y\\)-অক্ষকে ছেদ করলে \\(x=0 \\implies y^2-4y=0 \\implies y=0, 4\\)। বিন্দু দুটি \\((0,0)\\) ও \\((0,4)\\)। \\(\\frac{dx}{dy} = 2y-4\\)। \\((0,0)\\)-তে অভিলম্বের নতিমাত্রা 4, সমীকরণ \\(y=4x \\implies 4x-y=0\\)। \\((0,4)\\)-তে নতিমাত্রা -4, সমীকরণ \\(y-4=-4x \\implies 4x+y=4\\)।" },
+            { q: "৪. \\(y^2 = x^3\\) বক্রের \\((m^2,m^3)\\) বিন্দুতে স্পর্শক যদি \\((M^2,M^3)\\) বিন্দুতে বক্রের অভিলম্ব হয়, তবে \\(mM\\)-এর মান হবে-", opts: ["\\(-\\frac{1}{9}\\)", "\\(-\\frac{2}{9}\\)", "\\(-\\frac{1}{3}\\)", "\\(-\\frac{4}{9}\\)"], ans: 3, exp: "ব্যাখ্যা: \\((m^2,m^3)\\)-তে স্পর্শকের নতিমাত্রা \\(\\frac{3}{2}m\\)। \\((M^2,M^3)\\)-তে অভিলম্বের নতিমাত্রা \\(-\\frac{2}{3M}\\)। দুটি সমান হলে \\(\\frac{3m}{2} = -\\frac{2}{3M} \\implies mM = -\\frac{4}{9}\\)।" },
+            { q: "৫. \\(lx+my=1\\) সরলরেখা \\((ax)^n+(by)^n=1\\) বক্রকে স্পর্শ করলে শর্ত কী হবে?", opts: ["\\(l^n+m^n=(ab)^n\\)", "\\(\\left(\\frac{l}{a}\\right)^n+\\left(\\frac{m}{b}\\right)^n=1\\)", "\\(\\left(\\frac{a}{l}\\right)^n+\\left(\\frac{b}{m}\\right)^n=1\\)", "\\(\\left(\\frac{l}{a}\\right)^{\\frac{n}{n-1}}+\\left(\\frac{m}{b}\\right)^{\\frac{n}{n-1}}=1\\)"], ans: 3, exp: "ব্যাখ্যা: বক্রের ওপর স্পর্শকের সমীকরণ বের করে প্রদত্ত সরলরেখার সাথে সহগ তুলনা করলে এই শর্তটি গাণিতিকভাবে প্রমাণিত হয়।" },
+            { q: "৬. \\(y^2 = 4ax\\) অধিবৃত্তের ওপর \\((x_1, y_1)\\) বিন্দুতে অভিলম্বের সমীকরণ হবে-", opts: ["\\(y_1(x+x_1)+2a(y+y_1)=0\\)", "\\(y_1(x-x_1)+2a(y-y_1)=0\\)", "\\(x_1(x-x_1)+y_1(y-y_1)=2a\\)", "এদের কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: \\((x_1,y_1)\\) বিন্দুতে স্পর্শকের নতিমাত্রা \\(\\frac{2a}{y_1}\\), তাই অভিলম্বের নতিমাত্রা \\(-\\frac{y_1}{2a}\\)। সমীকরণ \\(y-y_1 = -\\frac{y_1}{2a}(x-x_1)\\) যা সরল করলে (খ) পাওয়া যায়।" },
+            { q: "৭. যদি \\(y^2 = 4bx\\) অধিবৃত্তের \\((bt_1^2, 2bt_1)\\) বিন্দুতে অঙ্কিত অভিলম্ব অধিবৃত্তটিকে পুনরায় \\((bt_2^2, 2bt_2)\\) বিন্দুতে ছেদ করে, তবে-", opts: ["\\(t_2 = t_1 - \\frac{2}{t_1}\\)", "\\(t_2 = t_1 + \\frac{2}{t_1}\\)", "\\(t_1 = t_2 + \\frac{2}{t_2}\\)", "\\(t_2 = -t_1 - \\frac{2}{t_1}\\)"], ans: 3, exp: "ব্যাখ্যা: অধিবৃত্তের পরামিতিক অভিলম্বের এটি একটি আদর্শ (standard) উপপাদ্য। \\(t_1\\) বিন্দুতে অভিলম্ব আবার \\(t_2\\) বিন্দুতে ছেদ করলে \\(t_2 = -t_1 - \\frac{2}{t_1}\\) হয়।" },
+            { q: "৮. \\(x = a(\\cos\\theta + \\theta\\sin\\theta)\\), \\(y = a(\\sin\\theta - \\theta\\cos\\theta)\\) বক্রের যে-কোনো বিন্দুতে অঙ্কিত অভিলম্বের মূলবিন্দু থেকে দূরত্ব-", opts: ["\\(\\theta\\)-এর ওপর নির্ভরশীল", "ধ্রুবক", "সর্বদা 1 একক", "অনির্দিষ্ট"], ans: 1, exp: "ব্যাখ্যা: অবকলন করে নতিমাত্রা বের করলে দেখা যায়, অভিলম্বের সমীকরণ হয় \\(x\\cos\\theta + y\\sin\\theta = a\\)। মূলবিন্দু \\((0,0)\\) থেকে এর লম্ব দূরত্ব সর্বদা \\(a\\) (যা একটি ধ্রুবক)।" },
+            { q: "৯. \\(b^2x^2 + a^2y^2 = a^2b^2\\) উপবৃত্তের ওপর দুটি বিন্দুর উৎকেন্দ্রিক কোণের অন্তর \\(\\pi/2\\) হলে, বিন্দু দুটিতে অঙ্কিত স্পর্শকের ছেদবিন্দুর সঞ্চারপথ হয়-", opts: ["\\(b^2x^2+a^2y^2=2a^2b^2\\)", "\\(b^2x^2+a^2y^2=a^2b^2\\)", "\\(b^2x^2-a^2y^2=2a^2b^2\\)", "\\(a^2x^2+b^2y^2=2a^2b^2\\)"], ans: 0, exp: "ব্যাখ্যা: উপবৃত্তের উৎকেন্দ্রিক কোণ \\(\\theta\\) এবং \\(\\theta + \\pi/2\\) ধরে স্পর্শকের সমীকরণ দুটির ছেদবিন্দু \\((h,k)\\) ধরে সমাধান করলে \\(\\frac{h^2}{a^2} + \\frac{k^2}{b^2} = 2\\) পাওয়া যায়।" },
+            { q: "১০. \\(\\sqrt{x} + \\sqrt{y} = \\sqrt{a}\\) বক্রের যে-কোনো বিন্দুতে অঙ্কিত স্পর্শকের অক্ষ দুটিতে ছেদিতাংশ দুটির সমষ্টির মান-", opts: ["\\(a\\) একক", "\\(\\sqrt{a}\\) একক", "ধ্রুবক", "অনির্দিষ্ট"], ans: 2, exp: "ব্যাখ্যা: এই বক্রের যেকোনো বিন্দুতে স্পর্শক অক্ষ দুটি থেকে যথাক্রমে \\(x\\)-ছেদিতাংশ \\(X_1\\) এবং \\(y\\)-ছেদিতাংশ \\(Y_1\\) তৈরি করলে, জ্যামিতিকভাবে \\(X_1+Y_1 = a\\) হয়, যা সর্বদা ধ্রুবক।" },
+            { q: "১১. \\(y = x^2 - 5x + 6\\) বক্রের \\((2,0)\\) ও \\((3,0)\\) বিন্দুতে অঙ্কিত স্পর্শক দুটি পরস্পর-", opts: ["সমান্তরাল", "ছেদ করবে না", "\\(45^\\circ\\) কোণে ছেদ করে", "সমকোণে ছেদ করে"], ans: 3, exp: "ব্যাখ্যা: নতিমাত্রা \\(m = \\frac{dy}{dx} = 2x-5\\)। \\(x=2\\) তে \\(m_1 = -1\\) এবং \\(x=3\\) তে \\(m_2 = 1\\)। \\(m_1 \\times m_2 = -1 \\times 1 = -1\\)। তাই তারা সমকোণে ছেদ করে।" },
+            { q: "১২. \\(x^3 + y^3 = 3axy\\) বক্রের ওপর \\((\\frac{3a}{2}, \\frac{3a}{2})\\) বিন্দুতে অভিলম্বের সমীকরণ হবে-", opts: ["\\(x-3y=0\\)", "\\(x+y=0\\)", "\\(x-y=0\\)", "\\(x-7y=0\\)"], ans: 2, exp: "ব্যাখ্যা: এই বিন্দুতে বক্রের স্পর্শকের নতিমাত্রা -1। তাই অভিলম্বের নতিমাত্রা 1। অভিলম্বের সমীকরণ: \\(y - \\frac{3a}{2} = 1(x - \\frac{3a}{2}) \\implies x - y = 0\\)।" },
+            { q: "১৩. \\(y^2 = 8x\\) অধিবৃত্তের যে স্পর্শক \\(x\\)-অক্ষের সঙ্গে \\(45^\\circ\\) কোণ উৎপন্ন করে, তার সমীকরণ হবে-", opts: ["\\(x+y=2\\)", "\\(y=x+2\\)", "\\(x=y+2\\)", "\\(x+y+2=0\\)"], ans: 1, exp: "ব্যাখ্যা: \\(45^\\circ\\) কোণ অর্থাৎ নতিমাত্রা \\(m = \\tan 45^\\circ = 1\\)। \\(y^2=8x\\)-এ স্পর্শকের শর্ত \\(y = mx + \\frac{a}{m}\\)। এখানে \\(a=2, m=1\\), তাই সমীকরণ \\(y = 1 \\cdot x + \\frac{2}{1} \\implies y=x+2\\)।" },
+            { q: "১৪. \\(xy=c^2\\) সমপরাবৃত্তের '\\(t\\)' বিন্দুতে অভিলম্ব তাকে পুনরায় '\\(t\\'\\)' বিন্দুতে ছেদ করলে, \\(t^3 t'\\) = হবে-", opts: ["1", "-1", "2", "-2"], ans: 1, exp: "ব্যাখ্যা: সমপরাবৃত্তের এটি একটি পরিচিত উপপাদ্য। \\((ct, c/t)\\) বিন্দুতে অভিলম্ব আবার বক্রটিকে \\((ct', c/t')\\) বিন্দুতে ছেদ করলে তাদের সম্পর্ক হয় \\(t^3 t' = -1\\)।" },
+            { q: "১৫. \\(x^2+y^2=16\\) বৃত্তের যে স্পর্শকের প্রবণতা \\((-\\frac{4}{3})\\), তার সমীকরণ হবে-", opts: ["\\(3x+4y=7\\)", "\\(x+2y=5\\)", "\\(4x+3y=\\pm20\\)", "\\(4x+3y=10\\)"], ans: 2, exp: "ব্যাখ্যা: \\(x^2+y^2=a^2\\) বৃত্তে \\(m\\) প্রবণতাবিশিষ্ট স্পর্শকের সমীকরণ \\(y=mx\\pm a\\sqrt{1+m^2}\\)। এখানে \\(a=4, m=-\\frac{4}{3}\\)। মান বসালে \\(y = -\\frac{4}{3}x \\pm 4\\sqrt{1+\\frac{16}{9}} \\implies y = -\\frac{4}{3}x \\pm \\frac{20}{3} \\implies 3y = -4x \\pm 20 \\implies 4x+3y = \\pm 20\\)।" }
+        ]
+    }
+};
+
+// ================== STATE VARIABLES ==================
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+// ================== LOCAL STORAGE LOGIC ==================
+function getGlobalUsers() {
+    const data = localStorage.getItem("testBazarGlobalUsers");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+    const data = localStorage.getItem("testBazarAttemptsMath3U3C5_v1");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    attempts[key] = (attempts[key] || 0) + 1;
+    localStorage.setItem("testBazarAttemptsMath3U3C5_v1", JSON.stringify(attempts));
+    return attempts[key];
+}
+
+// ================== INITIALIZATION ==================
+window.onload = () => {
+    renderHub();
+};
+
+function renderHub() {
+    const grid = document.getElementById("setGrid");
+    grid.innerHTML = "";
+    
+    for(let id in ALL_SETS) {
+        const set = ALL_SETS[id];
+        const div = document.createElement("div");
+        div.className = "set-card";
+        
+        let attemptCount = 0;
+        let isLocked = false;
+        
+        if (currentUser) {
+            attemptCount = getAttemptCount(currentUser, id);
+            isLocked = attemptCount >= MAX_ATTEMPTS;
+            if (isLocked) div.classList.add("locked");
+        }
+        
+        div.innerHTML = `
+            <div class="icon">${set.icon}</div>
+            <div class="set-num">${set.name}</div>
+            <div class="set-title">${set.topic}</div>
+            <div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+            ${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+        `;
+        
+        div.onclick = () => {
+            if (isLocked) {
+                alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+                return;
+            }
+            handleSetClick(id);
+        };
+        grid.appendChild(div);
+    }
+}
+
+function handleSetClick(setId) {
+    activeSetId = setId;
+    if (!currentUser) {
+        document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+        document.getElementById("loginOverlay").classList.add("active");
+        document.getElementById("loginUsername").value = "";
+        document.getElementById("loginPassword").value = "";
+        document.getElementById("loginError").style.display = "none";
+    } else {
+        startQuiz(setId);
+    }
+}
+
+function doLogin() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+    const err = document.getElementById("loginError");
+    const GLOBAL_USERS = getGlobalUsers();
+
+    if(!u || !p) {
+        err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!";
+        err.style.display = "block";
+        return;
+    }
+
+    if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+        let attempts = getAttemptCount(u, activeSetId);
+        if (attempts >= MAX_ATTEMPTS) {
+            err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+            err.style.display = "block";
+            return;
+        }
+        currentUser = u;
+        document.getElementById("loginOverlay").classList.remove("active");
+        document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+        document.getElementById("userDisplay").classList.remove("hidden");
+        renderHub();
+        startQuiz(activeSetId);
+    } else {
+        err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+        err.style.display = "block";
+    }
+}
+
+function closeLogin() {
+    document.getElementById("loginOverlay").classList.remove("active");
+}
+
+function goToHub() {
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("hubPage").style.display = "block";
+    document.getElementById("timerBox").classList.add("hidden");
+    clearInterval(timerInterval);
+    renderHub();
+}
+
+// ================== QUIZ LOGIC ==================
+function startQuiz(setId) {
+    incrementAttempt(currentUser, setId);
+    questions = ALL_SETS[setId].questions;
+    currentQIndex = 0;
+    score = 0;
+    wrongAnswers = 0;
+    userAnswers = {};
+    isReviewMode = false;
+    timeLeft = TIME_LIMIT;
+
+    document.getElementById("hubPage").style.display = "none";
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    document.getElementById("timerBox").classList.remove("hidden");
+    document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+    document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+
+    startTimer();
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const qData = questions[currentQIndex];
+    document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+    document.getElementById("qText").innerHTML = qData.q;
+    const progress = ((currentQIndex) / questions.length) * 100;
+    document.getElementById("progressFill").style.width = `${progress}%`;
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    
+    const optsBox = document.getElementById("qOpts");
+    optsBox.innerHTML = "";
+    document.getElementById("explanation").classList.remove("show");
+    document.getElementById("nextBtn").disabled = true;
+    document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+    qData.opts.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "opt";
+        btn.innerHTML = `<div class="opt-circle">${LABELS[idx] || '—'}</div> <div class="opt-text">${optText}</div>`;
+        
+        if (isReviewMode) {
+            btn.classList.add("disabled");
+            if (idx === qData.ans) btn.classList.add("correct");
+            else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+        } else {
+            btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+        }
+        optsBox.appendChild(btn);
+    });
+
+    if (isReviewMode) {
+        document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+        document.getElementById("explanation").classList.add("show");
+        document.getElementById("nextBtn").disabled = false;
+        if (currentQIndex === questions.length - 1) {
+            document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন";
+        }
+    }
+    
+    // Refresh MathJax for the new content
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+    const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+    allBtns.forEach(b => b.classList.add("disabled"));
+    userAnswers[currentQIndex] = selectedIdx; 
+
+    if (selectedIdx === correctIdx) {
+        btn.classList.add("correct");
+        score++;
+    } else {
+        btn.classList.add("wrong");
+        allBtns[correctIdx].classList.add("correct");
+        wrongAnswers++;
+    }
+    
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+    document.getElementById("explanation").classList.add("show");
+    document.getElementById("nextBtn").disabled = false;
+    
+    // Refresh MathJax for explanation text
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function nextQ() {
+    if (isReviewMode && currentQIndex === questions.length - 1) {
+        document.getElementById("testArea").classList.add("hidden");
+        document.getElementById("resultWrap").classList.add("show");
+        return;
+    }
+    if (!isReviewMode && currentQIndex === questions.length - 1) {
+        finishQuiz();
+        return;
+    }
+    currentQIndex++;
+    loadQuestion();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    const tBox = document.getElementById("timerBox");
+    tBox.classList.remove("danger");
+    
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishQuiz();
+            return;
+        }
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        if (timeLeft < 60) tBox.classList.add("danger");
+    }, 1000);
+}
+
+function finishQuiz() {
+    clearInterval(timerInterval);
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("timerBox").classList.add("hidden");
+    document.getElementById("resultWrap").classList.add("show");
+    
+    const total = questions.length;
+    const skipped = total - (score + wrongAnswers);
+    const percent = Math.round((score / total) * 100);
+    
+    document.getElementById("finalScore").innerText = `${percent}%`;
+    document.getElementById("rbCorrect").innerText = score;
+    document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+    
+    const gradeEl = document.getElementById("resultGrade");
+    if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+    else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+    else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+    
+    const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+    document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+    if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+        alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+        return;
+    }
+    startQuiz(activeSetId);
+}
+
+function showReview() {
+    isReviewMode = true;
+    currentQIndex = 0;
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    loadQuestion();
+}
+</script>
+</body>
+</html>
