@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Maths 3rd Sem | Unit 2 Ch 3</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- MathJax for rendering mathematical equations -->
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+/* ================= COLOR SCHEME & VARIABLES ================= */
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+
+/* Top Bar */
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+
+/* Hub View */
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; justify-content: center; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; max-width: 350px; margin: 0 auto; width: 100%;}
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+
+/* Quiz View */
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; overflow-x: auto; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main); overflow-x: auto;}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; overflow-x: auto;}
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+
+/* Result View */
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+
+/* Login Modal */
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+    <div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+    <div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+
+<div class="main">
+
+    <!-- ================= LOGIN MODAL ================= -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <h2>লগইন করুন</h2>
+            <p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+            <div class="login-set-name" id="loginSetName">📚 Set 1</div>
+            <div class="input-group">
+                <label>ইউজারনেম</label>
+                <input type="text" id="loginUsername" placeholder="Username">
+            </div>
+            <div class="input-group">
+                <label>পাসওয়ার্ড</label>
+                <input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+            </div>
+            <button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+            <button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+            <div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+        </div>
+    </div>
+
+    <!-- ================= HUB PAGE ================= -->
+    <div id="hubPage">
+        <div class="hub-header">
+            <h1>গণিত 3rd Sem Unit 2:<br>অ্যাডজয়েন্ট, বিপরীত ম্যাট্রিক্স ও সমাধান</h1>
+            <p>মোট ৩০টি প্রশ্ন সম্বলিত ২টি সেট। Test শুরু করতে সেটে ক্লিক করুন।</p>
+        </div>
+        <div class="set-grid" id="setGrid"></div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+        </div>
+    </div>
+
+    <!-- ================= QUIZ AREA ================= -->
+    <div id="testArea" class="hidden">
+        <div class="quiz-info">
+            <div class="info-item">🎓 <strong>Mathematics</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+            <div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="q-card">
+            <div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+            <div class="q-text" id="qText">Question Text</div>
+            <div class="opts" id="qOpts"></div>
+            <div class="explanation" id="explanation"><p id="explanationText"></p></div>
+            <div class="nav-row">
+                <div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+                <button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RESULT AREA ================= -->
+    <div class="result-wrap" id="resultWrap">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-score en-font" id="finalScore">100%</div>
+        <div class="result-total">স্কোর</div>
+        <div class="result-grade" id="resultGrade">অসাধারণ!</div>
+        <div class="result-bars">
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+                <div class="rb-label">সঠিক</div>
+            </div>
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+                <div class="rb-label">ভুল/স্কিপ</div>
+            </div>
+        </div>
+        <div class="attempt-info-box" id="attemptInfo"></div>
+        <div class="action-btns">
+            <button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+            <button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+            <button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// Global Config & Database
+// ============================================================
+const MAX_ATTEMPTS = 10; 
+const TIME_LIMIT = 10 * 60; // 10 Minutes
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+    1: {
+        name: 'Set 1', icon: '🧮', topic: 'অ্যাডজয়েন্ট ও বিপরীত ম্যাট্রিক্সের ধর্মাবলি',
+        questions: [
+            { q: "১. একটি বর্গ ম্যাট্রিক্স A-কে সিঙ্গুলার (Singular) বলা হয়, যখন—", opts: ["\\(|A| > 0\\)", "\\(|A| < 0\\)", "\\(|A| = 0\\)", "\\(|A| = 1\\)"], ans: 2, exp: "ব্যাখ্যা: কোনো বর্গ ম্যাট্রিক্সের নির্ণায়কের (determinant) মান শূন্য হলে তাকে সিঙ্গুলার ম্যাট্রিক্স বলা হয়।" },
+            { q: "২. A একটি নন-সিঙ্গুলার ম্যাট্রিক্স হলে, \\(\\frac{1}{|A|} \\text{adj } A\\) কার সমান?", opts: ["\\(A^T\\)", "\\(A^{-1}\\)", "0", "\\(I\\)"], ans: 1, exp: "ব্যাখ্যা: বিপরীত ম্যাট্রিক্স বা Inverse Matrix-এর গাণিতিক সংজ্ঞানুযায়ী \\(A^{-1} = \\frac{1}{|A|}\\text{adj } A\\) হয়।" },
+            { q: "৩. A ও B দুটি একই ক্রমের বিপরীতকরণযোগ্য ম্যাট্রিক্স হলে, \\((AB)^{-1}\\) এর মান কত?", opts: ["\\(A^{-1}B^{-1}\\)", "\\(A^{-1}B\\)", "\\(B^{-1}A^{-1}\\)", "\\(AB^{-1}\\)"], ans: 2, exp: "ব্যাখ্যা: ম্যাট্রিক্সের রিভার্সাল ল (Reversal Law) অনুসারে, দুটি ম্যাট্রিক্সের গুণফলের বিপরীত ম্যাট্রিক্স তাদের নিজ নিজ বিপরীত ম্যাট্রিক্সের বিপরীত ক্রমে গুণফলের সমান হয়।" },
+            { q: "৪. A একটি \\(3 \\times 3\\) ক্রমের ম্যাট্রিক্স এবং \\(|A| = 5\\) হলে, \\(|\\text{adj } A|\\) এর মান কত?", opts: ["5", "20", "25", "125"], ans: 2, exp: "ব্যাখ্যা: \\(n \\times n\\) ক্রমের ম্যাট্রিক্সের ক্ষেত্রে \\(|\\text{adj } A| = |A|^{n-1}\\) হয়। এখানে n=3, তাই \\(|\\text{adj } A| = 5^{3-1} = 5^2 = 25\\)।" },
+            { q: "৫. A ও B দুটি ম্যাট্রিক্স পরস্পর বিপরীত (Inverse) ম্যাট্রিক্স হবে, যদি—", opts: ["\\(AB = BA = 0\\)", "\\(AB = 0, BA = I\\)", "\\(AB = BA \\neq I\\)", "\\(AB = BA = I\\)"], ans: 3, exp: "ব্যাখ্যা: দুটি ম্যাট্রিক্স একে অপরের বিপরীত হলে তাদের গুণফল সর্বদা একটি একক ম্যাট্রিক্স (Identity Matrix, I) হয়।" },
+            { q: "৬. A একটি \\(n \\times n\\) ক্রমের নন-সিঙ্গুলার ম্যাট্রিক্স হলে \\(A(\\text{adj } A)\\) এর মান কত?", opts: ["\\(|A| I_n\\)", "\\(I_n\\)", "0", "\\(|A|^n I_n\\)"], ans: 0, exp: "ব্যাখ্যা: ম্যাট্রিক্স তত্ত্বের মৌলিক উপপাদ্য অনুযায়ী, \\(A(\\text{adj } A) = (\\text{adj } A)A = |A| I_n\\) হয়।" },
+            { q: "৭. যদি a, b, c অশূন্য বাস্তব সংখ্যা হয়, তবে \\(A = \\begin{bmatrix} a & 0 & 0 \\\\ 0 & b & 0 \\\\ 0 & 0 & c \\end{bmatrix}\\) ম্যাট্রিক্সের বিপরীত ম্যাট্রিক্স হবে—", opts: ["\\(\\begin{bmatrix} -a & 0 & 0 \\\\ 0 & -b & 0 \\\\ 0 & 0 & -c \\end{bmatrix}\\)", "\\(\\begin{bmatrix} a^{-1} & 0 & 0 \\\\ 0 & b^{-1} & 0 \\\\ 0 & 0 & c^{-1} \\end{bmatrix}\\)", "\\(\\begin{bmatrix} 1/a & 1/b & 1/c \\\\ 0 & 0 & 0 \\\\ 0 & 0 & 0 \\end{bmatrix}\\)", "নির্ণয় করা সম্ভব নয়"], ans: 1, exp: "ব্যাখ্যা: কর্ণ ম্যাট্রিক্সের বিপরীত ম্যাট্রিক্স তার প্রধান কর্ণের পদগুলির অন্যোন্যক (reciprocal) নিয়ে গঠিত হয়।" },
+            { q: "৮. যদি A একটি লম্ব-ম্যাট্রিক্স (Orthogonal matrix) হয়, তবে \\(A^{-1}\\) কার সমান হবে?", opts: ["\\(A^T\\)", "\\(A^2\\)", "\\(I\\)", "0"], ans: 0, exp: "ব্যাখ্যা: লম্ব ম্যাট্রিক্সের সংজ্ঞানুযায়ী \\(AA^T = I\\)। আবার আমরা জানি \\(AA^{-1} = I\\)। এই দুটি তুলনা করলে পাওয়া যায় \\(A^{-1} = A^T\\)।" },
+            { q: "৯. যদি A একটি প্রকৃত লম্ব-ম্যাট্রিক্স (Proper orthogonal matrix) হয়, তবে—", opts: ["\\(|A| = 0\\)", "\\(|A| = 1\\)", "\\(|A| = -1\\)", "\\(|A| = 2\\)"], ans: 1, exp: "ব্যাখ্যা: যে লম্ব ম্যাট্রিক্সের নির্ণায়কের মান 1 হয়, তাকে প্রকৃত লম্ব ম্যাট্রিক্স বলা হয়। মান -1 হলে তা অপ্রকৃত লম্ব ম্যাট্রিক্স হয়।" },
+            { q: "১০. \\(X = \\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}\\) হলে \\(X^{-1}\\) হবে—", opts: ["\\(\\frac{1}{ad-bc}\\begin{bmatrix} d & b \\\\ c & a \\end{bmatrix}\\)", "\\(\\frac{1}{ad-bc}\\begin{bmatrix} -d & b \\\\ c & -a \\end{bmatrix}\\)", "\\(\\frac{1}{ad-bc}\\begin{bmatrix} d & -b \\\\ -c & a \\end{bmatrix}\\)", "\\(\\frac{1}{bc-ad}\\begin{bmatrix} d & -b \\\\ -c & a \\end{bmatrix}\\)"], ans: 2, exp: "ব্যাখ্যা: 2x2 ম্যাট্রিক্সের বিপরীত নির্ণয়ের ক্ষেত্রে প্রধান কর্ণের পদগুলি স্থান পরিবর্তন করে এবং গৌণ কর্ণের পদগুলির চিহ্ন পরিবর্তিত হয়, আর নির্ণায়কের মান দিয়ে ভাগ করতে হয়।" },
+            { q: "১১. যদি \\(|A| \\neq 0\\) হয়, তবে \\(|A^{-1}|\\) এর মান নিচের কোনটির সমান?", opts: ["\\(|A|\\)", "\\(\\frac{1}{|A|}\\)", "0", "1"], ans: 1, exp: "ব্যাখ্যা: আমরা জানি, \\(AA^{-1}=I \\implies |AA^{-1}|=|I| \\implies |A||A^{-1}|=1 \\implies |A^{-1}| = \\frac{1}{|A|}\\)।" },
+            { q: "১২. A একটি 3 ক্রমের নন-সিঙ্গুলার ম্যাট্রিক্স এবং x এমন একটি বাস্তব সংখ্যা যে \\(\\text{det}(xA) = |x|\\text{det} A\\) ; তাহলে x-এর মান—", opts: ["0 অথবা 1", "1 অথবা -1", "0, 1 অথবা -1", "0"], ans: 2, exp: "ব্যাখ্যা: 3x3 ম্যাট্রিক্সের ক্ষেত্রে \\(\\text{det}(xA) = x^3 \\text{det} A\\) হয়। শর্তানুযায়ী \\(x^3 \\text{det} A = x \\text{det} A\\) ধরলে \\(x(x^2-1)=0 \\implies x=0, 1, -1\\)।" },
+            { q: "১৩. A একটি বিপরীতকরণযোগ্য ম্যাট্রিক্স এবং k একটি অশূন্য ধ্রুবক হলে \\((kA)^{-1}\\) হবে—", opts: ["\\(k A^{-1}\\)", "\\(\\frac{1}{k} A^{-1}\\)", "\\(k^n A^{-1}\\)", "\\(\\frac{1}{k^n} A^{-1}\\)"], ans: 1, exp: "ব্যাখ্যা: বিপরীত ম্যাট্রিক্সের ধর্ম অনুযায়ী একটি স্কেলার দ্বারা গুণিত ম্যাট্রিক্সের বিপরীত নিলে সেই স্কেলারটির অন্যোন্যক হয়ে যায়।" },
+            { q: "১৪. \\((A^T)^{-1}\\) সর্বদা কার সমান?", opts: ["\\(A^{-1}\\)", "\\((A^{-1})^T\\)", "\\(A^T\\)", "\\(I\\)"], ans: 1, exp: "ব্যাখ্যা: এটি বিপরীত ম্যাট্রিক্সের একটি অত্যন্ত গুরুত্বপূর্ণ ধর্ম। ম্যাট্রিক্সের পরিবর্তের বিপরীত, তার বিপরীতের পরিবর্তের সমান হয়।" },
+            { q: "১৫. কোনো ম্যাট্রিক্স A-এর বিপরীত ম্যাট্রিক্সের অস্তিত্ব থাকার জন্য প্রয়োজনীয় ও যথেষ্ট শর্ত হল—", opts: ["A সিঙ্গুলার ম্যাট্রিক্স হবে", "A নন-সিঙ্গুলার ম্যাট্রিক্স হবে", "A প্রতিসম ম্যাট্রিক্স হবে", "A কর্ণ ম্যাট্রিক্স হবে"], ans: 1, exp: "ব্যাখ্যা: \\(|A| \\neq 0\\) (অর্থাৎ নন-সিঙ্গুলার) হলেই কেবল \\(A^{-1} = \\frac{1}{|A|} \\text{adj} A\\) সূত্রটি সংজ্ঞাত হয়।" }
+        ]
+    },
+    2: {
+        name: 'Set 2', icon: '📝', topic: 'সমীকরণ সমাধান ও বিবিধ প্রয়োগ',
+        questions: [
+            { q: "১. \\(a_1x + b_1y = k_1\\) এবং \\(a_2x + b_2y = k_2\\) সমীকরণ দুটি থেকে Cramer's রুল ব্যবহার করে x ও y-এর মান পাওয়া যাবে যখন—", opts: ["\\(\\begin{vmatrix} a_1 & b_1 \\\\ a_2 & b_2 \\end{vmatrix} = 0\\)", "\\(\\begin{vmatrix} a_1 & b_1 \\\\ a_2 & b_2 \\end{vmatrix} \\neq 0\\)", "\\(\\begin{vmatrix} k_1 & b_1 \\\\ k_2 & b_2 \\end{vmatrix} \\neq 0\\)", "\\(\\begin{vmatrix} a_1 & k_1 \\\\ a_2 & k_2 \\end{vmatrix} = 0\\)"], ans: 1, exp: "ব্যাখ্যা: Cramer-এর নিয়মে সমাধান পাওয়ার প্রধান শর্ত হলো সহগ নির্ণায়কটির (Coefficient determinant, \\(\\Delta\\)) মান অশূন্য হতে হবে।" },
+            { q: "২. \\(x - 2y + 5z + 4 = 0\\), \\(2x - y + 3z = 1\\), \\(5x - 4y + 9z = 14\\) সমীকরণগুলি—", opts: ["সঙ্গত এবং একক সমাধান আছে", "সঙ্গত এবং অসংখ্য সমাধান আছে", "অসঙ্গত (Inconsistent)", "এদের কোনোটিই নয়"], ans: 2, exp: "ব্যাখ্যা: এই সমীকরণগুলির ক্ষেত্রে প্রধান নির্ণায়ক \\(|A|=0\\) হয় এবং সহযোগী ম্যাট্রিক্সের মান \\((\\text{adj } A)B \\neq 0\\) হয়। তাই এদের কোনো সমাধান নেই, অর্থাৎ সমীকরণগুলি অসঙ্গত।" },
+            { q: "৩. A একটি \\(n\\) ক্রমের বর্গ ম্যাট্রিক্স এবং \\(A^T A = I\\) হলে, \\(A^{-1}\\) হবে—", opts: ["\\(A^T\\)", "\\(A\\)", "\\(I\\)", "0"], ans: 0, exp: "ব্যাখ্যা: \\(A^T A = I\\) অর্থাৎ ম্যাট্রিক্সটি লম্ব ম্যাট্রিক্স। উভয়পাশে \\(A^{-1}\\) গুণ করলে \\(A^T = A^{-1}\\) পাওয়া যায়।" },
+            { q: "৪. \\(\\begin{vmatrix} \\cos\\theta & \\sin\\theta \\\\ -\\sin\\theta & \\cos\\theta \\end{vmatrix}\\) ম্যাট্রিক্সটির অ্যাডজয়েন্ট (Adjoint) কত?", opts: ["\\(\\begin{bmatrix} \\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta \\end{bmatrix}\\)", "\\(\\begin{bmatrix} \\cos\\theta & \\sin\\theta \\\\ -\\sin\\theta & \\cos\\theta \\end{bmatrix}\\)", "\\(\\begin{bmatrix} \\sin\\theta & \\cos\\theta \\\\ \\cos\\theta & -\\sin\\theta \\end{bmatrix}\\)", "\\(\\begin{bmatrix} -\\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & -\\cos\\theta \\end{bmatrix}\\)"], ans: 0, exp: "ব্যাখ্যা: সহ-উৎপাদকগুলির ম্যাট্রিক্স \\(\\begin{bmatrix} \\cos\\theta & \\sin\\theta \\\\ -\\sin\\theta & \\cos\\theta \\end{bmatrix}\\)। এর পরিবর্ত নিলে অ্যাডজয়েন্ট ম্যাট্রিক্স হয় \\(\\begin{bmatrix} \\cos\\theta & -\\sin\\theta \\\\ \\sin\\theta & \\cos\\theta \\end{bmatrix}\\)।" },
+            { q: "৫. \\(A = \\begin{bmatrix} 2 & 0 \\\\ 0 & 3 \\end{bmatrix}\\) হলে, \\(A^{-1}\\) হবে—", opts: ["\\(\\begin{bmatrix} 1/2 & 0 \\\\ 0 & 1/3 \\end{bmatrix}\\)", "\\(\\begin{bmatrix} -2 & 0 \\\\ 0 & -3 \\end{bmatrix}\\)", "\\(\\begin{bmatrix} 3 & 0 \\\\ 0 & 2 \\end{bmatrix}\\)", "\\(\\begin{bmatrix} 1/3 & 0 \\\\ 0 & 1/2 \\end{bmatrix}\\)"], ans: 0, exp: "ব্যাখ্যা: কর্ণ ম্যাট্রিক্সের বিপরীত নির্ণয় করতে হলে প্রধান কর্ণের পদগুলি উল্টে (reciprocal) যায়।" },
+            { q: "৬. \\(x + y + z = 6\\), \\(x + 2z = 7\\), \\(x + y + z = 12\\) সমীকরণগুলি—", opts: ["সঙ্গত এবং একক সমাধান আছে", "সঙ্গত এবং অসংখ্য সমাধান আছে", "অসঙ্গত", "এদের কোনোটিই নয়"], ans: 2, exp: "ব্যাখ্যা: প্রথম ও তৃতীয় সমীকরণ থেকে পাই \\(x+y+z=6\\) এবং \\(x+y+z=12\\), যা একইসঙ্গে সম্ভব নয়, তাই সমীকরণগুলি অসঙ্গত।" },
+            { q: "৭. \\(x+2y+3z=1\\), \\(3x+4y+5z=2\\), \\(5x+6y+7z=3\\) সমীকরণগুলি—", opts: ["সঙ্গত এবং একক সমাধান আছে", "অসঙ্গত", "সঙ্গত এবং অসংখ্য সমাধান আছে", "এদের কোনোটিই নয়"], ans: 2, exp: "ব্যাখ্যা: এই সমীকরণগুলির ক্ষেত্রে \\(|A| = 0\\) এবং \\((\\text{adj } A)B = 0\\) হয়। ফলে এই গুচ্ছটি সঙ্গত এবং এদের অসংখ্য সমাধান বিদ্যমান।" },
+            { q: "৮. A একটি \\(n \\times n\\) ক্রমের ম্যাট্রিক্স যেখানে \\(A^2 + A + 2I = 0\\), তবে \\(A^{-1}\\) হবে—", opts: ["\\(\\frac{1}{2}(A+I)\\)", "\\(-\\frac{1}{2}(A+I)\\)", "\\(A+I\\)", "\\(I-A\\)"], ans: 1, exp: "ব্যাখ্যা: \\(A^2 + A = -2I \\implies A(A+I) = -2I \\implies A[-\\frac{1}{2}(A+I)] = I\\)। বিপরীত ম্যাট্রিক্সের সংজ্ঞা থেকে \\(A^{-1} = -\\frac{1}{2}(A+I)\\)।" },
+            { q: "৯. \\(A = \\begin{bmatrix} 2 & -1 \\\\ -1 & 2 \\end{bmatrix}\\) হলে \\(A^2 - 4A + 3I = 0\\)। এখান থেকে \\(A^{-1}\\) এর মান কত?", opts: ["\\(\\frac{1}{3}\\begin{bmatrix} 2 & 1 \\\\ 1 & 2 \\end{bmatrix}\\)", "\\(\\begin{bmatrix} 2 & 1 \\\\ 1 & 2 \\end{bmatrix}\\)", "\\(\\frac{1}{4}\\begin{bmatrix} -2 & 1 \\\\ 1 & -2 \\end{bmatrix}\\)", "\\(\\begin{bmatrix} -2 & 1 \\\\ 1 & -2 \\end{bmatrix}\\)"], ans: 0, exp: "ব্যাখ্যা: সমীকরণ থেকে পাই \\(A(4I-A)=3I \\implies A^{-1} = \\frac{1}{3}(4I-A)\\)। মান বসালে \\(\\frac{1}{3}\\begin{bmatrix} 2 & 1 \\\\ 1 & 2 \\end{bmatrix}\\) পাওয়া যায়।" },
+            { q: "১০. A একটি \\(3\\times 3\\) ম্যাট্রিক্স এবং B হল A-এর অ্যাডজয়েন্ট। যদি \\(|B| = 64\\) হয়, তবে \\(|A|\\)-এর মান হবে—", opts: ["\\(\\pm 2\\)", "\\(\\pm 4\\)", "\\(\\pm 8\\)", "\\(\\pm 12\\)"], ans: 2, exp: "ব্যাখ্যা: \\(B = \\text{adj } A \\implies |B| = |\\text{adj } A| = |A|^{n-1} = |A|^{3-1} = |A|^2\\)। প্রশ্নমতে \\(|A|^2 = 64 \\implies |A| = \\pm 8\\)।" },
+            { q: "১১. \\(A = \\begin{bmatrix} 1 & 2 \\\\ 2 & 1 \\end{bmatrix}\\) ম্যাট্রিক্সের অ্যাডজয়েন্ট (adj A) কত?", opts: ["\\(\\begin{bmatrix} 1 & -2 \\\\ -2 & 1 \\end{bmatrix}\\)", "\\(\\begin{bmatrix} -1 & 2 \\\\ 2 & -1 \\end{bmatrix}\\)", "\\(\\begin{bmatrix} 1 & 2 \\\\ 2 & 1 \\end{bmatrix}\\)", "\\(\\begin{bmatrix} -1 & -2 \\\\ -2 & -1 \\end{bmatrix}\\)"], ans: 0, exp: "ব্যাখ্যা: একটি 2x2 ম্যাট্রিক্সের অ্যাডজয়েন্ট নির্ণয়ের সহজ নিয়ম হলো প্রধান কর্ণের পদগুলিকে নিজেদের মধ্যে স্থান পরিবর্তন করানো এবং গৌণ কর্ণের পদগুলির চিহ্ন পরিবর্তন করা।" },
+            { q: "১২. A ও B দুটি ম্যাট্রিক্স এরূপ যে \\(AB=A\\) এবং \\(BA=B\\)। তবে \\(B^2\\) সমান—", opts: ["\\(B\\)", "\\(A\\)", "\\(I\\)", "0"], ans: 0, exp: "ব্যাখ্যা: \\(B^2 = B \\cdot B\\)। যেহেতু \\(B = BA\\), তাই \\(B^2 = B(BA) = (BB)A = BA = B\\)।" },
+            { q: "১৩. \\(A(\\text{adj } A) = \\begin{bmatrix} 10 & 0 & 0 \\\\ 0 & 10 & 0 \\\\ 0 & 0 & 10 \\end{bmatrix}\\) হলে \\(|A|\\)-এর মান কত?", opts: ["100", "10", "1000", "0"], ans: 1, exp: "ব্যাখ্যা: \\(A(\\text{adj } A) = |A|I = \\begin{bmatrix} |A| & 0 & 0 \\\\ 0 & |A| & 0 \\\\ 0 & 0 & |A| \\end{bmatrix}\\)। ম্যাট্রিক্স দুটি তুলনা করলে সহজেই বোঝা যায় \\(|A| = 10\\)।" },
+            { q: "১৪. \\(x+y+z=1\\), \\(x+ay+z=1\\), \\(ax+by+z=0\\) সমীকরণগুচ্ছের কোনো সমাধান না থাকলে a-এর মান কত?", opts: ["1", "2", "0", "-1"], ans: 0, exp: "ব্যাখ্যা: সমাধান না থাকার শর্ত হলো সহগ নির্ণায়ক \\(|A|=0\\) হতে হবে। নির্ণায়কটি সমাধান করলে \\(-(a-1)^2 = 0\\) পাওয়া যায়, অর্থাৎ \\(a=1\\)।" },
+            { q: "১৫. A একটি 3 ক্রমের বর্গ ম্যাট্রিক্স হলে \\(\\text{det}(2A)\\) কার সমান?", opts: ["\\(2 \\text{det}(A)\\)", "\\(4 \\text{det}(A)\\)", "\\(8 \\text{det}(A)\\)", "\\(6 \\text{det}(A)\\)"], ans: 2, exp: "ব্যাখ্যা: \\(n \\times n\\) ক্রমের ম্যাট্রিক্সের ক্ষেত্রে \\(\\text{det}(kA) = k^n \\text{det}(A)\\) হয়। এখানে \\(n=3, k=2\\), তাই \\(2^3 \\text{det}(A) = 8 \\text{det}(A)\\)।" }
+        ]
+    }
+};
+
+// ================== STATE VARIABLES ==================
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+// ================== LOCAL STORAGE LOGIC ==================
+function getGlobalUsers() {
+    const data = localStorage.getItem("testBazarGlobalUsers");
+    return data ? JSON.parse(data) : {};
+}
+
+// Keeping attempts separate for Maths Unit 2 Chapter 3
+function getAttemptsData() {
+    const data = localStorage.getItem("testBazarAttemptsMath3U2C3_v1");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    attempts[key] = (attempts[key] || 0) + 1;
+    localStorage.setItem("testBazarAttemptsMath3U2C3_v1", JSON.stringify(attempts));
+    return attempts[key];
+}
+
+// ================== INITIALIZATION ==================
+window.onload = () => {
+    renderHub();
+};
+
+function renderHub() {
+    const grid = document.getElementById("setGrid");
+    grid.innerHTML = "";
+    
+    for(let id in ALL_SETS) {
+        const set = ALL_SETS[id];
+        const div = document.createElement("div");
+        div.className = "set-card";
+        
+        let attemptCount = 0;
+        let isLocked = false;
+        
+        if (currentUser) {
+            attemptCount = getAttemptCount(currentUser, id);
+            isLocked = attemptCount >= MAX_ATTEMPTS;
+            if (isLocked) div.classList.add("locked");
+        }
+        
+        div.innerHTML = `
+            <div class="icon">${set.icon}</div>
+            <div class="set-num">${set.name}</div>
+            <div class="set-title">${set.topic}</div>
+            <div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+            ${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+        `;
+        
+        div.onclick = () => {
+            if (isLocked) {
+                alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+                return;
+            }
+            handleSetClick(id);
+        };
+        grid.appendChild(div);
+    }
+}
+
+function handleSetClick(setId) {
+    activeSetId = setId;
+    if (!currentUser) {
+        document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+        document.getElementById("loginOverlay").classList.add("active");
+        document.getElementById("loginUsername").value = "";
+        document.getElementById("loginPassword").value = "";
+        document.getElementById("loginError").style.display = "none";
+    } else {
+        startQuiz(setId);
+    }
+}
+
+function doLogin() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+    const err = document.getElementById("loginError");
+    const GLOBAL_USERS = getGlobalUsers();
+
+    if(!u || !p) {
+        err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!";
+        err.style.display = "block";
+        return;
+    }
+
+    if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+        let attempts = getAttemptCount(u, activeSetId);
+        if (attempts >= MAX_ATTEMPTS) {
+            err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+            err.style.display = "block";
+            return;
+        }
+        currentUser = u;
+        document.getElementById("loginOverlay").classList.remove("active");
+        document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+        document.getElementById("userDisplay").classList.remove("hidden");
+        renderHub();
+        startQuiz(activeSetId);
+    } else {
+        err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+        err.style.display = "block";
+    }
+}
+
+function closeLogin() {
+    document.getElementById("loginOverlay").classList.remove("active");
+}
+
+function goToHub() {
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("hubPage").style.display = "block";
+    document.getElementById("timerBox").classList.add("hidden");
+    clearInterval(timerInterval);
+    renderHub();
+}
+
+// ================== QUIZ LOGIC ==================
+function startQuiz(setId) {
+    incrementAttempt(currentUser, setId);
+    questions = ALL_SETS[setId].questions;
+    currentQIndex = 0;
+    score = 0;
+    wrongAnswers = 0;
+    userAnswers = {};
+    isReviewMode = false;
+    timeLeft = TIME_LIMIT;
+
+    document.getElementById("hubPage").style.display = "none";
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    document.getElementById("timerBox").classList.remove("hidden");
+    document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+    document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+
+    startTimer();
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const qData = questions[currentQIndex];
+    document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+    document.getElementById("qText").innerHTML = qData.q;
+    const progress = ((currentQIndex) / questions.length) * 100;
+    document.getElementById("progressFill").style.width = `${progress}%`;
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    
+    const optsBox = document.getElementById("qOpts");
+    optsBox.innerHTML = "";
+    document.getElementById("explanation").classList.remove("show");
+    document.getElementById("nextBtn").disabled = true;
+    document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+    qData.opts.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "opt";
+        btn.innerHTML = `<div class="opt-circle">${LABELS[idx] || '—'}</div> <div class="opt-text">${optText}</div>`;
+        
+        if (isReviewMode) {
+            btn.classList.add("disabled");
+            if (idx === qData.ans) btn.classList.add("correct");
+            else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+        } else {
+            btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+        }
+        optsBox.appendChild(btn);
+    });
+
+    if (isReviewMode) {
+        document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+        document.getElementById("explanation").classList.add("show");
+        document.getElementById("nextBtn").disabled = false;
+        if (currentQIndex === questions.length - 1) {
+            document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন";
+        }
+    }
+    
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+    const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+    allBtns.forEach(b => b.classList.add("disabled"));
+    userAnswers[currentQIndex] = selectedIdx; 
+
+    if (selectedIdx === correctIdx) {
+        btn.classList.add("correct");
+        score++;
+    } else {
+        btn.classList.add("wrong");
+        allBtns[correctIdx].classList.add("correct");
+        wrongAnswers++;
+    }
+    
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+    document.getElementById("explanation").classList.add("show");
+    document.getElementById("nextBtn").disabled = false;
+    
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function nextQ() {
+    if (isReviewMode && currentQIndex === questions.length - 1) {
+        document.getElementById("testArea").classList.add("hidden");
+        document.getElementById("resultWrap").classList.add("show");
+        return;
+    }
+    if (!isReviewMode && currentQIndex === questions.length - 1) {
+        finishQuiz();
+        return;
+    }
+    currentQIndex++;
+    loadQuestion();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    const tBox = document.getElementById("timerBox");
+    tBox.classList.remove("danger");
+    
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishQuiz();
+            return;
+        }
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        if (timeLeft < 60) tBox.classList.add("danger");
+    }, 1000);
+}
+
+function finishQuiz() {
+    clearInterval(timerInterval);
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("timerBox").classList.add("hidden");
+    document.getElementById("resultWrap").classList.add("show");
+    
+    const total = questions.length;
+    const skipped = total - (score + wrongAnswers);
+    const percent = Math.round((score / total) * 100);
+    
+    document.getElementById("finalScore").innerText = `${percent}%`;
+    document.getElementById("rbCorrect").innerText = score;
+    document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+    
+    const gradeEl = document.getElementById("resultGrade");
+    if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+    else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+    else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+    
+    const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+    document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+    if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+        alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+        return;
+    }
+    startQuiz(activeSetId);
+}
+
+function showReview() {
+    isReviewMode = true;
+    currentQIndex = 0;
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    loadQuestion();
+}
+</script>
+</body>
+</html>
