@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Biology 3rd Sem | Ch 5</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+/* ================= COLOR SCHEME & VARIABLES ================= */
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+
+/* Top Bar */
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+
+/* Hub View */
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; justify-content: center; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; max-width: 350px; margin: 0 auto; width: 100%;}
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+
+/* Quiz View */
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; overflow-x: auto; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main); overflow-x: auto;}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; overflow-x: auto;}
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+
+/* Result View */
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+
+/* Login Modal */
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+    <div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+    <div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+
+<div class="main">
+
+    <!-- ================= LOGIN MODAL ================= -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <h2>লগইন করুন</h2>
+            <p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+            <div class="login-set-name" id="loginSetName">📚 Set 1</div>
+            <div class="input-group">
+                <label>ইউজারনেম</label>
+                <input type="text" id="loginUsername" placeholder="Username">
+            </div>
+            <div class="input-group">
+                <label>পাসওয়ার্ড</label>
+                <input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+            </div>
+            <button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+            <button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+            <div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+        </div>
+    </div>
+
+    <!-- ================= HUB PAGE ================= -->
+    <div id="hubPage">
+        <div class="hub-header">
+            <h1>জীববিজ্ঞান 3rd Sem <br>পঞ্চম অধ্যায়: বংশগতির আণবিক ভিত্তি</h1>
+            <p>আপনার নির্বাচিত ৮টি সেট (১, ২, ৩, ৪, ১৭, ১৮, ১৯, ২০)। Test শুরু করতে সেটে ক্লিক করুন।</p>
+        </div>
+        <div class="set-grid" id="setGrid"></div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+        </div>
+    </div>
+
+    <!-- ================= QUIZ AREA ================= -->
+    <div id="testArea" class="hidden">
+        <div class="quiz-info">
+            <div class="info-item">🎓 <strong>Biology</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+            <div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="q-card">
+            <div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+            <div class="q-text" id="qText">Question Text</div>
+            <div class="opts" id="qOpts"></div>
+            <div class="explanation" id="explanation"><p id="explanationText"></p></div>
+            <div class="nav-row">
+                <div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+                <button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RESULT AREA ================= -->
+    <div class="result-wrap" id="resultWrap">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-score en-font" id="finalScore">100%</div>
+        <div class="result-total">স্কোর</div>
+        <div class="result-grade" id="resultGrade">অসাধারণ!</div>
+        <div class="result-bars">
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+                <div class="rb-label">সঠিক</div>
+            </div>
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+                <div class="rb-label">ভুল/স্কিপ</div>
+            </div>
+        </div>
+        <div class="attempt-info-box" id="attemptInfo"></div>
+        <div class="action-btns">
+            <button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+            <button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+            <button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// Global Config & Database
+// ============================================================
+const MAX_ATTEMPTS = 10;
+const TIME_LIMIT = 10 * 60; // 10 Minutes
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+    1: {
+        name: 'Set 1', icon: '🧬', topic: 'নিউক্লিক অ্যাসিড, DNA ও RNA-এর রাসায়নিক গঠন',
+        questions: [
+            { q: "১. DNA এবং RNA-এর গঠনগত একককে কী বলা হয়?", opts: ["নিউক্লিওসাইড", "নিউক্লিওটাইড", "নাইট্রোজেন বেস", "পলিস্যাকারাইড"], ans: 1, exp: "ব্যাখ্যা: DNA বা RNA-কে একক উপাদান নিউক্লিওটাইডের (nucleotide) সম্মিলিত গঠন বলা যায়। অনেক নিউক্লিওটাইড DNA বা RNA-তে একের পর এক যুক্ত হয়ে দীর্ঘ শৃঙ্খল তৈরি করে।" },
+            { q: "২. একটি নিউক্লিওটাইড প্রধানত কী কী উপাদান নিয়ে গঠিত হয়?", opts: ["নাইট্রোজেন বেস, ৫-কার্বন সুগার ও ফসফোরিক অ্যাসিড", "নাইট্রোজেন বেস ও ৫-কার্বন সুগার", "৫-কার্বন সুগার ও ফসফোরিক অ্যাসিড", "পিউরিন ও পিরিমিডিন"], ans: 0, exp: "ব্যাখ্যা: তিনপ্রকার উপাদান সমন্বয়ে নিউক্লিওটাইড গঠিত হয়, যেগুলি হল—নাইট্রোজেন বেস, 5-কার্বন সুগার ও ফসফোরিক অ্যাসিড।" },
+            { q: "৩. DNA-তে উপস্থিত পিরিমিডিন (Pyrimidine) বেসগুলি কী কী?", opts: ["অ্যাডেনিন ও গুয়ানিন", "অ্যাডেনিন ও থাইমিন", "থাইমিন ও সাইটোসিন", "সাইটোসিন ও ইউরাসিল"], ans: 2, exp: "ব্যাখ্যা: DNA অণুতে উপস্থিত পিরিমিডিন বলয়গুলি হল থাইমিন ও সাইটোসিন।" },
+            { q: "৪. RNA অণুতে থাইমিনের পরিবর্তে কোন্ পিরিমিডিন বেসটি থাকে?", opts: ["গুয়ানিন", "সাইটোসিন", "ইউরাসিল", "অ্যাডেনিন"], ans: 2, exp: "ব্যাখ্যা: ইউরাসিল কেবলমাত্র RNA-তে পাওয়া যায়, এবং RNA-তে থাইমিন থাকে না।" },
+            { q: "৫. ৫-কার্বন সুগারের সাথে নাইট্রোজেন বেস যুক্ত হয়ে যে গঠন তৈরি করে, তাকে কী বলে?", opts: ["নিউক্লিওটাইড", "নিউক্লিওসাইড", "পলিনিউক্লিওটাইড", "জিনোম"], ans: 1, exp: "ব্যাখ্যা: একটি নাইট্রোজেন বেস সুগারের সাথে যুক্ত হলে তাকে নিউক্লিওসাইড বলা হয়।" },
+            { q: "৬. DNA এবং RNA-এর মধ্যে শর্করা বা সুগারের প্রধান গঠনগত পার্থক্য কী?", opts: ["DNA-তে ৫-কার্বন সুগার থাকে, RNA-তে ৬-কার্বন সুগার থাকে", "DNA-এর সুগারের ২' কার্বনে অক্সিজেন থাকে না (ডিঅক্সি), কিন্তু RNA-তে থাকে (OH মূলক)", "DNA-এর সুগারে ৩' কার্বনে অক্সিজেন থাকে না", "এদের সুগারের মধ্যে কোনো পার্থক্য নেই"], ans: 1, exp: "ব্যাখ্যা: DNA-তে 5-কার্বন সুগারের 2' নং স্থানে একটি অক্সিজেন থাকে না বলে একে 2-ডিঅক্সি রাইবোজ সুগার বলে। অপরদিকে, RNA-এর ক্ষেত্রে কার্বনের 2' নম্বর স্থানে 'H'-এর পরিবর্তে OH মূলক থাকে।" },
+            { q: "৭. চারগাফের সূত্র (Chargaff's rule) অনুযায়ী, একটি দ্বিতন্ত্রী DNA-তে নীচের কোন্ সম্পর্কটি সঠিক?", opts: ["A+T=G+C", "A+G=T+C", "A=G", "A+T/G+C=1"], ans: 1, exp: "ব্যাখ্যা: চারগাফের সূত্র অনুযায়ী দ্বিতন্ত্রী DNA-তে মোট পিউরিনের সংখ্যা ও মোট পাইরিমিডিনের সংখ্যা সমান থাকে, অর্থাৎ A+G=T+C হয়।" },
+            { q: "৮. একটি পলিনিউক্লিওটাইড শৃঙ্খলে দুটি নিউক্লিওটাইড পরষ্পর কোন্ বন্ধনী দ্বারা যুক্ত থাকে?", opts: ["গ্লাইকোসাইড বন্ধনী", "হাইড্রোজেন বন্ধনী", "ফসফোডাইএস্টার বন্ধনী", "পেপটাইড বন্ধনী"], ans: 2, exp: "ব্যাখ্যা: পাশাপাশি অবস্থিত দুটি নিউক্লিওটাইড ফসফোডাইএস্টার বন্ধনী (phosphodiester bond) দ্বারা যুক্ত হয় এবং নিউক্লিক অ্যাসিডের গঠন কাঠামো তৈরি করে।" },
+            { q: "৯. ১৯৫৩ খ্রিস্টাব্দে DNA অণুর 'ডবল হেলিক্স' (Double helix) বা দ্বিতন্ত্রী প্যাঁচানো মডেল কারা প্রবর্তন করেন?", opts: ["উইলিকিনস ও ফ্রাঙ্কলিন", "হারসে ও চেজ", "ওয়াটসন ও ক্রিক", "মেসেলসন ও স্টাল"], ans: 2, exp: "ব্যাখ্যা: 1953 খ্রিস্টাব্দে বিজ্ঞানী ওয়াটসন এবং ক্রিক (Watson and Crick) DNA অণুর গঠন প্রকৃতির একটি নকশা প্রণয়ন করেন যা 'DNA ডবল হেলিক্স' নামে পরিচিত।" },
+            { q: "১০. B-DNA-এর একটি সম্পূর্ণ পাকে (turn) কত জোড়া নিউক্লিওটাইড বা বেস পেয়ার থাকে?", opts: ["৮ জোড়া", "১০ জোড়া", "১১ জোড়া", "১২ জোড়া"], ans: 1, exp: "ব্যাখ্যা: ওয়াটসন ও ক্রিক বর্ণিত B-DNA-এর প্যাঁচানো দ্বিতন্ত্রী গঠনের এক একটি সম্পূর্ণ পাকে 10 জোড়া করে নিউক্লিওটাইড সমদূরত্বে অবস্থিত থাকে।" },
+            { q: "১১. DNA অণুর দুটি পলিনিউক্লিওটাইড তন্তুর মধ্যেকার রৈখিক দূরত্ব বা ব্যাস কত?", opts: ["3.4 Å", "20 Å", "34 Å", "2 Å"], ans: 1, exp: "ব্যাখ্যা: দ্বিতন্ত্রী DNA-এর তত্ত্ব দুটির মধ্যেকার দূরত্ব বা ব্যাস 20Å হয়।" },
+            { q: "১২. DNA অণুতে অ্যাডেনিন (A) ও থাইমিন (T)-এর মধ্যে কয়টি হাইড্রোজেন বন্ধনী থাকে?", opts: ["১ টি", "২ টি", "৩ টি", "৪ টি"], ans: 1, exp: "ব্যাখ্যা: DNA অণুতে অ্যাডেনিন ও থাইমিনের মধ্যে দুটি হাইড্রোজেন বন্ধনী গঠিত হয় (A=T)।" },
+            { q: "১৩. DNA অণুতে গুয়ানিন (G) ও সাইটোসিন (C)-এর মধ্যে কয়টি হাইড্রোজেন বন্ধনী থাকে?", opts: ["১ টি", "২ টি", "৩ টি", "৪ টি"], ans: 2, exp: "ব্যাখ্যা: সাইটোসিন ও গুয়ানিনের মধ্যে তিনটি করে হাইড্রোজেন বন্ধনী (G≡C) গঠিত হয়।" },
+            { q: "১৪. B-DNA অণুর একটি সম্পূর্ণ পাকের দৈর্ঘ্য (Pitch) কত?", opts: ["3.4 Å", "20 Å", "34 Å", "340 Å"], ans: 2, exp: "ব্যাখ্যা: প্যাঁচানো দ্বিতন্ত্রী DNA-এর একটি সম্পূর্ণ পাকের দৈর্ঘ্য 34Å।" },
+            { q: "১৫. DNA অণুর দুটি সন্নিহিত বেস জোড়ের (Base pair) মধ্যেকার দূরত্ব কত?", opts: ["0.34 Å", "3.4 Å", "20 Å", "34 Å"], ans: 1, exp: "ব্যাখ্যা: একটি সম্পূর্ণ পাকে 10 জোড়া বেস 34Å দৈর্ঘ্যে থাকায়, প্রতি জোড়া নিউক্লিওটাইডের মধ্যেকার দূরত্ব 3.4Å হয়।" }
+        ]
+    },
+    2: {
+        name: 'Set 2', icon: '🔬', topic: 'জেনেটিক বস্তুর সন্ধান (Search for Genetic Material)',
+        questions: [
+            { q: "১৬. ১৯২৮ সালে ফ্রেডেরিক গ্রিফিথ তাঁর ব্যাকটেরিয়ার রূপান্তরভবন (Transformation) পরীক্ষার জন্য কোন্ ব্যাকটেরিয়া ব্যবহার করেছিলেন?", opts: ["Escherichia coli", "Streptococcus pneumoniae", "Salmonella typhimurium", "Bacillus subtilis"], ans: 1, exp: "ব্যাখ্যা: ফ্রেডেরিক গ্রিফিথ (1928) Streptococcus pneumoniae (বা ডিপ্লোকক্কাস) ব্যাকটেরিয়ার ওপর পরীক্ষা চালিয়ে রূপান্তরভবন (Transformation) পর্যবেক্ষণ করেন।" },
+            { q: "১৭. গ্রিফিথের পরীক্ষায় ইঁদুরের দেহে কোন্ ব্যাকটেরিয়া প্রবেশ করালে ইঁদুরটি নিউমোনিয়ায় আক্রান্ত হয়ে মারা যায়?", opts: ["জীবন্ত II-R", "জীবন্ত III-S", "তাপমৃত III-S", "তাপমৃত II-R"], ans: 1, exp: "ব্যাখ্যা: জীবন্ত III-S ব্যাকটেরিয়ার ক্যাপসুল থাকায় এরা রোগ সৃষ্টি করতে পারে এবং ইঁদুরটি নিউমোনিয়ায় মারা যায়।" },
+            { q: "১৮. গ্রিফিথের পরীক্ষায় তাপমৃত III-S এবং জীবন্ত II-R ব্যাকটেরিয়ার মিশ্রণ ইঁদুরের দেহে প্রবেশ করালে কী ঘটে?", opts: ["ইঁদুরটি বেঁচে থাকে", "ইঁদুরটি নিউমোনিয়ায় মারা যায়", "ব্যাকটেরিয়াগুলি ধ্বংস হয়", "ইঁদুরের ইমিউনিটি বৃদ্ধি পায়"], ans: 1, exp: "ব্যাখ্যা: তাপমৃত III-S থেকে জিনবস্তু (DNA) জীবন্ত II-R এ প্রবেশ করে তাকে ক্ষতিকারক III-S এ রূপান্তরিত করে, ফলে ইঁদুরটি মারা যায়।" },
+            { q: "১৯. ১৯৪৪ খ্রিস্টাব্দে কোন্ তিনজন বিজ্ঞানী প্রমাণ করেন যে গ্রিফিথের পরীক্ষায় রূপান্তরের জন্য দায়ী পদার্থটি হলো DNA?", opts: ["হারসে, চেজ এবং মেসেলসন", "ওয়াটসন, ক্রিক এবং উইলকিন্স", "অ্যাভেরি, ম্যাকলিওড এবং ম্যাককার্টি", "জ্যাকব, মোনড এবং খোরানা"], ans: 2, exp: "ব্যাখ্যা: 1944 খ্রিস্টাব্দে অ্যাভেরি, ম্যাকলিওড ও ম্যাককার্টি আবিষ্কার করে ফেলেন যে DNA-ই কোশে জিনবস্তু হিসেবে কাজ করে এবং রূপান্তরভবন ঘটায়।" },
+            { q: "২০. অ্যাভেরি, ম্যাকলিওড এবং ম্যাককার্টির পরীক্ষায় কোন্ উৎসেচক প্রয়োগ করলে II-R ব্যাকটেরিয়ার রূপান্তরভবন বন্ধ হয়ে গিয়েছিল?", opts: ["প্রোটিয়েজ (Protease)", "আরএনএজ (RNase)", "ডিএনএজ (DNase)", "লাইগেজ (Ligase)"], ans: 2, exp: "ব্যাখ্যা: DNase প্রয়োগ করলে মৃত III-S ব্যাকটেরিয়ার DNA বিনষ্ট হওয়ায় মিশ্রণটি আর II-R কে III-S-এ রূপান্তরিত করতে পারে না, যা প্রমাণ করে DNA-ই জেনেটিক পদার্থ।" },
+            { q: "২১. ১৯৫২ খ্রিস্টাব্দে এ. ডি. হারসে এবং এম. চেজ জিন বস্তুর সন্ধানের জন্য তাঁদের পরীক্ষায় কোন্ জীব ব্যবহার করেছিলেন?", opts: ["T2 ব্যাকটেরিওফাজ এবং E. coli", "Streptococcus এবং ইঁদুর", "TMV এবং তামাক গাছ", "Drosophila এবং মটর গাছ"], ans: 0, exp: "ব্যাখ্যা: হারসে ও চেজ 1952 খ্রিস্টাব্দে T2 ব্যাকটেরিওফাজ ও Escherichia coli নিয়ে পরীক্ষার মাধ্যমে প্রমাণ করেন যে DNA-ই জিন বস্তু হিসেবে কাজ করে।" },
+            { q: "২২. হারসে ও চেজ তাঁদের পরীক্ষায় DNA এবং প্রোটিনকে পৃথকভাবে চিহ্নিত করার জন্য কোন্ দুটি তেজস্ক্রিয় আইসোটোপ ব্যবহার করেছিলেন?", opts: ["14C এবং 15N", "32P এবং 35S", "18O এবং 3H", "131I এবং 32P"], ans: 1, exp: "ব্যাখ্যা: হারসে ও চেজ T2 ভাইরাসের DNA-কে তেজস্ক্রিয় 32P দিয়ে এবং প্রোটিন খোলককে 35S দিয়ে চিহ্নিত করেন।" },
+            { q: "২৩. হারসে ও চেজের পরীক্ষায়, কোন্ তেজস্ক্রিয় আইসোটোপটি E. coli কোশের অভ্যন্তরে প্রবেশ করেছিল, যা প্রমাণ করে যে DNA-ই জেনেটিক বস্তু?", opts: ["35S", "14C", "32P", "15N"], ans: 2, exp: "ব্যাখ্যা: 32P দ্বারা চিহ্নিত ভাইরাসের ক্ষেত্রে দেখা যায় প্রায় সমস্ত তেজস্ক্রিয়তা E.coli কোশের মধ্যে প্রবেশ করেছে, যার দ্বারা প্রমাণিত হয় DNA-ই জিন বস্তু।" },
+            { q: "২৪. শুধুমাত্র ভাইরাসের নিউক্লিক অ্যাসিড বা বিশুদ্ধ DNA ব্যাকটেরিয়ার প্রোটোপ্লাজমে প্রবেশ করিয়ে নতুন ভাইরাস সৃষ্টির ঘটনাকে কী বলে?", opts: ["ট্রান্সফরমেশন", "ট্রান্সডাকশন", "ট্রান্সফেকশন", "কনজুগেশন"], ans: 2, exp: "ব্যাখ্যা: ভাইরাসের নিউক্লিক অ্যাসিডের মাধ্যমে সংক্রমণ ঘটিয়ে সম্পূর্ণ ব্যাকটেরিওফাজ সৃষ্টি করার পদ্ধতিকে ট্রান্সফেকশন বলে, যা প্রমাণ করে DNA-ই জেনেটিক বস্তু।" },
+            { q: "২৫. যে প্রক্রিয়ায় একটি ব্যাকটেরিয়ার জেনেটিক বস্তু ফাজ ভাইরাস বাহকের মাধ্যমে অপর একটি ব্যাকটেরিয়াতে স্থানান্তরিত হয়, তাকে কী বলে?", opts: ["ট্রান্সফরমেশন", "ট্রান্সডাকশন", "ট্রান্সফেকশন", "ট্রান্সলেশন"], ans: 1, exp: "ব্যাখ্যা: ফাজ ভাইরাস বাহকের মাধ্যমে এক ব্যাকটেরিয়া থেকে অপর ব্যাকটেরিয়াতে জেনেটিক বস্তু স্থানান্তরিত হওয়ার প্রক্রিয়াকে ট্রান্সডাকশন বলে।" },
+            { q: "২৬. কোন্ বিজ্ঞানীরা ১৯৫৭ খ্রিস্টাব্দে টোবাকো মোজাইক ভাইরাসের (TMV) উপর পুনর্গঠন পরীক্ষা চালিয়ে প্রমাণ করেন যে RNA-ও জিনবস্তুরূপে কাজ করতে পারে?", opts: ["মেসেলসন ও স্টাল", "এইচ. ফ্রাঙ্কেল-কনরাট ও বি. সিঙ্গার", "ওয়াটসন ও ক্রিক", "বিডল ও ট্যাটাম"], ans: 1, exp: "ব্যাখ্যা: এইচ. ফ্রাঙ্কেল-কনরাট ও বি. সিঙ্গার 1957 খ্রিস্টাব্দে TMV-র উপর পুনর্গঠন পরীক্ষা চালিয়ে প্রমাণ করেন যে কোনো কোনো ভাইরাসের ক্ষেত্রে RNA জিনবস্তুরূপে কাজ করতে পারে।" },
+            { q: "২৭. টোবাকো মোজাইক ভাইরাস (TMV) এবং এইচ. আই. ভি. (HIV) ভাইরাসে জেনেটিক বস্তু হিসেবে কী উপস্থিত থাকে?", opts: ["দ্বিতন্ত্রী DNA", "একতন্ত্রী DNA", "RNA", "প্রোটিন"], ans: 2, exp: "ব্যাখ্যা: টোবাকো মোজাইক ভাইরাস (TMV) এবং মানুষের এইডস রোগ সৃষ্টিকারী ভাইরাস এইচ আই ভি (HIV) হল এক ধরনের RNA ভাইরাস, যেখানে RNA জিনবস্তু হিসেবে কাজ করে।" },
+            { q: "২৮. কোনো অণুকে জিনগত বস্তু (Genetic material) হিসেবে কাজ করতে হলে, নীচের কোন্ মানদণ্ডটি পূরণ করা আবশ্যক নয়?", opts: ["নিজস্ব প্রতিলিপি তৈরি করতে সক্ষম হওয়া", "গঠনগত এবং রাসায়নিকভাবে স্থিতিশীল হওয়া", "দ্রুতগতিতে প্রতিনিয়ত পরিবর্তিত হওয়া", "নিজেকে মেন্ডেলীয় বৈশিষ্ট্যরূপে প্রকাশ করতে সমর্থ হওয়া"], ans: 2, exp: "ব্যাখ্যা: জিনগত বস্তুর মিউটেশন বা ধীরগতির পরিবর্তনের সুযোগ থাকতে হবে যা বিবর্তনের জন্য প্রয়োজনীয়, তবে দ্রুত বা অস্থিতিশীল পরিবর্তন এর বৈশিষ্ট্য নয়।" },
+            { q: "২৯. জিন প্রযুক্তিবিদ্যার সাহায্যে ইঁদুরের নিষিক্ত ডিম্বাণুর মধ্যে মানুষের বৃদ্ধি হরমোনের (GH) জিন প্রবেশ করিয়ে যে বড়ো আকারের ইঁদুর তৈরি করা হয়েছে, তাকে কী বলে?", opts: ["মিউট্যান্ট ইঁদুর", "ট্রান্সজেনিক ইঁদুর", "ক্লোন ইঁদুর", "হাইব্রিড ইঁদুর"], ans: 1, exp: "ব্যাখ্যা: মানুষের বৃদ্ধি হরমোনের (GH) জিন (DNA) প্রবেশ করিয়ে ট্রান্সজেনিক ইঁদুর সৃষ্টি করা হয়েছে যা প্রমাণ করে DNA-ই জেনেটিক বস্তু।" },
+            { q: "৩০. DNA থেকে RNA এবং RNA থেকে প্রোটিন সংশ্লেষের মাধ্যমে জিনের বার্তা বা তথ্যের একমুখী প্রবাহের নীতিকে কী বলা হয়?", opts: ["সেন্ট্রাল ডগমা (Central Dogma)", "ট্রান্সডাকশন", "রিভার্স ট্রান্সক্রিপশন", "ওপেরন মডেল"], ans: 0, exp: "ব্যাখ্যা: DNA থেকে জিনের সাংকেতিক বার্তার পর্যায়ক্রমিক প্রবাহ (ট্রান্সক্রিপশন) ও তার প্রোটিনে রূপায়ণকে (ট্রান্সলেশন) সেন্ট্রাল ডগমা বা কেন্দ্রীয় নীতি বলে, যা বিজ্ঞানী ক্রিক প্রবর্তন করেন।" }
+        ]
+    },
+    3: {
+        name: 'Set 3', icon: '🧪', topic: 'DNA-এর ভৌত ও রাসায়নিক ধর্ম (Properties of DNA)',
+        questions: [
+            { q: "৩১. DNA অণুর দুটি সূত্রকে তাপ বা ক্ষার প্রয়োগে সম্পূর্ণ পৃথক করার ঘটনাকে কী বলা হয়?", opts: ["রিন্যাচুরেশন", "ডিন্যাচুরেশন", "হাইপারক্রোমিক শিফট", "ট্রান্সফরমেশন"], ans: 1, exp: "ব্যাখ্যা: অধিক তাপ অথবা অধিক ক্ষার প্রয়োগে DNA-র দুটি সূত্রকে সম্পূর্ণ পৃথক করা যায়। DNA-র সূত্রদ্বয়ের এমন ভাবে পৃথকীভবন হওয়াকে ডিন্যাচুরেশন (denaturation) বলে।" },
+            { q: "৩২. যে পরিমাণ তাপ প্রয়োগ করলে DNA-এর অর্ধেকাংশের সূত্র দুটি পৃথক হয়ে যায়, তাকে কী বলে?", opts: ["বয়েলিং টেম্পারেচার", "মেল্টিং টেম্পারেচার বা গলন তাপমাত্রা (Tm)", "ডিন্যাচুরেশন টেম্পারেচার", "অ্যানিলিং টেম্পারেচার"], ans: 1, exp: "ব্যাখ্যা: যে পরিমাণ তাপ প্রয়োগে অর্ধেকাংশে DNA-র সূত্র দুটি পৃথক হয় তাকে গলন তাপমাত্রা (melting temperature বা Tm) বলা হয়।" },
+            { q: "৩৩. DNA-এর গলন তাপমাত্রা (Tm) প্রধানত কোন্ বেস-জোড়ের পরিমাণের ওপর নির্ভর করে?", opts: ["A-T জোড়", "G-C জোড়", "A-G জোড়", "T-C জোড়"], ans: 1, exp: "ব্যাখ্যা: বিভিন্ন পরিমাণে G-C-এর উপস্থিতি সাপেক্ষে বিভিন্ন DNA-র গলন তাপমাত্রা আলাদা হয়। G-C জোড়ে তিনটি হাইড্রোজেন বন্ধনী থাকায় এরা বেশি তাপমাত্রায় বিশ্লিষ্ট হয়।" },
+            { q: "৩৪. দ্বিতন্ত্রী DNA-এর তুলনায় ডিন্যাচুরেশনের পর একতন্ত্রী DNA-তে অতিবেগুনি রশ্মি (UV ray) শোষণের পরিমাণ বৃদ্ধি পাওয়ার ঘটনাকে কী বলে?", opts: ["হাইপারক্রোমিক শিফট (Hyperchromic shift)", "ডিন্যাচুরেশন", "রিন্যাচুরেশন", "টটোমেরিক শিফট"], ans: 0, exp: "ব্যাখ্যা: দ্বিতন্ত্রী DNA যে পরিমাণ অতিবেগুনি রশ্মি শোষণ করে, ডিন্যাচুরেশনের সময় একই DNA-তে শোষিত অতিবেগুনি রশ্মির পরিমাণ বেড়ে যায়। একে hyperchromic shift বলে।" },
+            { q: "৩৫. DNA সাধারণত কত ন্যানোমিটার (nm) তরঙ্গদৈর্ঘ্যের অতিবেগুনি রশ্মি সর্বোচ্চ মাত্রায় শোষণ করে?", opts: ["200 nm", "260 nm", "300 nm", "340 nm"], ans: 1, exp: "ব্যাখ্যা: DNA 260 ন্যানোমিটার তরঙ্গদৈর্ঘ্যের অতিবেগুনি রশ্মি শোষণ করতে সক্ষম।" },
+            { q: "৩৬. স্বাভাবিক শারীরবৃত্তীয় অবস্থায়, ৯২% আর্দ্রতায় ওয়াটসন ও ক্রিক বর্ণিত DNA-এর কোন্ রূপটি (Form) দেখা যায়?", opts: ["A-DNA", "B-DNA", "C-DNA", "Z-DNA"], ans: 1, exp: "ব্যাখ্যা: স্বাভাবিক শারীরবৃত্তীয় অবস্থায় এবং 92% আর্দ্রতায় ওয়াটসন ও ক্রিক রচিত নকশাকে B-DNA গঠন হিসেবে গণ্য করা হয়।" },
+            { q: "৩৭. নিম্নলিখিত কোন্ প্রকারের DNA-তে কুণ্ডলীটি বামাবর্তী (Left-handed) পাকযুক্ত হয়?", opts: ["A-DNA", "B-DNA", "Z-DNA", "D-DNA"], ans: 2, exp: "ব্যাখ্যা: Z-DNA হলো বামাবর্তী পাকযুক্ত (Left-handed DNA), যেখানে প্রতি আবর্তে 12 জোড়া বেস থাকে।" },
+            { q: "৩৮. মানুষের শুক্রাণুতে A+T/G+C এর অনুপাত কত?", opts: ["1.00", "1.67", "0.98", "1.09"], ans: 1, exp: "ব্যাখ্যা: মানুষের শুক্রাণুর DNA-তে A+T/G+C এর অনুপাত হলো 1.67।" },
+            { q: "৩৯. কোন্ প্রজাতির হ্যাপ্লয়েড জিনোমের মধ্যে যে পরিমাণ DNA থাকে তাকে কী বলা হয়?", opts: ["জিনোম সাইজ", "C-ভ্যালু (C-value)", "কাইনেটিক ভ্যালু", "D-ভ্যালু"], ans: 1, exp: "ব্যাখ্যা: কোনো প্রজাতির হ্যাপ্লয়েড জিনোমের মধ্যে যে পরিমাণ DNA থাকে তাকে সি-ভ্যালু (C-value) বলা হয়।" },
+            { q: "৪০. উন্নত প্রাণীদের ক্ষেত্রে জীবের জটিলতা তার DNA-এর পরিমাণের (C-value) ওপর নির্ভর করে না। এই অসামঞ্জস্যতাকে কী বলা হয়?", opts: ["সেন্ট্রাল ডগমা", "C-ভ্যালু প্যারাডক্স (C-value paradox)", "হাইপারক্রোমিক শিফট", "জিনোমিক ইমপ্রিন্টিং"], ans: 1, exp: "ব্যাখ্যা: মানুষ ব্যাঙের চেয়ে অনেক জটিল প্রাণী হওয়া সত্ত্বেও তার C-value ব্যাঙের অপেক্ষা অনেক কম। জীবের C-value ও তার জটিলতার সঙ্গে এই অসামঞ্জস্য সম্পর্ককে C-value paradox বলে।" },
+            { q: "৪১. φX174 (Phi X 174) কলিফাজ ভাইরাসে কোন্ প্রকারের DNA পাওয়া যায়?", opts: ["রেখাকার দ্বিতন্ত্রী DNA", "চক্রাকার দ্বিতন্ত্রী DNA", "চক্রাকার একতন্ত্রী DNA", "রেখাকার একতন্ত্রী RNA"], ans: 2, exp: "ব্যাখ্যা: φX174 কলিফাজ ভাইরাসে চক্রাকার একতন্ত্রী DNA (Circular Single Stranded DNA) বর্তমান।" },
+            { q: "৪২. মানুষের 23 জোড়া ক্রোমোজোমে উপস্থিত মোট DNA-এর আনুমানিক দৈর্ঘ্য কত?", opts: ["1.9 মিটার", "2.2 মিটার", "1400 মাইক্রোমিটার", "85 মিলিমিটার"], ans: 0, exp: "ব্যাখ্যা: মানুষের 23 জোড়া ক্রোমোজোমের মোট DNA-এর দৈর্ঘ্য 1.9 মিটার এবং এর মধ্যে জিনের সংখ্যা 24194।" },
+            { q: "৪৩. RNA অণু কার অনুঘটক হিসেবে কাজ করতে পারে, যার কারণে একে রাইবোজাইম (Ribozyme) বলা হয়?", opts: ["লিপিড সংশ্লেষ", "প্রোটিন সংশ্লেষ বা পেপটাইড বন্ড গঠন", "গ্লাইকোলাইসিস", "সালোকসংশ্লেষ"], ans: 1, exp: "ব্যাখ্যা: কিছু RNA অনুঘটক রূপে কাজ করে, এদের রাইবোজাইম নামে চিহ্নিত করা হয় যা প্রোটিন সংশ্লেষে পেপটাইডল ট্রান্সফারেজ হিসেবে কাজ করতে পারে।" },
+            { q: "৪৪. ফয়েলগেন পদ্ধতিতে (Fuelgen Method) কোন্ বিকারক দ্বারা DNA-কে রঞ্জিত করা যায়?", opts: ["সিফ-এর রিএজেন্ট (Schiff's reagent)", "ইওসিন", "অ্যাসিটোকারমিন", "পাইরোনিন"], ans: 0, exp: "ব্যাখ্যা: ফয়েলগেন পদ্ধতিতে সিফ-এর রিএজেন্ট (Schiff's reagent) দ্বারা DNA-কে রঞ্জিত করা যায়।" },
+            { q: "৪৫. DNA-র প্লবতা গুরুত্ব (Buoyant density) প্রধানত কোন্ বেস জোড়ের পরিমাণের ওপর নির্ভর করে?", opts: ["A-T", "G-C", "A-G", "C-T"], ans: 1, exp: "ব্যাখ্যা: যে সকল DNA-তে G-C-র পরিমাণ যত বেশি সেসব DNA-র প্লবতা গুরুত্বও (Buoyant density) তত বেশি হয়।" }
+        ]
+    },
+    4: {
+        name: 'Set 4', icon: '🧶', topic: 'DNA প্যাকেজিং ও ক্রোমোজোমের গঠন',
+        questions: [
+            { q: "৪৬. ইউক্যারিওটিক কোশে DNA এবং হিস্টোন প্রোটিনের সমন্বয়ে গঠিত ক্রোমাটিন তন্তুর প্রাথমিক গঠনমূলক একককে কী বলে?", opts: ["সেন্ট্রোমিয়ার", "নিউক্লিওজোম (Nucleosome)", "ক্রোমোজোম স্ক্যাফোল্ড", "টেলোমিয়ার"], ans: 1, exp: "ব্যাখ্যা: ইউক্যারওটিক ক্রোমোজোমের গঠনগত একক যা একটি হিস্টোন অক্টামার, H1 হিস্টোন এবং 200 জোড়া নাইট্রোজেন বেস নিয়ে গঠিত, তাকে নিউক্লিওজোম বলে।" },
+            { q: "৪৭. নিউক্লিওজোমের কেন্দ্রীয় কোর অংশে (Histone octamer) কোন্ কোন্ হিস্টোন প্রোটিন থাকে?", opts: ["H1, H2A, H2B, H3", "H2A, H2B, H3, H4 (প্রতিটি দুটি করে)", "H1, H3, H4", "শুধুমাত্র H1 এবং H4"], ans: 1, exp: "ব্যাখ্যা: হিস্টোন অক্টামারের প্রতিটি প্রোটিন অণু জোড়ায় জোড়ায় থাকে অর্থাৎ H2A, H2B, H3 এবং H4 হিস্টোন দু-বার করে ব্যবহৃত হয়ে আটটি প্রোটিন অণু নিয়ে হিস্টোন অক্টামার তৈরি করে।" },
+            { q: "৪৮. হিস্টোন প্রোটিনগুলি মূলত কোন্ ক্ষারীয় অ্যামাইনো অ্যাসিড সমৃদ্ধ হওয়ার কারণে ধনাত্মক আধানযুক্ত হয়?", opts: ["লিউসিন ও ভ্যালিন", "আর্জিনিন ও লাইসিন", "ট্রিপটোফ্যান ও টাইরোসিন", "গ্লুটামিক অ্যাসিড ও অ্যাসপারটিক অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: আর্জিনিন ও লাইসিন নামক ক্ষারধর্মী অ্যামাইনো অ্যাসিড অত্যন্ত বেশি পরিমাণে থাকায় হিস্টোন প্রোটিনটি ক্ষারীয় ও ধনাত্মক আধানযুক্ত হয়, যা ঋণাত্মক DNA-র সাথে যুক্ত হয়।" },
+            { q: "৪৯. নিউক্লিওজোমের হিস্টোন অক্টামারকে বেষ্টন করে থাকা কোর DNA (Core DNA)-তে কত জোড়া নাইট্রোজেন বেস (bp) থাকে?", opts: ["54 bp", "146 bp", "200 bp", "34 bp"], ans: 1, exp: "ব্যাখ্যা: হিস্টোন অক্টামারের বাইরের দিকে 146 জোড়া নাইট্রোজেন বেস (bp) যুক্ত DNA তন্তু বামাবর্তে প্যাঁচানো থাকে, যাকে কোর DNA বলে।" },
+            { q: "৫০. পাশাপাশি অবস্থিত দুটি নিউক্লিওজোমের সংযোগকারী DNA-কে কী বলা হয়?", opts: ["কোর DNA", "লিংকার DNA (Linker DNA)", "স্যাটেলাইট DNA", "প্রাইমার DNA"], ans: 1, exp: "ব্যাখ্যা: পাশাপাশি অবস্থিত দুটি নিউক্লিওজোমের সংযোগকারী DNA তন্তুকে লিংকার DNA বলে যা গড়ে 54 জোড়া বেস নিয়ে গঠিত।" },
+            { q: "৫১. লিংকার DNA এবং কোর DNA-র সংযোগস্থলে কোন্ হিস্টোন অণুটি অবস্থান করে?", opts: ["H1 হিস্টোন", "H2A হিস্টোন", "H3 হিস্টোন", "H4 হিস্টোন"], ans: 0, exp: "ব্যাখ্যা: একটি H1 হিস্টোন অণু লিংকার DNA-র সঙ্গে যুক্ত থাকে এবং এটি লিংকার DNA ও কোর DNA-র সংযোগস্থলে অবস্থান করে নিউক্লিওজোমকে স্থির রাখে।" },
+            { q: "৫২. DNA প্যাকেজিং-এর দ্বিতীয় ধাপে নিউক্লিওজোমগুলি কুণ্ডলীকৃত হয়ে যে 30 nm ব্যাসের তন্তু গঠন করে, তাকে কী মডেল বলা হয়?", opts: ["ডাবল হেলিক্স মডেল", "সোলেনয়েড মডেল (Solenoid model)", "স্ক্যাফোল্ড মডেল", "রিবন মডেল"], ans: 1, exp: "ব্যাখ্যা: দ্বিতীয় ধাপে ঘনীভবনে 11 nm ক্রোমাটিন তন্তু থেকে 30 nm ক্রোমাটিন তন্তু তৈরি হয়, যাকে সোলেনয়েড মডেল বা জিগ-জ্যাগ মডেল দ্বারা ব্যাখ্যা করা হয়।" },
+            { q: "৫৩. সোলেনয়েড মডেল অনুযায়ী 30 nm ক্রোমাটিন তন্তুর প্রতি পাকে (turn) গড়ে কতগুলি নিউক্লিওজোম থাকে?", opts: ["৩-৪টি", "৬-৭টি", "১০-১২টি", "১৫টি"], ans: 1, exp: "ব্যাখ্যা: সোলেনয়েড গঠনে 30 nm ফাইবার তৈরি হয়, যার প্রতি turn-এ 6-7টি নিউক্লিওজোম থাকে।" },
+            { q: "৫৪. কোশ বিভাজনের মেটাফেজ দশায় ক্রোমোজোমে ক্রোমোজোম স্ক্যাফোল্ড (Chromosome scaffold) গঠনকারী প্রোটিনগুলি কী প্রকৃতির?", opts: ["বেসিক বা ক্ষারীয় প্রোটিন", "নন-হিস্টোন আম্লিক প্রোটিন", "গ্লাইকোপ্রোটিন", "লাইপোপ্রোটিন"], ans: 1, exp: "ব্যাখ্যা: হিস্টোন অপসারিত করার পর ক্রোমোজোমে যে প্রোটিন কাঠামো অবশিষ্ট থাকে তাকে ক্রোমোজোম স্ক্যাফোল্ড বলে যা প্রধানত নন-হিস্টোন ক্রোমোসোমাল (NHC) আম্লিক প্রোটিন দিয়ে গঠিত।" },
+            { q: "৫৫. মেটাফেজ দশায় একটি সম্পূর্ণ ক্রোমোজোমের স্থূলতা বা ব্যাস কত হয়?", opts: ["30 nm", "300 nm", "700 nm", "1400 nm"], ans: 3, exp: "ব্যাখ্যা: মেটাফেজ দশায় এক একটি ক্রোমাটিড প্রায় 700nm মোটা হয় এবং দুটি ক্রোমাটিড নিয়ে একটি সম্পূর্ণ ক্রোমোজোমের স্থূলতা দাঁড়ায় 1400nm।" },
+            { q: "৫৬. সেন্ট্রোমিয়ার এবং টেলোমিয়ার অঞ্চলে কোন্ ধরনের হেটেরোক্রোমাটিন পাওয়া যায় যা কখনোই ইউক্রোমাটিনে পরিবর্তিত হয় না?", opts: ["ফ্যাকালটেটিভ হেটেরোক্রোমাটিন", "কনস্টিটিউটিভ হেটেরোক্রোমাটিন (Constitutive heterochromatin)", "ইউক্রোমাটিন", "পাফ"], ans: 1, exp: "ব্যাখ্যা: যে হেটেরোক্রোমাটিন নির্দিষ্ট স্থানে থাকে এবং কখনোই ইউক্রোমাটিনে রূপান্তরিত হয় না তাকে স্থায়ী বা কনস্টিটিউটিভ হেটেরোক্রোমাটিন বলে, যেমন সেন্ট্রোমেরিক ও টেলোমেরিক হেটেরোক্রোমাটিন।" },
+            { q: "৫৭. মহিলাদের দুটি X ক্রোমোজোমের মধ্যে একটি নিষ্ক্রিয় হয়ে বার বডি (Barr body) গঠন করে। এটি কোন্ ধরনের ক্রোমাটিনের উদাহরণ?", opts: ["কনস্টিটিউটিভ হেটেরোক্রোমাটিন", "অস্থায়ী বা ফ্যাকালটেটিভ হেটেরোক্রোমাটিন", "ইউক্রোমাটিন", "পলিটিন ক্রোমোজোম"], ans: 1, exp: "ব্যাখ্যা: স্ত্রীদেহের দুটি X ক্রোমোজোমের একটি হেটেরোক্রোমাটিনে রূপান্তরিত হয় যাকে বারবডি বলে। এটি পরবর্তী প্রজন্মে পুরুষে আসলে ইউক্রোমাটিনে বদলায়, তাই এটি ফ্যাকালটেটিভ হেটেরোক্রোমাটিনের উদাহরণ।" },
+            { q: "৫৮. ইউক্রোমাটিন অঞ্চলে DNA-এর প্রতিলিপিকরণ (Replication) কোশচক্রের S দশার কোন্ সময়ে ঘটে?", opts: ["S দশার প্রথম ভাগে", "S দশার শেষভাগে", "G1 দশায়", "G2 দশায়"], ans: 0, exp: "ব্যাখ্যা: ইউক্রোমাটিন অঞ্চলের DNA অণুর S দশার প্রথম ভাগে প্রতিলিপিকরণ দেখা যায়, যেখানে হেটেরোক্রোমাটিনের S দশার শেষভাগে হয়।" },
+            { q: "৫৯. ক্রোমোজোমের টেলোমিয়ার অঞ্চলে DNA অণুর যে পৌনঃপুনিক সজ্জারীতি (Repetitive sequence) দেখা যায়, মানুষের ক্ষেত্রে সেটি কী?", opts: ["ATCG / TAGC", "TTAGGG / AATCCC", "GGCCTA / CCGGAT", "AUGC / UACG"], ans: 1, exp: "ব্যাখ্যা: মানুষের টেলোমিয়ার অঞ্চলে TTAGGG / AATCCC এই সিকুয়েন্স বা সজ্জারীতি 500 থেকে 3000 বার আসে।" },
+            { q: "৬০. ড্রসোফিলা মাছির লালাগ্রন্থিতে যে দৈত্যাকার ক্রোমোজোম দেখা যায়, তাকে কী বলে?", opts: ["ল্যাম্পব্রাশ ক্রোমোজোম", "পলিটিন ক্রোমোজোম", "B-ক্রোমোজোম", "মেগাক্রোমোজোম"], ans: 1, exp: "ব্যাখ্যা: ডিপ্টেরা বর্গের পতঙ্গ (যেমন কাইরোনমাস এবং ড্রসোফিলা) এর লালাগ্রন্থিতে পলিটিন ক্রোমোজোম বা সালিভারি গ্ল্যান্ড ক্রোমোজোম দেখা যায়।" }
+        ]
+    },
+   5: {
+        name: 'Set 5', icon: '🧬', topic: 'DNA রেপ্লিকেশন - ধারণা ও মেসেলসন-স্টাল পরীক্ষা',
+        questions: [
+            { q: "৬১. একটি DNA অণু থেকে অবিকল আর একটি DNA অণু গঠিত হওয়ার পদ্ধতিকে কী বলা হয়?", opts: ["ট্রান্সক্রিপশন", "ট্রান্সলেশন", "DNA রেপ্লিকেশন বা প্রতিলিপিকরণ", "স্প্লাইসিং"], ans: 2, exp: "ব্যাখ্যা: যে পদ্ধতিতে বিভিন্ন প্রকার উৎসেচক ও প্রোটিনের সাহায্যে একটি DNA অণু থেকে অবিকল আর একটি DNA অণু গঠিত হয় তাকে DNA প্রতিলিপিকরণ বা DNA রেপ্লিকেশন বলে।" },
+            { q: "৬২. DNA প্রতিলিপিকরণের সর্বাধিক গ্রহণযোগ্য ও বাস্তবসম্মত পদ্ধতি কোনটি?", opts: ["রক্ষণশীল প্রতিলিপিকরণ (Conservative)", "অর্ধরক্ষণশীল প্রতিলিপিকরণ (Semiconservative)", "বিক্ষিপ্ত প্রতিলিপিকরণ (Dispersive)", "খণ্ডিত প্রতিলিপিকরণ"], ans: 1, exp: "ব্যাখ্যা: সম্ভাব্য তিনটি উপায়ের মধ্যে অর্ধরক্ষণশীল প্রতিলিপিকরণই প্রকৃতপক্ষে সমস্ত জীবের মধ্যে ঘটে থাকে, যেখানে অপত্য DNA-তে একটি পুরোনো ও একটি নতুন তন্ত্রী থাকে।" },
+            { q: "৬৩. ১৯৫৮ খ্রিস্টাব্দে কোন্ বিজ্ঞানীদ্বয় E. coli ব্যাকটেরিয়ার ওপর পরীক্ষা করে প্রমাণ করেন যে DNA প্রতিলিপিকরণ অর্ধসংরক্ষণশীল পদ্ধতিতে সম্পন্ন হয়?", opts: ["হারসে এবং চেজ", "ওয়াটসন এবং ক্রিক", "মেসেলসন এবং স্টাল (Meselson and Stahl)", "গ্রিফিথ এবং অ্যাভেরি"], ans: 2, exp: "ব্যাখ্যা: বিজ্ঞানী মেসেলসন ও স্টাল 1958 খ্রিস্টাব্দে E. coli ব্যাকটেরিয়াতে ভারী 15N প্রয়োগ করে প্রমাণ করেন যে DNA প্রতিলিপিকরণ পদ্ধতিটি অর্ধসংরক্ষণশীল প্রকৃতির।" },
+            { q: "৬৪. মেসেলসন ও স্টাল তাঁদের পরীক্ষায় DNA-কে চিহ্নিত করার জন্য নাইট্রোজেনের কোন্ ভারী আইসোটোপ ব্যবহার করেছিলেন?", opts: ["14N", "15N", "32P", "35S"], ans: 1, exp: "ব্যাখ্যা: তাঁরা E. coli ব্যাকটেরিয়াকে 15N আইসোটোপযুক্ত নাইট্রোজেন মাধ্যমে কালচার করে DNA-এর দুটি তন্ত্রীতেই 15N যুক্ত করেন।" },
+            { q: "৬৫. মেসেলসন ও স্টালের পরীক্ষায় ভারী ও হালকা DNA-কে পৃথক করার জন্য কোন্ রাসায়নিক দ্রবণ ব্যবহার করে সেন্ট্রিফিউগেশন করা হয়েছিল?", opts: ["সোডিয়াম ক্লোরাইড (NaCl)", "সিসিয়াম ক্লোরাইড (CsCl)", "ম্যাগনেসিয়াম সালফেট (MgSO4)", "ইথিডিয়াম ব্রোমাইড"], ans: 1, exp: "ব্যাখ্যা: নিষ্কাশিত DNA-কে 6M সিসিয়াম ক্লোরাইড দ্রবণে (CsCl) 48-72 ঘন্টা সেন্ট্রিফিউজ করে ভারী ও হালকা DNA-এর ব্যান্ড পৃথক করা হয়েছিল।" },
+            { q: "৬৬. 15N যুক্ত E. coli কে স্বাভাবিক 14N মাধ্যমে স্থানান্তরিত করার পর প্রথম প্রজন্মের (Gen I) অপত্য DNA সেন্ট্রিফিউজ করলে কী ব্যান্ড পাওয়া যায়?", opts: ["শুধুমাত্র ভারী ব্যান্ড (15N/15N)", "শুধুমাত্র হালকা ব্যান্ড (14N/14N)", "শুধুমাত্র মাঝারি বা হাইব্রিড ব্যান্ড (15N/14N)", "ভারী ও হালকা দুটি পৃথক ব্যান্ড"], ans: 2, exp: "ব্যাখ্যা: প্রথমবার বিভাজনের পর 15N তন্ত্রী খুলে যায় এবং 14N যুক্ত নতুন তন্ত্রী তৈরি হয়, ফলে সমস্ত DNA হাইব্রিড (15N/14N) প্রকৃতির হয় এবং একটি মাঝারি ব্যান্ড তৈরি করে।" },
+            { q: "৬৭. দ্বিতীয় প্রজন্মের (Gen II) পর 14N মাধ্যমেই বৃদ্ধি পাওয়া ব্যাকটেরিয়ার DNA-তে হাইব্রিড (15N/14N) এবং হালকা (14N/14N) DNA-এর অনুপাত কত ছিল?", opts: ["১ : ১", "১ : ৩", "৩ : ১", "১ : ০"], ans: 0, exp: "ব্যাখ্যা: তৃতীয় পরীক্ষার সময় (অর্থাৎ 14N মাধ্যমে দ্বিতীয়বার বিভাজন) 15N/14N DNA ও 14N/14N DNA সমান সমান পরিমাণে তৈরি হয়েছিল (1:1 অনুপাত)।" },
+            { q: "৬৮. E. coli ব্যাকটেরিয়ার চক্রাকার DNA-তে যে নির্দিষ্ট স্থান থেকে প্রতিলিপিকরণ শুরু হয়, তাকে কী বলে?", opts: ["প্রিবনাও বক্স", "TATA বক্স", "Ori C (Origin of Replication)", "টার্মিনেটর"], ans: 2, exp: "ব্যাখ্যা: E. coli-এর Origin স্থানটিকে OriC বলে, যেখানে DNA সংশ্লেষ শুরু হয় এবং এখানে AT বেস জোড় বেশি থাকে।" },
+            { q: "৬৯. DNA প্রতিলিপিকরণ প্রক্রিয়ায় কোন্ উৎসেচক প্রাইমার (RNA primer) সংশ্লেষ করে?", opts: ["DNA পলিমারেজ", "প্রাইমেজ (Primase)", "হেলিকেজ", "লাইগেজ"], ans: 1, exp: "ব্যাখ্যা: রেপ্লিকেশনের শুরুতে প্রাইমেজ (Primase) উৎসেচক একটি ছোট RNA প্রাইমার তৈরি করে যা DNA সংশ্লেষের ভিত্তি হিসেবে কাজ করে।" },
+            { q: "৭০. DNA প্রতিলিপিকরণের সময় Y-আকৃতির যে গঠন তৈরি হয় তাকে কী বলে?", opts: ["রেপ্লিকেশন বাবল", "স্প্লাইসোজোম", "রেপ্লিকেশন ফর্ক (Replication Fork)", "ওকাজাকি খণ্ডক"], ans: 2, exp: "ব্যাখ্যা: হেলিকেজ দ্বারা DNA-র দুটি তন্ত্রী বিচ্ছিন্ন হওয়ার ফলে যে Y-আকৃতির কাঠামো গঠিত হয়, তাকে রেপ্লিকেশন ফর্ক বলে।" },
+            { q: "৭১. DNA প্রতিলিপিকরণের সময় যে তন্ত্রীটি 3'→5' ছাঁচের উপর নিরবচ্ছিন্নভাবে (Continuously) সংশ্লেষিত হয়, তাকে কী বলে?", opts: ["ল্যাগিং তন্ত্রী", "লিডিং তন্ত্রী (Leading strand)", "ওকাজাকি খণ্ডক", "নন-সেন্স তন্ত্রী"], ans: 1, exp: "ব্যাখ্যা: যে তন্ত্রীটি 3' → 5' দিকে ছাঁচ হিসেবে থাকে তার ওপর নতুন DNA 5' → 3' দিকে অবিচ্ছিন্নভাবে (Continuous) উৎপন্ন হয়, একে লিডিং তন্ত্রী বলে।" },
+            { q: "৭২. DNA প্রতিলিপিকরণের সময় যে তন্ত্রীটি 5'→3' ছাঁচের উপর খণ্ডে খণ্ডে বা বিচ্ছিন্নভাবে (Discontinuously) সংশ্লেষিত হয়, তাকে কী বলে?", opts: ["লিডিং তন্ত্রী", "ল্যাগিং তন্ত্রী (Lagging strand)", "সেন্স তন্ত্রী", "কোডিং তন্ত্রী"], ans: 1, exp: "ব্যাখ্যা: যে জনিতৃ তন্ত্রীটি 5' → 3' দিকে থাকে তাকে ছাঁচ হিসেবে ধরে নতুন DNA তন্ত্রী বিচ্ছিন্নভাবে (Discontinuous) উৎপন্ন হয়, তাকে ল্যাগিং তন্ত্রী বলে।" },
+            { q: "৭৩. ল্যাগিং তন্ত্রীতে সৃষ্ট ক্ষুদ্র ক্ষুদ্র DNA খণ্ডকগুলিকে কী বলা হয়?", opts: ["ওকাজাকি খণ্ডক (Okazaki fragments)", "প্রাইমার খণ্ডক", "সোলেনয়েড", "প্রিবনাও খণ্ডক"], ans: 0, exp: "ব্যাখ্যা: ল্যাগিং তন্ত্রীতে 5' → 3' মেরুত্ব সম্পন্ন নবসৃষ্ট DNA-র ক্ষুদ্র ক্ষুদ্র খণ্ডকগুলিকে ওকাজাকি খণ্ডক বলে।" },
+            { q: "৭৪. একটি রেপ্লিকেশন উৎস (Origin) থেকে নিয়ন্ত্রিত সমগ্র প্রতিলিপিকৃত DNA অংশটিকে একত্রে কী বলে?", opts: ["ট্রান্সক্রিপশন বাবল", "ওপেরন", "রেপ্লিকন (Replicon)", "স্প্লাইসোজোম"], ans: 2, exp: "ব্যাখ্যা: রেপ্লিকন মডেল অনুসারে একটি অরিজিন থেকে সকল রেপ্লিকেটেড DNA-কে একত্রে রেপ্লিকন বলে।" },
+            { q: "৭৫. ইউক্যারিওটিক কোশে DNA প্রতিলিপিকরণ কোশচক্রের কোন্ দশায় সম্পন্ন হয়?", opts: ["G1 দশা", "S দশা (Synthesis phase)", "G2 দশা", "M দশা"], ans: 1, exp: "ব্যাখ্যা: ইউক্রোমাটিন এবং হেটেরোক্রোমাটিনের প্রতিলিপিকরণ যথাক্রমে S দশার প্রথম এবং শেষভাগে ঘটে, সুতরাং সমগ্র DNA রেপ্লিকেশন S দশায় সম্পন্ন হয়।" }
+        ]
+    },
+    6: {
+        name: 'Set 6', icon: '✂️', topic: 'DNA রেপ্লিকেশনের উৎসেচক ও প্রক্রিয়া',
+        questions: [
+            { q: "৭৬. DNA রেপ্লিকেশনের প্রারম্ভিক দশায় কোন্ উৎসেচকটি DNA-র দুটি তন্ত্রীর মধ্যেকার হাইড্রোজেন বন্ধনী ভেঙে দিয়ে প্যাঁচ খুলতে সাহায্য করে?", opts: ["DNA পলিমারেজ", "হেলিকেজ (Helicase)", "টোপোআইসোমারেজ", "লাইগেজ"], ans: 1, exp: "ব্যাখ্যা: DNA আনউইন্ডিং প্রোটিন বা হেলিকেজ (Helicase) DNA-র প্যাঁচ খোলে ও দুটি DNA তন্ত্রীর মধ্যে হাইড্রোজেন বন্ধনী ভেঙে তন্ত্রী দুটি আলাদা করে।" },
+            { q: "৭৭. হেলিকেজ দ্বারা DNA-র প্যাঁচ খোলার পর তন্ত্রীদুটিকে পুনরায় জোড়া লাগতে বাধা দেয় কে?", opts: ["প্রাইমেজ", "টোপোআইসোমারেজ", "SSB প্রোটিন (Single Strand Binding protein)", "লাইগেজ"], ans: 2, exp: "ব্যাখ্যা: SSB প্রোটিনগুলি বিচ্ছিন্ন হওয়া একতন্ত্রী DNA-র সাথে যুক্ত হয়ে তাদের পুনরায় দ্বীতন্ত্রী হতে বাধা দেয়।" },
+            { q: "৭৮. DNA-র অতি-কুণ্ডলী বা সুপারকয়েলিংয়ের ফলে সৃষ্ট টেনশন দূর করে কে?", opts: ["হেলিকেজ", "টোপোআইসোমারেজ / গাইরেজ (Topoisomerase)", "প্রাইমেজ", "পলিমারেজ"], ans: 1, exp: "ব্যাখ্যা: টোপোআইসোমারেজ বা DNA গাইরেজ উৎসেচক DNA তন্ত্রীকে কেটে এবং পুনরায় জুড়ে দিয়ে সুপারকয়েলিংয়ের টেনশন হ্রাস করে।" },
+            { q: "৭৯. DNA পলিমারেজ উৎসেচক সর্বদা কোন্ অভিমুখে নতুন DNA তন্ত্রী সংশ্লেষ করে?", opts: ["3' → 5' অভিমুখে", "5' → 3' অভিমুখে", "উভয় দিকে", "যেকোনো একদিকে"], ans: 1, exp: "ব্যাখ্যা: DNA পলিমারেজ উৎসেচক সর্বদা নতুন নিউক্লিওটাইডগুলিকে 5' → 3' অভিমুখে যুক্ত করে।" },
+            { q: "৮০. প্রোক্যারিওটিক কোশে লিডিং ও ল্যাগিং তন্ত্রী উভয়ই কোন্ এনজাইম দ্বারা সংশ্লেষিত হয়?", opts: ["DNA পলিমারেজ I", "DNA পলিমারেজ II", "DNA পলিমারেজ III", "RNA পলিমারেজ"], ans: 2, exp: "ব্যাখ্যা: ব্যাকটেরিয়ার ক্ষেত্রে লিডিং এবং ল্যাগিং উভয় তন্ত্রীই প্রধানত DNA পলিমারেজ III দ্বারা সংশ্লেষিত হয়।" },
+            { q: "৮১. E. coli ব্যাকটেরিয়ায় DNA সংশ্লেষ বা শৃঙ্খল দীর্ঘকরণের প্রধান উৎসেচক কোনটি?", opts: ["DNA পলিমারেজ I", "DNA পলিমারেজ II", "DNA পলিমারেজ III (DNA Pol III)", "RNA পলিমারেজ"], ans: 2, exp: "ব্যাখ্যা: E.coli কোশে তিন রকম DNA পলিমারেজ পাওয়া যায়। এগুলির মধ্যে DNA pol. III হল রেপ্লিকেশনের প্রধান উৎসেচক।" },
+            { q: "৮২. বিজ্ঞানী আর্থার কর্নবার্গ সর্বপ্রথম কোন্ উৎসেচকটি আবিষ্কার করেছিলেন যাকে 'কর্নবার্গ এনজাইম' বলা হয়?", opts: ["DNA পলিমারেজ I (DNA Pol I)", "প্রাইমেজ", "লাইগেজ", "DNA পলিমারেজ III"], ans: 0, exp: "ব্যাখ্যা: বিজ্ঞানী আর্থার কর্নবার্গ E. coli থেকে DNA পলিমারেজ-I (Kornberg's enzyme) উৎসেচককে পৃথক করেন।" },
+            { q: "৮৩. ল্যাগিং তন্ত্রীতে থাকা RNA প্রাইমারকে অপসারণ করে সেই স্থান DNA দ্বারা পূরণ করে কে?", opts: ["হেলিকেজ", "প্রাইমেজ", "DNA পলিমারেজ I", "লাইগেজ"], ans: 2, exp: "ব্যাখ্যা: DNA পলিমারেজ I এর 5'→3' এক্সোনিউক্লিয়েজ ধর্ম কাজে লাগিয়ে RNA প্রাইমার অপসারিত করে এবং সেই গ্যাপে DNA নিউক্লিওটাইড বসিয়ে দেয়।" },
+            { q: "৮৪. DNA লাইগেজ ওকাজাকি খণ্ডকগুলিকে জোড়া লাগাতে কোন্ বন্ধনী তৈরি করে?", opts: ["হাইড্রোজেন বন্ড", "গ্লাইকোসাইডিক বন্ড", "ফসফোডাইএস্টার বন্ধনী (Phosphodiester bond)", "পেপটাইড বন্ড"], ans: 2, exp: "ব্যাখ্যা: DNA লাইগেজ উৎসেচক ওকাজাকি খণ্ডকগুলির মধ্যে ফসফোডাইএস্টার বন্ধনী তৈরি করে তাদের জোড়া লাগায়।" },
+            { q: "৮৫. DNA সংশ্লেষকালে ভুল নিউক্লিওটাইড যুক্ত হলে তাকে কেটে বাদ দেওয়ার ক্ষমতাকে 'প্রুফ রিডিং' (Proof reading) বলে। এটি কোন্ উৎসেচকীয় কার্যকারিতা?", opts: ["5'→3' এক্সোনিউক্লিয়েজ", "3'→5' এক্সোনিউক্লিয়েজ", "এন্ডোনিউক্লিয়েজ", "লাইগেজ"], ans: 1, exp: "ব্যাখ্যা: ভুলবশত সংযোজিত নিউক্লিওটাইডকে 3' প্রান্ত থেকে অপসারিত করার জন্য DNA পলিমারেজের 3'->5' এক্সোনিউক্লিয়েজ ধর্ম প্রুফ রিডিং হিসেবে কাজ করে।" },
+            { q: "৮৬. ইউক্যারিওটিক কোশে ল্যাগিং তন্ত্রী (Lagging strand) সংশ্লেষণের প্রধান দায়িত্বে কোন্ DNA পলিমারেজ থাকে?", opts: ["DNA পলিমারেজ α (Alpha)", "DNA পলিমারেজ δ (Delta)", "DNA পলিমারেজ ϵ (Epsilon)", "DNA পলিমারেজ γ (Gamma)"], ans: 0, exp: "ব্যাখ্যা: ইউক্যারিওট কোশে DNA পলিমারেজ α ল্যাগিং স্ট্র্যান্ড রেপ্লিকেশন করে ও DNA পলিমারেজ δ লিডিং স্ট্র্যান্ড রেপ্লিকেশন করে।" },
+            { q: "৮৭. ইউক্যারিওটিক কোশে লিডিং তন্ত্রী (Leading strand) সংশ্লেষণের প্রধান দায়িত্বে কোন্ DNA পলিমারেজ থাকে?", opts: ["DNA পলিমারেজ α (Alpha)", "DNA পলিমারেজ δ (Delta)", "DNA পলিমারেজ γ (Gamma)", "DNA পলিমারেজ β (Beta)"], ans: 1, exp: "ব্যাখ্যা: ইউক্যারিওট কোশে DNA পলিমারেজ δ (ডেল্টা) লিডিং স্ট্র্যান্ড রেপ্লিকেশন করে।" },
+            { q: "৮৮. E. coli ব্যাকটেরিয়ার রেপ্লিকেশনের সমাপ্তি দশায় (Termination) ফর্কের অগ্রগতিকে প্রতিহত করতে কোন্ প্রোটিন কাজ করে?", opts: ["Tus প্রোটিন (Terminus Utilization Substance)", "DnaA প্রোটিন", "Rho ফ্যাক্টর", "Sigma ফ্যাক্টর"], ans: 0, exp: "ব্যাখ্যা: E.coli ক্রোমোজোমে টারমিনেশন স্থানে tus জিন থাকে যা রেপ্লিকেশন ফর্কের অগ্রগতিকে প্রতিহত করে।" },
+            { q: "৮৯. ইউক্যারিওটিক কোশে মাইটোকন্ড্রিয়াল DNA রেপ্লিকেশনের দায়িত্বে কোন্ উৎসেচক থাকে?", opts: ["DNA Pol α", "DNA Pol δ", "DNA Pol γ (Gamma)", "DNA Pol ϵ"], ans: 2, exp: "ব্যাখ্যা: DNA পলিমারেজ γ মাইটোকন্ড্রিয়াল DNA রেপ্লিকেশন ও মেরামতির সাথে যুক্ত।" },
+            { q: "৯০. একটি ইউক্যারিওটিক কোশে ল্যাগিং তন্ত্রীতে তৈরি ওকাজাকি খণ্ডকগুলির দৈর্ঘ্য সাধারণত কত হয়?", opts: ["1000-2000 নিউক্লিওটাইড", "100-200 নিউক্লিওটাইড", "10-50 নিউক্লিওটাইড", "5000-7000 নিউক্লিওটাইড"], ans: 1, exp: "ব্যাখ্যা: ইউক্যারিওট কোশে ল্যাগিং স্ট্র্যান্ড রেপ্লিকেশনে যে ওকাজাকি খণ্ডক তৈরি হয় তার পরিমাপ 100-200 নিউক্লিওটাইড (প্রোক্যারিওটে এটি 1000-2000 নিউক্লিওটাইড)।" }
+        ]
+    },
+    7: {
+        name: 'Set 7', icon: '📝', topic: 'ট্রান্সক্রিপশন - প্রাথমিক ধারণা ও প্রোমোটার',
+        questions: [
+            { q: "৯১. DNA থেকে RNA সংশ্লেষিত হওয়ার পদ্ধতিকে কী বলে?", opts: ["রেপ্লিকেশন", "ট্রান্সক্রিপশন (Transcription)", "ট্রান্সলেশন", "ট্রান্সডাকশন"], ans: 1, exp: "ব্যাখ্যা: DNA-র সংকেত ব্যবহার করে পরিপূরক RNA তৈরি হওয়ার প্রক্রিয়াকে ট্রান্সক্রিপশন বলে।" },
+            { q: "৯২. ট্রান্সক্রিপশন প্রক্রিয়ার প্রধান উৎসেচক কোনটি?", opts: ["DNA পলিমারেজ", "RNA পলিমারেজ (RNA Polymerase)", "লাইগেজ", "হেলিকেজ"], ans: 1, exp: "ব্যাখ্যা: ট্রান্সক্রিপশনে DNA-নির্ভর RNA পলিমারেজ উৎসেচক ছাঁচ তন্ত্রী থেকে RNA সংশ্লেষ করে।" },
+            { q: "৯৩. ট্রান্সক্রিপশনে DNA-এর যে তন্ত্রীটি ছাঁচ (Template) হিসেবে ব্যবহৃত হয় এবং যার অভিমুখে RNA সংশ্লেষিত হয়, তার মেরুত্ব (Polarity) কত?", opts: ["5'→3'", "3'→5'", "5'→5'", "3'→3'"], ans: 1, exp: "ব্যাখ্যা: DNA তে অবস্থিত 3'→5' তন্ত্রীটিকে বলা হয় ছাঁচ তন্ত্রী বা টেমপ্লেট তন্ত্রী, একে ছাঁচ হিসেবে ব্যবহার করে 5'→3' অভিমুখে RNA সংশ্লেষিত হয়।" },
+            { q: "৯৪. DNA-এর যে তন্ত্রীটির ক্ষারকের সজ্জারীতির সাথে উৎপন্ন RNA-এর সজ্জারীতি অনুরূপ হয় (শুধুমাত্র T-এর জায়গায় U থাকে), তাকে কী বলে?", opts: ["টেমপ্লেট তন্ত্রী", "নন-কোডিং তন্ত্রী", "কোডিং তন্ত্রী বা সেন্স তন্ত্রী (Coding strand / Sense strand)", "ওকাজাকি তন্ত্রী"], ans: 2, exp: "ব্যাখ্যা: DNA তে অবস্থিত 5'→3' তন্ত্রীটিকে বলা হয় কোডিং তন্ত্রী বা সেন্স তন্ত্রী, কারণ এর ক্ষারকের সজ্জারীতির সাথে ট্রান্সক্রিপশন প্রক্রিয়ায় উৎপন্ন RNA এর সজ্জারীতি অনুরূপ হয়।" },
+            { q: "৯৫. প্রোক্যারিওটিক কোশে ট্রান্সক্রিপশন সম্পন্ন করার জন্য কটি RNA পলিমারেজ উৎসেচক থাকে?", opts: ["১ টি", "২ টি", "৩ টি", "৪ টি"], ans: 0, exp: "ব্যাখ্যা: প্রোক্যারিওটদের ক্ষেত্রে একটিমাত্র RNA পলিমারেজ উপস্থিত থাকে যা সব ধরনের RNA তৈরি করে।" },
+            { q: "৯৬. ইউক্যারিওটিক কোশে mRNA (এবং hnRNA) সংশ্লেষ করার জন্য কোন্ RNA পলিমারেজটি কাজ করে?", opts: ["RNA পলিমারেজ I", "RNA পলিমারেজ II", "RNA পলিমারেজ III", "প্রাইমেজ"], ans: 1, exp: "ব্যাখ্যা: ইউক্যারিওটিক কোশে RNA পলিমারেজ II mRNA এবং mt RNA সংশ্লেষ করে।" },
+            { q: "৯৭. ইউক্যারিওটিক কোশে tRNA সংশ্লেষ করার জন্য কোন্ RNA পলিমারেজ কাজ করে?", opts: ["RNA পলিমারেজ I", "RNA পলিমারেজ II", "RNA পলিমারেজ III", "DNA পলিমারেজ"], ans: 2, exp: "ব্যাখ্যা: RNA পলিমারেজ III tRNA, 5S rRNA, এবং snRNA সংশ্লেষ করে।" },
+            { q: "৯৮. প্রোক্যারিওটিক RNA পলিমারেজের কোর এনজাইমের সাথে কোন্ ফ্যাক্টরটি যুক্ত হলে সক্রিয় হলোএনজাইম (Holoenzyme) তৈরি হয় যা ট্রান্সক্রিপশন শুরু করতে পারে?", opts: ["রো-ফ্যাক্টর (ρ)", "সিগমা ফ্যাক্টর (σ)", "NusA ফ্যাক্টর", "eIF ফ্যাক্টর"], ans: 1, exp: "ব্যাখ্যা: নিষ্ক্রিয় কোর এনজাইম এর সাথে সিগমা (σ) ফ্যাক্টর যুক্ত হয়ে সক্রিয় হলোএনজাইম গঠিত হয় যা সূচনা দশাতে সাহায্য করে।" },
+            { q: "৯৯. ট্রান্সক্রিপশন প্রক্রিয়ায় জিনের যে নির্দিষ্ট অংশে RNA পলিমারেজ উৎসেচকটি যুক্ত হয়ে প্রক্রিয়া শুরু করে, তাকে কী বলা হয়?", opts: ["টার্মিনেটর", "স্ট্রাকচারাল জিন", "প্রোমোটার অঞ্চল (Promoter site)", "স্প্লাইসোজোম"], ans: 2, exp: "ব্যাখ্যা: কোনো জিনের আপস্ট্রিম অঞ্চলে অবস্থিত যে স্থানে RNA পলিমারেজ উৎসেচকটি যুক্ত হয় তাকে বলা হয় প্রোমোটার অঞ্চল।" },
+            { q: "১০০. প্রোক্যারিওটিক প্রোমোটার অঞ্চলে ট্রান্সক্রিপশন শুরুর স্থান থেকে 10 বেস পেয়ার আগে (-10 bp) যে TATAAT সজ্জা থাকে, তাকে কী বলে?", opts: ["ক্যাট বক্স", "প্রিবনাও বক্স (Pribnow Box)", "গোল্ডবার্গ-হগনেস বক্স", "এনহ্যান্সার"], ans: 1, exp: "ব্যাখ্যা: '-10 bp আপস্ট্রিম অঞ্চলে' অবস্থিত সিকোয়েন্স TATAAT কে প্রিবনাও বক্স বলা হয়, যা RNA পলিমারেজকে যুক্ত হতে সাহায্য করে।" },
+            { q: "১০১. প্রোক্যারিওটিক প্রোমোটার অঞ্চলে -35 bp আপস্ট্রিম অঞ্চলে কোন্ সিকোয়েন্সটি থাকে?", opts: ["TTGACA", "TATAAT", "GGCCAATCT", "TATAAA"], ans: 0, exp: "ব্যাখ্যা: '-35 bp আপস্ট্রিম অঞ্চলে' অবস্থিত সিকোয়েন্সটি হল TTGACA, যা -35 এলিমেন্ট নামে পরিচিত।" },
+            { q: "১০২. ইউক্যারিওটিক প্রোমোটার অঞ্চলে -10 bp থেকে -25 bp আপস্ট্রিম অঞ্চলে অবস্থিত সিকোয়েন্স TATA(A/T)A(A/T)-কে কী বলা হয়?", opts: ["প্রিবনাও বক্স", "টাটা বক্স বা গোল্ডবার্গ-হগনেস বক্স (TATA Box / Goldberg-Hogness box)", "ক্যাট বক্স", "GC বক্স"], ans: 1, exp: "ব্যাখ্যা: ইউক্যারিওটিক প্রোমোটার সিকোয়েন্স হিসেবে '-10 bp আপস্ট্রিম অঞ্চলে' টাটা বক্স বা গোল্ডবার্গ-হগনেস বক্স থাকে।" },
+            { q: "১০৩. একটি ট্রান্সক্রিপশন এককে (Transcription unit) কটি প্রধান অংশ থাকে?", opts: ["২টি", "৩টি", "৪টি", "৫টি"], ans: 1, exp: "ব্যাখ্যা: একটি ট্রান্সক্রিপশন ইউনিটের ৩টি প্রধান অংশ থাকে— প্রোমোটার, স্ট্রাকচারাল জিন এবং টার্মিনেটর।" },
+            { q: "১০৪. ট্রান্সক্রিপশন ইউনিটের যে অংশে ট্রান্সক্রিপশন শেষ হয়, তাকে কী বলে?", opts: ["প্রোমোটার", "ইনট্রন", "টার্মিনেটর (Terminator)", "এক্সন"], ans: 2, exp: "ব্যাখ্যা: স্ট্রাকচারাল জিনের শেষ প্রান্তে (ডাউনস্ট্রিমে) টার্মিনেটর অঞ্চল থাকে যেখানে ট্রান্সক্রিপশন প্রক্রিয়া সমাপ্ত হয়।" },
+            { q: "১০৫. কোডিং তন্ত্রীর মেরুত্ব (Polarity) সাধারণত কোন্ দিকে হয়?", opts: ["3'→5'", "5'→3'", "5'→5'", "3'→3'"], ans: 1, exp: "ব্যাখ্যা: কোডিং তন্ত্রীর মেরুত্ব সর্বদা 5'→3' দিকে ধরা হয়, যা টেমপ্লেট তন্ত্রীর (3'→5') ঠিক বিপরীত।" }
+        ]
+    },
+    8: {
+        name: 'Set 8', icon: '✂️', topic: 'ট্রান্সক্রিপশন দীর্ঘিকরণ, সমাপ্তি ও RNA প্রসেসিং',
+        questions: [
+            { q: "১০৬. ট্রান্সক্রিপশনের সূচনায় RNA পলিমারেজ-এর সাথে যুক্ত হওয়া সিগমা (σ) ফ্যাক্টরের কাজ কী?", opts: ["RNA তন্ত্রীকে লম্বা করা", "প্রোমোটার অঞ্চল শনাক্ত করা", "ট্রান্সক্রিপশন সমাপ্ত করা", "RNA প্রসেসিং করা"], ans: 1, exp: "ব্যাখ্যা: সিগমা ফ্যাক্টর RNA পলিমারেজকে DNA-এর নির্দিষ্ট প্রোমোটার অঞ্চল শনাক্ত করতে সাহায্য করে।" },
+            { q: "১০৭. প্রোক্যারিওটিক কোশে ট্রান্সক্রিপশনের দীর্ঘিকরণ (Elongation) দশায় সিগমা ফ্যাক্টর বিচ্যুত হওয়ার পর কোন্ ফ্যাক্টরটি যুক্ত হয়ে সাহায্য করে?", opts: ["রো-ফ্যাক্টর", "NusA ফ্যাক্টর", "eIF ফ্যাক্টর", "TBP"], ans: 1, exp: "ব্যাখ্যা: সদ্য উৎপন্ন RNA যখন 10-12 বেস দীর্ঘ হয় তখন সিগমা ফ্যাক্টরটি বিচ্যুত হয় এবং সেই স্থানে nusA ফ্যাক্টর যুক্ত হয়ে দীর্ঘিকরণ দশাতে সাহায্য করে।" },
+            { q: "১০৮. প্রোক্যারিওটিক ট্রান্সক্রিপশনের সমাপ্তি দশায় (Termination) ATP আর্দ্রবিশ্লেষণকারী কোন্ হেক্সামেরিক প্রোটিনটি RNA পলিমারেজকে টেমপ্লেট থেকে বিচ্যুত করে?", opts: ["সিগমা ফ্যাক্টর (σ)", "রো-ফ্যাক্টর (ρ / Rho factor)", "NusA ফ্যাক্টর", "রিলিজ ফ্যাক্টর"], ans: 1, exp: "ব্যাখ্যা: 'রো-ফ্যাক্টর' নির্ভর সমাপ্তির ক্ষেত্রে রো-ফ্যাক্টর নামক হেক্সামেরিক প্রোটিন বল প্রয়োগ করে RNA-কে টেমপ্লেট তন্ত্রী থেকে বিচ্যুত করে।" },
+            { q: "১০৯. 'রো-স্বাধীন' (Rho-independent) ট্রান্সক্রিপশন সমাপ্তিতে RNA তন্ত্রীটি কী ধরনের গঠন তৈরি করে?", opts: ["সোলেনয়েড", "ক্রস ল্যুপ", "হেয়ারপিন ল্যুপ (Hairpin loop)", "ডাবল হেলিক্স"], ans: 2, exp: "ব্যাখ্যা: রো-স্বাধীন সমাপ্তিতে RNA তন্ত্রীটি নিজেই ভাঁজ হয়ে একটি হেয়ারপিন ল্যুপ তৈরি করে, যার ফলে ট্রান্সক্রিপশন বন্ধ হয়ে যায়।" },
+            { q: "১১০. ইউক্যারিওটিক কোশে 28S, 18S, 5.8S rRNA সংশ্লেষ করে কোন উৎসেচক?", opts: ["RNA পলিমারেজ I", "RNA পলিমারেজ II", "RNA পলিমারেজ III", "প্রাইমেজ"], ans: 0, exp: "ব্যাখ্যা: ইউক্যারিওটদের নিউক্লিওলাসে RNA পলিমারেজ I এই নির্দিষ্ট প্রকারের রাইবোজোমাল RNA গুলি সংশ্লেষ করে।" },
+            { q: "১১১. ইউক্যারিওটিক mRNA-র 5' প্রান্তে ক্যাপিং প্রক্রিয়ায় কোন নিউক্লিওটাইড যুক্ত হয়?", opts: ["অ্যাডেনিন ট্রাইফসফেট", "7-মিথাইল গুয়ানোসিন ট্রাইফসফেট (7-mG)", "ইউরিডিন মনোফসফেট", "সাইটোসিন"], ans: 1, exp: "ব্যাখ্যা: mRNA-কে রক্ষা করার জন্য এর 5' প্রান্তে 7-mG (7-মিথাইল গুয়ানোসিন ট্রাইফসফেট) ক্যাপ যুক্ত করা হয়।" },
+            { q: "১১২. ইউক্যারিওটিক mRNA-র 3' প্রান্তে পলি-A টেল (Poly-A tail) যুক্ত হওয়ার প্রক্রিয়ায় প্রায় কতগুলি অ্যাডেনিন যুক্ত হয়?", opts: ["১০-২০ টি", "৫০-৬০ টি", "২০০-৩০০ টি", "১০০০ এর বেশি"], ans: 2, exp: "ব্যাখ্যা: 3' প্রান্তে পলি-A পলিমারেজ উৎসেচকের সাহায্যে প্রায় 200 থেকে 300 টি অ্যাডেনিন রেসিডিউ যুক্ত হয়ে পলি-A টেল তৈরি করে।" },
+            { q: "১১৩. hnRNA থেকে ইনট্রন অংশ কেটে বাদ দেওয়ার পদ্ধতিকে কী বলে?", opts: ["ক্যাপিং", "টেলিং", "স্প্লাইসিং (Splicing)", "মিউটেশন"], ans: 2, exp: "ব্যাখ্যা: স্প্লিট জিন থেকে উৎপন্ন প্রাথমিক RNA-র নিষ্ক্রিয় ইনট্রনগুলি স্প্লাইসিং প্রক্রিয়ায় কর্তিত হয়ে বাদ যায় এবং এক্সনগুলি জোড়া লাগে।" },
+            { q: "১১৪. স্প্লাইসিং সম্পন্ন হওয়ার পর গঠিত কমপ্লেক্সটিকে কী বলা হয়?", opts: ["পলিজোম", "নিউক্লিওজোম", "স্প্লাইসোজোম (Spliceosome)", "প্রোটিয়োজোম"], ans: 2, exp: "ব্যাখ্যা: snRNA এবং বিভিন্ন প্রোটিন মিলে যে বড় কমপ্লেক্স তৈরি করে ইনট্রন অপসারণ করে, তাকে স্প্লাইসোজোম বলে।" },
+            { q: "১১৫. ইউক্যারিওটিক কোশে ট্রান্সক্রিপশনের ফলে সরাসরি পরিণত mRNA উৎপন্ন হয় না। প্রথমে যে প্রিকার্সর RNA তৈরি হয়, তার নাম কী?", opts: ["snRNA", "rRNA", "হেটারোজেনাস নিউক্লিয়ার RNA বা hnRNA (Heterogenous nuclear RNA)", "tRNA"], ans: 2, exp: "ব্যাখ্যা: ইউক্যারিওটিক DNA থেকে উৎপন্ন সদ্যোজাত প্রাইমারি ট্রান্সক্রিপ্টকে hnRNA বলে, যা স্প্লাইসিং ও প্রসেসিং-এর পর কার্যকরী mRNA-তে পরিণত হয়।" },
+            { q: "১১৬. স্প্লাইসিং (Splicing) পদ্ধতিতে ইনট্রন অপসারণের জন্য কোন্ ক্ষুদ্র RNA অণু সাহায্য করে?", opts: ["rRNA", "tRNA", "snRNA বা U RNA (Small nuclear RNA)", "scRNA"], ans: 2, exp: "ব্যাখ্যা: ইউরিডিন সমৃদ্ধ ক্ষুদ্র RNA অণু বা snRNA, mRNA উৎপন্ন হবার সময় অপ্রয়োজনীয় ইনট্রনগুলি কর্তিত (splicing) করতে সাহায্য করে।" },
+            { q: "১১৭. ট্রান্সক্রিপশন চলাকালীন 'ট্রান্সক্রিপশন বাবল্' (Transcription bubble) নামক অংশে টেমপ্লেট তন্ত্রীর সাথে সাময়িকভাবে সদ্য উৎপন্ন RNA যুক্ত হয়ে যে গঠন তৈরি করে তাকে কী বলে?", opts: ["DNA-DNA হাইব্রিড", "DNA-RNA হাইব্রিড (DNA-RNA hybrid)", "ওকাজাকি খণ্ডক", "স্প্লাইসোজোম"], ans: 1, exp: "ব্যাখ্যা: ট্রান্সক্রিপশন বাবল অংশে টেমপ্লেট তন্ত্রীর সাথে অস্থায়ীভাবে সদ্য উৎপন্ন RNA যুক্ত থাকে, একে 'DNA-RNA হাইব্রিড' গঠন বলা হয়।" },
+            { q: "১১৮. কোন্ বিষাক্ত রাসায়নিক পদার্থটি (যা Amanita phalloides ছত্রাক থেকে পাওয়া যায়) ইউক্যারিওটিক RNA পলিমারেজ II-কে নিষ্ক্রিয় করতে পারে?", opts: ["কোলচিসিন", "অ্যামানিটিন (Amanitin / α-Amanitin)", "ইথিডিয়াম ব্রোমাইড", "রিফ্যামপিসিন"], ans: 1, exp: "ব্যাখ্যা: Amanita phalloides নামক ছত্রাক থেকে প্রাপ্ত 'অ্যামানিটিন' নামক বিষাক্ত পদার্থের প্রতি সংবেদনশীলতা অনুসারে RNA পলিমারেজগুলিকে পৃথক করা যায়। পলিমারেজ II এর প্রতি অত্যন্ত সংবেদনশীল।" },
+            { q: "১১৯. প্রোক্যারিওটিক RNA পলিমারেজ উৎসেচকটির ট্রান্সক্রিপশন দীর্ঘিকরণ দশায় (Elongation) গড়ে প্রতি সেকেন্ডে কতগুলি ক্ষারক সংশ্লেষ করতে পারে?", opts: ["৫ ক্ষারক", "১০ ক্ষারক", "৫০ ক্ষারক", "১০০০ ক্ষারক"], ans: 2, exp: "ব্যাখ্যা: প্রোক্যারিওটিক RNA পলিমারেজ প্রতি সেকেন্ডে প্রায় 50 ক্ষারক দীর্ঘ RNA তৈরি করতে থাকে।" },
+            { q: "১২০. স্প্লিট জিন (Split gene) বা খণ্ডিত জিনের উপস্থিতি কোন্ ধরণের কোশের একটি অন্যতম বৈশিষ্ট্য?", opts: ["শুধুমাত্র ব্যাকটেরিয়া", "ইউক্যারিওটিক কোশ", "প্রোক্যারিওটিক কোশ", "ভাইরয়েড"], ans: 1, exp: "ব্যাখ্যা: ইউক্যারিওটদের ক্ষেত্রে জিনগুলিতে এক্সন এবং ইনট্রন উপস্থিত থাকে, যাকে স্প্লিট জিন বলা হয়। প্রোক্যারিওটদের ক্ষেত্রে ইনট্রন অনুপস্থিত থাকে।" }
+        ]
+    },
+    9: {
+        name: 'Set 9', icon: '🔡', topic: 'জেনেটিক কোড (Genetic Code)',
+        questions: [
+            { q: "১২১. DNA বা mRNA-এর ওপর পরপর সজ্জিত তিনটি নিউক্লিওটাইড বা বেস মিলে একটি নির্দিষ্ট অ্যামাইনো অ্যাসিডের সংকেত তৈরি করে। একে কী বলা হয়?", opts: ["অ্যান্টি-কোডন", "জেনেটিক কোডন (Genetic codon)", "ওপেরন", "প্রোমোটার"], ans: 1, exp: "ব্যাখ্যা: mRNA-র ওপর সজ্জিত পরপর তিনটি নিউক্লিওটাইড মিলে অ্যামাইনো অ্যাসিডের জন্য যে অর্থবহ সংকেত তৈরি হয় তাকে জেনেটিক কোডন বা জেনেটিক কোড বলে।" },
+            { q: "১২২. সর্বপ্রথম কোন্ পদার্থবিদ যুক্তি দিয়ে প্রমাণ করার চেষ্টা করেন যে ২০টি অ্যামাইনো অ্যাসিডের সংকেত বহনের জন্য জেনেটিক কোডকে অবশ্যই ট্রিপলেট (তিনটি বেসযুক্ত) হতে হবে?", opts: ["ওয়াটসন", "ক্রিক", "জর্জ গ্যামো (George Gamow)", "নিরেনবার্গ"], ans: 2, exp: "ব্যাখ্যা: পদার্থবিদ জর্জ গ্যামো (George Gamow) সর্বপ্রথম যুক্তি দিয়ে প্রমাণ করার চেষ্টা করেন যে 20টি অ্যামাইনো অ্যাসিডের সংকেতের জন্য 4টি বেসের সংমিশ্রণে কোডকে ট্রিপলেট বা 4^3=64 হতে হবে।" },
+            { q: "১২৩. জেনেটিক কোডনের মোট সংখ্যা ৬৪টি। এর মধ্যে কতগুলি কোডন অ্যামাইনো অ্যাসিডের সংকেত বহন করে (Sense codons)?", opts: ["২০ টি", "৬৪ টি", "৬১ টি", "৩ টি"], ans: 2, exp: "ব্যাখ্যা: মোট 64টি কোডনের মধ্যে 3টি স্টপ কোডন (যাদের কোনো অ্যামাইনো অ্যাসিড নেই)। তাই 61টি কোডন 20টি অ্যামাইনো অ্যাসিডের সংকেত বহন করে।" },
+            { q: "১২৪. প্রোটিন সংশ্লেষের প্রারম্ভিক কোডন বা স্টার্ট কোডন (Start / Initiation codon) কোন্টি?", opts: ["UAA", "UAG", "AUG", "UGA"], ans: 2, exp: "ব্যাখ্যা: সব mRNA-এর ক্ষেত্রে প্রারম্ভিক কোডন হল AUG যা প্রোটিন সংশ্লেষ শুরু করে।" },
+            { q: "১২৫. AUG কোডনটি ইউক্যারিওটিক কোশে কোন্ অ্যামাইনো অ্যাসিডকে শনাক্ত করে?", opts: ["ভ্যালিন", "লিউসিন", "মিথিয়োনিন (Methionine)", "ট্রিপটোফ্যান"], ans: 2, exp: "ব্যাখ্যা: প্রারম্ভিক কোডন AUG ইউক্যারিওটিক কোশে মিথিয়োনিন এবং প্রোক্যারিওটিক কোশে ফরমাইলেটেড মিথিয়োনিনকে শনাক্ত করে।" },
+            { q: "১২৬. প্রোটিন সংশ্লেষ সমাপ্তকারী বা স্টপ কোডন (Stop / Termination / Nonsense codon) কোন তিনটি?", opts: ["UAA, UAG, UGA", "UUU, UUC, UUG", "AUU, AUC, AUA", "CAA, CAG, CGA"], ans: 0, exp: "ব্যাখ্যা: UAA, UAG, UGA এই তিনটি নন-সেন্স বা স্টপ কোডন যাদের কোনো অ্যামাইনো অ্যাসিড নেই এবং এরা প্রোটিন সংশ্লেষের সমাপ্তি ঘটায়।" },
+            { q: "১২৭. একটি অ্যামাইনো অ্যাসিড একাধিক কোডন দ্বারা নির্দিষ্ট হতে পারে। জেনেটিক কোডের এই বৈশিষ্ট্যকে কী বলা হয়?", opts: ["সর্বজনীনতা (Universal)", "বিরতিবিহীন (Commaless)", "অধঃপাতধর্মী বা ডিজেনারেসি (Degenerate)", "অদ্ব্যর্থক (Non-ambiguous)"], ans: 2, exp: "ব্যাখ্যা: 61টি কোডন 20টি অ্যামাইনো অ্যাসিডের সংকেত বহন করে, অর্থাৎ একাধিক কোডন একটি অ্যামাইনো অ্যাসিডের সংকেতবাহী। একে কোডনের ডিজেনারেসি বা অধঃপাতধর্মী বলে।" },
+            { q: "১২৮. মিথিয়োনিন এবং ট্রিপটোফ্যান ছাড়া প্রায় সমস্ত অ্যামাইনো অ্যাসিডের জন্য একাধিক কোডন থাকে। ট্রিপটোফ্যানের জন্য কোডন কোন্টি?", opts: ["UGG", "UAA", "AUG", "UUU"], ans: 0, exp: "ব্যাখ্যা: কোডন অভিধান অনুযায়ী ট্রিপটোফ্যানের (Trp) জন্য কেবল একটি নির্দিষ্ট কোডন আছে যা হল UGG। মিথিয়োনিনের জন্য AUG।" },
+            { q: "১২৯. জেনেটিক কোড সর্বজনীন (Universal) বলতে কী বোঝায়?", opts: ["সব জীব শুধু DNA ব্যবহার করে", "সব প্রোটিন একই রকম হয়", "একই কোডন সব জীবে একই অ্যামাইনো অ্যাসিড নির্দেশ করে", "সব কোডন সব অ্যামাইনো অ্যাসিড বোঝায়"], ans: 2, exp: "ব্যাখ্যা: ব্যাকটেরিয়া থেকে মানুষ পর্যন্ত সবার ক্ষেত্রে একটি নির্দিষ্ট কোডন একটি নির্দিষ্ট অ্যামাইনো অ্যাসিডকেই বোঝায়, এটিই কোডের ইউনিভার্সালিটি।" },
+            { q: "১৩০. UUU কোডনটি কোন্ অ্যামাইনো অ্যাসিডের সংকেত বহন করে?", opts: ["ভ্যালিন", "গ্লাইসিন", "ফিনাইল অ্যালানিন (Phenylalanine)", "সেরিন"], ans: 2, exp: "ব্যাখ্যা: triplet UUU হল ফিনাইল অ্যালানিনের code বা সংকেত।" },
+            { q: "১৩১. ১৯৬৬ খ্রিস্টাব্দে কোন্ বিজ্ঞানী 'উবল মতবাদ' (Wobble Hypothesis) প্রস্তাব করেন?", opts: ["ওয়াটসন", "ক্রিক (Crick)", "নিরেনবার্গ", "হরগোবিন্দ খোরানা"], ans: 1, exp: "ব্যাখ্যা: সমার্থক কোডনের সাথে অ্যান্টিকোডনের জোড় বাঁধার উবল হাইপোথেসিস 1966 খ্রিস্টাব্দে ক্রিক প্রস্তাব দিয়েছিলেন।" },
+            { q: "১৩২. উবল (Wobble) অবস্থান সাধারণত কোডনের কোন্ বেসকে বোঝায়?", opts: ["১ম বেস", "২য় বেস", "৩য় বেস", "সবকটি"], ans: 2, exp: "ব্যাখ্যা: উবল মতবাদ অনুযায়ী কোডনের তৃতীয় বেসটি অ্যান্টিকোডনের প্রথম বেসের সাথে শিথিলভাবে জোড় বাঁধে।" },
+            { q: "১৩৩. কোডনগুলি একটির ওপর আরেকটি ওভারল্যাপ করে না, এই ধর্মকে কী বলে?", opts: ["কমা-লেস", "নন-ওভারল্যাপিং (Non-overlapping)", "ডিজেনারেসি", "সর্বজনীনতা"], ans: 1, exp: "ব্যাখ্যা: একটি বেস কেবল একটি কোডনেরই অংশ হতে পারে, এটিই জেনেটিক কোডের নন-ওভারল্যাপিং ধর্ম।" },
+            { q: "১৩৪. জেনেটিক কোডের কোন্ বৈশিষ্ট্যের কারণে একটি কোডন সর্বদা একটি নির্দিষ্ট অ্যামাইনো অ্যাসিডকেই বোঝায়?", opts: ["ডিজেনারেট", "অদ্ব্যর্থক বা সুনির্দিষ্ট (Unambiguous)", "ওভারল্যাপিং", "কমা-লেস"], ans: 1, exp: "ব্যাখ্যা: একটি নির্দিষ্ট কোডন কখনোই দু-রকম অ্যামাইনো অ্যাসিড নির্দেশ করতে পারে না। একে অদ্ব্যর্থক বা Unambiguous ধর্ম বলে।" },
+            { q: "১৩৫. mRNA-তে কোডনগুলি পরপর কোনো বিরতি বা গ্যাপ (Gap) ছাড়াই সজ্জিত থাকে। এই বৈশিষ্ট্যকে কী বলা হয়?", opts: ["ডিজেনারেট", "বিরতিবিহীন বা কমা-লেস (Commaless)", "নন-ওভারল্যাপিং", "সুনির্দিষ্ট"], ans: 1, exp: "ব্যাখ্যা: mRNA অণুতে কোডনগুলি পরপর সজ্জিত থাকে অর্থাৎ কোনো বিরতি বা কমা ছাড়াই অবিচ্ছিন্নভাবে পলিপেপটাইড গঠিত হয়, একে বিরতিবিহীন বা commaless বলে।" }
+        ]
+    },
+    10: {
+        name: 'Set 10', icon: '🔗', topic: 'ট্রান্সলেশন (Translation - Protein Synthesis)',
+        questions: [
+            { q: "১৩৬. যে পদ্ধতিতে mRNA-এর কোডন অনুসারে অনেকগুলি অ্যামাইনো অ্যাসিড পরস্পর যুক্ত হয়ে একটি পলিপেপটাইড শৃঙ্খল বা প্রোটিন গঠন করে, তাকে কী বলে?", opts: ["ট্রান্সক্রিপশন", "ট্রান্সলেশন (Translation)", "রেপ্লিকেশন", "ট্রান্সডাকশন"], ans: 1, exp: "ব্যাখ্যা: যে পদ্ধতিতে m-RNA-র codon অনুসারে অনেকগুলি অ্যামাইনো অ্যাসিড পরস্পর যুক্ত হয়ে একটি পলিপেপটাইড শৃঙ্খল গঠিত হয় তাকে ট্রান্সলেশন বলে।" },
+            { q: "১৩৭. প্রোটিন সংশ্লেষ বা ট্রান্সলেশন কোশের কোথায় ঘটে?", opts: ["নিউক্লিয়াসে", "মাইটোকন্ড্রিয়ায়", "সাইটোপ্লাজম বা রাইবোজোমে", "লাইসোজোমে"], ans: 2, exp: "ব্যাখ্যা: ট্রান্সক্রিপশন নিউক্লিয়াসে হলেও, ট্রান্সলেশন বা প্রোটিন সংশ্লেষ সাইটোপ্লাজমে থাকা রাইবোজোমের ওপর সংঘটিত হয়।" },
+            { q: "১৩৮. প্রোটিন সংশ্লেষের শুরুতে অ্যামাইনো অ্যাসিডকে সক্রিয় করতে কোন্ শক্তির প্রয়োজন?", opts: ["GTP", "ATP", "CTP", "UTP"], ans: 1, exp: "ব্যাখ্যা: ট্রান্সলেশনের প্রারম্ভিক ধাপে অ্যামাইনো অ্যাসিড সক্রিয়করণের জন্য ATP ব্যবহৃত হয়।" },
+            { q: "১৩৯. সক্রিয় অ্যামাইনো অ্যাসিডকে নির্দিষ্ট tRNA-তে যুক্ত করতে কোন্ উৎসেচক লাগে?", opts: ["পেপটিডিল ট্রান্সফারেজ", "অ্যামাইনো অ্যাসাইল tRNA সিন্থেটেজ", "লাইগেজ", "হেলিকেজ"], ans: 1, exp: "ব্যাখ্যা: অ্যামাইনো অ্যাসাইল tRNA সিন্থেটেজ উৎসেচকটি নির্দিষ্ট অ্যামাইনো অ্যাসিডকে তার পরিপূরক tRNA-এর 3' প্রান্তে যুক্ত করে।" },
+            { q: "১৪০. প্রোক্যারিওটদের ক্ষেত্রে ট্রান্সলেশনের শুরুতে রাইবোজোমের কোন্ উপএককটি প্রথমে mRNA-র সাথে যুক্ত হয়?", opts: ["50S উপএকক", "30S উপএকক", "60S উপএকক", "40S উপএকক"], ans: 1, exp: "ব্যাখ্যা: প্রোক্যারিওটে প্রোটিন সংশ্লেষের শুরুতে রাইবোজোমের ছোট উপএকক (30S) প্রথমে mRNA-র নির্দিষ্ট স্থানে যুক্ত হয়।" },
+            { q: "১৪১. ট্রান্সলেশনের প্রারম্ভিক দশায় (Initiation) প্রোক্যারিওটদের ক্ষেত্রে কোন্ প্রারম্ভিক প্রোটিন ফ্যাক্টরগুলির (Initiation factors) প্রয়োজন হয়?", opts: ["EF-Tu, EF-Ts, EF-G", "RF1, RF2, RF3", "IF-1, IF-2, IF-3", "eIF-1, eIF-2"], ans: 2, exp: "ব্যাখ্যা: 30S এবং 70S ইনিসিয়েশন কমপ্লেক্স গঠনে IF-1, IF-2, IF-3 ফ্যাক্টর এবং GTP অণুর সাহায্য প্রয়োজন হয়।" },
+            { q: "১৪২. রাইবোজোমের অভ্যন্তরে tRNA যুক্ত হওয়ার জন্য তিনটি স্থান থাকে। সদ্য আসা অ্যামাইনো অ্যাসিড যুক্ত tRNA রাইবোজোমের কোন্ স্থানে প্রথমে প্রবেশ করে (প্রথম fMet-tRNA ছাড়া)?", opts: ["P সাইট (Peptidyl site)", "A সাইট (Amino acyl site)", "E সাইট (Exit site)", "M সাইট"], ans: 1, exp: "ব্যাখ্যা: 70S initiation complex গঠনের সময়ে যুক্ত প্রথম fMet-tRNA রাইবোজোমের 'P' স্থানে যুক্ত হয়, কিন্তু পরবর্তী সমস্ত নতুন অ্যামাইনো অ্যাসিডগুলি 'A' স্থানে যুক্ত হয়।" },
+            { q: "১৪৩. রাইবোজোমের 'P' স্থান এবং 'A' স্থানে থাকা দুটি অ্যামাইনো অ্যাসিডের মধ্যে পেপটাইড বন্ধনী (Peptide bond) তৈরি করতে কোন্ উৎসেচক অনুঘটকের কাজ করে?", opts: ["অ্যামাইনো অ্যাসাইল tRNA সিন্থেটেজ", "পেপটিডিল ট্রান্সফারেজ (Peptidyl transferase)", "হেলিকেজ", "লাইগেজ"], ans: 1, exp: "ব্যাখ্যা: 'P' স্থানের অ্যামাইনো অ্যাসিডের COOH গ্রুপের সঙ্গে 'A' স্থানের অ্যামাইনো অ্যাসিডের NH2 গ্রুপের সংযোগ ঘটিয়ে পেপটাইড বন্ড তৈরিতে 50S রাইবোজোমের পেপটিডিল ট্রান্সফারেজ এনজাইম অনুঘটকের কাজ করে।" },
+            { q: "১৪৪. প্রোটিন সংশ্লেষের বৃদ্ধিদশায় (Elongation) রাইবোজোমটি mRNA-র ওপর এক কোডন এগিয়ে যায় এবং খালি tRNA-টি E সাইটে চলে যায়। এই প্রক্রিয়াটিকে কী বলে?", opts: ["ট্রান্সডাকশন", "ট্রান্সক্রিপশন", "ট্রান্সলোকেশন (Translocation)", "স্প্লাইসিং"], ans: 2, exp: "ব্যাখ্যা: 'A' স্থানের tRNA অ্যামাইনো অ্যাসিড যুক্ত করে 'P' অঞ্চলে স্থানান্তরিত হয়। রাইবোজোমের এই অগ্রসর হওয়ার ক্রিয়াকে ট্রান্সলোকেশন বলে, যা EF-G এর সাহায্যে ঘটে।" },
+            { q: "১৪৫. প্রোক্যারিওটিক ট্রান্সলেশনে শৃঙ্খল দীর্ঘকরণের বা ইলঙ্গেশনের (Elongation) জন্য কোন্ ফ্যাক্টরগুলির প্রয়োজন হয়?", opts: ["IF-1, IF-2, IF-3", "EF-Tu, EF-Ts, EF-G", "RF-1, RF-2, RF-3", "TF-II-D, TF-II-A"], ans: 1, exp: "ব্যাখ্যা: প্রোক্যারিওট কোশে তিন রকমের ইলঙ্গেশন ফ্যাক্টর দেখা যায়। এগুলি হল যথাক্রমে EF-Tu, EF-Ts ও EF-G।" },
+            { q: "১৪৬. ট্রান্সলেশনের অন্তিম দশায় (Termination) যখন রাইবোজোম স্টপ কোডনের (UAA, UAG, UGA) কাছে পৌঁছোয়, তখন কোন্ ফ্যাক্টরগুলি পলিপেপটাইডকে মুক্ত করে?", opts: ["ইলঙ্গেশন ফ্যাক্টর", "ইনিসিয়েশন ফ্যাক্টর", "রিলিজ বা মুক্তিকারক ফ্যাক্টর (Release factors - RF1, RF2, RF3)", "সিগমা ফ্যাক্টর"], ans: 2, exp: "ব্যাখ্যা: পলিপেপটাইড তৈরি শেষ করার কাজে ব্যবহৃত ফ্যাক্টরগুলিকে রিলিজিং ফ্যাক্টর বলে। RF1 বা RF2 স্টপ কোডন শনাক্ত করে এবং পলিপেপটাইডকে মুক্ত করে।" },
+            { q: "১৪৭. একাধিক রাইবোজোম যখন একযোগে একই সময়ে একটি mRNA-র সঙ্গে যুক্ত হয়ে প্রোটিন সংশ্লেষ করে, তখন সেই শৃঙ্খলকে কী বলা হয়?", opts: ["নিউক্লিওজোম", "স্প্লাইসোজোম", "পলিরাইবোজোম বা পলিজোম (Polyribosome / Polysome)", "ইনফরমোজোম"], ans: 2, exp: "ব্যাখ্যা: অনেকগুলি রাইবোজোম একযোগে একই সময়ে m-RNA-র সঙ্গে যুক্ত হয়ে পলিজোম বা পলিরাইবোজোম গঠন করে এবং দ্রুত প্রোটিন সংশ্লেষ করে।" },
+            { q: "১৪৮. সদ্যোৎপাদিত বা প্রাথমিক রৈখিক পলিপেপটাইড শৃঙ্খলকে সঠিক ত্রিমাত্রিক গঠনে ভাঁজ (Fold) হতে সাহায্য করে কোন্ প্রোটিনগুলি?", opts: ["হিস্টোন", "চ্যাপেরোন (Chaperones)", "লাইগেজ", "অ্যাকটিন"], ans: 1, exp: "ব্যাখ্যা: প্রোটিন রূপায়ণের কাজে চ্যাপেরোন (chaperone) নামে কয়েক প্রকার প্রোটিন সংশ্লেষিত পলিপেপটাইডকে বিভিন্নভাবে ভাঁজ (Fold) করে কার্যকরী প্রোটিন তৈরি করে।" },
+            { q: "১৪৯. ট্রান্সলেশন প্রক্রিয়ায় পেপটাইড বন্ধনী সৃষ্টির সময় কোন্ শক্তির প্রয়োজন হয় যা মূলত ট্রান্সলোকেশনের সময় ব্যবহৃত হয়?", opts: ["ATP", "GTP", "CTP", "TTP"], ans: 1, exp: "ব্যাখ্যা: ট্রান্সলোকেশন চলার সময় এবং tRNA কে রাইবোজোমের A সাইটে আনতে শক্তির প্রয়োজন হয় যা GTP অণু (এক অণু GTP এবং বৃদ্ধি ফ্যাক্টর EF-G-র সাহায্যে) প্রদান করে।" },
+            { q: "১৫০. ট্রান্সলেশনের ফলে সৃষ্ট প্রোটিনের α-হেলিক্স (a-helix) বা β-প্লিটেড শিট (β-pleated sheet) গঠনটি প্রোটিনের কোন্ স্তরের গঠনকে নির্দেশ করে?", opts: ["প্রাথমিক গঠন (Primary structure)", "গৌণ গঠন (Secondary structure)", "প্রগৌণ বা ত্রিমাত্রিক গঠন (Tertiary structure)", "চতুর্মাত্রিক গঠন (Quaternary structure)"], ans: 1, exp: "ব্যাখ্যা: সরল রৈখিক পলিপেপটাইড শৃঙ্খলটি আলফা-হেলিক্স বা বিটা প্লিটেড শিট গঠন করে, এদের প্রোটিনের গৌণ গঠন (Secondary structure) বলে।" }
+        ]
+    },
+    11: {
+        name: 'Set 11', icon: '⚙️', topic: 'জিনের প্রকাশ ও নিয়ন্ত্রণ এবং ওপেরন মডেল',
+        questions: [
+            { q: "১৫১. \"এক জিন এক উৎসেচক\" (One gene one enzyme) মতবাদ প্রথম কারা প্রস্তাব করেন?", opts: ["ওয়াটসন ও ক্রিক", "বিডল ও ট্যাটাম (Beadle and Tatum)", "জ্যাকব ও মোনড", "মেসেলসন ও স্টাল"], ans: 1, exp: "ব্যাখ্যা: 1940 খ্রিস্টাব্দে বিডল ও ট্যাটাম নিউরোস্পোরা (Neurospora) ছত্রাকের ওপর কাজ করে এই তত্ত্ব দেন যে, প্রতিটি জিন একটি নির্দিষ্ট উৎসেচক তৈরির মাধ্যমে কাজ করে।" },
+            { q: "১৫২. ১৯৬১ খ্রিস্টাব্দে E. coli ব্যাকটেরিয়াতে জিনের প্রকাশ নিয়ন্ত্রণের জন্য 'ওপেরন মডেল' (Operon model) কারা আবিষ্কার করেন?", opts: ["জ্যাকব ও মোনড (Jacob and Monod)", "খোরানা ও নিরেনবার্গ", "বিডল ও ট্যাটাম", "অ্যাভেরি ও ম্যাককার্টি"], ans: 0, exp: "ব্যাখ্যা: ফরাসি বিজ্ঞানী ফ্রাঁসোয়া জ্যাকব এবং জ্যাক মোনড 1961 খ্রিস্টাব্দে ব্যাকটেরিয়া কোশে জিনের প্রকাশ নিয়ন্ত্রণ কৌশল হিসেবে ওপেরন মডেল আবিষ্কার করেন, যার জন্য তারা 1965 সালে নোবেল পান।" },
+            { q: "১৫৩. ওপেরন (Operon) বলতে কী বোঝায়?", opts: ["শুধুমাত্র একটি প্রোমোটার জিন", "সংগঠক জিন ও তাদের নিয়ন্ত্রক উপাদান সহ প্রোক্যারিওট কোশের একটি জিনগত কার্যকরী একক", "ইউক্যারিওটিক জিনের ইনট্রন অঞ্চল", "একটি স্টপ কোডন"], ans: 1, exp: "ব্যাখ্যা: সংগঠক জিন এবং প্রোমোটার, অপারেটর ও রেগুলেটর জিনের সমন্বয়ে গঠিত প্রোক্যারিওটদের ট্রান্সক্রিপশন নিয়ন্ত্রণকারী জিনগত একককে ওপেরন বলে।" },
+            { q: "১৫৪. E. coli-র ল্যাকটোজ ওপেরনে (Lac Operon) কটি গাঠনিক জিন বা স্ট্রাকচারাল জিন থাকে?", opts: ["১টি", "২টি", "৩টি (lac Z, lac Y, lac A)", "৪টি"], ans: 2, exp: "ব্যাখ্যা: ল্যাক ওপেরনে তিনটি সাংগঠনিক জিন থাকে, যেগুলি হলো lac Z, lac Y এবং lac A।" },
+            { q: "১৫৫. ল্যাক ওপেরনে 'lac Z' জিনটি কোন্ উৎসেচক তৈরি করে?", opts: ["বিটা গ্যালাকটোসাইডেজ (β-galactosidase)", "পারমিয়েজ", "ট্রান্সঅ্যাসিটাইলেজ", "লাইগেজ"], ans: 0, exp: "ব্যাখ্যা: lac Z জিন থেকে বিটা গ্যালাকটোসাইডেজ উৎসেচক তৈরি হয়, যা ল্যাকটোজকে ভেঙে গ্লুকোজ ও গ্যালাকটোজ উৎপন্ন করে।" },
+            { q: "১৫৬. ল্যাক ওপেরনে 'lac Y' জিনটি কোন্ উৎসেচক তৈরি করে যার মাধ্যমে ল্যাকটোজ কোশের ভেতর প্রবেশ করে?", opts: ["ট্রান্সঅ্যাসিটাইলেজ", "পারমিয়েজ (Permease)", "বিটা গ্যালাকটোসাইডেজ", "হেলিকেজ"], ans: 1, exp: "ব্যাখ্যা: lac Y জিন ল্যাক-পারমিয়েজ উৎসেচক তৈরি করে, যা একটি ট্রান্সমেমব্রেন চ্যানেল হিসেবে কাজ করে এবং পরিবেশ থেকে ল্যাকটোজকে সাইটোপ্লাজমে প্রবেশে সাহায্য করে।" },
+            { q: "১৫৭. ল্যাক ওপেরন কী ধরনের জিন নিয়ন্ত্রণ ব্যবস্থা?", opts: ["অবদম্য ব্যবস্থা (Repressible system)", "প্রণোদক ব্যবস্থা বা ইনডিউসিবল সিস্টেম (Inducible system)", "ফিডব্যাক ইনহিবিশন", "কনস্টিটিউটিভ সিস্টেম"], ans: 1, exp: "ব্যাখ্যা: ল্যাক ওপেরন একটি প্রণোদক ব্যবস্থা, কারণ এটি সাধারণত বন্ধ থাকে এবং প্রণোদক বা ইনডিউসারের (ল্যাকটোজ/অ্যালোল্যাকটোজ) উপস্থিতিতে এটি সক্রিয় (Switch on) হয়।" },
+            { q: "১৫۸. ল্যাক ওপেরনে ইনডিউসার (Inducer) বা প্রণোদক অণু হিসেবে প্রকৃতপক্ষে কে কাজ করে?", opts: ["গ্লুকোজ", "গ্যালাকটোজ", "অ্যালোল্যাকটোজ (Allolactose)", "সুক্রোজ"], ans: 2, exp: "ব্যাখ্যা: ল্যাকটোজ কোশে প্রবেশ করার পর β-গ্যালাকটোসাইডেজ দ্বারা অ্যালোল্যাকটোজে রূপান্তরিত হয়, যা প্রকৃত ইনডিউসার হিসেবে রিপ্রেসরের সঙ্গে যুক্ত হয়ে তাকে নিষ্ক্রিয় করে।" },
+            { q: "১৫৯. ল্যাক ওপেরনে 'রিপ্রেসর প্রোটিন' (Repressor protein) কোন্ জিন থেকে উৎপন্ন হয়?", opts: ["lac Z", "lac P", "lac I বা রেগুলেটর জিন (Regulator gene)", "lac O"], ans: 2, exp: "ব্যাখ্যা: রেগুলেটর জিন (lac I) একটি রিপ্রেসর প্রোটিন তৈরি করে, যা ল্যাকটোজের অনুপস্থিতিতে অপারেটরে বসে ওপেরন বন্ধ রাখে।" },
+            { q: "১৬০. ল্যাকটোজের অনুপস্থিতিতে রিপ্রেসর প্রোটিন ওপেরনের কোন্ অংশে যুক্ত হয়ে ট্রান্সক্রিপশনে বাধা দেয়?", opts: ["প্রোমোটার", "অপারেটর অঞ্চল (Operator / lac O)", "স্ট্রাকচারাল জিন", "ইনহ্যান্সার"], ans: 1, exp: "ব্যাখ্যা: রিপ্রেসর প্রোটিন অপারেটর অঞ্চলে (lac O) আবদ্ধ হলে প্রোমোটারে থাকা RNA পলিমারেজ সামনের দিকে এগোতে পারে না, ফলে ট্রান্সক্রিপশন বন্ধ থাকে।" },
+            { q: "১৬১. ট্রান্সক্রিপশন শুরু করার জন্য RNA পলিমারেজ উৎসেচক ওপেরনের কোন্ অংশে এসে যুক্ত হয়?", opts: ["অপারেটর", "রেগুলেটর", "প্রোমোটার অঞ্চল (Promoter / lac P)", "ইনট্রন"], ans: 2, exp: "ব্যাখ্যা: RNA পলিমারেজ প্রোমোটার জিনে (lac P) যুক্ত হয় এবং অপারেটর মুক্ত থাকলে স্ট্রাকচারাল জিনের ট্রান্সক্রিপশন ঘটায়।" },
+            { q: "১৬২. ল্যাক ওপেরনে 'CAP-cAMP' কমপ্লেক্সের যুক্ত হওয়া কী ধরনের নিয়ন্ত্রণের উদাহরণ?", opts: ["ঋণাত্মক নিয়ন্ত্রণ", "ধনাত্মক নিয়ন্ত্রণ (Positive control)", "ফিডব্যাক ইনহিবিশন", "অবদমন"], ans: 1, exp: "ব্যাখ্যা: গ্লুকোজের অনুপস্থিতিতে CAP-cAMP কমপ্লেক্স প্রোমোটার অঞ্চলে যুক্ত হয়ে RNA পলিমারেজকে সাহায্য করে, একে ধনাত্মক নিয়ন্ত্রণ বলে।" },
+            { q: "১৬৩. রিপ্রেসর প্রোটিন দ্বারা ল্যাক ওপেরনের ট্রান্সক্রিপশন বন্ধ রাখাকে কী বলা হয়?", opts: ["পজিটিভ কন্ট্রোল", "নেগেটিভ কন্ট্রোল বা ঋণাত্মক নিয়ন্ত্রণ (Negative control)", "অ্যালোস্টেরিক কন্ট্রোল", "মিউটেশন"], ans: 1, exp: "ব্যাখ্যা: রিপ্রেসর প্রোটিন দ্বারা ওপেরন বন্ধ রাখাকে ঋণাত্মক নিয়ন্ত্রণ বলা হয়, যা ল্যাকটোজের অনুপস্থিতিতে ঘটে।" },
+            { q: "১৬৪. রিপ্রেসর প্রোটিন ল্যাকটোজের (অ্যালোল্যাকটোজ) সাথে যুক্ত হলে কী ঘটে?", opts: ["রিপ্রেসর আরও দৃঢ়ভাবে অপারেটরে বসে", "রিপ্রেসরের গঠনগত পরিবর্তন হয় এবং এটি অপারেটর থেকে মুক্ত হয়ে যায়", "রিপ্রেসর RNA পলিমারেজকে ধ্বংস করে", "রিপ্রেসর DNA কে কেটে দেয়"], ans: 1, exp: "ব্যাখ্যা: ইনডিউসার (অ্যালোল্যাকটোজ) রিপ্রেসরের অ্যালোস্টেরিক স্থানে যুক্ত হয়ে তাকে নিষ্ক্রিয় করে, ফলে সেটি অপারেটর থেকে মুক্ত হয় এবং ওপেরন চালু (Switch on) হয়।" },
+            { q: "১৬৫. ওপেরন মডেল প্রধানত কাদের জিনের প্রকাশ নিয়ন্ত্রণের ব্যাখ্যা দেয়?", opts: ["মানুষ", "ইউক্যারিওট", "প্রোক্যারিওট বা ব্যাকটেরিয়া", "ভাইরাস"], ans: 2, exp: "ব্যাখ্যা: ওপেরন ব্যবস্থাটি প্রোক্যারিওটিক কোশে (যেমন E. coli) বিপাকীয় জিনের প্রকাশ নিয়ন্ত্রণের একটি অন্যতম ব্যবস্থা। ইউক্যারিওটে ওপেরন থাকে না।" }
+        ]
+    },
+    12: {
+        name: 'Set 12', icon: '🧬', topic: 'ওপেরনের মিউটেশন, ট্রিপটোফ্যান ওপেরন এবং জিন কনসেপ্ট',
+        questions: [
+            { q: "১৬৬. ল্যাক ওপেরনে অপারেটর জিনের মিউটেশন (lac Oc) ঘটলে কী হবে?", opts: ["ওপেরন সর্বদা বন্ধ থাকবে", "রিপ্রেসর অপারেটরে বসতে পারবে না, ফলে ওপেরন সর্বদা চালু থাকবে (কনস্টিটিউটিভ সংশ্লেষ)", "রিপ্রেসর তৈরি হবে না", "RNA পলিমারেজ যুক্ত হতে পারবে না"], ans: 1, exp: "ব্যাখ্যা: অপারেটরে মিউটেশন (Oc) হলে রিপ্রেসর সেখানে যুক্ত হতে পারে না, ফলে ল্যাকটোজ থাকুক বা না থাকুক, সর্বদা উৎসেচক তৈরি হয় (Constitutive synthesis)।" },
+            { q: "১৬৭. ল্যাক ওপেরনে 'রেগুলেটর' জিনে মিউটেশন হলে (রিপ্রেসর তৈরি না হলে) কী হবে?", opts: ["ওপেরন সর্বদা বন্ধ থাকবে", "ওপেরন সর্বদা চালু থাকবে বা কনস্টিটিউটিভ হবে", "গাঠনিক জিন নষ্ট হয়ে যাবে", "RNA পলিমারেজ নষ্ট হবে"], ans: 1, exp: "ব্যাখ্যা: রেগুলেটর জিনে মিউটেশন হলে রিপ্রেসর তৈরি হয় না, তাই অপারেটর সবসময় ফাঁকা থাকে এবং ওপেরন সর্বদা চালু থাকে।" },
+            { q: "১৬৮. E. coli-র ট্রিপটোফ্যান ওপেরন (Trp Operon) কী ধরনের জিন নিয়ন্ত্রণ ব্যবস্থা?", opts: ["প্রণোদক বা ইনডিউসিবল", "অবদম্য বা রিপ্রেসিবেল ব্যবস্থা (Repressible system)", "কনস্টিটিউটিভ", "অ্যাটেনুয়েটেড"], ans: 1, exp: "ব্যাখ্যা: ট্রিপটোফ্যান ওপেরন একটি ধনাত্মক/অবদম্য নিয়ন্ত্রণ ব্যবস্থা, যা সাধারণত চালু থাকে, কিন্তু উৎপাদিত বস্তু (ট্রিপটোফ্যান) নির্দিষ্ট মাত্রায় পৌঁছোলে এটি বন্ধ (Switch off) হয়ে যায়।" },
+            { q: "১৬৯. ট্রিপটোফ্যান ওপেরনে কটি গাঠনিক জিন (Structural genes) থাকে?", opts: ["৩টি", "৪টি", "৫টি (trpE, trpD, trpC, trpB, trpA)", "৭টি"], ans: 2, exp: "ব্যাখ্যা: Trp Operon-এ পাঁচটি গাঠনিক জিন থাকে, যারা কোরিজমিক অ্যাসিড থেকে ট্রিপটোফ্যান তৈরির পাঁচটি উৎসেচকের সংকেত বহন করে।" },
+            { q: "১৭০. ট্রিপটোফ্যান ওপেরনে রেগুলেটর জিন (trpR) থেকে উৎপন্ন প্রোটিনটিকে কী বলা হয়?", opts: ["ইনডিউসার", "অ্যাপোরিপ্রেসর (Aporepressor)", "কো-রিপ্রেসর", "প্রোমোটার"], ans: 1, exp: "ব্যাখ্যা: trpR থেকে উৎপন্ন প্রোটিনটি অ্যাপোরিপ্রেসর যা একা অপারেটরের সাথে যুক্ত হতে অক্ষম।" },
+            { q: "১৭১. ট্রিপটোফ্যান ওপেরনে কো-রিপ্রেসর (Co-repressor) হিসেবে কে কাজ করে?", opts: ["ল্যাকটোজ", "গ্লুকোজ", "ট্রিপটোফ্যান (Tryptophan) অণু নিজেই", "ATP"], ans: 2, exp: "ব্যাখ্যা: কোশে ট্রিপটোফ্যানের মাত্রা বাড়লে ট্রিপটোফ্যান কো-রিপ্রেসর হিসেবে অ্যাপোরিপ্রেসরের সাথে যুক্ত হয়ে সক্রিয় রিপ্রেসর তৈরি করে এবং ওপেরন বন্ধ করে।" },
+            { q: "১৭২. DNA-র যে ক্ষুদ্রতম অংশ একটি পলিপেপটাইড তৈরির সংকেত বহন করে, তাকে জিনের কোন্ কার্যকরী একক বলা হয়?", opts: ["রেকন", "মিউটন", "সিস্ট্রন (Cistron)", "রেপ্লিকন"], ans: 2, exp: "ব্যাখ্যা: জিনের ক্রিয়াগত বা শারীরবৃত্তীয় কাজের একককে সিস্ট্রন বলে, যা একটি পলিপেপটাইড বা প্রোটিন তৈরির সংকেত বহন করে।" },
+            { q: "১৭৩. DNA-র যে ক্ষুদ্রতম অংশে পরিব্যক্তি বা মিউটেশন ঘটতে পারে, তাকে কী বলে?", opts: ["সিস্ট্রন", "মিউটন (Muton)", "রেকন", "ওপেরন"], ans: 1, exp: "ব্যাখ্যা: DNA অণুর পরিব্যক্তিক্ষম ক্ষুদ্রতম অংশ (সাধারণত এক জোড়া নিউক্লিওটাইড) হল মিউটন।" },
+            { q: "১৭৪. ক্রসিং ওভার বা পুনঃসংযোজন (Recombination) ঘটার জন্য দায়ী DNA-র ক্ষুদ্রতম একককে কী বলে?", opts: ["রেকন (Recon)", "মিউটন", "সিস্ট্রন", "কোডন"], ans: 0, exp: "ব্যাখ্যা: DNA-র যে অংশে ক্রসিং ওভার বা রিকম্বিনেশন ঘটতে পারে তাকে রেকন বলে।" },
+            { q: "১৭৫. যে জিনগুলি কোনো অপরিহার্য প্রোটিন তৈরি করে না বা কোশে কোনো প্রকাশ দেখায় না কিন্তু ক্রোমোজোমে অবস্থান করে, তাদের কী বলা হয়?", opts: ["ওভারল্যাপিং জিন", "সেলফিশ বা স্বার্থপর DNA (Selfish DNA)", "হাউসকিপিং জিন", "লিথাল জিন"], ans: 1, exp: "ব্যাখ্যা: যে DNA বা জিনগুলি প্রোটিন তৈরির কোনো সংকেত গঠন করে না এবং কোশে নিজেদের টিকিয়ে রাখে, তাদের স্বার্থপর DNA বলে।" },
+            { q: "১৭৬. ইউক্যারিওটিক জিনের যে অংশগুলি প্রোটিন তৈরির সংকেত বহন করে (সক্রিয় অংশ), তাদের কী বলে?", opts: ["ইনট্রন", "এক্সন (Exon)", "প্রোমোটার", "স্যাটেলাইট"], ans: 1, exp: "ব্যাখ্যা: ইউক্যারিওটিক স্প্লিট জিনের সক্রিয় অংশগুলিকে এক্সন বলে।" },
+            { q: "১৭৭. ট্রান্সক্রিপশনের ফলে উৎপন্ন প্রাথমিক RNA (hnRNA) থেকে ইনট্রন অংশগুলি কেটে বাদ দিয়ে এক্সনগুলিকে জোড়া লাগানোর পদ্ধতিকে কী বলে?", opts: ["ট্রান্সলেশন", "রেপ্লিকেশন", "স্প্লাইসিং (Splicing)", "ক্যাপিং"], ans: 2, exp: "ব্যাখ্যা: স্প্লাইসিং পদ্ধতিতে নিষ্ক্রিয় ইনট্রনগুলি বাদ যায় এবং সক্রিয় এক্সনগুলি জোড়া লেগে পরিণত mRNA গঠন করে।" },
+            { q: "১৭৮. প্রোক্যারিওটিক কোশে জিনের ট্রান্সক্রিপশনের ফলে সাধারণত একটি mRNA একাধিক জিনের সংকেত বহন করে। একে কী ধরনের mRNA বলে?", opts: ["মনোসিস্ট্রনিক mRNA", "পলিসিস্ট্রনিক mRNA (Polycistronic mRNA)", "স্প্লিট mRNA", "হেটেরোজেনাস mRNA"], ans: 1, exp: "ব্যাখ্যা: প্রোক্যারিওটদের ক্ষেত্রে একটি mRNA একাধিক সিস্ট্রন বা জিনের সংকেত বহন করে, তাই একে পলিসিস্ট্রনিক mRNA বলে।" },
+            { q: "১৭৯. ইউক্যারিওটিক কোশে জিনের ট্রান্সক্রিপশনের ফলে একটি mRNA সাধারণত একটিমাত্র জিনের সংকেত বহন করে। একে কী বলে?", opts: ["পলিসিস্ট্রনিক mRNA", "মনোসিস্ট্রনিক mRNA (Monocistronic mRNA)", "ডাইসিস্ট্রনিক mRNA", "রাইবোজাইম"], ans: 1, exp: "ব্যাখ্যা: ইউক্যারিওটদের ক্ষেত্রে একটি mRNA একটিমাত্র পলিপেপটাইডের সংকেত বহন করে বলে একে মনোসিস্ট্রনিক mRNA বলে।" },
+            { q: "১৮০. 'জাম্পিং জিন' (Jumping gene) বা ট্রান্সপোজোন প্রথম কে আবিষ্কার করেন?", opts: ["বারবারা ম্যাকক্লিনটক (Barbara McClintock)", "ওয়াটসন ও ক্রিক", "হরগোবিন্দ খোরানা", "বিডল ও ট্যাটাম"], ans: 0, exp: "ব্যাখ্যা: বারবারা ম্যাকক্লিনটক ভুট্টার ওপর গবেষণাকালে জাম্পিং জিন বা ট্রান্সপোজোন আবিষ্কার করেন, যা জিনোমের এক স্থান থেকে অন্য স্থানে লাফিয়ে যেতে পারে।" }
+        ]
+    },
+    13: {
+        name: 'Set 13', icon: '🧬', topic: 'পরিব্যক্তি বা মিউটেশন: আণবিক ভিত্তি',
+        questions: [
+            { q: "১৮১. ডিএনএ সিকোয়েন্সে একটি মাত্র বেসের পরিবর্তনকে কী মিউটেশন বলে?", opts: ["ফ্রেম শিফ্ট মিউটেশন", "পয়েন্ট মিউটেশন (Point mutation)", "ইনভারশন", "ডিলিশন"], ans: 1, exp: "ব্যাখ্যা: ডিএনএ-র মধ্যে একটি মাত্র বেস বা নিউক্লিওটাইড প্রতিস্থাপিত হয়ে যে মিউটেশন ঘটে তাকে পয়েন্ট মিউটেশন বলে।" },
+            { q: "১৮২. ফ্রেম শিফ্ট মিউটেশনের প্রধান কারণ কী?", opts: ["ডিঅ্যামিনেশন", "একটি বেসের প্রতিস্থাপন", "এক বা একাধিক বেস যুক্ত হওয়া (Insertion) বা বাদ যাওয়া (Deletion)", "ক্রসিং ওভার"], ans: 2, exp: "ব্যাখ্যা: ডিএনএ-তে এক বা একাধিক বেস যুক্ত বা অপসারিত হলে জিনের পড়ার ফ্রেম বা রিডিং ফ্রেম বদলে যায়, একে ফ্রেম শিফ্ট মিউটেশন বলে।" },
+            { q: "১৮৩. এক্স-রে, গামা-রে, এবং ইউভি-রে কী ধরনের মিউটাজেন?", opts: ["রাসায়নিক মিউটাজেন", "ভৌত মিউটাজেন (Physical mutagen)", "জৈব মিউটাজেন", "ভাইরাল মিউটাজেন"], ans: 1, exp: "ব্যাখ্যা: বিভিন্ন ধরনের তড়িৎচুম্বকীয় বা কণা বিকিরণ (যেমন এক্স-রে, ইউভি-রে) যা ডিএনএ-র মিউটেশন ঘটায়, তাদের ভৌত মিউটাজেন বলে।" },
+            { q: "১৮৪. 5-ব্রোমোইউরাসিল (5-BU) কী ধরনের রাসায়নিক মিউটাজেন?", opts: ["অ্যালকাইলেটিং এজেন্ট", "বেস অ্যানালগ (Base Analog)", "ডিঅ্যামিনেটিং এজেন্ট", "রঞ্জক"], ans: 1, exp: "ব্যাখ্যা: 5-BU গঠনগত দিক দিয়ে থাইমিনের অনুরূপ একটি বেস অ্যানালগ, যা DNA সংশ্লেষের সময় থাইমিনের পরিবর্তে প্রবেশ করে মিউটেশন ঘটায়।" },
+            { q: "১৮৫. ইথাইল মিথেন সালফোনেট (EMS) এবং নাইট্রোজেন মাস্টার্ড কী ধরনের রাসায়নিক মিউটাজেন?", opts: ["বেস অ্যানালগ", "অ্যালকাইলেটিং এজেন্ট (Alkylating Agent)", "ইন্টারক্যালেটিং এজেন্ট", "ভৌত মিউটাজেন"], ans: 1, exp: "ব্যাখ্যা: এই পদার্থগুলি DNA-র স্বাভাবিক বেসের সঙ্গে ইথাইল বা মিথাইল গ্রুপ যোগ করে বেস প্রতিস্থাপন ঘটায়, তাই এদের অ্যালকাইলেটিং এজেন্ট বলে।" },
+            { q: "১৮৬. ডিঅ্যামিনেটিং এজেন্ট (যেমন নাইট্রাস অ্যাসিড) কী কাজ করে?", opts: ["বেস থেকে অ্যামাইনো গ্রুপ অপসারণ করে", "অ্যালকাইল গ্রুপ যুক্ত করে", "ডিএনএ-র ফ্রেম বদলে দেয়", "বেস অ্যানালগ হিসেবে বসে"], ans: 0, exp: "ব্যাখ্যা: ডিঅ্যামিনেটিং এজেন্টগুলি (যেমন HNO2) ডিএনএ বেস থেকে অ্যামাইনো (-NH2) গ্রুপ সরিয়ে দেয়, ফলে বেসটি অন্য বেসে পরিণত হয়ে যায় (যেমন সাইটোসিন ইউরাসিলে)।" },
+            { q: "১৮৭. অ্যাক্রিডিন অরেঞ্জ এবং ইথিডিয়াম ব্রোমাইড কী ধরনের মিউটাজেন?", opts: ["বেস অ্যানালগ", "ইন্টারক্যালেটিং এজেন্ট (Intercalating agent)", "ডিঅ্যামিনেটিং এজেন্ট", "অ্যালকাইলেটিং এজেন্ট"], ans: 1, exp: "ব্যাখ্যা: এই রঞ্জকগুলি ডিএনএ-র বেস জোড়ের মাঝে ঢুকে পড়ে (Intercalate করে) এবং রেপ্লিকেশনের সময় ফ্রেম শিফ্ট মিউটেশন ঘটায়।" },
+            { q: "১৮৮. মানুষের সিকল সেল অ্যানিমিয়া (Sickle cell anemia) রোগটি কোন্ ধরনের মিউটেশনের একটি চমৎকার উদাহরণ?", opts: ["ফ্রেম শিফ্ট মিউটেশন", "পয়েন্ট মিউটেশন বা বেস প্রতিস্থাপন (Point Mutation / Base substitution)", "ক্রোমোজোমাল ডিলিশন", "পলিপ্লয়ডি"], ans: 1, exp: "ব্যাখ্যা: হিমোগ্লোবিনের বিটা চেনে ৬ নম্বর স্থানে গ্লুটামিক অ্যাসিডের কোডনটি (GAG) একটিমাত্র বেস প্রতিস্থাপিত হয়ে ভ্যালিন (GUG)-এর কোডনে পরিণত হয়, এটি পয়েন্ট মিউটেশনের উদাহরণ।" },
+            { q: "১৮৯. মিউটেশনের ফলে যদি কোডনটি পরিবর্তিত হয়ে একটি স্টপ কোডনে (UAA, UAG, UGA) পরিণত হয়, তবে তাকে কী মিউটেশন বলে?", opts: ["মিসসেন্স মিউটেশন", "ননসেন্স মিউটেশন (Nonsense mutation)", "সাইলেন্ট মিউটেশন", "ফ্রেম শিফ্ট"], ans: 1, exp: "ব্যাখ্যা: অর্থহীন বা ননসেন্স কোডন তৈরি হলে প্রোটিন সংশ্লেষ মাঝপথেই বন্ধ হয়ে যায়, একে ননসেন্স মিউটেশন বলে।" },
+            { q: "১৯০. যে মিউটেশনে বেস পরিবর্তিত হলেও একই অ্যামাইনো অ্যাসিড তৈরি হয় (কারণ কোডন অধঃপাতধর্মী), তাকে কী বলে?", opts: ["সাইলেন্ট মিউটেশন বা সমার্থক মিউটেশন (Silent mutation)", "মিসসেন্স মিউটেশন", "লিথাল মিউটেশন", "ননসেন্স মিউটেশন"], ans: 0, exp: "ব্যাখ্যা: জেনেটিক কোডের ডিজেনারেসি ধর্মের জন্য অনেক সময় বেস পরিবর্তন হলেও অ্যামাইনো অ্যাসিড একই থাকে, ফলে প্রোটিনে কোনো প্রভাব পড়ে না। একে সাইলেন্ট মিউটেশন বলে।" },
+            { q: "১৯১. ট্রানজিশন মিউটেশনের (Transition) ক্ষেত্রে মোট কতগুলি ধরন বা সম্ভাবনা থাকতে পারে?", opts: ["২টি", "৪টি", "৮টি", "১৬টি"], ans: 1, exp: "ব্যাখ্যা: ট্রানজিশনের ক্ষেত্রে A↔G এবং T↔C অর্থাৎ মোট 4 ধরনের ট্রানজিশন হওয়া সম্ভব।" },
+            { q: "১৯২. ট্রান্সভার্শন মিউটেশনের (Transversion) ক্ষেত্রে মোট কতগুলি ধরন বা সম্ভাবনা থাকতে পারে?", opts: ["৪টি", "৬টি", "৮টি", "১২টি"], ans: 2, exp: "ব্যাখ্যা: একটি পিউরিন পিরিমিডিন দ্বারা বা পিরিমিডিন পিউরিন দ্বারা প্রতিস্থাপিত হলে তাকে ট্রান্সভার্শন বলে এবং এর 8টি ধরন হওয়া সম্ভব।" },
+            { q: "১৯৩. যে মিউটেশন জীবের পক্ষে অত্যন্ত ক্ষতিকর এবং যার ফলে জীবের মৃত্যুও ঘটতে পারে, তাকে কী বলে?", opts: ["লিথাল মিউটেশন (Lethal mutation)", "সাইলেন্ট মিউটেশন", "নিউট্রাল মিউটেশন", "ব্যাক মিউটেশন"], ans: 0, exp: "ব্যাখ্যা: যে সকল মিউটেশন জীবের মৃত্যু ঘটায় তাদের লিথাল বা মরণকারী মিউটেশন বলে।" },
+            { q: "১৯৪. মিউটেশনের হার স্বাভাবিকের তুলনায় অনেক গুণ বাড়িয়ে দেয় এমন পদার্থকে কী বলে?", opts: ["প্রোমোটার", "মিউটাজেন (Mutagen)", "অ্যাডাপ্টার", "রিপ্রেসর"], ans: 1, exp: "ব্যাখ্যা: যে সব ভৌত ও রাসায়নিক পদার্থ ডিএনএ-তে মিউটেশন ঘটানোর জন্য দায়ী তাদের মিউটাজেন বলে।" },
+            { q: "১৯৫. বেস অ্যানালগ 5-ব্রোমোইউরাসিল (5-BU) সাধারণত কার পরিবর্তে ডিএনএ-তে যুক্ত হয়?", opts: ["অ্যাডেনিন", "গুয়ানিন", "সাইটোসিন", "থাইমিন (Thymine)"], ans: 3, exp: "ব্যাখ্যা: 5-BU হলো থাইমিনের রাসায়নিক অ্যানালগ, যা ডিএনএ রেপ্লিকেশনের সময় থাইমিনের জায়গাতেই যুক্ত হয়।" }
+        ]
+    },
+    14: {
+        name: 'Set 14', icon: '🧬', topic: 'ক্রোমোজোমাল মিউটেশন ও প্লয়ডি',
+        questions: [
+            { q: "১৯৬. ক্রোমোজোমের হ্যাপ্লয়েড বা ডিপ্লয়েড সেট যখন গুণিতকে (যেমন 3n, 4n) বৃদ্ধি বা হ্রাস পায়, তখন তাকে কী বলে?", opts: ["অ্যানিউপ্লয়ডি", "ইউপ্লয়ডি (Euploidy)", "মনোজোমি", "ট্রান্সলোকেশন"], ans: 1, exp: "ব্যাখ্যা: সম্পূর্ণ জিনোম সেটের গুণিতক আকারে হ্রাস বা বৃদ্ধিকে ইউপ্লয়ডি বলা হয় (যেমন মনোপ্লয়ডি, ট্রিপ্লয়ডি, টেট্রাপ্লয়ডি)।" },
+            { q: "১৯৭. যখন একই প্রজাতির ক্রোমোজোম সংখ্যা গুণিতকে বৃদ্ধি পায় (যেমন 3n, 4n), তখন তাকে কী বলে?", opts: ["অ্যালোপলিপ্লয়ডি", "অ্যানিউপ্লয়ডি", "অটোপলিপ্লয়ডি (Autopolyploidy)", "ডিলিশন"], ans: 2, exp: "ব্যাখ্যা: একই প্রজাতির ক্রোমোজোম সংখ্যা গুণিতকে বৃদ্ধি পেলে তাকে অটোপলিপ্লয়ডি বলে (যেমন অটোট্রিপ্লয়েড বা আলু, কলা ইত্যাদি)।" },
+            { q: "১৯৮. যখন সংকরায়ণের মাধ্যমে দুটি ভিন্ন প্রজাতির ক্রোমোজোম সংখ্যা একত্রিত হয়ে দ্বিগুণ বৃদ্ধি পায়, তখন তাকে কী বলে?", opts: ["অটোপলিপ্লয়ডি", "অ্যালোপলিপ্লয়ডি (Allopolyploidy)", "মনোজোমি", "ট্রাইজোমি"], ans: 1, exp: "ব্যাখ্যা: দুটি ভিন্ন প্রজাতির সংকরায়ণের পর ক্রোমোজোম সংখ্যা বৃদ্ধি পেলে তাকে অ্যালোপলিপ্লয়ডি বলে (যেমন গম, তুলো)।" },
+            { q: "১৯৯. ক্রোমোজোম সেটের সংখ্যার পরিবর্তন না হয়ে যদি নির্দিষ্ট এক বা একাধিক ক্রোমোজোমের হ্রাস বা বৃদ্ধি ঘটে (যেমন 2n+1, 2n-1), তাকে কী বলে?", opts: ["ইউপ্লয়ডি", "অ্যানিউপ্লয়ডি (Aneuploidy)", "পলিপ্লয়ডি", "ইনভারশন"], ans: 1, exp: "ব্যাখ্যা: ডিপ্লয়েড সেটের সঙ্গে এক বা একাধিক ক্রোমোজোমের হ্রাস বা বৃদ্ধিকে অ্যানিউপ্লয়ডি বলে।" },
+            { q: "২০০. বিশেষ একজোড়া ক্রোমোজোম থেকে একটি ক্রোমোজোম অবলুপ্ত হলে (2n-1), সেই অবস্থাকে কী বলে?", opts: ["ট্রাইজোমি", "নালিসোমি", "মনোজোমি (Monosomy)", "টেট্রাজোমি"], ans: 2, exp: "ব্যাখ্যা: একটি ক্রোমোজোম অবলুপ্ত হলে তাকে মনোজোমি (2n-1) বলে, যেমন টার্নার সিন্ড্রোম (45, XO)।" },
+            { q: "২০১. একটি সেট থেকে সম্পূর্ণ একজোড়া সমসংস্থ ক্রোমোজোম অবলুপ্ত হলে (2n-2), তাকে কী বলে?", opts: ["মনোজোমি", "ডাবল মনোজোমি", "নালিসোমি (Nullisomy)", "ডাবল ট্রাইজোমি"], ans: 2, exp: "ব্যাখ্যা: একজোড়া ক্রোমোজোম সম্পূর্ণ অবলুপ্ত হওয়াকে নালিসোমি (2n-2) রূপে চিহ্নিত করা হয়।" },
+            { q: "২০২. একজোড়া সমসংস্থ ক্রোমোজোমের সঙ্গে আরও একটি অতিরিক্ত ক্রোমোজোম যুক্ত হলে (2n+1), সেই অবস্থাকে কী বলে?", opts: ["ট্রাইজোমি (Trisomy)", "মনোজোমি", "নালিসোমি", "টেট্রাজোমি"], ans: 0, exp: "ব্যাখ্যা: একটি অতিরিক্ত ক্রোমোজোম যুক্ত হলে তাকে ট্রাইজোমি (2n+1) বলে, যেমন ডাউন সিন্ড্রোম (Trisomy 21)।" },
+            { q: "২০৩. ক্রোমোজোমের কোনো একটি অংশ অপসারিত হয়ে জিন বিলুপ্ত হওয়াকে কী বলে?", opts: ["ডুপ্লিকেশন", "ইনভারশন", "ডিলিশন বা ডেফিসিয়েন্সি (Deletion or Deficiency)", "ট্রান্সলোকেশন"], ans: 2, exp: "ব্যাখ্যা: ক্রোমোজোমের একটি অংশ ভেঙে অপসারিত হলে তাকে ডিলিশন বলে। যেমন 5 নং ক্রোমোজোমের ডিলিশনে ক্রাই-ডু-চ্যাট সিন্ড্রোম হয়।" },
+            { q: "২০৪. ক্রোমোজোমের কোনো একটি অংশ একাধিকবার ক্রোমোজোমে উপস্থিত থাকলে তাকে কী বলে?", opts: ["ডিলিশন", "ডুপ্লিকেশন (Duplication)", "ইনভারশন", "নালিসোমি"], ans: 1, exp: "ব্যাখ্যা: ক্রোমোজোমে কোনো অংশ দুই বা তার থেকে বেশিবার উপস্থিত থাকলে তাকে ডুপ্লিকেশন বলে। ড্রসোফিলার 'বার আই' এর উদাহরণ।" },
+            { q: "২০৫. কোনো ক্রোমোজোমের একটি অংশ ভেঙে গিয়ে 180° ঘুরে আবার একই স্থানে জোড়া লাগাকে কী বলে?", opts: ["ইনভারশন (Inversion)", "ডিলিশন", "ট্রান্সলোকেশন", "পলিপ্লয়ডি"], ans: 0, exp: "ব্যাখ্যা: ক্রোমোজোমের অংশ 180° কোণে ঘুরে বিপরীত সজ্জায় অবস্থান করলে তাকে ইনভারশন বলে।" },
+            { q: "২০৬. যে ইনভারশনে উলটে যাওয়া খণ্ডিত অংশের মধ্যে সেন্ট্রোমিয়ার অন্তর্ভুক্ত থাকে, তাকে কী বলে?", opts: ["প্যারাসেন্ট্রিক ইনভারশন", "পেরিসেন্ট্রিক ইনভারশন (Pericentric Inversion)", "ট্যানডেম ইনভারশন", "ডিসপ্লেসড ইনভারশন"], ans: 1, exp: "ব্যাখ্যা: সেন্ট্রোমিয়ার খণ্ডিত অংশের মধ্যে থাকলে তাকে পেরিসেন্ট্রিক ইনভারশন বলে এবং সেন্ট্রোমিয়ার না থাকলে প্যারাসেন্ট্রিক ইনভারশন বলে।" },
+            { q: "২০৭. দুটি নন-হোমোলোগাস (অসমসংস্থ) ক্রোমোজোমের মধ্যে খণ্ড বিনিময় ঘটাকে কী বলে?", opts: ["ডিলিশন", "ক্রসিং ওভার", "রেসিপ্রোকাল ট্রান্সলোকেশন (Reciprocal Translocation)", "ইনভারশন"], ans: 2, exp: "ব্যাখ্যা: দুটি অসমসংস্থ ক্রোমোজোমের মধ্যে খণ্ড বিনিময় হলে তাকে রেসিপ্রোকাল ট্রান্সলোকেশন বলে।" },
+            { q: "২০৮. ড্রসোফিলা মাছির 'বার আই' (Bar eye) বৈশিষ্ট্যটি কোন্ ধরনের মিউটেশনের উদাহরণ?", opts: ["X ক্রোমোজোমের 16A অংশের ডিলিশন", "X ক্রোমোজোমের 16A অংশের ডুপ্লিকেশন", "অটোজোমাল ইনভারশন", "অটোজোমাল ট্রান্সলোকেশন"], ans: 1, exp: "ব্যাখ্যা: ড্রসোফিলার X ক্রোমোজোমের 16A অংশটি ডুপ্লিকেশন হয়ে দু-বার বা তিনবার এলে চোখ ছোটো বা বার (Bar) আকৃতির হয়ে যায়।" },
+            { q: "২০৯. মানুষের ফ্যামিলিয়াল ডাউন সিন্ড্রোম (Familial Down Syndrome) কোন্ ধরনের ক্রোমোজোমাল মিউটেশনের কারণে হয়?", opts: ["ইনভারশন", "ডিলিশন", "14 ও 21 নং ক্রোমোজোমের মধ্যে রবার্টসোনিয়ান ট্রান্সলোকেশন", "5 নং ক্রোমোজোমের ডিলিশন"], ans: 2, exp: "ব্যাখ্যা: 21 নং এবং 14 নং ক্রোমোজোমের মধ্যে রবার্টসোনিয়ান ট্রান্সলোকেশনের কারণে ফ্যামিলিয়াল ডাউন সিন্ড্রোম দেখা দেয়।" },
+            { q: "২১০. কোন্ রাসায়নিক পদার্থ প্রয়োগ করে উদ্ভিদ কোশে কৃত্রিমভাবে অটোপলিপ্লয়ডি ঘটানো যায়?", opts: ["ইথিলিন", "কোলচিসিন (Colchicine)", "অক্সিন", "জিব্বেরেলিন"], ans: 1, exp: "ব্যাখ্যা: Colchicum autumnale থেকে প্রাপ্ত কোলচিসিন উপক্ষারের প্রভাবে বেমতন্তুর গঠন ব্যাহত হয়, ফলে অ্যানাফেজ দশায় ক্রোমোজোমগুলি মেরুতে যেতে না পেরে কোষে গুণিতক হারে বাড়ে।" }
+        ]
+    },
+    15: {
+        name: 'Set 15', icon: '🧬', topic: 'হিউম্যান জিনোম প্রজেক্ট (Human Genome Project - HGP)',
+        questions: [
+            { q: "২১১. মানুষের সম্পূর্ণ জিনোমের DNA সজ্জাক্রম (Sequence) নির্ধারণের উদ্দেশ্যে 'হিউম্যান জিনোম প্রজেক্ট' (HGP) কবে শুরু হয়?", opts: ["1980 খ্রিস্টাব্দে", "1990 খ্রিস্টাব্দে", "2003 খ্রিস্টাব্দে", "2010 খ্রিস্টাব্দে"], ans: 1, exp: "ব্যাখ্যা: মানুষের 24 রকম ক্রোমোজোমের DNA সজ্জাক্রম নির্ধারণের উদ্দেশ্যে 1990 খ্রিস্টাব্দে Human Genome Project গঠিত হয়।" },
+            { q: "২১২. হিউম্যান জিনোম প্রজেক্ট কত খ্রিস্টাব্দে সফলভাবে সম্পন্ন হয়?", opts: ["1995 খ্রিস্টাব্দে", "2000 খ্রিস্টাব্দে", "2003 খ্রিস্টাব্দে", "2010 খ্রিস্টাব্দে"], ans: 2, exp: "ব্যাখ্যা: 2003 খ্রিস্টাব্দে মানুষের সকল ক্রোমোজোমে DNA সজ্জাক্রম উদ্‌ঘাটিত হয় এবং প্রজেক্টটি সম্পন্ন হয় (যদিও ক্রোমোজোম 1-এর কাজ 2006 সালে শেষ হয়)।" },
+            { q: "২১৩. মানুষের হ্যাপ্লয়েড জিনোমে আনুমানিক কতগুলি বেস পেয়ার (bp) DNA থাকে?", opts: ["3 মিলিয়ন (3 Million)", "3164.7 মিলিয়ন বা প্রায় 3 বিলিয়ন (3×10^9 bp)", "1.5 বিলিয়ন", "6 বিলিয়ন"], ans: 1, exp: "ব্যাখ্যা: মানুষের হ্যাপ্লয়েড জিনোমে 3164.7 মিলিয়ন বা প্রায় 3×10^9 নিউক্লিওটাইড বেস পেয়ার থাকে।" },
+            { q: "২১৪. HGP-এর তথ্য অনুসারে মানুষের জিনোমে আনুমানিক জিনের সংখ্যা কত?", opts: ["1 লক্ষ", "80,000 থেকে 1 লক্ষ", "প্রায় 30,000 (30,000 - 32,000)", "মাত্র 10,000"], ans: 2, exp: "ব্যাখ্যা: হিউম্যান জিনোম প্রজেক্টের মুখ্য উদ্দেশ্য ছিল মানব জিনোমে বর্তমান প্রায় 30,000-32,000 জিন শনাক্ত করা এবং দেখা গেছে জিনের সংখ্যা প্রায় 30,000।" },
+            { q: "২১৫. মানুষের জিনোমে আবিষ্কৃত সবচেয়ে বড়ো জিন কোনটি?", opts: ["ইনসুলিন", "ডিস্ট্রফিন (Dystrophin)", "কোলাজেন", "হিমোগ্লোবিন"], ans: 1, exp: "ব্যাখ্যা: মানুষের জিনোমের সব থেকে বড়ো জিনটি হল ডিস্ট্রফিন (Dystrophin), যা প্রায় 2.4 মিলিয়ন বেস নিয়ে গঠিত।" },
+            { q: "২১৬. মানুষের কোন্ ক্রোমোজোমে সবচেয়ে বেশি সংখ্যক জিন (2968টি) বর্তমান থাকে?", opts: ["ক্রোমোজোম 1", "ক্রোমোজোম 21", "X ক্রোমোজোম", "Y ক্রোমোজোম"], ans: 0, exp: "ব্যাখ্যা: মানুষের ক্রোমোজোম 1-এ সব থেকে বেশি জিন আছে (2968টি)।" },
+            { q: "২১৭. মানুষের কোন্ ক্রোমোজোমে সবচেয়ে কম সংখ্যক জিন (মাত্র 231টি) বর্তমান থাকে?", opts: ["ক্রোমোজোম 22", "ক্রোমোজোম 21", "Y ক্রোমোজোম", "X ক্রোমোজোম"], ans: 2, exp: "ব্যাখ্যা: মানুষের Y ক্রোমোজোমে সব থেকে কম জিন আছে, যার সংখ্যা মাত্র 231টি।" },
+            { q: "২১৮. HGP অনুসারে, মানুষের জিনোমের কত শতাংশের চেয়েও কম অংশ প্রোটিন সংশ্লেষের সংকেত (Coding region) বহন করে?", opts: ["10%", "20%", "50%", "2%-এরও কম (<2%)"], ans: 3, exp: "ব্যাখ্যা: মানুষের জিনোমের 2%-এরও কম সংখ্যক জিন প্রোটিনকে কোড করে, বাকি বিশাল অংশ নন-কোডিং।" },
+            { q: "২১৯. মানুষের জিনোমে থাকা প্রায় 1.4 মিলিয়ন স্থানে একটি মাত্র নিউক্লিওটাইড বেসের পার্থক্য দেখা যায়। একে কী বলা হয়?", opts: ["VNTR", "SNP (Single Nucleotide Polymorphism)", "STR", "ইনট্রন"], ans: 1, exp: "ব্যাখ্যা: মানুষের জিনোমে প্রায় 1.4 মিলিয়ন লোকেশন আছে যেখানে একক বেস DNA পার্থক্য (Single Nucleotide Polymorphism বা SNP) আছে, যা বিবর্তন ও রোগ নির্ণয়ে সাহায্য করে।" },
+            { q: "২২০. জিনোমের বিশাল তথ্য বিশ্লেষণ, সঞ্চয় এবং পুনরুদ্ধারের জন্য কোন্ আধুনিক প্রযুক্তির উদ্ভব হয়েছে?", opts: ["বায়োইনফরমেটিক্স (Bioinformatics)", "বায়োটেকনোলজি", "ন্যানোটেকনোলজি", "জেনেটিক ইঞ্জিনিয়ারিং"], ans: 0, exp: "ব্যাখ্যা: এই প্রজেক্টে বায়োইনফরমেটিক্স ডেটা বেসিং এবং দ্রুত কম্পিউটেশনাল ডিভাইস তথ্য বিশ্লেষণ, সঞ্চয় ও পুনরুদ্ধারের কাজে ব্যবহৃত হয়।" },
+            { q: "২২১. HGP-এর জিন সিকোয়েন্সিংয়ের জন্য কোন্ ভেক্টর (Vector) ব্যবহৃত হয়েছিল?", opts: ["pBR322", "BAC (Bacterial Artificial Chromosome) এবং YAC (Yeast Artificial Chromosome)", "Ti প্লাজমিড", "ল্যাম্বডা ফাজ"], ans: 1, exp: "ব্যাখ্যা: মানুষের জিনোম সিকোয়েন্সিং করার জন্য বড়ো DNA খণ্ড বহনকারী ভেক্টর হিসেবে BAC এবং YAC ব্যবহৃত হয়েছিল।" },
+            { q: "২২২. মানুষের জিনোমের কত শতাংশ নিউক্লিওটাইড বেস সকল মানুষের ক্ষেত্রে হুবহু এক?", opts: ["90%", "95%", "99.9%", "100%"], ans: 2, exp: "ব্যাখ্যা: প্রায় সব (99.9%) নিউক্লিওটাইড বেস পৃথিবীর সব মানুষের ক্ষেত্রেই সমান হয়, মাত্র 0.1% পার্থক্য মানুষে মানুষে বৈচিত্র্য আনে।" },
+            { q: "২২৩. হিউম্যান জিনোম প্রজেক্ট পরিচালনার জন্য কোন্ আন্তর্জাতিক সংস্থা গঠিত হয়েছিল?", opts: ["WHO", "HUGO (Human Genome Organization)", "IRGSP", "NIH"], ans: 1, exp: "ব্যাখ্যা: বিভিন্ন দেশের বিজ্ঞানীরা হিউম্যান জিনোম প্রজেক্টে যোগদান করেন এবং এই কাজ পরিচালনার জন্য Human Genome Organization (HUGO) গঠিত হয়।" },
+            { q: "২২৪. মানুষের 24 রকম ক্রোমোজোমের (22টি অটোজোম + X ও Y) সিকোয়েন্সিংয়ের মধ্যে কোন্ ক্রোমোজোমের কাজ সবশেষে (মে 2006-এ) সম্পূর্ণ হয়?", opts: ["ক্রোমোজোম 22", "Y ক্রোমোজোম", "X ক্রোমোজোম", "ক্রোমোজোম 1"], ans: 3, exp: "ব্যাখ্যা: মে 2006 সালে ক্রোমোজোম 1-এর সিকোয়েন্সিং সম্পূর্ণ হয় যা মানুষের শেষ ক্রোমোজোম হিসেবে সিকোয়েন্সড হয়েছিল (কারন এতে সবথেকে বেশি জিন থাকে)।" },
+            { q: "২২৫. মানুষের জিনোমে পুনরাবৃত্তিমূলক ডিএনএ (Repetitive DNA) এর পরিমাণ কেমন?", opts: ["খুবই কম (১%)", "প্রায় ১০%", "প্রায় ২০%", "প্রায় ৫০% এর বেশি"], ans: 3, exp: "ব্যাখ্যা: মানুষের জিনোমের একটি বিশাল অংশ (প্রায় ৫০% এর বেশি) জুড়ে রয়েছে এই রিপিটেটিভ ডিএনএ বা পুনরাবৃত্তিমূলক ডিএনএ, যার কোনো কোডিং কাজ নেই।" }
+        ]
+    },
+    16: {
+        name: 'Set 16', icon: '🌾', topic: 'রাইস জিনোম প্রজেক্ট এবং জিনোমিক্স (Rice Genome Project)',
+        questions: [
+            { q: "২২৬. ইন্টারন্যাশনাল রাইস জিনোম সিকোয়েন্সিং প্রজেক্ট (IRGSP) কত খ্রিস্টাব্দে শুরু হয়েছিল?", opts: ["1990", "1997", "2000", "2005"], ans: 1, exp: "ব্যাখ্যা: 1997 খ্রিস্টাব্দের সেপ্টেম্বরে সিঙ্গাপুরে প্ল্যান্ট মলিকুলার বায়োলজির আন্তর্জাতিক সিম্পোজিয়ামের সাথে একযোগে IRGSP শুরু হয়েছিল।" },
+            { q: "২২৭. IRGSP-তে মোট কটি দেশ অংশগ্রহণ করেছিল?", opts: ["৫টি", "৭টি", "১০টি", "১৫টি"], ans: 2, exp: "ব্যাখ্যা: জাপান, মার্কিন যুক্তরাষ্ট্র, চিন, তাইওয়ান, কোরিয়া, ভারত, থাইল্যান্ড, ফ্রান্স, ব্রাজিল এবং যুক্তরাজ্য—এই ১০টি দেশ IRGSP সংগঠন তৈরি করে।" },
+            { q: "২২৮. রাইস জিনোম প্রজেক্টে জিন সিকোয়েন্সিংয়ের জন্য কোন্ পদ্ধতি ব্যবহার করা হয়েছিল?", opts: ["স্যাঙ্গার সিকোয়েন্সিং", "ম্যাক্সাম-গিলবার্ট পদ্ধতি", "ক্লোন-বাই-ক্লোন শটগান সিকোয়েন্সিং (Clone-by-clone shotgun sequencing)", "পাইরোসিকোয়েন্সিং"], ans: 2, exp: "ব্যাখ্যা: প্রতিটি সিকোয়েন্সড ক্লোনের জন্য জেনেটিক মানচিত্রে নির্দিষ্ট অবস্থান নির্ধারণ করার জন্য IRGSP একটি ক্লোন-বাই-ক্লোন শটগান সিকোয়েন্সিং পদ্ধতি ব্যবহার করে।" },
+            { q: "২২৯. IRGSP রাইস জিনোম সিকোয়েন্স করার জন্য ধানের কোন্ বৈচিত্র্য বা উপপ্রজাতিকে উৎস হিসেবে ধরেছিল?", opts: ["ইন্ডিকা (Indica)", "নিপ্পন-বারে (NIPPON-BARE / Japonica variety)", "বাসমতী", "জ্যাভনিকা"], ans: 1, exp: "ব্যাখ্যা: রাইস জিনোম সিকোয়েন্স করা হয়েছে 'NIPPON-BARE' বৈচিত্র্যের ওপর, যা জাপোনিকা উপপ্রজাতির অন্তর্গত।" },
+            { q: "২৩০. ধানের বৈজ্ঞানিক নাম কী?", opts: ["Triticum aestivum", "Zea mays", "Oryza sativa", "Pisum sativum"], ans: 2, exp: "ব্যাখ্যা: ধানের বৈজ্ঞানিক নাম হলো Oryza sativa, যার ওপর রাইস জিনোম প্রজেক্ট করা হয়।" },
+            { q: "২৩১. রাইস জিনোম প্রজেক্টে কোন দেশের অবদান সর্বাধিক ছিল?", opts: ["ভারত", "চীন", "জাপান", "আমেরিকা"], ans: 2, exp: "ব্যাখ্যা: জাপান এই প্রজেক্টের প্রধান উদ্যোক্তা ছিল এবং প্রায় ৫৫% জিনোম তারাই সিকোয়েন্স করেছিল।" },
+            { q: "২৩২. কৃষি ও জিনোমিক্সে 'মডেল উদ্ভিদ' হিসেবে কাকে ধরা হয়?", opts: ["মটর গাছ", "অ্যারাবিডপসিস এবং ধানকে", "গম", "ভুট্টা"], ans: 1, exp: "ব্যাখ্যা: ধানের জিনোম তুলনামূলকভাবে ছোটো এবং এটি একটি প্রধান শস্য হওয়ায়, একে একবীজপত্রী উদ্ভিদের জিনোমিক্সের 'মডেল উদ্ভিদ' ধরা হয়।" },
+            { q: "২৩৩. ধানের জিনোমের আকার (Genome size) আনুমানিক কত?", opts: ["১০০ মেগাবেস পেয়ার", "প্রায় ৩৮৯ থেকে ৪০০ মেগাবেস পেয়ার (Mb)", "১০০০ মেগাবেস পেয়ার", "৩০০০ মেগাবেস পেয়ার"], ans: 1, exp: "ব্যাখ্যা: ধানের জিনোম তুলনামূলক ছোটো, যার আকার প্রায় 389 Mb (বা 400 Mb)।" },
+            { q: "২৩৪. ধানের (Oryza sativa) হ্যাপ্লয়েড ক্রোমোজোম সংখ্যা বা জিনোমে ক্রোমোজোম কটি?", opts: ["7", "10", "12", "24"], ans: 2, exp: "ব্যাখ্যা: ধানের 2n=24, তাই এর হ্যাপ্লয়েড জিনোমে 12টি ক্রোমোজোম থাকে।" },
+            { q: "২৩৫. কোনো প্রজাতির হ্যাপ্লয়েড ক্রোমোজোম সেটে উপস্থিত DNA-এর মোট পরিমাণকে কী বলা হয়?", opts: ["জিনোম সাইজ", "C-ভ্যালু (C-value)", "D-ভ্যালু", "ক্যারিওটাইপ"], ans: 1, exp: "ব্যাখ্যা: কোনো প্রজাতির হ্যাপ্লয়েড ক্রোমোজোমে যে পরিমাণ DNA থাকে তাকে C-value বলা হয়।" },
+            { q: "২৩৬. जीवोंের গঠনগত জটিলতার সঙ্গে তাদের C-value বা DNA-এর পরিমাণের অসামঞ্জস্যতাকে কী বলা হয়?", opts: ["সেন্ট্রাল ডগমা", "C-ভ্যালু প্যারাডক্স (C-value paradox)", "জিনোমিক ইমপ্রিন্টিং", "পলিমরফিজম"], ans: 1, exp: "ব্যাখ্যা: মানুষ ব্যাঙের চেয়ে জটিল প্রাণী হলেও তার C-value ব্যাঙের চেয়ে কম। জীবের C-value ও তার জটিলতার এই অসামঞ্জস্যকে C-value paradox বলে।" },
+            { q: "২৩৭. রাইস জিনোম প্রজেক্টে ভারতের কোন্ সংস্থা গুরুত্বপূর্ণ ভূমিকা পালন করেছিল?", opts: ["ICMR", "CSIR", "NRCPB (National Research Centre for Plant Biotechnology)", "DRDO"], ans: 2, exp: "ব্যাখ্যা: ভারতের National Research Centre for Plant Biotechnology (NRCPB) রাইস জিনোম প্রজেক্টে ক্রোমোজোম 11-এর সিকোয়েন্সিং-এ অংশগ্রহণ করেছিল।" },
+            { q: "২৩৮. ধানের জিনোমের আকার মানুষের জিনোমের আকারের তুলনায় প্রায় কত গুণ ছোটো?", opts: ["২ গুণ", "৭-৮ গুণ", "২০ গুণ", "১০০ গুণ"], ans: 1, exp: "ব্যাখ্যা: মানুষের জিনোম প্রায় 3000 Mb এবং ধানের জিনোম প্রায় 400 Mb, অর্থাৎ ধানের জিনোম মানুষের থেকে প্রায় ৭.৫ বা ৮ গুণ ছোটো।" },
+            { q: "২৩৯. IRGSP-এর কাজ কবে সম্পূর্ণভাবে শেষ হয়ে উচ্চ গুণসম্পন্ন সিকোয়েন্স প্রকাশ করা হয়?", opts: ["1997", "2000", "2002 (ডিসেম্বর)", "2005"], ans: 2, exp: "ব্যাখ্যা: ডিসেম্বর 2002 সালে IRGSP উচ্চ গুণসম্পন্ন খসড়া সিকোয়েন্স শেষ করে যা 92% রাইস জিনোমের অনুরূপ।" },
+            { q: "২৪০. ধানের জিনোম সিকোয়েন্সিং কৃষিক্ষেত্রে কেন এত গুরুত্বপূর্ণ?", opts: ["ধান পৃথিবীর অন্যতম প্রধান খাদ্যশস্য এবং এর জিনোম জানলে উন্নত, খরা ও রোগপ্রতিরোধী ধানের জাত তৈরি করা সহজ হয়", "ধান গাছে অনেক ফুল হয়", "ধানের জিনোম সবথেকে বড়ো", "ধান গাছে কোনো রোগ হয় না"], ans: 0, exp: "ব্যাখ্যা: ধান পৃথিবীর অর্ধেকের বেশি মানুষের প্রধান খাদ্য, তাই এর জিনোম বিশ্লেষণ করে জেনেটিক ইঞ্জিনিয়ারিংয়ের মাধ্যমে উন্নত জাত তৈরি করা সম্ভব।" }
+        ]
+    },
+    17: {
+        name: 'Set 17', icon: '🪪', topic: 'DNA ফিঙ্গারপ্রিন্টিং (DNA Fingerprinting)',
+        questions: [
+            { q: "২৪১. প্রতিটি মানুষের কোশস্থ DNA-এর গঠনভঙ্গির স্বাতন্ত্র্যতা নির্ভর করে ক্রোমোজোমে থাকা নির্দিষ্ট ছোটো ছোটো বেস সজ্জার পুনরাবৃত্তির ওপর। এদের কী বলা হয়?", opts: ["জিন", "মিনি স্যাটেলাইট বা VNTR (Variable Number of Tandem Repeats)", "ম্যাক্রো স্যাটেলাইট", "প্রোমোটার"], ans: 1, exp: "ব্যাখ্যা: DNA-এর মধ্যে বসে থাকা ছোটো ছোটো বেস সজ্জার পুনরাবৃত্তিকে মিনি স্যাটেলাইট বা VNTR বলে, যা মানুষে মানুষে ভিন্ন হয় এবং DNA ফিঙ্গারপ্রিন্টিংয়ের ভিত্তি।" },
+            { q: "২৪২. DNA ফিঙ্গারপ্রিন্টিং প্রযুক্তি সর্বপ্রথম কে আবিষ্কার করেন?", opts: ["জেমস ওয়াটসন", "আলেক জে. জেফ্রিজ (Alec J. Jeffreys)", "হরগোবিন্দ খোরানা", "ফ্রেডরিক স্যাঙ্গার"], ans: 1, exp: "ব্যাখ্যা: DNA ফিঙ্গারপ্রিন্টিং-এর আবিষ্কর্তা হলেন বিজ্ঞানী আলেক জে. জেফ্রিজ। তিনি প্রথম DNA-র মধ্যে VNTR-এর উপস্থিতি সম্পর্কে আলোকপাত করেন।" },
+            { q: "২৪৩. DNA ফিঙ্গারপ্রিন্টিং করার সময় DNA-কে ছোটো ছোটো টুকরোতে ভাঙার জন্য কোন্ 'আণবিক কাঁচি' ব্যবহার করা হয়?", opts: ["DNA পলিমারেজ", "DNA লাইগেজ", "রেস্ট্রিকশন এন্ডোনিউক্লিয়েজ (Restriction endonuclease)", "হেলিকেজ"], ans: 2, exp: "ব্যাখ্যা: যে-কোনো রকম রেস্ট্রিকশন এন্ডোনিউক্লিয়েজ দিয়ে কোশস্থ DNA-এর বিক্রিয়া ঘটালে DNA ছোটো-বড়ো অনেক টুকরোতে ভেঙে যায়।" },
+            { q: "২৪৪. রেস্ট্রিকশন উৎসেচক দ্বারা খণ্ডিত DNA টুকরোগুলিকে তাদের আকার ও আধান অনুযায়ী পৃথক করার জন্য কোন্ পদ্ধতি ব্যবহার করা হয়?", opts: ["সেন্ট্রিফিউগেশন", "জেল ইলেকট্রোফোরেসিস (Gel electrophoresis)", "ক্রোমাটোগ্রাফি", "ব্লটিং"], ans: 1, exp: "ব্যাখ্যা: খণ্ডিত DNA টুকরোগুলিকে জেল ইলেকট্রোফোরেসিসের সাহায্যে আলাদা করলে জেল স্তরের ওপর প্রত্যেকের DNA খণ্ডগুলি বড়ো থেকে ছোটো হিসেবে সারিবদ্ধভাবে জমা হয়।" },
+            { q: "২৪৫. জেল ইলেকট্রোফোরেসিস পদ্ধতিতে DNA পৃথক করার জন্য সাধারণত কোন্ জেল ব্যবহার করা হয়?", opts: ["পলিঅ্যাক্রিলামাইড জেল", "অ্যাগারোজ জেল (Agarose gel)", "সিলিকা জেল", "স্টার্চ জেল"], ans: 1, exp: "ব্যাখ্যা: অ্যাগারোজ (Agarose) দিয়ে তৈরি জেল ব্লকের ওয়েলে খণ্ডিত DNA দেওয়া হয় যা ছিদ্রযুক্ত মাধ্যমের সাহায্যে DNA পৃথক করে।" },
+            { q: "২৪৬. জেল ইলেকট্রোফোরেসিসের সময় DNA খণ্ডগুলি কোন্ মেরুর দিকে ধাবিত হয় এবং কেন?", opts: ["ঋণাত্মক মেরুর দিকে, কারণ DNA ধনাত্মক আধানযুক্ত", "ধনাত্মক মেরু বা অ্যানোডের দিকে (+ve), কারণ DNA ঋণাত্মক আধানযুক্ত", "কোনো মেরুর দিকে যায় না", "মাধ্যাকর্ষণের টানে নীচে যায়"], ans: 1, exp: "ব্যাখ্যা: DNA ফসফেট গ্রুপের জন্য ঋণাত্মক আধানযুক্ত হওয়ায়, তড়িৎ প্রবাহ চালনা করলে ছোটো DNA খণ্ডগুলি দ্রুত পজিটিভ (+ve) বা অ্যানোড প্রান্তের দিকে যেতে পারে।" },
+            { q: "২৪৭. জেল ইলেকট্রোফোরেসিসে পৃথকীকৃত DNA খণ্ডগুলিকে জেলের মধ্য থেকে একটি নাইট্রোসেলুলোজ বা নাইলন পর্দায় স্থানান্তরিত করার পদ্ধতিকে কী বলে?", opts: ["নর্দার্ন ব্লটিং", "সাউদার্ন ব্লটিং (Southern blotting)", "ওয়েস্টার্ন ব্লটিং", "পিসিআর (PCR)"], ans: 1, exp: "ব্যাখ্যা: অ্যাগারোজের DNA তন্তুগুলিকে রাসায়নিকভাবে একতন্ত্রী করে সাউদার্ন ব্লটিং পদ্ধতিতে একটি নাইট্রোসেলুলোজ পর্দায় তুলে নেওয়া হয়।" },
+            { q: "২৪৮. নাইট্রোসেলুলোজ পর্দায় থাকা নির্দিষ্ট VNTR শৃঙ্খল শনাক্ত করার জন্য তেজস্ক্রিয় আইসোটোপ দিয়ে চিহ্নিত যে একতন্ত্রী DNA বা RNA খণ্ড ব্যবহার করা হয়, তাকে কী বলে?", opts: ["প্রাইমার", "প্রোব (Probe)", "ভেক্টর", "অ্যান্টিবডি"], ans: 1, exp: "ব্যাখ্যা: বিশেষ তেজস্ক্রিয় আইসোটোপ চিহ্নিত একতন্ত্রী DNA বা RNA খণ্ডকে প্রোব বলে, যা নাইট্রোসেলুলোজ পর্দায় থাকা পরিপূরক VNTR-এর সাথে যুক্ত হয়।" },
+            { q: "২৪۹. নাইট্রোসেলুলোজ পর্দায় থাকা একতন্ত্রী DNA-র সাথে তেজস্ক্রিয় প্রোব (Probe) যুক্ত হওয়ার ঘটনাকে কী বলে?", opts: ["স্প্লাইসিং", "হাইব্রিডাইজেশন (Hybridization)", "রেপ্লিকেশন", "ট্রান্সফরমেশন"], ans: 1, exp: "ব্যাখ্যা: পরিপূরক বেস পেয়ারিংয়ের মাধ্যমে তেজস্ক্রিয় প্রোব টার্গেট DNA-র সাথে যুক্ত হয়ে দ্বিতন্ত্রী গঠন তৈরি করাকে হাইব্রিডাইজেশন বলে।" },
+            { q: "২৫০. হাইব্রিডাইজড তেজস্ক্রিয় DNA খণ্ডগুলিকে এক্স-রে (X-Ray) ফিল্মের ওপর ফেলে কালো পটির মতো ব্যান্ডের ছবি পাওয়ার পদ্ধতিকে কী বলে?", opts: ["আলট্রাসোনোগ্রাফি", "অটোরিওগ্রাফি (Autoradiography)", "ক্রিস্টালোগ্রাফি", "ইলেকট্রন মাইক্রোস্কোপি"], ans: 1, exp: "ব্যাখ্যা: এক্স-রে ফিল্মের ওপর রেখে তেজস্ক্রিয়তার প্রভাবে DNA ব্যান্ডের ছবি ফোটানোর পদ্ধতিকে অটোরিওগ্রাফি বলে, যা DNA ফিঙ্গারপ্রিন্ট হিসেবে দেখা যায়।" },
+            { q: "২৫১. মিনি স্যাটেলাইট বা VNTR সজ্জায় সাধারণত কতগুলি বেস জোড় থাকে এবং তাদের পুনরাবৃত্তির সংখ্যা কত হতে পারে?", opts: ["2-5 বেস জোড়, 1000 বার", "9-40 বেস জোড় এবং পুনরাবৃত্ত অঞ্চলে সংখ্যা 10 থেকে 30 বার", "1000 বেস জোড়", "1 মিলিয়ন বেস জোড়"], ans: 1, exp: "ব্যাখ্যা: মিনি স্যাটেলাইট সজ্জায় বেস থাকে 9-40টি বেস জোড়া ও পুনরাবৃত্ত অঞ্চলে এদের সংখ্যা হতে পারে প্রায় 10 থেকে 30।" },
+            { q: "২৫২. একমাত্র কোন্ ধরনের মানুষদের ক্ষেত্রে দুজনের DNA ফিঙ্গারপ্রিন্ট হুবহু এক হতে পারে?", opts: ["ভাই-বোনের ক্ষেত্রে", "পিতা ও পুত্রের ক্ষেত্রে", "এক-জাইগোটীয় যমজ (Monozygotic twins) বা আইডেন্টিক্যাল টুইনসের ক্ষেত্রে", "যে-কোনো যমজের ক্ষেত্রে"], ans: 2, exp: "ব্যাখ্যা: একমাত্র এক জাইগোটের দুই যমজ ছাড়া দুটি মানুষের DNA ফিঙ্গার প্রিন্ট এক হওয়ার সম্ভাবনা প্রায় 10^-5 থেকে 10^-8, অর্থাৎ আইডেন্টিক্যাল টুইন ছাড়া সবার DNA ফিঙ্গারপ্রিন্ট আলাদা।" },
+            { q: "২৫৩. DNA ফিঙ্গারপ্রিন্টিং-এর একটি অন্যতম প্রধান ব্যবহার কী?", opts: ["রক্ত গ্রুপ নির্ণ", "অপরাধ বিজ্ঞান বা ফরেনসিক সায়েন্সে (Forensic science) অপরাধী শনাক্তকরণ এবং পিতৃত্ব নির্ণয়", "ক্লোনিং করা", "নতুন প্রজাতি তৈরি করা"], ans: 1, exp: "ব্যাখ্যা: অপরাধীর রক্তের দাগ, শুক্রাণু বা চুল থেকে প্রাপ্ত DNA ব্যবহার করে অপরাধী শনাক্তকরণে এবং পিতৃত্ব/মাতৃত্ব বিবাদ মেটাতে এটি ব্যাপকভাবে ব্যবহৃত হয়।" },
+            { q: "২৫৪. যদি অপরাধস্থল থেকে প্রাপ্ত DNA-র পরিমাণ অত্যন্ত কম হয়, তবে DNA ফিঙ্গারপ্রিন্টিং করার আগে কোন্ পদ্ধতির সাহায্যে ওই DNA-র পরিমাণ বাড়িয়ে নেওয়া হয়?", opts: ["সাউদার্ন ব্লটিং", "PCR (Polymerase Chain Reaction)", "সেন্ট্রিফিউগেশন", "হাইব্রিডাইজেশন"], ans: 1, exp: "ব্যাখ্যা: প্রাপ্ত DNA-র পরিমাণ কম হলে PCR (পলিমারেজ চেইন রিঅ্যাকশন) পদ্ধতিতে ওই DNA-এর পরিমাণ বহুগুণ বাড়িয়ে নেওয়া যায়।" },
+            { q: "২৫৫. রিপিটেটিভ DNA (Repetitive DNA) এবং স্যাটেলাইট DNA জিনোমের কোন্ অংশে থাকে?", opts: ["কোডিং অংশে বা এক্সনে", "নন-কোডিং অঞ্চলে (যেখানে কোনো প্রোটিন তৈরি হয় না)", "প্রোমোটার অঞ্চলে", "প্লাজমিডে"], ans: 1, exp: "ব্যাখ্যা: স্যাটেলাইট DNA বা VNTR সজ্জাক্রমগুলিতে কোনো প্রোটিন কোড থাকে না, এগুলি জিনোমের নন-কোডিং অংশে অবস্থান করে এবং উচ্চমাত্রায় পলিমরফিজম দেখায়।" }
+        ]
+    },
+    18: {
+        name: 'Set 18', icon: '📚', topic: 'মলিকিউলার জেনেটিক্স - বিবিধ ১',
+        questions: [
+            { q: "২৫৬. DNA এবং হিস্টোন প্রোটিনের সমন্বয়ে গঠিত নিউক্লিওজোমের (Nucleosome) কোর পার্টিকেলে কত জোড়া নাইট্রোজেন বেস (bp) প্যাঁচানো থাকে?", opts: ["54 bp", "146 bp (বা সামগ্রিক নিউক্লিওজোমে 200 bp)", "300 bp", "1000 bp"], ans: 1, exp: "ব্যাখ্যা: হিস্টোন অক্টামারের বাইরের দিকে 146 জোড়া বেস প্যাঁচানো থাকে যাকে কোর DNA বলে এবং 54 জোড়া লিংকার DNA নিয়ে একটি সম্পূর্ণ নিউক্লিওজোমে 200 bp থাকে।" },
+            { q: "২৫৭. RNA থেকে DNA সংশ্লেষ হওয়ার পদ্ধতিকে কী বলা হয়?", opts: ["ট্রান্সক্রিপশন", "ট্রান্সলেশন", "রিভার্স ট্রান্সক্রিপশন (Reverse Transcription)", "স্প্লাইসিং"], ans: 2, exp: "ব্যাখ্যা: রেট্রোভাইরাসদের (যেমন HIV) ক্ষেত্রে RNA থেকে বিপরীত ট্রান্সক্রিপশন পদ্ধতিতে DNA উৎপন্ন হয় যাকে রিভার্স ট্রান্সক্রিপশন বলে।" },
+            { q: "২৫৮. রিভার্স ট্রান্সক্রিপশন পদ্ধতিতে সাহায্যকারী উৎসেচকটির নাম কী?", opts: ["DNA পলিমারেজ", "RNA পলিমারেজ", "রিভার্স ট্রান্সক্রিপটেজ (Reverse Transcriptase)", "লাইগেজ"], ans: 2, exp: "ব্যাখ্যা: রিভার্স ট্রান্সক্রিপটেজ (যা একটি RNA-নির্ভর DNA পলিমারেজ) উৎসেচকটি RNA কে ছাঁচ হিসেবে ব্যবহার করে DNA (cDNA) তৈরি করে।" },
+            { q: "২৫৯. ট্রান্সলেশন বা প্রোটিন সংশ্লেষের সময় পেপটাইড বন্ড (Peptide bond) তৈরিতে কোন্ উৎসেচক অনুঘটকের কাজ করে?", opts: ["অ্যামাইনো অ্যাসাইল tRNA সিন্থেটেজ", "পেপটিডিল ট্রান্সফারেজ (Peptidyl transferase)", "লাইগেজ", "হেলিকেজ"], ans: 1, exp: "ব্যাখ্যা: রাইবোজোমের 50S উপএককে থাকা পেপটিডিল ট্রান্সফারেজ এনজাইম 'P' এবং 'A' সাইটে থাকা দুটি অ্যামাইনো অ্যাসিডের মধ্যে পেপটাইড বন্ড তৈরিতে অনুঘটকের কাজ করে।" },
+            { q: "২৬০. পেপটিডিল ট্রান্সফারেজ উৎসেচকটি আসলে প্রোটিন নয়, বরং এটি একটি 23S rRNA। এই ধরনের RNA উৎসেচককে কী বলে?", opts: ["প্রোটিজ", "রাইবোজাইম (Ribozyme)", "লাইসোজাইম", "প্রাইমেজ"], ans: 1, exp: "ব্যাখ্যা: কিছু RNA অনুঘটক রূপে কাজ করে, এদের রাইবোজাইম নামে চিহ্নিত করা হয়, যেমন ব্যাকটেরিয়ার 23S rRNA পেপটাইড বন্ড তৈরিতে সাহায্য করে।" },
+            { q: "২৬১. ট্রান্সলেশন প্রক্রিয়ার প্রারম্ভিক দশায় প্রথম অ্যামাইনো অ্যাসিড (মিথিয়োনিন) নিয়ে আসা tRNA রাইবোজোমের কোন্ সাইটে যুক্ত হয়?", opts: ["A সাইট", "P সাইট (Peptidyl site)", "E সাইট", "Z সাইট"], ans: 1, exp: "ব্যাখ্যা: 70S ইনিসিয়েশন কমপ্লেক্স গঠনের সময়ে যুক্ত প্রথম fMet-tRNA রাইবোজোমের 'P' স্থানে যুক্ত হয়, পরবর্তী সমস্ত নতুন অ্যামাইনো অ্যাসিডগুলি 'A' স্থানে যুক্ত হয়।" },
+            { q: "২৬২. স্প্লিট জিন (Split gene) বা খণ্ডিত জিনের ধারণা অনুযায়ী, জিনের কোন্ অংশটি প্রোটিন তৈরির সংকেত বহন করে না এবং স্প্লাইসিংয়ের মাধ্যমে বাদ যায়?", opts: ["এক্সন", "ইনট্রন (Intron)", "প্রোমোটার", "টার্মিনেটর"], ans: 1, exp: "ব্যাখ্যা: স্প্লিট জিনের নিষ্ক্রিয় অংশগুলিকে ইনট্রন বলে। কার্যকরী mRNA সৃষ্টি হবার সময় স্প্লাইসিং পদ্ধতিতে ইনট্রনগুলি অপসারিত হয়।" },
+            { q: "২৬৩. স্প্লাইসোজোম (Spliceosome) নামক জটিল গঠনটি তৈরি করতে এবং ইনট্রন অপসারণ করতে কোন্ ক্ষুদ্র RNA সাহায্য করে?", opts: ["tRNA", "rRNA", "snRNA বা U RNA (Small nuclear RNA)", "scRNA"], ans: 2, exp: "ব্যাখ্যা: ইউরিডিন সমৃদ্ধ ক্ষুদ্র RNA অণু বা snRNA, mRNA উৎপন্ন হবার সময় অপ্রয়োজনীয় ইনট্রনগুলি কর্তিত (splicing) করতে সাহায্য করে।" },
+            { q: "২৬৪. কোন্ ধরনের কোষে ট্রান্সক্রিপশন এবং ট্রান্সলেশন একই সাথে (Coupled) চলতে পারে?", opts: ["প্রোক্যারিওটিক কোষ (যেমন ব্যাকটেরিয়া)", "ইউক্যারিওটিক কোষ (যেমন মানুষ)", "ছত্রাক", "উদ্ভিদ কোষ"], ans: 0, exp: "ব্যাখ্যা: ব্যাকটেরিয়াতে নিউক্লিয় পর্দা না থাকায় এবং mRNA-এর কোনো প্রসেসিংয়ের প্রয়োজন না হওয়ায় ট্রান্সক্রিপশন শেষ হওয়ার আগেই ট্রান্সলেশন শুরু হয়ে যেতে পারে।" },
+            { q: "২৬৫. একটি mRNA-তে প্রোটিন সংশ্লেষের জন্য একাধিক রাইবোজোম একযোগে যুক্ত হলে সেই গঠনকে কী বলে?", opts: ["নিউক্লিওজোম", "পলিরাইবোজোম বা পলিজোম (Polyribosome or Polysome)", "স্প্লাইসোজোম", "সেন্ট্রোজোম"], ans: 1, exp: "ব্যাখ্যা: অনেকগুলি রাইবোজোম একযোগে একই সময়ে mRNA-র সঙ্গে যুক্ত হয়ে পলিজোম বা পলিরাইবোজোম গঠন করে এবং দ্রুত প্রোটিন সংশ্লেষ করে।" },
+            { q: "২৬৬. DNA থেকে জিনের সাংকেতিক বার্তার পর্যায়ক্রমিক প্রবাহ (ট্রান্সক্রিপশন) ও তার প্রোটিনে রূপায়ণকে (ট্রান্সলেশন) আণবিক জীববিদ্যায় একত্রে কী বলা হয়?", opts: ["রিভার্স ট্রান্সক্রিপশন", "ট্রান্সডাকশন", "সেন্ট্রাল ডগমা (Central Dogma)", "স্প্লাইসিং"], ans: 2, exp: "ব্যাখ্যা: DNA → RNA → প্রোটিন, জিনের এই একমুখী তথ্য প্রবাহকে আণবিক জীববিদ্যার কেন্দ্রীয় নীতি বা সেন্ট্রাল ডগমা বলে, যা ফ্রান্সিস ক্রিক প্রবর্তন করেন।" },
+            { q: "২৬৭. প্রোটিন সংশ্লেষের শেষে যখন রাইবোজোম স্টপ কোডনের কাছে পৌঁছোয়, তখন কোন্ ফ্যাক্টরটি পলিপেপটাইড শৃঙ্খলকে মুক্ত করে?", opts: ["ইনিসিয়েশন ফ্যাক্টর", "ইলঙ্গেশন ফ্যাক্টর", "রিলিজ বা মুক্তিকারক ফ্যাক্টর (Release Factor / RF)", "সিগমা ফ্যাক্টর"], ans: 2, exp: "ব্যাখ্যা: একটি রিলিজ ফ্যাক্টর (RF1 বা RF2) স্টপ কোডন শনাক্ত করে এবং পেপটিডিল ট্রান্সফারেজকে উদ্দীপিত করে পলিপেপটাইডকে মুক্ত করে।" },
+            { q: "২৬৮. কোন্ বিষাক্ত রাসায়নিক পদার্থটি ইউক্যারিওটিক RNA পলিমারেজ II-কে নিষ্ক্রিয় করতে পারে?", opts: ["কোলচিসিন", "আলফা-অ্যামানিটিন (α-Amanitin)", "রিফ্যামপিসিন", "ইথিডিয়াম ব্রোমাইড"], ans: 1, exp: "ব্যাখ্যা: Amanita phalloides নামক ছত্রাক থেকে প্রাপ্ত 'অ্যামানিটিন' বিষাক্ত পদার্থটি RNA পলিমারেজ II-কে নিষ্ক্রিয় করে ট্রান্সক্রিপশন বন্ধ করে দেয়।" },
+            { q: "২৬৯. ইউক্যারিওটিক কোশে মাইটোকন্ড্রিয়াল DNA রেপ্লিকেশনের দায়িত্বে কোন্ উৎসেচক থাকে?", opts: ["DNA পলিমারেজ α", "DNA পলিমারেজ δ", "DNA পলিমারেজ γ (Gamma)", "DNA পলিমারেজ ϵ"], ans: 2, exp: "ব্যাখ্যা: DNA পলিমারেজ γ মাইটোকন্ড্রিয়া ও ক্লোরোপ্লাস্ট DNA-এর প্রতিলিপিকরণে সহায়তা করে।" },
+            { q: "২৭০. DNA অণুতে নাইট্রোজেন বেস এবং রাইবোজ সুগারের মধ্যে কোন্ বন্ধনী থাকে?", opts: ["হাইড্রোজেন বন্ড", "ফসফোডাইএস্টার বন্ড", "N-গ্লাইকোসাইডিক বন্ড (N-glycosidic bond)", "পেপটাইড বন্ড"], ans: 2, exp: "ব্যাখ্যা: 5-কার্বন সুগারের 1 নং কার্বনের সঙ্গে নাইট্রোজেন বেস বিশেষ গ্লাইকোসাইড বন্ধনী দ্বারা সংযুক্ত হয়ে নিউক্লিওসাইড তৈরি করে।" }
+        ]
+    },
+    19: {
+        name: 'Set 19', icon: '🧩', topic: 'মলিকিউলার জেনেটিক্স - বিবিধ ২',
+        questions: [
+            { q: "২৭১. যদি DNA-এর একটি স্ট্র্যান্ডের বেস সজ্জাক্রম 5'-ATCTG-3' হয়, তবে ট্রান্সক্রিপশনের ফলে উৎপন্ন পরিপূরক RNA স্ট্র্যান্ডের সজ্জাক্রম কী হবে?", opts: ["3'-TAGAC-5'", "3'-UAGAC-5'", "5'-UAGAC-3'", "3'-AUCUG-5'"], ans: 1, exp: "ব্যাখ্যা: DNA-র A এর পরিপূরক RNA তে U, T এর পরিপূরক A, C এর পরিপূরক G এবং G এর পরিপূরক C বসে। তাই 5'-ATCTG-3' থেকে 3'-UAGAC-5' তৈরি হবে।" },
+            { q: "২৭২. যদি একটি দ্বিতন্ত্রী DNA-তে 20% সাইটোসিন (C) থাকে, তবে তাতে অ্যাডেনিনের (A) শতকরা পরিমাণ কত হবে?", opts: ["20%", "30%", "40%", "60%"], ans: 1, exp: "ব্যাখ্যা: চারগাফের সূত্র অনুযায়ী C=G এবং A=T। C যদি 20% হয়, তবে G=20% হবে। C+G=40%। বাকি 60% এর অর্ধেক A এবং অর্ধেক T হবে। তাই অ্যাডেনিন (A) = 30%।" },
+            { q: "২৭৩. সেন্ট্রোমিয়ার এবং টেলোমিয়ার অঞ্চলে কোন্ প্রকারের হেটেরোক্রোমাটিন পাওয়া যায় যা কখনোই ইউক্রোমাটিনে পরিবর্তিত হয় না?", opts: ["ফ্যাকালটেটিভ হেটেরোক্রোমাটিন", "কনস্টিটিউটিভ হেটেরোক্রোমাটিন (Constitutive heterochromatin)", "ইউক্রোমাটিন", "পলিটিন ক্রোমোজোম"], ans: 1, exp: "ব্যাখ্যা: যে হেটেরোক্রোমাটিন নির্দিষ্ট স্থানে থাকে এবং কখনোই ইউক্রোমাটিনে রূপান্তরিত হয় না তাকে স্থায়ী বা কনস্টিটিউটিভ হেটেরোক্রোমাটিন বলে।" },
+            { q: "২৭৪. মহিলাদের দুটি X ক্রোমোজোমের মধ্যে একটি নিষ্ক্রিয় হয়ে বার বডি (Barr body) গঠন করে। এটি কোন্ ধরনের ক্রোমাটিনের উদাহরণ?", opts: ["কনস্টিটিউটিভ হেটেরোক্রোমাটিন", "অস্থায়ী বা ফ্যাকালটেটিভ হেটেরোক্রোমাটিন (Facultative heterochromatin)", "ইউক্রোমাটিন", "নিউক্লিওলাস"], ans: 1, exp: "ব্যাখ্যা: স্ত্রীদেহের একটি X ক্রোমোজোম হেটেরোক্রোমাটিনে রূপান্তরিত হয়ে বার বডি গঠন করে, যা পরবর্তী প্রজন্মে পুরুষে গেলে ইউক্রোমাটিন হতে পারে, তাই এটি ফ্যাকালটেটিভ।" },
+            { q: "২৭৫. প্রোটিন সংশ্লেষ বা ট্রান্সলেশনের পূর্বে অ্যামাইনো অ্যাসিডকে সক্রিয় (Activation) করতে কোন্ শক্তির প্রয়োজন হয়?", opts: ["GTP", "ATP", "CTP", "UTP"], ans: 1, exp: "ব্যাখ্যা: Amino-acyl tRNA Synthetase উৎসেচকের সাহায্যে ATP-র সঙ্গে যুক্ত হয়ে অ্যামাইনো অ্যাসিডগুলি সক্রিয় হয় (Amino acid-AMP-Enzyme complex তৈরি করে)।" },
+            { q: "২৭৬. অ্যামাইনো অ্যাসিডকে সাইটোপ্লাজম থেকে বহন করে নির্দিষ্ট tRNA-তে যুক্ত করতে কোন্ উৎসেচক কাজ করে?", opts: ["পেপটিডিল ট্রান্সফারেজ", "অ্যামাইনো অ্যাসাইল tRNA সিন্থেটেজ (Amino-acyl tRNA synthetase)", "RNA পলিমারেজ", "লাইগেজ"], ans: 1, exp: "ব্যাখ্যা: এই উৎসেচকটির দ্বৈত ভূমিকা আছে, এটি নির্দিষ্ট অ্যামাইনো অ্যাসিডকে চিনে ATP এর সাহায্যে সক্রিয় করে এবং তার নিজস্ব tRNA-তে যুক্ত করে।" },
+            { q: "২৭৭. ট্রান্সক্রিপশন বাবল (Transcription bubble) অঞ্চলে টেমপ্লেট তন্ত্রী এবং সদ্যোজাত RNA-এর মধ্যেকার ক্ষণস্থায়ী গঠনকে কী বলে?", opts: ["স্প্লাইসোজোম", "DNA-RNA হাইব্রিড (DNA-RNA hybrid)", "ওকাজাকি খণ্ডক", "লিডিং তন্ত্রী"], ans: 1, exp: "ব্যাখ্যা: ট্রান্সক্রিপশন বাবল অংশে টেমপ্লেট তন্ত্রীর সাথে অস্থায়ীভাবে সদ্য উৎপন্ন RNA যুক্ত থাকে, একে 'DNA-RNA হাইব্রিড' গঠন বলা হয়।" },
+            { q: "২৭৮. প্রোক্যারিওট কোশে 'রো-ফ্যাক্টর' (ρ factor) নির্ভর ট্রান্সক্রিপশন সমাপ্তির ক্ষেত্রে, রো-ফ্যাক্টর কী ধরনের প্রোটিন?", opts: ["ডাইমেরিক প্রোটিন", "হেক্সামেরিক প্রোটিন (Hexameric protein)", "মোনোমেরিক প্রোটিন", "গ্লাইকোপ্রোটিন"], ans: 1, exp: "ব্যাখ্যা: রো-ফ্যাক্টর নামক হেক্সামেরিক প্রোটিন ATP আর্দ্রবিশ্লেষণ করে বল প্রয়োগের মাধ্যমে RNA-কে টেমপ্লেট তন্ত্রী থেকে বিচ্যুত করে ট্রান্সক্রিপশন সমাপ্ত করে।" },
+            { q: "২৭৯. সদ্যোৎপন্ন ইউক্যারিওটিক প্রাইমারি ট্রান্সক্রিপ্ট বা hnRNA-এর 5' প্রান্তে কোন্ ক্যাপ যুক্ত হয়?", opts: ["পলি-A টেল", "7-মিথাইল গুয়ানোসিন ট্রাইফসফেট (7-mG Cap)", "CCA প্রান্ত", "TATA বক্স"], ans: 1, exp: "ব্যাখ্যা: mRNA-র 5' প্রান্তের সাথে মিথাইল গ্রুপযুক্ত 7-মিথাইল গুয়ানোসিন বেসটি যুক্ত হয় যাকে 5' ক্যাপ বলা হয়।" },
+            { q: "২৮০. ইউক্যারিওটিক mRNA-র 3' প্রান্তে প্রায় ২০০-২৫০টি অ্যাডেনিন (A) যুক্ত হওয়াকে কী বলা হয়?", opts: ["5' ক্যাপিং", "3' পলি-A টেলিং বা পলিঅ্যাডেনাইলেশন (3' Poly-A Tailing)", "স্প্লাইসিং", "ট্রান্সলেশন"], ans: 1, exp: "ব্যাখ্যা: mRNA-এর 3' প্রান্তের দিকে 200-250টি অ্যাডেনিনযুক্ত অঞ্চল থাকে যাকে পলি-A প্রান্ত বা টেল বলে।" },
+            { q: "২৮১. কোডন এবং অ্যান্টিকোডনের মধ্যে উবল পেয়ারিং (Wobble pairing) কোন্ অবস্থানে গঠিত হয়?", opts: ["কোডনের ১ম বেস এবং অ্যান্টিকোডনের ৩য় বেস", "কোডনের ৩য় বেস এবং অ্যান্টিকোডনের ১ম বেস", "কোডনের ২য় বেস এবং অ্যান্টিকোডনের ২য় বেস", "কোডন এবং অ্যান্টিকোডনের সবকটি বেসেই"], ans: 1, exp: "ব্যাখ্যা: উবল মতবাদ অনুযায়ী কোডনের তৃতীয় বেস শিথিলভাবে অ্যান্টিকোডনের প্রথম বেসের সঙ্গে জোড় বাঁধে।" },
+            { q: "২৮২. DNA ফিঙ্গারপ্রিন্টিং-এ ব্যবহৃত 'সাউদার্ন ব্লটিং' (Southern blotting) পদ্ধতিতে জেল থেকে কী স্থানান্তরিত করা হয়?", opts: ["RNA", "প্রোটিন", "DNA", "লিপিড"], ans: 2, exp: "ব্যাখ্যা: সাউদার্ন ব্লটিং পদ্ধতিতে অ্যাগারোজ জেলের DNA তন্তুগুলিকে একটি নাইট্রোসেলুলোজ বা নাইলন পর্দায় তুলে নেওয়া হয়। (RNA এর জন্য নর্দার্ন এবং প্রোটিনের জন্য ওয়েস্টার্ন ব্লটিং হয়)।" },
+            { q: "২৮৩. tRNA-এর থ্রি প্রাইম (3') প্রান্তে কোন্ তিনটি নিউক্লিওটাইড ধ্রুবক থাকে যেখানে অ্যামাইনো অ্যাসিড যুক্ত হয়?", opts: ["AUG", "CCA", "UUU", "GGG"], ans: 1, exp: "ব্যাখ্যা: tRNA-র 3' প্রান্তে চারটি মুক্ত নিউক্লিওটাইড থাকে যার মধ্যে প্রথম তিনটি (CCA) সর্বদাই ধ্রুবক এবং এখানেই অ্যামাইনো অ্যাসিড যুক্ত হয়।" },
+            { q: "২৮৪. প্রোক্যারিওটিক কোশে ল্যাগিং তন্ত্রীতে তৈরি ওকাজাকি খণ্ডকগুলির দৈর্ঘ্য সাধারণত কত হয়?", opts: ["10-50 নিউক্লিওটাইড", "100-200 নিউক্লিওটাইড", "1000-2000 নিউক্লিওটাইড", "5000-10000 নিউক্লিওটাইড"], ans: 2, exp: "ব্যাখ্যা: ব্যাকটেরিয়া বা প্রোক্যারিওটদের ক্ষেত্রে ল্যাগিং তন্ত্রীতে সৃষ্ট ওকাজাকি খণ্ডকগুলির দৈর্ঘ্য 1000-2000 নিউক্লিওটাইড হয় (ইউক্যারিওটে এটি 100-200)।" },
+            { q: "২৮৫. DNA প্রতিলিপিকরণের সময় 'প্রুফ রিডিং' (Proof reading) বা ভুল বেস সংশোধনের কাজটি কোন্ এনজাইমের 3'→5' এক্সোনিউক্লিয়েজ ধর্ম দ্বারা সম্পন্ন হয়?", opts: ["DNA হেলিকেজ", "DNA পলিমারেজ (প্রধানত DNA Pol I এবং Pol III)", "RNA পলিমারেজ", "প্রাইমেজ"], ans: 1, exp: "ব্যাখ্যা: ভুলবশত সংযোজিত নিউক্লিওটাইডকে 3' প্রান্ত থেকে অপসারিত করার জন্য DNA পলিমারেজের 3'->5' এক্সোনিউক্লিয়েজ ধর্ম প্রুফ রিডিং হিসেবে কাজ করে।" }
+        ]
+    },
+    20: {
+        name: 'Set 20', icon: '🎯', topic: 'মলিকিউলার জেনেটিক্স - বোর্ড ও নিট স্পেশাল',
+        questions: [
+            { q: "২৮৬. একটি জিনের মিউটেশনের ফলে যদি কোডনটি একটি 'স্টপ কোডন'-এ পরিণত হয়, তবে প্রোটিন সংশ্লেষে কী প্রভাব পড়বে?", opts: ["প্রোটিনের গঠন আরও ভালো হবে", "পলিপেপটাইড শৃঙ্খল সম্পূর্ণ হওয়ার আগেই মাঝপথে প্রোটিন সংশ্লেষ বন্ধ হয়ে যাবে (অসম্পূর্ণ প্রোটিন তৈরি হবে)", "প্রোটিন সংশ্লেষের হার বৃদ্ধি পাবে", "অন্য কোনো অ্যামাইনো অ্যাসিড তৈরি হবে"], ans: 1, exp: "ব্যাখ্যা: ননসেন্স মিউটেশনের ফলে স্টপ কোডন তৈরি হলে রাইবোজোম আর এগোতে পারে না, ফলে অসম্পূর্ণ বা খণ্ডিত পলিপেপটাইড তৈরি হয় যা সাধারণত অকেজো।" },
+            { q: "২৮৭. ট্রিপটোফ্যান ওপেরনে (Trp operon) উৎপাদিত ট্রিপটোফ্যান যখন রিপ্রেসরের সাথে যুক্ত হয়ে ওপেরন বন্ধ করে, তখন ট্রিপটোফ্যানকে কী বলা হয়?", opts: ["ইনডিউসার", "অ্যাপোরিপ্রেসর", "কোর-রিপ্রেসর (Corepressor)", "অ্যাক্টিভেটর"], ans: 2, exp: "ব্যাখ্যা: ট্রিপটোফ্যান নিজে কোর-রিপ্রেসর হিসেবে অ্যাপোরিপ্রেসরের সাথে যুক্ত হয়ে একটি সক্রিয় রিপ্রেসর কমপ্লেক্স গঠন করে যা অপারেটরে যুক্ত হয়।" },
+            { q: "২৮۸. DNA-এর যে নির্দিষ্ট অংশটি একটি পূর্ণাঙ্গ পলিপেপটাইড চেইন তৈরির সংকেত বহন করে, তাকে আণবিক জেনেটিক্সে কী বলে?", opts: ["রেকন", "মিউটন", "সিস্ট্রন (Cistron)", "ওপেরন"], ans: 2, exp: "ব্যাখ্যা: জিনের কার্যগত একককে সিস্ট্রন বলে যা একটি নির্দিষ্ট প্রোটিন বা পলিপেপটাইড তৈরির সম্পূর্ণ সংকেত বহন করে।" },
+            { q: "২৮৯. ব্যাক্টেরিয়ার ট্রান্সডাকশন (Transduction) প্রক্রিয়ায় এক ব্যাকটেরিয়া থেকে অন্য ব্যাকটেরিয়াতে জিনগত বস্তু কার মাধ্যমে স্থানান্তরিত হয়?", opts: ["কনজুগেশন নালিকা", "ব্যাক্টেরিওফাজ ভাইরাস (Bacteriophage)", "নগ্ন DNA", "প্লাজমিড"], ans: 1, exp: "ব্যাখ্যা: যে প্রক্রিয়ায় একটি ব্যাকটেরিয়ার জেনেটিক বস্তু ফাজ ভাইরাস বাহকের মাধ্যমে অপর একটি ব্যাকটেরিয়াতে স্থানান্তরিত হয়, তাকে ট্রান্সডাকশন বলে।" },
+            { q: "২৯০. ল্যাক ওপেরনে RNA পলিমারেজ যদি প্রোমোটার অঞ্চলের সাথে যুক্ত হতে না পারে, তবে কী ঘটবে?", opts: ["শুধুমাত্র lac Z জিনের ট্রান্সক্রিপশন হবে", "ট্রান্সলেশন দ্রুত হবে", "গাঠনিক জিনগুলির কোনো ট্রান্সক্রিপশন হবে না", "রিপ্রেসর প্রোটিন তৈরি বন্ধ হয়ে যাবে"], ans: 2, exp: "ব্যাখ্যা: প্রোমোটার অঞ্চলে RNA পলিমারেজ যুক্ত না হতে পারলে ট্রান্সক্রিপশন শুরুই হতে পারে না, ফলে কোনো গাঠনিক জিনই (z, y, a) ট্রান্সক্রাইবড হবে না।" },
+            { q: "২৯১. 'উবল মতবাদ' (Wobble hypothesis) প্রবর্তন করেন কোন্ বিজ্ঞানী?", opts: ["ফ্রান্সিস ক্রিক (Francis Crick)", "জেমস ওয়াটসন", "হরগোবিন্দ খোরানা", "জর্জ গ্যামো"], ans: 0, exp: "ব্যাখ্যা: 1966 খ্রিস্টাব্দে ফ্রান্সিস ক্রিক উবল মতবাদ প্রস্তাব করেন যা কোডন এবং অ্যান্টিকোডনের তৃতীয় বেসের শিথিল জোড় বাঁধাকে ব্যাখ্যা করে।" },
+            { q: "২৯২. UUU কোডনটি কোন্ অ্যামাইনো অ্যাসিডের সংকেত বহন করে?", opts: ["ভ্যালিন", "ফিনাইল অ্যালানিন (Phenylalanine)", "মিথিয়োনিন", "গ্লাইসিন"], ans: 1, exp: "ব্যাখ্যা: জেনেটিক কোড অভিধান অনুযায়ী ট্রিপলেট UUU হল ফিনাইল অ্যালানিনের কোডন।" },
+            { q: "২৯৩. AUG কোডনটি মিথিয়োনিনকে নির্দেশ করে এবং প্রারম্ভিক কোডন হিসেবে কাজ করে। ব্যাকটেরিয়ার ক্ষেত্রে এর পরিবর্তে আর কোন্ কোডনটি মাঝে মাঝে প্রারম্ভিক কোডন হিসেবে কাজ করতে পারে?", opts: ["UAA", "GUG", "CCC", "UCA"], ans: 1, exp: "ব্যাখ্যা: প্রোক্যারিওটদের ক্ষেত্রে AUG প্রধান প্রারম্ভিক কোডন হলেও, কখনো কখনো GUG (যা সাধারণত ভ্যালিনকে নির্দেশ করে) প্রারম্ভিক কোডন হিসেবে কাজ করতে পারে।" },
+            { q: "২৯৪. ট্রান্সলেশন প্রক্রিয়ায় রাইবোজোমের 'E' সাইট (Exit site)-এর প্রধান কাজ কী?", opts: ["নতুন অ্যামাইনো অ্যাসিডযুক্ত tRNA গ্রহণ করা", "পেপটাইড বন্ড তৈরি করা", "অ্যামাইনো অ্যাসিডবিহীন ফাঁকা tRNA-কে রাইবোজোম থেকে নির্গত করা", "mRNA কে যুক্ত করা"], ans: 2, exp: "ব্যাখ্যা: 'E' সাইট বা Exit site থেকে অ্যামাইনো অ্যাসিডবিহীন বা খালি tRNA রাইবোজোমের ওপর থেকে সাইটোপ্লাজমে বহিষ্কৃত হয়।" },
+            { q: "২৯৫. গ্রিফিথের ব্যাকটেরিয়ার রূপান্তরভবন (Transformation) প্রক্রিয়ায় কে জিনগত বস্তুর আদানপ্রদান ঘটায়?", opts: ["ভাইরাস", "পরিবেশ থেকে গৃহীত নগ্ন DNA (Naked DNA)", "প্লাজমিড কনজুগেশন", "প্রোটিন"], ans: 1, exp: "ব্যাখ্যা: ট্রান্সফরমেশন প্রক্রিয়ায় দাতা ব্যাকটেরিয়ার DNA (নগ্ন DNA) কোনো বাহক বা প্রত্যক্ষ সংযোগ ছাড়াই মাধ্যম থেকে গ্রহীতা ব্যাকটেরিয়ায় প্রবেশ করে।" },
+            { q: "২৯৬. DNA ফিঙ্গারপ্রিন্টিং এ প্রোব (Probe) হিসেবে সাধারণত কী ব্যবহার করা হয়?", opts: ["সাধারণ প্রোটিন", "তেজস্ক্রিয় আইসোটোপ দ্বারা চিহ্নিত একতন্ত্রী DNA বা RNA (Radioactive ssDNA/RNA)", "অ্যান্টিবডি", "রেস্ট্রিকশন উৎসেচক"], ans: 1, exp: "ব্যাখ্যা: সাউদার্ন ব্লটিংয়ের পর নাইট্রোসেলুলোজ পর্দায় থাকা নির্দিষ্ট DNA (VNTR) শনাক্ত করার জন্য তেজস্ক্রিয় আইসোটোপ চিহ্নিত একতন্ত্রী DNA বা RNA-কে প্রোব হিসেবে ব্যবহার করা হয়।" },
+            { q: "২৯৭. জেনেটিক কোডের একটি বৈশিষ্ট্য হলো 'কমা-লেস' (Commaless)। এর অর্থ কী?", opts: ["কোডনগুলি একটি অন্যটির উপর ওভারল্যাপ করে", "কোডনগুলির মাঝে কোনো বিরাম চিহ্ন বা গ্যাপ (Gap) থাকে না", "এটি সব জীবে একইরকম", "এটি তিনটি বেস নিয়ে গঠিত"], ans: 1, exp: "ব্যাখ্যা: mRNA তে কোডনগুলি পরপর সজ্জিত থাকে, দুটি কোডনের মাঝে কোনো গ্যাপ বা কমা থাকে না। এটিই বিরতিবিহীন বা Commaless ধর্ম।" },
+            { q: "২৯৮. ইউক্যারিওটিক কোশে জিনের 'TATA বক্স' (TATA box) প্রোমোটার অঞ্চলের কোথায় অবস্থিত থাকে?", opts: ["ট্রান্সক্রিপশন শুরুর স্থান থেকে -10 bp আপস্ট্রিমে", "-35 bp আপস্ট্রিমে", "ডাউনস্ট্রিম অঞ্চলে", "টার্মিনেটর অঞ্চলে"], ans: 0, exp: "ব্যাখ্যা: ইউক্যারিওটিক প্রোমোটার সিকোয়েন্স হিসেবে -10 bp আপস্ট্রিম অঞ্চলে TATA(A/T)A(A/T) সিকোয়েন্স বা টাটা বক্স থাকে।" },
+            { q: "২৯৯. কোন্ বিজ্ঞানীরা DNA-র গঠন সম্পর্কে প্রথম 'ডবল হেলিক্স' বা দ্বিতন্ত্রী মডেল আবিষ্কারের জন্য 1962 সালে নোবেল পুরস্কার পেয়েছিলেন?", opts: ["হারসে ও চেজ", "ওয়াটসন, ক্রিক এবং উইলকিন্স (Watson, Crick and Wilkins)", "মেসেলসন ও স্টাল", "গ্রিফিথ ও অ্যাভেরি"], ans: 1, exp: "ব্যাখ্যা: 1953 সালে ওয়াটসন ও ক্রিক DNA ডবল হেলিক্স মডেল প্রবর্তন করেন এবং এক্স-রে ক্রিস্টালোগ্রাফির তথ্যদাতা উইলকিন্স সহ তারা 1962 সালে নোবেল পুরস্কার পান।" },
+            { q: "৩০০. 'সেন্ট্রাল ডগমা' (Central Dogma)-র সঠিক পর্যায়ক্রম কোনটি?", opts: ["প্রোটিন → RNA → DNA", "RNA → DNA → প্রোটিন", "DNA → RNA → প্রোটিন", "DNA → প্রোটিন → RNA"], ans: 2, exp: "ব্যাখ্যা: সেন্ট্রাল ডগমা অনুসারে জিনগত বার্তার প্রবাহ সর্বদা একমুখী: DNA থেকে ট্রান্সক্রিপশনের মাধ্যমে RNA এবং RNA থেকে ট্রান্সলেশনের মাধ্যমে প্রোটিন তৈরি হয়।" }
+        ]
+    }
+};
+
+// ================== STATE VARIABLES ==================
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+// ================== LOCAL STORAGE LOGIC ==================
+function getGlobalUsers() {
+    const data = localStorage.getItem("testBazarGlobalUsers");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+    const data = localStorage.getItem("testBazarAttemptsBio3Ch5_v1");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    attempts[key] = (attempts[key] || 0) + 1;
+    localStorage.setItem("testBazarAttemptsBio3Ch5_v1", JSON.stringify(attempts));
+    return attempts[key];
+}
+
+// ================== INITIALIZATION ==================
+window.onload = () => {
+    renderHub();
+};
+
+function renderHub() {
+    const grid = document.getElementById("setGrid");
+    grid.innerHTML = "";
+
+    for(let id in ALL_SETS) {
+        const set = ALL_SETS[id];
+        const div = document.createElement("div");
+        div.className = "set-card";
+
+        let attemptCount = 0;
+        let isLocked = false;
+
+        if (currentUser) {
+            attemptCount = getAttemptCount(currentUser, id);
+            isLocked = attemptCount >= MAX_ATTEMPTS;
+            if (isLocked) div.classList.add("locked");
+        }
+
+        div.innerHTML = `
+            <div class="icon">${set.icon}</div>
+            <div class="set-num">${set.name}</div>
+            <div class="set-title">${set.topic}</div>
+            <div class="set-meta"><span>${set.questions.length} Qs</span><span>10 Mins</span></div>
+            ${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+        `;
+
+        div.onclick = () => {
+            if (isLocked) {
+                alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+                return;
+            }
+            handleSetClick(id);
+        };
+        grid.appendChild(div);
+    }
+}
+
+function handleSetClick(setId) {
+    activeSetId = setId;
+    if (!currentUser) {
+        document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+        document.getElementById("loginOverlay").classList.add("active");
+        document.getElementById("loginUsername").value = "";
+        document.getElementById("loginPassword").value = "";
+        document.getElementById("loginError").style.display = "none";
+    } else {
+        startQuiz(setId);
+    }
+}
+
+function doLogin() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+    const err = document.getElementById("loginError");
+    const GLOBAL_USERS = getGlobalUsers();
+
+    if(!u || !p) {
+        err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!";
+        err.style.display = "block";
+        return;
+    }
+
+    if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+        let attempts = getAttemptCount(u, activeSetId);
+        if (attempts >= MAX_ATTEMPTS) {
+            err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+            err.style.display = "block";
+            return;
+        }
+        currentUser = u;
+        document.getElementById("loginOverlay").classList.remove("active");
+        document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+        document.getElementById("userDisplay").classList.remove("hidden");
+        renderHub();
+        startQuiz(activeSetId);
+    } else {
+        err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+        err.style.display = "block";
+    }
+}
+
+function closeLogin() {
+    document.getElementById("loginOverlay").classList.remove("active");
+}
+
+function goToHub() {
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("hubPage").style.display = "block";
+    document.getElementById("timerBox").classList.add("hidden");
+    clearInterval(timerInterval);
+    renderHub();
+}
+
+// ================== QUIZ LOGIC ==================
+function startQuiz(setId) {
+    incrementAttempt(currentUser, setId);
+    questions = ALL_SETS[setId].questions;
+    currentQIndex = 0;
+    score = 0;
+    wrongAnswers = 0;
+    userAnswers = {};
+    isReviewMode = false;
+    timeLeft = TIME_LIMIT;
+
+    document.getElementById("hubPage").style.display = "none";
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    document.getElementById("timerBox").classList.remove("hidden");
+    document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+    document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+
+    startTimer();
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const qData = questions[currentQIndex];
+    document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+    document.getElementById("qText").innerHTML = qData.q;
+    const progress = ((currentQIndex) / questions.length) * 100;
+    document.getElementById("progressFill").style.width = `${progress}%`;
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+
+    const optsBox = document.getElementById("qOpts");
+    optsBox.innerHTML = "";
+    document.getElementById("explanation").classList.remove("show");
+    document.getElementById("nextBtn").disabled = true;
+    document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+    qData.opts.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "opt";
+        btn.innerHTML = `<div class="opt-circle">${LABELS[idx] || '—'}</div> <div class="opt-text">${optText}</div>`;
+
+        if (isReviewMode) {
+            btn.classList.add("disabled");
+            if (idx === qData.ans) btn.classList.add("correct");
+            else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+        } else {
+            btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+        }
+        optsBox.appendChild(btn);
+    });
+
+    if (isReviewMode) {
+        document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+        document.getElementById("explanation").classList.add("show");
+        document.getElementById("nextBtn").disabled = false;
+        if (currentQIndex === questions.length - 1) {
+            document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন";
+        }
+    }
+
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+    const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+    allBtns.forEach(b => b.classList.add("disabled"));
+    userAnswers[currentQIndex] = selectedIdx;
+
+    if (selectedIdx === correctIdx) {
+        btn.classList.add("correct");
+        score++;
+    } else {
+        btn.classList.add("wrong");
+        allBtns[correctIdx].classList.add("correct");
+        wrongAnswers++;
+    }
+
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+    document.getElementById("explanation").classList.add("show");
+    document.getElementById("nextBtn").disabled = false;
+
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function nextQ() {
+    if (isReviewMode && currentQIndex === questions.length - 1) {
+        document.getElementById("testArea").classList.add("hidden");
+        document.getElementById("resultWrap").classList.add("show");
+        return;
+    }
+    if (!isReviewMode && currentQIndex === questions.length - 1) {
+        finishQuiz();
+        return;
+    }
+    currentQIndex++;
+    loadQuestion();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    const tBox = document.getElementById("timerBox");
+    tBox.classList.remove("danger");
+
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishQuiz();
+            return;
+        }
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        if (timeLeft < 60) tBox.classList.add("danger");
+    }, 1000);
+}
+
+function finishQuiz() {
+    clearInterval(timerInterval);
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("timerBox").classList.add("hidden");
+    document.getElementById("resultWrap").classList.add("show");
+
+    const total = questions.length;
+    const skipped = total - (score + wrongAnswers);
+    const percent = Math.round((score / total) * 100);
+
+    document.getElementById("finalScore").innerText = `${percent}%`;
+    document.getElementById("rbCorrect").innerText = score;
+    document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+
+    const gradeEl = document.getElementById("resultGrade");
+    if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+    else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+    else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+
+    const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+    document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+    if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+        alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+        return;
+    }
+    startQuiz(activeSetId);
+}
+
+function showReview() {
+    isReviewMode = true;
+    currentQIndex = 0;
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    loadQuestion();
+}
+</script>
+</body>
+</html>
+
+
