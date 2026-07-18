@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Biology 3rd Sem | Ch 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+/* ================= COLOR SCHEME & VARIABLES ================= */
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+
+/* Top Bar */
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+
+/* Hub View */
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; justify-content: center; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; max-width: 350px; margin: 0 auto; width: 100%;}
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+
+/* Quiz View */
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; overflow-x: auto; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main); overflow-x: auto;}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; overflow-x: auto;}
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+
+/* Result View */
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+
+/* Login Modal */
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+    <div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+    <div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+
+<div class="main">
+
+    <!-- ================= LOGIN MODAL ================= -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <h2>লগইন করুন</h2>
+            <p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+            <div class="login-set-name" id="loginSetName">📚 Set 1</div>
+            <div class="input-group">
+                <label>ইউজারনেম</label>
+                <input type="text" id="loginUsername" placeholder="Username">
+            </div>
+            <div class="input-group">
+                <label>পাসওয়ার্ড</label>
+                <input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+            </div>
+            <button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+            <button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+            <div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+        </div>
+    </div>
+
+    <!-- ================= HUB PAGE ================= -->
+    <div id="hubPage">
+        <div class="hub-header">
+            <h1>জীববিজ্ঞান 3rd Sem <br>সপুষ্পক উদ্ভিদের যৌন জনন</h1>
+            <p>আপনার চাহিদা অনুযায়ী সাজানো স্পেশাল সেট। Test শুরু করতে সেটে ক্লিক করুন।</p>
+        </div>
+        <div class="set-grid" id="setGrid"></div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+        </div>
+    </div>
+
+    <!-- ================= QUIZ AREA ================= -->
+    <div id="testArea" class="hidden">
+        <div class="quiz-info">
+            <div class="info-item">🎓 <strong>Biology</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+            <div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="q-card">
+            <div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+            <div class="q-text" id="qText">Question Text</div>
+            <div class="opts" id="qOpts"></div>
+            <div class="explanation" id="explanation"><p id="explanationText"></p></div>
+            <div class="nav-row">
+                <div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+                <button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RESULT AREA ================= -->
+    <div class="result-wrap" id="resultWrap">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-score en-font" id="finalScore">100%</div>
+        <div class="result-total">স্কোর</div>
+        <div class="result-grade" id="resultGrade">অসাধারণ!</div>
+        <div class="result-bars">
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+                <div class="rb-label">সঠিক</div>
+            </div>
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+                <div class="rb-label">ভুল/স্কিপ</div>
+            </div>
+        </div>
+        <div class="attempt-info-box" id="attemptInfo"></div>
+        <div class="action-btns">
+            <button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+            <button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+            <button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// Global Config & Database
+// ============================================================
+const MAX_ATTEMPTS = 10; 
+const TIME_LIMIT = 10 * 60; // 10 Minutes
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+    1: {
+        name: 'Set 1', icon: '🌸', topic: 'সপুষ্পক উদ্ভিদের ফুল এবং পুংস্তবক',
+        questions: [
+            { q: "১. একটি আদর্শ ফুলের কয়টি স্তবক থাকে?", opts: ["২টি", "৩টি", "৪টি", "৫টি"], ans: 2, exp: "ব্যাখ্যা: একটি আদর্শ বা সম্পূর্ণ ফুলে পুষ্পাক্ষের ওপর ক্রমান্বয়ে চারটি স্তবক—বৃতি, দলমণ্ডল, পুংস্তবক ও স্ত্রীস্তবক সজ্জিত থাকে।" },
+            { q: "১০. পরাগরেণুর মসৃণ অন্তঃপ্রাচীর বা ইনটাইন (Intine) প্রধানত কী দিয়ে গঠিত?", opts: ["কাইটিন", "সেলুলোজ ও পেকটিন", "স্পোরোপোলেনিন", "লিগনিন"], ans: 1, exp: "ব্যাখ্যা: পরাগরেণুর অন্তঃপ্রাচীর বা ইনটাইন পেক্টো-সেলুলোজিক প্রকৃতির, অর্থাৎ এটি পেকটিন ও সেলুলোজ দিয়ে গঠিত।" },
+            { q: "১১. একগুচ্ছ বা মনোডেলফাস (Monodelphous) পুংকেশর কোন্ ফুলে দেখা যায়?", opts: ["মটর", "শিমুল", "জবা", "সূর্যমুখী"], ans: 2, exp: "ব্যাখ্যা: জবা বা কার্পাস ফুলে সব পুংকেশরের পুংদণ্ডগুলি পরস্পরের সঙ্গে যুক্ত হয়ে একটিমাত্র গুচ্ছ তৈরি করে, তাই একে মনোডেলফাস পুংকেশর বলে।" },
+            { q: "১৪. পরাগরেণু মাতৃকোশ (2n) থেকে রেণুচতুষ্টয় সৃষ্টি হওয়ার সময় কোন্ কোশ বিভাজন ঘটে?", opts: ["মাইটোসিস", "অ্যামাইটোসিস", "মিয়োসিস", "দ্বিবিভাজন"], ans: 2, exp: "ব্যাখ্যা: ডিপ্লয়েড পরাগরেণু মাতৃকোশ (2n) মিয়োসিস প্রক্রিয়ায় বিভাজিত হয়ে চারটি হ্যাপ্লয়েড (n) পরাগরেণু বা রেণুচতুষ্টয় গঠন করে।" },
+            { q: "১৫. পুষ্পাক্ষ ও পুংকেশরের পরাগধানীর মধ্যবর্তী দণ্ডাকার অংশটিকে কী বলে?", opts: ["যোজক", "পুংদণ্ড (Filament)", "গর্ভদণ্ড", "বৃন্ত"], ans: 1, exp: "ব্যাখ্যা: পুংকেশরের যে সরু দণ্ডাকার অংশে পরাগধানী সংলগ্ন থাকে এবং যা পুষ্পাক্ষের সাথে যুক্ত থাকে, তাকে পুংদণ্ড বা ফিলামেন্ট বলে।" }
+        ]
+    },
+    2: {
+        name: 'Set 2', icon: '🌱', topic: 'স্ত্রীস্তবক, ডিম্বক এবং স্ত্রীলিঙ্গধরের উৎপত্তি',
+        questions: [
+            { q: "১৬. মটর ও ছোলা গাছে কোন্ প্রকৃতির ডিম্বক দেখা যায়, যেখানে ডিম্বকরন্ধ্র নীচের দিকে এবং ডিম্বকমূল ওপরের দিকে থাকে?", opts: ["অর্থোট্রোপাস", "অ্যানাট্রোপাস (অধোমুখ)", "অ্যামফিট্রোপাস", "ক্যাম্পাইলোট্রোপাস"], ans: 1, exp: "ব্যাখ্যা: মটর ও ছোলা গাছে অধোমুখ বা অ্যানাট্রোপাস ডিম্বক থাকে, যা উল্টানো প্রকৃতির এবং এতে ডিম্বকরন্ধ্র নীচের দিকে থাকে।" },
+            { q: "১৭. ডিম্বকের যে বৃন্তের সাহায্যে ডিম্বকটি অমরার (Placenta) সাথে যুক্ত থাকে, তাকে কী বলে?", opts: ["ফিউনিকিউলাস", "হাইলাম", "চ্যালাজা", "রন্ধ্র"], ans: 0, exp: "ব্যাখ্যা: ডিম্বক বৃন্ত বা ফিউনিকিউলাস-এর সাহায্যে ডিম্বক অমরার সঙ্গে সংলগ্ন থাকে, যা নিষেকের পর বীজের বৃন্তে পরিণত হয়।" },
+            { q: "৩০. সপুষ্পক উদ্ভিদের মেগাস্পোরোজেনেসিস ও মেগাগ্যামেটোজেনেসিস কোথায় সম্পন্ন হয়?", opts: ["পরাগধানীতে", "ডিম্বাশয়ের ডিম্বকের ভেতর", "গর্ভদণ্ডে", "গর্ভমুণ্ডে"], ans: 1, exp: "ব্যাখ্যা: ডিম্বাশয়ের অভ্যন্তরে অবস্থিত ডিম্বকের ভ্রূণপোষক কলায় মেগাস্পোরোজেনেসিস এবং মেগাগ্যামেটোজেনেসিস সম্পন্ন হয়ে ভ্রূণস্থলী গঠিত হয়।" }
+        ]
+    },
+    3: {
+        name: 'Set 3', icon: '🐝', topic: 'পরাগযোগ ও পরাগযোগের বাহক',
+        questions: [
+            { q: "৩১. যে ফুলগুলি সর্বদা বদ্ধ প্রকৃতির হয় এবং কখনো ফোটে না, যার ফলে কেবল স্বপরাগযোগ ঘটে, তাকে কী বলে?", opts: ["চাসমোগ্যামি", "হোমোগ্যামি", "ক্লিস্টোগ্যামি (Cleistogamy)", "ডাইকোগ্যামি"], ans: 2, exp: "ব্যাখ্যা: দোপাটি, কানশিরার মতো উদ্ভিদের ফুলগুলি বদ্ধ প্রকৃতির হওয়ায় পরাগধানী বিদীর্ণ হলে পরাগরেণু স্বাভাবিকভাবেই গর্ভমুণ্ডে পড়ে স্বপরাগযোগ ঘটায়। একে ক্লিস্টোগ্যামি বা অনুমীলন বলে।" },
+            { q: "৩৬. যে ফুলে পুংস্তবক ও স্ত্রীস্তবক একই সময়ে পরিণত হয়, তাকে কী বলে?", opts: ["ডাইকোগ্যামি", "হোমোগ্যামি", "প্রোটোগাইনি", "প্রোট্যান্ড্রি"], ans: 1, exp: "ব্যাখ্যা: স্বপরাগযোগ নিশ্চিত করার জন্য যখন উভলিঙ্গ ফুলে পরাগধানী এবং গর্ভমুণ্ড একই সময়ে পরিপক্বতা বা পরিণতি লাভ করে, তখন তাকে সমপরিণতি বা হোমোগ্যামি বলে।" },
+            { q: "৩৭. শিমুল, পলাশ, মাদার প্রভৃতি গাছে কোন্ প্রাণীর সাহায্যে পরাগযোগ ঘটে?", opts: ["পতঙ্গ", "শামুক", "পাখি (Ornithophily)", "বাদুড়"], ans: 2, exp: "ব্যাখ্যা: শিমুল, পলাশ প্রভৃতি গাছের ফুল বড়ো ও উজ্জ্বল বর্ণের হয় এবং এদের পরাগযোগ পাখির সাহায্যে ঘটে যাকে অরনিথোফিলি বলে।" }
+        ]
+    },
+    4: {
+        name: 'Set 4', icon: '🧬', topic: 'নিষেক ও দ্বিনিষেক (Fertilization)',
+        questions: [
+            { q: "৪৮. গুপ্তবীজী উদ্ভিদের দ্বিনিষেক পদ্ধতিটি কোন্ বিজ্ঞানী প্রথম আবিষ্কার করেন?", opts: ["স্ট্রাসবার্গার", "এস. নাওয়াসিন (Nawaschin)", "হফমেইস্টার", "মেন্ডেল"], ans: 1, exp: "ব্যাখ্যা: বিজ্ঞানী নাওয়াসিন (Nawaschin) ১৮৯৮ খ্রিস্টাব্দে Fritillaria এবং Lilium নামক উদ্ভিদে সর্বপ্রথম দ্বিনিষেক পর্যবেক্ষণ বা আবিষ্কার করেন।" },
+            { q: "৪৯. পরাগনালি যখন ডিম্বকের ডিম্বকমূল (Chalaza) ভেদ করে ভ্রূণস্থলীতে প্রবেশ করে, তখন তাকে কী বলে?", opts: ["পোরোগ্যামি", "মেসোগ্যামি", "চ্যালাজোগ্যামি", "সিনগ্যামি"], ans: 2, exp: "ব্যাখ্যা: ডিম্বকমূল বা চ্যালাজা দিয়ে পরাগনালির প্রবেশকে চ্যালাজোগ্যামি বলে। উদাহরণ— ক্যাসুরিনা (Casuarina)।" },
+            { q: "৫০. পরাগ-গর্ভকেশর আন্তঃক্রিয়ায় স্পোরোফাইটিক যৌন অসাযুজ্যতা (SSI) কী দ্বারা নিয়ন্ত্রিত হয়?", opts: ["পরাগরেণুর হ্যাপ্লয়েড জিনের দ্বারা", "পরাগরেণু উৎপাদনকারী ডিপ্লয়েড কলার দ্বারা", "গর্ভদণ্ডের তরলের দ্বারা", "ডিম্বাণুর দ্বারা"], ans: 1, exp: "ব্যাখ্যা: স্পোরোফাইটিক যৌন অসাযুজ্যতা (SSI) পরাগরেণু উৎপাদনকারী ডিপ্লয়েড বা স্পোরোফাইটিক কোশ (Sporophytic tissue) দ্বারা নিয়ন্ত্রিত হয়।" },
+            { q: "৫১. একটি পুংগ্যামেট (n) এবং নির্ণীত নিউক্লিয়াসের (2n) মিলনের ফলে কী গঠিত হয়?", opts: ["জাইগোট", "প্রাথমিক সস্য কোশ (3n)", "সহকারী কোশ", "ভ্রূণমুকুল"], ans: 1, exp: "ব্যাখ্যা: দ্বিনিষেকের সময় একটি পুংগ্যামেট (n) নির্ণীত নিউক্লিয়াসের (2n) সাথে মিলিত হয়ে ট্রিপ্লয়েড (3n) সস্য নিউক্লিয়াস বা প্রাথমিক এন্ডোস্পার্ম নিউক্লিয়াস গঠন করে, যা পরে সস্যে পরিণত হয়।" },
+            { q: "৫৬. দ্বিনিষেকের ফলে উৎপন্ন জাইগোট এবং সস্য যথাক্রমে কীরূপ প্রকৃতির হয়?", opts: ["n এবং 2n", "2n এবং 2n", "2n এবং 3n", "3n এবং 2n"], ans: 2, exp: "ব্যাখ্যা: পুংগ্যামেট (n) ও ডিম্বাণুর (n) মিলনে জাইগোট (2n) এবং অপর পুংগ্যামেট (n) ও নির্ণীত নিউক্লিয়াসের (2n) মিলনে ট্রিপ্লয়েড সস্য (3n) গঠিত হয়।" },
+            { q: "৫৭. ভুট্টা গাছে কখনো কখনো পরাগরেণু থেকে দুটি পরাগনালি সৃষ্টি হয় এবং দুই পরাগনালির পুংগ্যামেট দ্বারা ডিম্বাণু ও নির্ণীত নিউক্লিয়াস নিষিক্ত হয়। একে কী বলে?", opts: ["হেটেরোফার্টিলাইজেশন", "মেসোগ্যামি", "পলিস্পার্মি", "ক্লিস্টোগ্যামি"], ans: 0, exp: "ব্যাখ্যা: পরাগরেণু থেকে দুটি পরাগনালি সৃষ্টি হয়ে একটির পুংগ্যামেট ডিম্বাণুকে এবং অপরটির পুংগ্যামেট নির্ণীত নিউক্লিয়াসকে নিষিক্ত করার ঘটনাকে হেটেরোফার্টিলাইজেশন বলে।" },
+            { q: "৬০. একটি ডিম্বাণু একাধিক পুংজননকোশ দ্বারা নিষিক্ত হওয়ার অস্বাভাবিক ঘটনাকে কী বলে?", opts: ["হেটেরোফার্টিলাইজেশন", "পলিস্পার্মি (Polyspermy)", "সিনগ্যামি", "অ্যাপোগ্যামি"], ans: 1, exp: "ব্যাখ্যা: যে প্রক্রিয়ায় একটি ডিম্বাণু একাধিক পুং জননকোষ দ্বারা নিষিক্ত হয় তাকে পলিস্পার্মি বলে। উদাহরণ : Oenothera।" }
+        ]
+    },
+    9: {
+        name: 'Set 9', icon: '🌰', topic: 'বীজ, ফল ও বিশেষ জনন পদ্ধতি',
+        questions: [
+            { q: "১২১. গুপ্তবীজী উদ্ভিদে যে প্রকৃতির সস্য গঠন সবচেয়ে বেশি দেখা যায় তা হল—", opts: ["সেলুলার সস্য", "হেলোবিয়াল সস্য", "নিউক্লিয়ার সস্য", "পেরিস্পার্ম"], ans: 2, exp: "ব্যাখ্যা: গুপ্তবীজী উদ্ভিদে নিউক্লিয়ার সস্য সবচেয়ে বেশি দেখা যায়, যেখানে সস্য নিউক্লিয়াসটি মুক্ত নিউক্লিয়ার বিভাজনের মাধ্যমে বিভাজিত হয় এবং প্রথমদিকে কোশপ্রাচীর গঠিত হয় না।" },
+            { q: "১২২. নারকেলের তরল সস্যে কী বর্তমান থাকে?", opts: ["অক্সিন", "জিব্বেরেলিন", "অসংখ্য মুক্ত নিউক্লিয়াস ও সাইটোকাইনিন", "ইথিলিন"], ans: 2, exp: "ব্যাখ্যা: নারকেলের তরল সস্যে অসংখ্য মুক্ত নিউক্লিয়াস ভাসমান অবস্থায় থাকে এবং এতে কোষ বিভাজনে সাহায্যকারী সাইটোকাইনিন হরমোন উপস্থিত থাকে।" },
+            { q: "১২৩. ভ্রূণ গঠনের সময় যে বীজগুলিতে সস্য (Endosperm) সম্পূর্ণ অবলুপ্ত হয়, তাদের কী বলে?", opts: ["সস্যল বীজ", "অ্যালবুমিনাস বীজ", "পেরিস্পার্মিক বীজ", "অসস্যল বা এক্সঅ্যালবুমিনাস বীজ"], ans: 3, exp: "ব্যাখ্যা: ছোলা, মটর, চিনাবাদাম প্রভৃতি বীজে ভ্রূণের পরিস্ফুটনের সময় সম্পূর্ণ সস্য ব্যবহৃত হয়ে যায়, ফলে পরিণত বীজে কোনো সস্য সঞ্চিত থাকে না। এদের অসস্যল বীজ বলে।" },
+            { q: "১২৪. রেড়ির (Castor) বীজ কী প্রকৃতির?", opts: ["একবীজপত্রী সস্যল", "দ্বিবীজপত্রী সস্যল", "একবীজপত্রী অসস্যল", "দ্বিবীজপত্রী অসস্যল"], ans: 1, exp: "ব্যাখ্যা: রেড়ি গাছ দ্বিবীজপত্রী হওয়া সত্ত্বেও এর বীজে প্রচুর তেল বা সস্য সঞ্চিত থাকে, তাই এটি ব্যতিক্রমী দ্বিবীজপত্রী সস্যল বীজ।" },
+            { q: "১২৫. ক্যারানকল (Caruncle) নামক মাংসল উপবৃদ্ধি কোন্ বীজে দেখা যায়?", opts: ["ধান", "ভুট্টা", "রেড়ি", "মটর"], ans: 2, exp: "ব্যাখ্যা: সস্যল প্রকৃতির রেড়ি বীজের ডিম্বকরন্ধ্রের পাশে একটি সাদা রঙের মাংসল বিশেষ উপবৃদ্ধিকে ক্যারানকল বলে।" },
+            { q: "১২৬. ফিউনিকিউলাস (Funiculus) কী?", opts: ["ডিম্বকের ত্বক", "ডিম্বকের রন্ধ্র", "ডিম্বকের বৃন্ত বা বীজের বৃন্ত", "সস্যের আবরণ"], ans: 2, exp: "ব্যাখ্যা: ডিম্বক যে বৃন্তের সাহায্যে অমরার সঙ্গে সংলগ্ন থাকে তাকে ফিউনিকিউলাস বা ডিম্বকবৃন্ত বলে। নিষেকের পর এটি বীজের বৃন্তে পরিণত হয়।" },
+            { q: "১২৭. চালতার ভোজ্য অংশ বা ফল গঠনে অংশগ্রহণকারী অংশটি আসলে কী?", opts: ["পুষ্পমঞ্জরী", "বৃতি", "পুষ্পাক্ষ", "মধ্যস্তক"], ans: 1, exp: "ব্যাখ্যা: চালতার ক্ষেত্রে ডিম্বাশয়ের পরিবর্তে স্থায়ী বৃতি রসালো হয়ে ফল গঠনে অংশ নেয় এবং আমরা এটিকেই খাদ্য হিসেবে গ্রহণ করি।" },
+            { q: "১২৮. আপেলকে অপ্রকৃত ফল (False fruit) বলা হয় কেন?", opts: ["এটি নিষেক ছাড়াই উৎপন্ন হয়", "এর কোনো বীজ থাকে না", "ডিম্বাশয় ছাড়া ফুলের পুষ্পাক্ষ ফলে পরিণত হয়", "এটি বাতাসে বিস্তার লাভ করে"], ans: 2, exp: "ব্যাখ্যা: আপেলের ক্ষেত্রে ডিম্বাশয় ছাড়া পুষ্পাক্ষ ফল গঠনে অংশগ্রহণ করে, তাই একে অপ্রকৃত ফল বলা হয়।" },
+            { q: "১৩১. যে ফুলের পরাগযোগ মাটির উপরে হয় কিন্তু ফল মাটির তলায় বৃদ্ধি পায়, সেটি কী?", opts: ["মিষ্টি আলু", "চিনাবাদাম", "পেঁয়াজ", "আলু"], ans: 1, exp: "ব্যাখ্যা: চিনাবাদাম গাছে ফুল মাটির ওপরে ফোটে এবং পরাগযোগ ঘটে, কিন্তু নিষেকের পর ফুলের বৃন্ত মাটির নিচে প্রবেশ করে এবং সেখানে ফল ও বীজের বিকাশ ঘটে।" },
+            { q: "১৩২. পার্থেনোকার্পিক টম্যাটো বা বীজহীন ফল উৎপন্ন করতে কোন্ পদ্ধতিটি অবলম্বন করা হয়?", opts: ["উদ্ভিদের উপর ফিনাইল মারকিউরিক অ্যাসিড প্রয়োগ", "উদ্ভিদের ওপর কম ঘনত্বযুক্ত জিব্বেরেলিক অ্যাসিড ও অক্সিন হরমোন প্রয়োগ", "বাষ্পীকরণের মাধ্যমে বীজের সুপ্তাবস্থা ভঙ্গ", "পরাগধানী অপসারণ"], ans: 1, exp: "ব্যাখ্যা: কৃত্রিম পার্থেনোকার্পিতে বীজহীন ফল উৎপাদনের জন্য বাহ্যিক উদ্দীপক হিসেবে অক্সিন বা জিব্বেরেলিন হরমোন প্রয়োগ করা হয়।" },
+            { q: "১৩৩. একবীজপত্রী উদ্ভিদের বীজে থাকা একটিমাত্র বীজপত্রটিকে কী বলা হয়?", opts: ["কোলিওপটাইল", "কোলিওরাইজা", "স্কুটলাম", "পেরিস্পার্ম"], ans: 2, exp: "ব্যাখ্যা: ভুট্টা বা ঘাস জাতীয় একবীজপত্রী উদ্ভিদের বীজে থাকা একটিমাত্র বীজপত্রটিকে স্কুটলাম (Scutellum) বলা হয়।" },
+            { q: "১৩৪. নিষেকের পর ডিম্বকের ত্বক (Integument) শক্ত হয়ে বীজের কোন্ অংশ গঠন করে?", opts: ["পেরিকার্প", "বীজত্বক (টেস্টা ও টেগামেন)", "সস্য", "ভ্রূণমূল"], ans: 1, exp: "ব্যাখ্যা: নিষেকের পর ডিম্বকের বাইরের আবরণী বা ত্বক পরিবর্তিত হয়ে বীজের সুরক্ষামূলক আবরণ বা বীজত্বক (বাইরে টেস্টা ও ভেতরে টেগামেন) তৈরি করে।" },
+            { q: "১৩৫. ফলের প্রাচীর বা ফলত্বককে (Pericarp) কয়টি স্তরে ভাগ করা যায়?", opts: ["১টি", "২টি", "৩টি", "৪টি"], ans: 2, exp: "ব্যাখ্যা: ফলের প্রাচীর বা পেরিকার্প তিনটি স্তরে বিভক্ত থাকে— চর্মবৎ বহিঃফলত্বক (Epicarp), মধ্যফলত্বক (Mesocarp) এবং অন্তঃফলত্বক (Endocarp)।" }
+        ]
+    },
+    10: {
+        name: 'Set 10', icon: '🌍', topic: 'পরাগযোগের বাহক ও অন্যান্য',
+        questions: [
+            { q: "১৩৬. মিয়োসিস ছাড়াই ভ্রূণস্থলীর ডিপ্লয়েড কোষ থেকে সরাসরি ভ্রূণ উৎপাদন হওয়ার ঘটনাকে কী বলে?", opts: ["সিনগ্যামি", "অ্যাপোস্পোরি", "পার্থেনোকার্পি", "পার্থেনোজেনেসিস"], ans: 1, exp: "ব্যাখ্যা: মিয়োসিস বিভাজন ছাড়াই রেণুধর কলার কোনো ডিপ্লয়েড কোষ থেকে সরাসরি ভ্রূণস্থলী ও ভ্রূণ গঠনের অযৌন পদ্ধতিকে অ্যাপোস্পোরি বলা হয়।" },
+            { q: "১৩৭. অনিষিক্ত ডিম্বাণু থেকে সরাসরি অপত্য জীব বা ভ্রূণ সৃষ্টি হওয়াকে কী বলে?", opts: ["পার্থেনোজেনেসিস", "পার্থেনোকার্পি", "অ্যাপোগ্যামি", "ভেজিটেটিভ প্রোপাগেশন"], ans: 0, exp: "ব্যাখ্যা: পুংগ্যামেটের সাথে মিলন বা নিষেক ছাড়াই একটি ডিম্বাণু বা স্ত্রীগ্যামেট যখন সরাসরি বিভাজিত হয়ে অপত্য গঠন করে, তখন সেই পদ্ধতিকে পার্থেনোজেনেসিস বলা হয়।" },
+            { q: "১৩৮. লেবু, আম, পেঁয়াজ প্রভৃতি উদ্ভিদে কোন্ ধরনের বহুভ্রূণতা (Polyembryony) দেখা যায়?", opts: ["প্রকৃত বহুভ্রূণতা", "মেকি বহুভ্রূণতা (False polyembryony)", "হ্যাপ্লয়েড বহুভ্রূণতা", "ভেজিটেটিভ বহুভ্রূণতা"], ans: 1, exp: "ব্যাখ্যা: একই ডিম্বকের একাধিক ভ্রূণস্থলীতে বা নিউসেলার কোষ থেকে একাধিক ভ্রূণ উৎপন্ন হলে তাকে মেকি বহুভ্রূণতা বলে, যা আম, লেবু, পেঁয়াজে দেখা যায়।" },
+            { q: "১৫০. একটি বীজের ভেতরে যখন একাধিক ভ্রূণ সৃষ্টি হয়, তখন তাকে কী বলে?", opts: ["বহুভ্রূণতা (Polyembryony)", "পার্থেনোকার্পি", "পলিস্পার্মি", "অ্যাপোগ্যামি"], ans: 0, exp: "ব্যাখ্যা: একটি ডিম্বকে বা বীজে একের বেশি ভ্রূণ উৎপন্ন হওয়ার ঘটনাকে বহুভ্রূণতা বা পলিএমব্রায়োনি বলে।" }
+        ]
+    },
+    11: {
+        name: 'Set 11', icon: '📝', topic: 'গুরুত্বপূর্ণ প্রশ্ন-১',
+        questions: [
+            { q: "১৫১. পরাগরেণুর বহিঃপ্রাচীর (Exine) কঠিনতম স্পোরোপোলেনিন দ্বারা গঠিত, এর প্রধান কারণ কী?", opts: ["পরাগরেণুর বর্ণ তৈরি করা", "পরাগরেণুকে অত্যধিক তাপমাত্রা এবং শুষ্কতা বা চরম প্রতিকূল পরিবেশ থেকে রক্ষা করা", "পরাগনালি গঠন করা", "পতঙ্গকে আকৃষ্ট করা"], ans: 1, exp: "ব্যাখ্যা: স্পোরোপোলেনিন একপ্রকার অত্যন্ত সুদৃঢ় পলিমার যা পরাগরেণুকে চরম প্রতিকূল পরিবেশ ও তাপমাত্রা থেকে রক্ষা করে।" },
+            { q: "১৫৪. একটি সপুষ্পক উদ্ভিদের দ্বিনিষেক (Double fertilization) পদ্ধতিতে কী ঘটে?", opts: ["একটি পুংগ্যামেট ডিম্বাণুর সঙ্গে এবং অপরটি সহকারী কোষের সঙ্গে মিলিত হয়", "একটি পুংগ্যামেট ডিম্বাণুর সঙ্গে এবং অপরটি নির্ণীত নিউক্লিয়াসের সঙ্গে মিলিত হয়", "একটি পুংগ্যামেট সহকারী কোষের সঙ্গে এবং অপরটি প্রতিপাদ কোষের সঙ্গে মিলিত হয়", "দুটি পুংগ্যামেট একই ডিম্বাণুর সঙ্গে মিলিত হয়"], ans: 1, exp: "ব্যাখ্যা: দ্বিনিষেকের সময় একটি পুংগ্যামেট ডিম্বাণুকে নিষিক্ত করে জাইগোট (2n) এবং অপর পুংগ্যামেটটি নির্ণীত নিউক্লিয়াসের সাথে মিলিত হয়ে সস্য (3n) গঠন করে।" },
+            { q: "১৫৫. জেনিয়া (Xenia) এবং মেটাজেনিয়া কী?", opts: ["শুধুমাত্র সস্য", "জাইলেম ও ফ্লোয়েম", "পরাগযোগের ফলে যথাক্রমে সস্য ও ফলত্বকের সরাসরি পরিবর্তন", "পুং ও স্ত্রী গ্যামেট"], ans: 2, exp: "ব্যাখ্যা: ইতর পরাগযোগের ফলে উৎপন্ন সস্যের তাৎক্ষণিক পরিবর্তনকে জেনিয়া এবং মাতৃকলার পরিবর্তনকে মেটাজেনিয়া বলে।" },
+            { q: "১৫৬. যে ফুলের পরাগযোগ মাটির উপরে হয় কিন্তু ফল মাটির তলায় বৃদ্ধি পায়, তা কী?", opts: ["মিষ্টি আলু", "চিনাবাদাম", "পেঁয়াজ", "আলু"], ans: 1, exp: "ব্যাখ্যা: চিনাবাদাম গাছে ফুল মাটির ওপরে ফোটে এবং পরাগযোগ ঘটে, কিন্তু নিষেকের পর ফল মাটির নিচে বৃদ্ধি পায়।" },
+            { q: "১৫৭. যে ফুলে অনেকগুলি পরাগরেণু একত্রিত হয়ে পলিনিয়াম (Pollinium) গঠন করে, তার উদাহরণ কী?", opts: ["গোলাপ", "অর্কিড ও আকন্দ", "জবা", "সূর্যমুখী"], ans: 1, exp: "ব্যাখ্যা: অর্কিড এবং আকন্দ ফুলে পরাগথলির সমস্ত পরাগরেণুগুলি একত্রিত হয়ে একটি থলির মতো গঠন তৈরি করে যাকে পলিনিয়াম বলে।" },
+            { q: "১৫৮. আপেল বায়ুপরাগী হলেও আপেল চাষিরা বাগানে মৌমাছি সংরক্ষণ করেন কেন?", opts: ["বায়ুপরাগী আপেল নিম্নমানের হয়", "পতঙ্গপরাগী আপেল উন্নত গুণমানের হয়", "যদি বায়ু দ্বারা পরাগযোগ ব্যর্থ হয় তাহলে মৌমাছিরা সেই সময়ে পরাগযোগ ঘটাতে পারে", "মৌমাছি আপেলে মধু প্রবেশ করিয়ে আপেলকে মিষ্টি করে"], ans: 2, exp: "ব্যাখ্যা: আপেল চাষিরা ফলন নিশ্চিত করার জন্য মৌমাছি পালন করেন যাতে পরাগযোগের সম্ভাবনা বৃদ্ধি পায়।" },
+            { q: "১৫৯. বংশানুক্রমে ক্রমাগত স্বপরাগযোগের ফলে কী হয়?", opts: ["উন্নত বংশধর সৃষ্টি হয়", "বিশুদ্ধ বংশধারা (Pure line) লক্ষ করা যায়", "নতুন ভ্যারাইটি বা প্রজাতি সৃষ্টি হয়", "গাছের জীবনীশক্তি বৃদ্ধি পায়"], ans: 1, exp: "ব্যাখ্যা: স্বপরাগযোগের ফলে বাইরের কোনো অবাঞ্ছিত জিন প্রবেশ করতে পারে আসতে পারে না, তাই বংশানুক্রমে উদ্ভিদের বৈশিষ্ট্য সংরক্ষিত থাকে এবং বিশুদ্ধ বংশধারা বজায় থাকে।" },
+            { q: "১৬০. ডাইথেকাস (Dithecous) পরাগধানী ও মোনোথেকাস (Monothecous) পরাগধানীতে যথাক্রমে কয়টি করে পরাগস্থলী থাকে?", opts: ["৪টি ও ২টি", "২টি ও ৪টি", "৪টি ও ৮টি", "২টি ও ১টি"], ans: 0, exp: "ব্যাখ্যা: ডাইথেকাস বা দ্বিখণ্ডিত পরাগধানীর প্রতি খণ্ডে ২টি করে মোট ৪টি পরাগথলি (টেট্রাস্পোরাঞ্জিয়েট) থাকে, আর মোনোথেকাস পরাগধানীতে ২টি পরাগথলি (বাইস্পোরাঞ্জিয়েট) থাকে।" },
+            { q: "১৬১. উদ্ভিদের কোন্ অঙ্গে ডিপ্লয়েড (2n) ও ট্রিপ্লয়েড (3n) কোষ উভয়ই লক্ষ করা যায়?", opts: ["ভ্রূণ", "অনিষিক্ত ডিম্বাণু", "অঙ্কুরিত পরাগরেণু", "বীজ"], ans: 3, exp: "ব্যাখ্যা: পরিণত বীজে থাকা ভ্রূণ ডিপ্লয়েড (2n) এবং সঞ্চিত খাদ্য বা সস্য ট্রিপ্লয়েড (3n) কোষ দ্বারা গঠিত হয়।" },
+            { q: "১৬২. একটি কার্যকরী মেগাস্পোর বা স্ত্রীরেণু থেকে আটটি নিউক্লিয়াসযুক্ত ভ্রূণস্থলী গঠিত হতে কয়টি মাইটোসিস বিভাজন প্রয়োজন?", opts: ["১টি", "২টি", "৩টি", "৪টি"], ans: 2, exp: "ব্যাখ্যা: একটি হ্যাপ্লয়েড মেগাস্পোরের নিউক্লিয়াসটি পরপর ৩ বার মাইটোসিস প্রক্রিয়ায় বিভাজিত হয়ে শেষে ৮টি নিউক্লিয়াস গঠন করে।" },
+            { q: "১৬৩. হে ফিভার (Hay fever) কীসের কারণে হয়?", opts: ["ভাইরাসের সংক্রমণে", "পরাগরেণু সংক্রমণের ফলে অ্যালার্জি", "জলবাহিত ব্যাকটেরিয়া", "ছত্রাকের স্পোর"], ans: 1, exp: "ব্যাখ্যা: বাতাসে ভাসমান কিছু উদ্ভিদের পরাগরেণু শ্বাসতন্ত্রে প্রবেশ করে অ্যালার্জি বা হাঁপানি সৃষ্টি করে, যাকে হে ফিভার বলে।" },
+            { q: "১৬৪. পরাগনালির অগ্রপ্রান্ত ডিম্বকের ডিম্বকরন্ধ্র ভেদ করে ভ্রূণস্থলীর মধ্যে প্রবেশ করলে তাকে কী বলা হয়?", opts: ["চ্যালাজোগ্যামি", "পোরোগ্যামি", "মেসোগ্যামি", "অটোগ্যামি"], ans: 1, exp: "ব্যাখ্যা: নিষেকের সময় পরাগনালি যখন সরাসরি ডিম্বকের সামনের দিকের ছিদ্র বা ডিম্বকরন্ধ্র পথে প্রবেশ করে, তখন সেই পদ্ধতিকে পোরোগ্যামি বলে।" },
+            { q: "১৬৫. একটি সপুষ্পক উদ্ভিদের জাইগোট গঠনের পূর্বে কিছু পরিমাণ সস্য কেন গঠিত হয়?", opts: ["ডিম্বাণুকে সুরক্ষা দিতে", "জাইগোটকে পুষ্টি সরবরাহ নিশ্চিত করতে", "পরাগনালিকে আকর্ষণ করতে", "ফলত্বক গঠন করতে"], ans: 1, exp: "ব্যাখ্যা: সস্য ভ্রূণের খাদ্য। জাইগোট গঠনের পর তা থেকে ভ্রূণ তৈরি হওয়ার সময় পুষ্টির প্রয়োজন হয়, তাই আগে সস্য কিছুটা বৃদ্ধি পেয়ে পুষ্টি সরবরাহ নিশ্চিত করে।" }
+        ]
+    },
+    12: {
+        name: 'Set 12', icon: '📝', topic: 'গুরুত্বপূর্ণ প্রশ্ন-২',
+        questions: [
+            { q: "১৬৬. দ্বিবীজপত্রী ভ্রূণের ভ্রূণাক্ষের ওপরের অংশকে কী বলা হয়?", opts: ["হাইপোকোটাইল", "এপিকোটাইল (বীজপত্রাধিকান্ড)", "কোলিওপটাইল", "সাসপেনসর"], ans: 1, exp: "ব্যাখ্যা: ভ্রূণাক্ষের উপরের অংশটিকে এপিকোটাইল বলে, যার অগ্রভাগে ভ্রূণমুকুল অবস্থান করে।" },
+            { q: "১৬৯. সমপরিণতি বা হোমোগ্যামি (Homogamy) বলতে কী বোঝায়?", opts: ["গর্ভমুণ্ড ও পরাগধানীর ভিন্ন সময়ে পরিণতি লাভ", "গর্ভমুণ্ড ও পরাগধানীর একই সঙ্গে পরিণতি লাভ", "ফুল বন্ধ থাকা", "একলিঙ্গ ফুল হওয়া"], ans: 1, exp: "ব্যাখ্যা: স্বপরাগযোগ নিশ্চিত করার জন্য উভলিঙ্গ ফুলে পরাগধানী এবং গর্ভমুণ্ড একই সময়ে পরিপক্বতা লাভ করলে তাকে সমপরিণতি বা হোমোগ্যামি বলে।" },
+            { q: "১৭০. নিউক্লিয়ার সস্য (Nuclear endosperm) কলা উৎপাদনের সঠিক ক্রম কী?", opts: ["সস্য বিভাজন → মুক্ত নিউক্লিয়াস সৃষ্টি → ভ্যাকুওল সৃষ্টি → কোশপ্রাচীর তৈরি", "মুক্ত নিউক্লিয়াস সৃষ্টি → সস্য বিভাজন → কোশপ্রাচীর তৈরি", "মুক্ত নিউক্লিয়াস বিভাজন → কেন্দ্রীয় ভ্যাকুওলের আবির্ভাব → কোশপ্রাচীর উৎপাদন ও সস্যকলার সৃষ্টি", "কোশপ্রাচীর তৈরি → নিউক্লিয়াস বিভাজন"], ans: 2, exp: "ব্যাখ্যা: ট্রিপ্লয়েড সস্য নিউক্লিয়াসটি বারবার বিভাজিত হয়ে মুক্ত নিউক্লিয়াস সৃষ্টি করে, ভ্যাকুওল তৈরি হয় এবং শেষে কোশপ্রাচীর তৈরি হয়ে সস্য গঠিত হয়।" },
+            { q: "১৭১. একটি ব্যক্তবীজী উদ্ভিদের কাণ্ডের ক্রোমোজোম সংখ্যা 2n = 32 হলে সস্যের ক্রোমোজোম সংখ্যা কত হবে?", opts: ["16", "32", "48", "64"], ans: 0, exp: "ব্যাখ্যা: ব্যক্তবীজী উদ্ভিদের সস্য নিষেকের পূর্বেই গঠিত হয়, তাই এদের সস্য সর্বদা হ্যাপ্লয়েড (n) প্রকৃতির হয়। 2n = 32 হলে, n = 16 হবে।" },
+            { q: "১৭২. গুপ্তবীজী উদ্ভিদের পরাগধানীতে প্রোথ্যালিয়াল কোশ (Prothallial cell) কয়টি থাকে?", opts: ["একটি", "দুটি", "তিনটি", "শূন্য"], ans: 3, exp: "ব্যাখ্যা: গুপ্তবীজী উদ্ভিদের পরাগরেণুতে কোনো প্রোথ্যালিয়াল কোশ গঠিত হয় না, এটি শুধুমাত্র ব্যক্তবীজীতে দেখা যায়।" },
+            { q: "১৭৯. সপুষ্পক উদ্ভিদের যৌন জননে নীচের ঘটনাবলির সঠিক সজ্জা কোনটি?", opts: ["পরাগযোগ → গ্যামেটোজেনেসিস → নিষেক → এমব্রায়োজেনেসিস", "গ্যামেটোজেনেসিস → পরাগযোগ → নিষেক → এমব্রায়োজেনেসিস", "নিষেক → গ্যামেটোজেনেসিস → পরাগযোগ → এমব্রায়োজেনেসিস", "এমব্রায়োজেনেসিস → নিষেক → গ্যামেটোজেনেসিস → পরাগযোগ"], ans: 1, exp: "ব্যাখ্যা: যৌন জননে প্রথমে গ্যামেট তৈরি হয়, তারপর পরাগযোগ ঘটে, এরপর পুং ও স্ত্রী গ্যামেটের নিষেক হয় এবং শেষে ভ্রূণ বা এমব্রায়োজেনেসিস ঘটে।" },
+            { q: "১৮০. দ্বিবীজপত্রী উদ্ভিদের ভ্রূণের পরিস্ফুটনে জাইগোট থেকে পরিণত ভ্রূণ হওয়ার সঠিক ক্রমটি কী?", opts: ["জাইগোট → অক্ট্যান্ট → গ্লোবিউলার → প্রোএমব্রায়ো → টর্পেডো → পরিণত ভ্রূণ", "জাইগোট → প্রোএমব্রায়ো → অক্ট্যান্ট → গ্লোবিউলার → টর্পেডো → পরিণত ভ্রূণ", "জাইগোট → প্রোএমব্রায়ো → গ্লোবিউলার → অক্ট্যান্ট → টর্পেডো → পরিণত ভ্রূণ", "প্রোএমব্রায়ো → জাইগোট → অক্ট্যান্ট → টর্পেডো → পরিণত ভ্রূণ"], ans: 1, exp: "ব্যাখ্যা: জাইগোট বিভাজিত হয়ে আদি ভ্রূণ বা প্রোএমব্রায়ো গঠন করে, যা পরে অক্ট্যান্ট, গোলাকার গ্লোবিউলার, এবং টর্পেডো দশা পার হয়ে পূর্ণাঙ্গ ভ্রূণে পরিণত হয়।" }
+        ]
+    }
+};
+
+// ================== STATE VARIABLES ==================
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+// ================== LOCAL STORAGE LOGIC ==================
+function getGlobalUsers() {
+    const data = localStorage.getItem("testBazarGlobalUsers");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+    const data = localStorage.getItem("testBazarAttemptsBio3Ch1_v2");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    attempts[key] = (attempts[key] || 0) + 1;
+    localStorage.setItem("testBazarAttemptsBio3Ch1_v2", JSON.stringify(attempts));
+    return attempts[key];
+}
+
+// ================== INITIALIZATION ==================
+window.onload = () => {
+    renderHub();
+};
+
+function renderHub() {
+    const grid = document.getElementById("setGrid");
+    grid.innerHTML = "";
+    
+    for(let id in ALL_SETS) {
+        const set = ALL_SETS[id];
+        const div = document.createElement("div");
+        div.className = "set-card";
+        
+        let attemptCount = 0;
+        let isLocked = false;
+        
+        if (currentUser) {
+            attemptCount = getAttemptCount(currentUser, id);
+            isLocked = attemptCount >= MAX_ATTEMPTS;
+            if (isLocked) div.classList.add("locked");
+        }
+        
+        div.innerHTML = `
+            <div class="icon">${set.icon}</div>
+            <div class="set-num">${set.name}</div>
+            <div class="set-title">${set.topic}</div>
+            <div class="set-meta"><span>${set.questions.length} Qs</span><span>10 Mins</span></div>
+            ${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+        `;
+        
+        div.onclick = () => {
+            if (isLocked) {
+                alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+                return;
+            }
+            handleSetClick(id);
+        };
+        grid.appendChild(div);
+    }
+}
+
+function handleSetClick(setId) {
+    activeSetId = setId;
+    if (!currentUser) {
+        document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+        document.getElementById("loginOverlay").classList.add("active");
+        document.getElementById("loginUsername").value = "";
+        document.getElementById("loginPassword").value = "";
+        document.getElementById("loginError").style.display = "none";
+    } else {
+        startQuiz(setId);
+    }
+}
+
+function doLogin() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+    const err = document.getElementById("loginError");
+    const GLOBAL_USERS = getGlobalUsers();
+
+    if(!u || !p) {
+        err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!";
+        err.style.display = "block";
+        return;
+    }
+
+    if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+        let attempts = getAttemptCount(u, activeSetId);
+        if (attempts >= MAX_ATTEMPTS) {
+            err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+            err.style.display = "block";
+            return;
+        }
+        currentUser = u;
+        document.getElementById("loginOverlay").classList.remove("active");
+        document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+        document.getElementById("userDisplay").classList.remove("hidden");
+        renderHub();
+        startQuiz(activeSetId);
+    } else {
+        err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+        err.style.display = "block";
+    }
+}
+
+function closeLogin() {
+    document.getElementById("loginOverlay").classList.remove("active");
+}
+
+function goToHub() {
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("hubPage").style.display = "block";
+    document.getElementById("timerBox").classList.add("hidden");
+    clearInterval(timerInterval);
+    renderHub();
+}
+
+// ================== QUIZ LOGIC ==================
+function startQuiz(setId) {
+    incrementAttempt(currentUser, setId);
+    questions = ALL_SETS[setId].questions;
+    currentQIndex = 0;
+    score = 0;
+    wrongAnswers = 0;
+    userAnswers = {};
+    isReviewMode = false;
+    timeLeft = TIME_LIMIT;
+
+    document.getElementById("hubPage").style.display = "none";
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    document.getElementById("timerBox").classList.remove("hidden");
+    document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+    document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+
+    startTimer();
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const qData = questions[currentQIndex];
+    document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+    document.getElementById("qText").innerHTML = qData.q;
+    const progress = ((currentQIndex) / questions.length) * 100;
+    document.getElementById("progressFill").style.width = `${progress}%`;
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    
+    const optsBox = document.getElementById("qOpts");
+    optsBox.innerHTML = "";
+    document.getElementById("explanation").classList.remove("show");
+    document.getElementById("nextBtn").disabled = true;
+    document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+    qData.opts.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "opt";
+        btn.innerHTML = `<div class="opt-circle">${LABELS[idx] || '—'}</div> <div class="opt-text">${optText}</div>`;
+        
+        if (isReviewMode) {
+            btn.classList.add("disabled");
+            if (idx === qData.ans) btn.classList.add("correct");
+            else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+        } else {
+            btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+        }
+        optsBox.appendChild(btn);
+    });
+
+    if (isReviewMode) {
+        document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+        document.getElementById("explanation").classList.add("show");
+        document.getElementById("nextBtn").disabled = false;
+        if (currentQIndex === questions.length - 1) {
+            document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন";
+        }
+    }
+    
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+    const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+    allBtns.forEach(b => b.classList.add("disabled"));
+    userAnswers[currentQIndex] = selectedIdx; 
+
+    if (selectedIdx === correctIdx) {
+        btn.classList.add("correct");
+        score++;
+    } else {
+        btn.classList.add("wrong");
+        allBtns[correctIdx].classList.add("correct");
+        wrongAnswers++;
+    }
+    
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+    document.getElementById("explanation").classList.add("show");
+    document.getElementById("nextBtn").disabled = false;
+    
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function nextQ() {
+    if (isReviewMode && currentQIndex === questions.length - 1) {
+        document.getElementById("testArea").classList.add("hidden");
+        document.getElementById("resultWrap").classList.add("show");
+        return;
+    }
+    if (!isReviewMode && currentQIndex === questions.length - 1) {
+        finishQuiz();
+        return;
+    }
+    currentQIndex++;
+    loadQuestion();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    const tBox = document.getElementById("timerBox");
+    tBox.classList.remove("danger");
+    
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishQuiz();
+            return;
+        }
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        if (timeLeft < 60) tBox.classList.add("danger");
+    }, 1000);
+}
+
+function finishQuiz() {
+    clearInterval(timerInterval);
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("timerBox").classList.add("hidden");
+    document.getElementById("resultWrap").classList.add("show");
+    
+    const total = questions.length;
+    const skipped = total - (score + wrongAnswers);
+    const percent = Math.round((score / total) * 100);
+    
+    document.getElementById("finalScore").innerText = `${percent}%`;
+    document.getElementById("rbCorrect").innerText = score;
+    document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+    
+    const gradeEl = document.getElementById("resultGrade");
+    if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+    else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+    else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+    
+    const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+    document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+    if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+        alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+        return;
+    }
+    startQuiz(activeSetId);
+}
+
+function showReview() {
+    isReviewMode = true;
+    currentQIndex = 0;
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    loadQuestion();
+}
+</script>
+</body>
+</html>
+```
