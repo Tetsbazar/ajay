@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Biology 3rd Sem | Ch 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+/* ================= COLOR SCHEME & VARIABLES ================= */
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+
+/* Top Bar */
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+
+/* Hub View */
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; justify-content: center; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; max-width: 350px; margin: 0 auto; width: 100%;}
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+
+/* Quiz View */
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; overflow-x: auto; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main); overflow-x: auto;}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; overflow-x: auto;}
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+
+/* Result View */
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+
+/* Login Modal */
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+    <div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+    <div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+
+<div class="main">
+
+    <!-- ================= LOGIN MODAL ================= -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <h2>লগইন করুন</h2>
+            <p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+            <div class="login-set-name" id="loginSetName">📚 Set 1</div>
+            <div class="input-group">
+                <label>ইউজারনেম</label>
+                <input type="text" id="loginUsername" placeholder="Username">
+            </div>
+            <div class="input-group">
+                <label>পাসওয়ার্ড</label>
+                <input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+            </div>
+            <button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+            <button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+            <div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+        </div>
+    </div>
+
+    <!-- ================= HUB PAGE ================= -->
+    <div id="hubPage">
+        <div class="hub-header">
+            <h1>জীববিজ্ঞান 3rd Sem <br>মানুষের জনন (Human Reproduction)</h1>
+            <p>মোট ১২০টি প্রশ্ন সম্বলিত ৮টি সেট। Test শুরু করতে সেটে ক্লিক করুন।</p>
+        </div>
+        <div class="set-grid" id="setGrid"></div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+        </div>
+    </div>
+
+    <!-- ================= QUIZ AREA ================= -->
+    <div id="testArea" class="hidden">
+        <div class="quiz-info">
+            <div class="info-item">🎓 <strong>Biology</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+            <div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+        </div>
+        <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="q-card">
+            <div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+            <div class="q-text" id="qText">Question Text</div>
+            <div class="opts" id="qOpts"></div>
+            <div class="explanation" id="explanation"><p id="explanationText"></p></div>
+            <div class="nav-row">
+                <div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+                <button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RESULT AREA ================= -->
+    <div class="result-wrap" id="resultWrap">
+        <div class="result-icon" id="resultIcon">🏆</div>
+        <div class="result-score en-font" id="finalScore">100%</div>
+        <div class="result-total">স্কোর</div>
+        <div class="result-grade" id="resultGrade">অসাধারণ!</div>
+        <div class="result-bars">
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+                <div class="rb-label">সঠিক</div>
+            </div>
+            <div class="result-bar">
+                <div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+                <div class="rb-label">ভুল/স্কিপ</div>
+            </div>
+        </div>
+        <div class="attempt-info-box" id="attemptInfo"></div>
+        <div class="action-btns">
+            <button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+            <button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+            <button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// Global Config & Database
+// ============================================================
+const MAX_ATTEMPTS = 10;
+const TIME_LIMIT = 10 * 60; // 10 Minutes
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+    1: {
+        name: 'Set 1', icon: '♂️', topic: 'পুংজননতন্ত্র ও আনুষঙ্গিক গ্রন্থি',
+        questions: [
+            { q: "১. ভ্রূণ অবস্থায় পুরুষদের শুক্রাশয় উদরগহ্বর থেকে স্ক্রোটামে নেমে না এলে সেই অস্বাভাবিক অবস্থাকে কী বলে?", opts: ["অর্কিডেকটমি", "ক্রিপটরকিডিজম", "মোনোরকিডিজম", "ভ্যারিকোসিল"], ans: 1, exp: "ব্যাখ্যা: শুক্রাশয় উদরগহ্বর থেকে স্ক্রোটামে না নেমে উদরগহ্বরেই থেকে গেলে সেই অবস্থাকে ক্রিপটরকিডিজম বলে। এর ফলে পুরুষ বন্ধ্যা হতে পারে।" },
+            { q: "২. শুক্রাশয় স্ক্রোটাম থলির সঙ্গে যে সূক্ষ্ম তন্তুর সাহায্যে যুক্ত থাকে তাকে কী বলে?", opts: ["ভাস ডিফারেন্স", "ইনগুইনাল ক্যানাল", "গুবারনাকুলাম (টেল অফ লকউড)", "স্পার্মাটিক কর্ড"], ans: 2, exp: "ব্যাখ্যা: গুবারনাকুলাম নামক অংশ থেকে সৃষ্ট একপ্রকার সূক্ষ্ম তন্তুময় ব্যান্ড শুক্রাশয় দুটিকে স্ক্রোটামের সঙ্গে যুক্ত রাখে, একে টেল অফ লকউডও বলে।" },
+            { q: "৩. মানুষের স্ক্রোটামের উষ্ণতা দেহের স্বাভাবিক উষ্ণতার চেয়ে কতটা কম হয় যা শুক্রাণু গঠনের পক্ষে আদর্শ?", opts: ["১-২°C", "৩-৪°C", "৫-৬°C", "৭-৮°C"], ans: 1, exp: "ব্যাখ্যা: স্ক্রোটামে শুক্রাশয়ের উষ্ণতা স্বাভাবিক দেহের উষ্ণতা (37°C) অপেক্ষা 3-4°C কম থাকে (প্রায় 33°C), যা শুক্রাণু উৎপাদনের জন্য আদর্শ।" },
+            { q: "৪. রেটি টেস্টিস (জালক শুক্রাশয়) থেকে উৎপন্ন হয়ে যে সূক্ষ্ম নালিকাগুলি এপিডিডাইমিসে প্রবেশ করে তাদের কী বলে?", opts: ["ভাস ডিফারেন্স", "ভাসা ইফারেনসিয়া", "সেমিনিফেরাস নালিকা", "নিক্ষেপণ নালি"], ans: 1, exp: "ব্যাখ্যা: জালক শুক্রাশয় থেকে কতকগুলি সূক্ষ্ম নালিকা উৎপন্ন হয়ে এপিডিডাইমিসে প্রবেশ করে, এদের বহির্মুখী শুক্রনালি বা ভাসা ইফারেনসিয়া বলে।" },
+            { q: "৫. শুক্রাণু সাময়িকভাবে কোথায় সঞ্চিত থাকে এবং পুষ্ট হয়?", opts: ["প্রস্টেট গ্রন্থি", "সেমিনাল ভেসিকল", "এপিডিডাইমিস", "কাউপার গ্রন্থি"], ans: 2, exp: "ব্যাখ্যা: এপিডিডাইমিস নালির মধ্যে শুক্রাণু সাময়িকভাবে অবস্থান করে, পুষ্ট হয় এবং চলনক্ষমতা লাভ করে।" },
+            { q: "৬. সেমিনাল ভেসিকল থেকে নিঃসৃত তরলে কোন উপাদানের পরিমাণ অত্যন্ত বেশি থাকে যা শুক্রাণুকে শক্তি ও পুষ্টি জোগায়?", opts: ["গ্লুকোজ", "ফ্রুক্টোজ", "সুক্রোজ", "গ্যালাকটোজ"], ans: 1, exp: "ব্যাখ্যা: সেমিনাল তরলে ফ্রুক্টোজের পরিমাণ অত্যন্ত বেশি থাকে যা শুক্রাণুকে পুষ্টি ও শক্তি জোগায়।" },
+            { q: "৭. কোন গ্রন্থির ক্ষরণ মূত্রনালিকে পিচ্ছিল করে শুক্রস্খলন সহজ করে এবং বীর্যের প্রায় ২৫-৩০% গঠন করে?", opts: ["কাউপার গ্রন্থি", "প্রস্টেট গ্রন্থি", "সেমিনাল ভেসিকল", "বার্থোলিন গ্রন্থি"], ans: 1, exp: "ব্যাখ্যা: মূত্রাশয়ের গ্রীবাদেশের গোড়ায় থাকা প্রস্টেট গ্রন্থির ক্ষরণ মূত্রনালিকে পিচ্ছিল করে এবং বীর্যের 25-30% গঠন করে।" },
+            { q: "৮. বীর্যের (Semen) pH মাত্রা সাধারণত কীরূপ হয়?", opts: ["আম্লিক (5.5 - 6.0)", "প্রশম (7.0)", "ক্ষারীয় (7.3 - 7.5)", "তীব্র ক্ষারীয় (8.5 - 9.0)"], ans: 2, exp: "ব্যাখ্যা: বীর্যের pH প্রায় 7.3 – 7.5, অর্থাৎ ক্ষারীয় হয়, যা যোনিপথের আম্লিক পরিবেশকে প্রশমিত করতে সাহায্য করে।" },
+            { q: "৯. পুরুষদের মূত্র-জনন নালি (Urethra) মোট কটি অংশে বিভক্ত?", opts: ["২টি", "৩টি", "৪টি", "৫টি"], ans: 1, exp: "ব্যাখ্যা: পুরুষদের ইউরেথ্রা তিনটি অংশে বিভক্ত— প্রস্টেটিক ইউরেথ্রা, মেমব্রেনাস ইউরেথ্রা এবং পাইনাইল ইউরেথ্রা।" },
+            { q: "১০. কোন হরমোন শুক্রাশয়ের লেডিগ কোষকে টেস্টোস্টেরন ক্ষরণে উদ্দীপিত করে?", opts: ["FSH", "GnRH", "LH / ICSH", "ইনহিবিন"], ans: 2, exp: "ব্যাখ্যা: অগ্র পিটুইটারি নিঃসৃত LH (Luteinizing Hormone) বা ICSH লেডিগের আন্তরকোষকে উদ্দীপিত করে টেস্টোস্টেরন ক্ষরণ ঘটায়।" },
+            { q: "১১. সারটোলির কোশ থেকে নিঃসৃত কোন প্রোটিন হরমোনটি FSH-এর ক্ষরণকে বাধা দেয় বা অবদমিত করে?", opts: ["ইনহিবিন", "অ্যান্ড্রোজেন বাইন্ডিং প্রোটিন (ABP)", "রিলাক্সিন", "টেস্টোস্টেরন"], ans: 0, exp: "ব্যাখ্যা: সারটোলি কোশ থেকে ইনহিবিন নামক প্রোটিন হরমোন ক্ষরিত হয় যা নেগেটিভ ফিডব্যাকের মাধ্যমে পিটুইটারির FSH সংশ্লেষকে অবদমিত করে।" },
+            { q: "১২. ব্লাড টেস্টিস ব্যারিয়ার (BTB) গঠন করে শুক্রাণু উৎপাদনের জন্য বিশেষ পরিবেশ সৃষ্টি করে কে?", opts: ["লেডিগ কোশ", "স্পার্মাটোগোনিয়া", "সারটোলি কোশ", "এপিথেলিয়াল কোশ"], ans: 2, exp: "ব্যাখ্যা: সেমিনিফেরাস নালিকার ভিত্তি পর্দার নিকটে সারটোলির কোশগুলির মধ্যে টাইট জাংশন ব্লাড টেস্টিস ব্যারিয়ার (BTB) গঠন করে যা সদ্য উৎপন্ন জার্মকোশদের রক্ষা করে।" },
+            { q: "১৩. শুক্রাশয়ে রক্ত সংবহনকারী শিরা যখন ভাঁজ হয়ে ফুলে ওঠে এবং পুরুষের বন্ধ্যাত্ব দেখা দেয়, তাকে কী বলে?", opts: ["হাইড্রোসিল", "ভ্যারিকোসিল", "প্রস্টাটোম্যাগালি", "ক্রিপটরকিডিজম"], ans: 1, exp: "ব্যাখ্যা: শুক্রাশয়ে রক্ত সংবহনকারী শিরা ফুলে উঠলে রক্তসংবহন কমে যায়, একে ভ্যারিকোসিল বলে। এর ফলে শুক্রাণুর সংখ্যা কমে যায়।" },
+            { q: "১৪. শিশ্নের (Penis) কেন্দ্রে থাকা যে পেশিটিকে বেষ্টন করে মূত্র-জনন নালি বিস্তৃত থাকে তাকে কী বলে?", opts: ["করপোরা ক্যাভারনোসা", "করপাস স্পঞ্জিওসাম", "গ্লান্স পেনিস", "প্রিপিউস"], ans: 1, exp: "ব্যাখ্যা: শিশ্নের কেন্দ্রে থাকে করপাস স্পঞ্জিওসাম পেশি এবং একে বেষ্টন করে থাকে দুটি করপোরা ক্যাভারনোসা।" },
+            { q: "১৫. বীর্যের মধ্যে থাকা কোন খনিজ উপাদানটি শুক্রাণু ক্রোমাটিনের স্থিতিকরণে সাহায্য করে?", opts: ["ক্যালশিয়াম", "আয়রন", "জিঙ্ক", "ম্যাগনেশিয়াম"], ans: 2, exp: "ব্যাখ্যা: প্রস্টেট গ্রন্থি থেকে নিঃসৃত বীর্যের জিঙ্ক শুক্রাণু ক্রোমাটিনের স্থিতিকরণে সাহায্য করে।" }
+        ]
+    },
+    2: {
+        name: 'Set 2', icon: '♀️', topic: 'স্ত্রীজননতন্ত্র',
+        questions: [
+            { q: "১. জরায়ুর পেশিময় পুরু মধ্যস্তরটিকে কী বলে যার শক্তিশালী সংকোচনে শিশু জরায়ুর বাইরে আসে?", opts: ["পেরিমেট্রিয়াম", "মায়োমেট্রিয়াম", "এন্ডোমেট্রিয়াম", "এন্ডোথেলিয়াম"], ans: 1, exp: "ব্যাখ্যা: জরায়ুর প্রাচীরের মাঝখানের পুরু ও পেশিবহুল স্তরটিকে মায়োমেট্রিয়াম বলে। এর শক্তিশালী সংকোচনেই প্রসব সম্পন্ন হয়।" },
+            { q: "২. ফ্যালোপিয়ান নালির কোন অংশে সাধারণত ডিম্বাণুর নিষেক (Fertilization) সম্পন্ন হয়?", opts: ["ইসথমাস", "ইনফান্ডিবুলাম", "অ্যাম্পুলা", "ইউটেরাইন অংশ"], ans: 2, exp: "ব্যাখ্যা: ফ্যালোপিয়ান নালির স্ফীত অংশ অ্যাম্পুলাতে শুক্রাণু ও ডিম্বাণুর মিলন বা নিষেক সম্পন্ন হয়।" },
+            { q: "৩. জরায়ুর ভেতরের দিকের গ্রন্থিময় কলাস্তরটিকে কী বলে যা ঋতুচক্রের সঙ্গে পরিবর্তিত হয়?", opts: ["এন্ডোমেট্রিয়াম", "মায়োমেট্রিয়াম", "পেরিমেট্রিয়াম", "সারভিক্স"], ans: 0, exp: "ব্যাখ্যা: জরায়ুর সবচেয়ে ভেতরের গ্রন্থিময় স্তরটি হল এন্ডোমেট্রিয়াম। ঋতুচক্রের সময় এই স্তরের পরিবর্তন ঘটে এবং ভ্রূণ এখানেই রোপিত হয়।" },
+            { q: "৪. ফ্যালোপিয়ান নালির ফানেল সদৃশ ইনফান্ডিবুলামের মুক্ত প্রান্তে থাকা আঙুলের মতো অংশগুলিকে কী বলে?", opts: ["অ্যাম্পুলা", "ফিমব্রি", "সারভিক্স", "হাইমেন"], ans: 1, exp: "ব্যাখ্যা: ইনফান্ডিবুলামের মুক্ত প্রান্তে থাকা ক্ষুদ্র আঙুলাকার অংশগুলিকে ফিমব্রি বলে, যা ডিম্বাশয় থেকে নির্গত ডিম্বাণুকে গ্রহণ করতে সাহায্য করে।" },
+            { q: "৫. স্ত্রীলোকদের যোনিছিদ্রের নিকটস্থ মটরদানার মতো কোন গ্রন্থি মিউকাস ক্ষরণ করে যোনিপথ সিক্ত রাখে?", opts: ["প্রস্টেট গ্রন্থি", "কাউপার গ্রন্থি", "বার্থোলিন গ্রন্থি", "সিবেসিয়াস গ্রন্থি"], ans: 2, exp: "ব্যাখ্যা: যোনিছিদ্রের দু-পাশে থাকা বার্থোলিন গ্রন্থি মিউকাস ক্ষরণ করে যোনিপথকে পিচ্ছিল রাখে। এটি পুরুষদের কাউপার গ্রন্থির সমতুল্য।" },
+            { q: "৬. মানব স্ত্রী জননতন্ত্রের কোন অংশটি পুরুষদের শিশ্নের (glans penis) সমসংস্থ (homologous) অঙ্গ?", opts: ["ক্লাইটোরিস", "লেবিয়া মেজোরা", "লেবিয়া মাইনোরা", "হাইমেন"], ans: 0, exp: "ব্যাখ্যা: ক্লাইটোরিস স্ত্রীদেহের একপ্রকার ক্ষুদ্র ও দণ্ডাকার পেশিময় অঙ্গবিশেষ যা পুরুষদের শিশ্নের সমসংস্থ অঙ্গ হিসেবে পরিচিত।" },
+            { q: "৭. জরায়ু ছাড়া অন্য কোনো স্থানে (যেমন ডিম্বনালিতে) ভ্রূণের রোপণ ঘটলে তাকে কীরূপ গর্ভাবস্থা বলে?", opts: ["মিসক্যারেজ", "একটোপিক প্রেগন্যান্সি", "এন্ডোমেট্রিয়োসিস", "প্রিম্যাচিওর প্রেগন্যান্সি"], ans: 1, exp: "ব্যাখ্যা: স্বাভাবিকভাবে ভ্রূণ জরায়ুতে রোপিত হয়। কিন্তু ফ্যালোপিয়ান নালি বা অন্য কোথাও রোপিত হলে তাকে একটোপিক প্রেগন্যান্সি বলে।" },
+            { q: "৮. ডিম্বাশয় জরায়ুর সঙ্গে কোন প্রশস্ত যোজক দ্বারা সংলগ্ন থাকে?", opts: ["মেসোভ্যারিয়াম", "স্পার্মাটিক কর্ড", "ইনগুইনাল লিগামেন্ট", "গুবারনাকুলাম"], ans: 0, exp: "ব্যাখ্যা: ডিম্বাশয় দুটি মেসোভ্যারিয়াম নামক পর্দা এবং প্রশস্ত যোজক (broad ligament) দিয়ে জরায়ুর সঙ্গে সংলগ্ন থাকে।" },
+            { q: "৯. সন্তান প্রসবের পর কোন হরমোনের প্রভাবে স্তনগ্রন্থি থেকে দুগ্ধ উৎপাদন শুরু হয়?", opts: ["ইস্ট্রোজেন", "প্রোজেস্টেরন", "প্রোল্যাকটিন", "অক্সিটোসিন"], ans: 2, exp: "ব্যাখ্যা: প্রোল্যাকটিন হরমোনের প্রভাবে দুগ্ধ উৎপাদন শুরু হয় এবং অক্সিটোসিন হরমোনের প্রভাবে দুগ্ধ ক্ষরণ উদ্দীপিত হয়।" },
+            { q: "১০. বয়ঃসন্ধিকালে স্তনগ্রন্থির বৃদ্ধি মূলত কোন কোন হরমোনের প্রভাবে ঘটে?", opts: ["প্রোল্যাকটিন ও অক্সিটোসিন", "ইস্ট্রোজেন ও প্রোজেস্টেরন", "FSH ও LH", "রিলাক্সিন ও HCG"], ans: 1, exp: "ব্যাখ্যা: বয়ঃসন্ধিকালে ইস্ট্রোজেন ও প্রোজেস্টেরন হরমোনের প্রভাবে স্তনগ্রন্থি বড়ো হয়ে প্রমাণ আকার ধারণ করে।" },
+            { q: "১১. স্ত্রীদেহের যোনিপথের পরিবেশ কীরূপ হয়, যা প্যাথোজেনের বৃদ্ধি রোধ করে?", opts: ["ক্ষারীয়", "আম্লিক", "প্রশম", "তীব্র ক্ষারীয়"], ans: 1, exp: "ব্যাখ্যা: যোনিদেহের আম্লিক পরিবেশ কোনো প্রকার প্যাথোজেনিক অরগানিজম-এর বৃদ্ধি পাওয়ার হাত থেকে এই অঙ্গকে রক্ষা করে।" },
+            { q: "১২. ডিম্বাশয়ের পরিণত গ্রাফিয়ান ফলিকল থেকে প্রধানত কোন হরমোন নিঃসৃত হয়?", opts: ["ইস্ট্রোজেন", "প্রোজেস্টেরন", "রিলাক্সিন", "প্রোল্যাকটিন"], ans: 0, exp: "ব্যাখ্যা: পরিণত ডিম্বথলি বা গ্রাফিয়ান ফলিকল থেকে ইস্ট্রোজেন হরমোন ক্ষরিত হয়, যা স্ত্রীদেহের যৌনাঙ্গের পরিণতি ঘটায়।" },
+            { q: "১৩. জরায়ুর সবচেয়ে নীচের নলাকার অংশটিকে কী বলে যা যোনির সঙ্গে যুক্ত থাকে?", opts: ["ফান্ডাস", "বডি (দেহ)", "সারভিক্স", "ইসথমাস"], ans: 2, exp: "ব্যাখ্যা: জরায়ুর নীচের নলাকার অংশটিকে সারভিক্স বলে যা এক্সটারনাল অসটিয়াম দিয়ে যোনির সঙ্গে যুক্ত থাকে।" },
+            { q: "১৪. ঋতুস্রাব না হওয়াকে চিকিৎসাবিজ্ঞানের ভাষায় কী বলা হয়?", opts: ["ডিসমেনোরিয়া", "অ্যামেনোরিয়া", "মেনোরেজিয়া", "ওফোরাইটিস"], ans: 1, exp: "ব্যাখ্যা: স্ত্রীলোকদের ঋতুস্রাব না হওয়ার ঘটনাকে অ্যামেনোরিয়া বলে।" },
+            { q: "১৫. শল্য চিকিৎসার সাহায্যে জরায়ু বাদ দেওয়াকে কী বলে?", opts: ["হিস্টেরেকটমি", "ম্যাসটেকটমি", "অর্কিডেকটমি", "ভ্যাসেকটমি"], ans: 0, exp: "ব্যাখ্যা: সার্জারি বা শল্য চিকিৎসার মাধ্যমে জরায়ু সম্পূর্ণরূপে বাদ দেওয়াকে হিস্টেরেকটমি বলা হয়।" }
+        ]
+    },
+    3: {
+        name: 'Set 3', icon: '🔬', topic: 'শুক্রাশয় ও ডিম্বাশয়ের আণুবীক্ষণিক গঠন',
+        questions: [
+            { q: "১. শুক্রাশয়ের মধ্যে অসংখ্য সূক্ষ্ম কুণ্ডলীকৃত কোন নালিকায় শুক্রাণু উৎপন্ন হয়?", opts: ["ভাস ডিফারেন্স", "ভাসা ইফারেনসিয়া", "সেমিনিফেরাস নালিকা", "নিক্ষেপণ নালি"], ans: 2, exp: "ব্যাখ্যা: শুক্রাশয়ের প্রকোষ্ঠগুলি অসংখ্য সূক্ষ্ম কুণ্ডলীকৃত সেমিনিফেরাস নালিকা বা শুক্রোৎপাদক নালিকা দিয়ে পূর্ণ থাকে যার ভেতরে শুক্রাণু উৎপন্ন হয়।" },
+            { q: "২. সেমিনিফেরাস নালিকার আবরণী কোশগুলিকে কী বলে যা শুক্রাণুকে পুষ্টি জোগায়?", opts: ["লেডিগ কোশ", "সারটোলি কোশ", "স্পার্মাটোগোনিয়া", "জার্মিনাল এপিথেলিয়াম"], ans: 1, exp: "ব্যাখ্যা: সেমিনিফেরাস নালির প্রাচীরে উপস্থিত সারটোলি কোশ শুক্রাণুকে পুষ্টি জোগায়, তাই এদের পোষক কোশ বা sustentacular cells-ও বলে।" },
+            { q: "৩. শুক্রাশয়ের লেডিগের আন্তরকোশ (Leydig cells) কোথায় অবস্থান করে?", opts: ["সেমিনিফেরাস নালিকার ভেতরে", "এপিডিডাইমিসে", "দুটি সেমিনিফেরাস নালিকার মধ্যবর্তী স্ট্রোমায় বা ধাত্রে", "রেটি টেস্টিসে"], ans: 2, exp: "ব্যাখ্যা: শুক্রাশয়ের প্রকোষ্ঠগুলিতে দুটি শুক্রোৎপাদক নালিকার মধ্যবর্তী স্থানে ধাত্র বা স্ট্রোমাতে লেডিগের আন্তরকোশ থাকে যা টেস্টোস্টেরন ক্ষরণ করে।" },
+            { q: "৪. শুক্রাণু উৎপাদনের পর্যায়ক্রমে সেমিনিফেরাস নালিকার পরিধি থেকে কেন্দ্রের দিকে কোশস্তরের সঠিক বিন্যাস কোনটি?", opts: ["স্পার্মাটোগোনিয়া → প্রাথমিক স্পার্মাটোসাইট → গৌণ স্পার্মাটোসাইট → স্পার্মাটিড → স্পার্মাটোজোয়া", "স্পার্মাটিড → স্পার্মাটোগোনিয়া → প্রাথমিক স্পার্মাটোসাইট → গৌণ স্পার্মাটোসাইট", "স্পার্মাটোজোয়া → স্পার্মাটিড → গৌণ স্পার্মাটোসাইট → প্রাথমিক স্পার্মাটোসাইট", "স্পার্মাটোগোনিয়া → গৌণ স্পার্মাটোসাইট → প্রাথমিক স্পার্মাটোসাইট → স্পার্মাটিড"], ans: 0, exp: "ব্যাখ্যা: সেমিনিফেরাস নালিকার পরিধি থেকে কেন্দ্রের দিকে কোষগুলি ক্রমান্বয়ে এই পাঁচটি স্তরে সজ্জিত থাকে এবং সবশেষে পরিণত শুক্রাণু লুমেনে বা গহ্বরে মুক্ত হয়।" },
+            { q: "৫. ডিম্বাশয়ের সর্বাপেক্ষা বাইরের আবরণী স্তরটিকে কী বলে যা থেকে আদি ডিম্বথলির উৎপত্তি ঘটে?", opts: ["টিউনিকা অ্যালবুজিনিয়া", "জনন কলা (Germinal epithelium)", "স্ট্রোমা", "মেডুলা"], ans: 1, exp: "ব্যাখ্যা: ডিম্বাশয়ের সর্বাপেক্ষা বাইরের স্তরটি জনন কলা বা জার্মিনাল এপিথেলিয়াম যা কন্যা ভ্রূণে আদি ডিম্বথলি গঠন করে।" },
+            { q: "৬. ডিম্বাশয়ের কোন অংশে প্রচুর রক্তনালি, লসিকাবাহ এবং স্নায়ু থাকে এবং যা ডিম্বাশয়ের হাইলাম গঠন করে?", opts: ["কর্টেক্স", "মেডুলা", "টিউনিকা অ্যালবুজিনিয়া", "জনন কলা"], ans: 1, exp: "ব্যাখ্যা: ডিম্বাশয়ের কেন্দ্রে মেডুলা অবস্থান করে। এই অংশে প্রচুর রক্তবাহ ও স্নায়ু থাকে এবং এটি হাইলাম গঠন করে ডিম্বাশয়কে যুক্ত রাখে।" },
+            { q: "৭. ক্রমবর্ধমান ডিম্বথলিতে প্রাথমিক পরডিম্বাণুকে ঘিরে থাকা গ্লাইকোপ্রোটিন নির্মিত কোশস্তরটিকে কী বলে?", opts: ["গ্রানুলোসা স্তর", "জোনা পেলুসিডা", "করোনা রেডিয়েটা", "থিকা ইন্টারনা"], ans: 1, exp: "ব্যাখ্যা: প্রাথমিক পরডিম্বাণুকে ঘিরে গ্রানুলোসা কোষ থাকে এবং একে ঘিরে গ্লাইকোপ্রোটিন নির্মিত যে স্তর থাকে তাকে জোনা পেলুসিডা বলে।" },
+            { q: "৮. পরিণত গ্রাফিয়ান ফলিকলের ভেতরের তরলপূর্ণ ফাঁকা স্থান বা গহ্বরটিকে কী বলে?", opts: ["লিকার ফলিকুলি", "অ্যান্ট্রাম", "ব্লাস্টোসিল", "আর্কেনটেরন"], ans: 1, exp: "ব্যাখ্যা: পরিণত ফলিকলের কোশপুঞ্জের মধ্যে যে ফাঁকা স্থান থাকে তাকে অ্যান্ট্রাম বলে এবং এর ভিতরের তরলকে লিকার ফলিকুলি বলে।" },
+            { q: "৯. ডিম্বাণু বেরিয়ে যাওয়ার পর বিদীর্ণ ডিম্বথলি (Graafian follicle) কোন অস্থায়ী অন্তঃক্ষরা গ্রন্থিতে রূপান্তরিত হয়?", opts: ["করপাস অ্যালবিকানস", "করপাস লিউটিয়াম (পীতগ্রন্থি)", "পিটুইটারি", "ম্যাক্রোফাজ"], ans: 1, exp: "ব্যাখ্যা: ডিম্বাণু নিঃসরণের পর বিদীর্ণ ডিম্বথলি হলুদ বর্ণের পীতগ্রন্থি বা করপাস লিউটিয়ামে পরিণত হয় যা প্রোজেস্টেরন ক্ষরণ করে।" },
+            { q: "১০. যে আদি ডিম্বথলিগুলি পরিণত গ্রাফিয়ান ফলিকলে রূপান্তরিত হওয়ার আগেই ধ্বংসপ্রাপ্ত হয় তাদের কী বলে?", opts: ["অ্যাট্রেটিক ফলিকল", "করপাস অ্যালবিকানস", "পোলার বডি", "প্রাইমারি উসাইট"], ans: 0, exp: "ব্যাখ্যা: বয়ঃসন্ধিকালে বহু আদি ডিম্বথলি গ্রাফিয়ান ফলিকলে পরিণত হওয়ার আগেই নষ্ট হয়ে যায়, এদের অ্যাট্রেটিক ফলিকল বলে।" },
+            { q: "১১. নিষেক না ঘটলে করপাস লিউটিয়াম ক্রমশ ধ্বংসপ্রাপ্ত হয়ে যে শ্বেতকায়া সৃষ্টি করে তাকে কী বলে?", opts: ["করপাস স্পঞ্জিওসাম", "করপাস অ্যালবিকানস", "করপাস ক্যালোসাম", "করোনা রেডিয়েটা"], ans: 1, exp: "ব্যাখ্যা: নিষেক না ঘটলে পীতগ্রন্থি বা করপাস লিউটিয়াম ২৮ দিনের মাথায় পুরোপুরি নষ্ট হয়ে যায় এবং শ্বেত বর্ণের করপাস অ্যালবিকানস গঠন করে।" },
+            { q: "১২. শুক্রাশয়ের টিউনিকা অ্যালবুজিনিয়া থেকে উৎপন্ন ট্র্যাবিকিউলি শুক্রাশয়কে প্রায় কতগুলি উপখণ্ড বা প্রকোষ্ঠে ভাগ করে?", opts: ["১০টি", "৫০টি", "১০০টি", "১০০০টি"], ans: 2, exp: "ব্যাখ্যা: মধ্য আবরক টিউনিকা অ্যালবুজিনিয়ার তন্তু শুক্রাশয়কে প্রায় ১০০টি প্রকোষ্ঠে বা খণ্ডকে ভাগ করেছে।" },
+            { q: "১৩. মানব ভ্রূণে আদি ডিম্বথলির (Primordial follicles) সংখ্যা নবজাতক অবস্থায় কত থাকে?", opts: ["১০,০০০ - ২০,০০০", "৬০,০০০ - ৮০,০০০", "৩,০০,০০০ - ৫,০০,০০০", "১ মিলিয়নের বেশি"], ans: 2, exp: "ব্যাখ্যা: নবজাতক কন্যাসন্তানে আদি ডিম্বথলির সংখ্যা প্রায় 3,00,000-5,00,000 থাকে যা বয়ঃসন্ধিতে 60,000-80,000-এ নেমে আসে।" },
+            { q: "১৪. পরিণত ডিম্বথলির বাইরের দিকে থাকা দুটি কোষীয় আচ্ছাদনী স্তরের নাম কী?", opts: ["জোনা পেলুসিডা ও করোনা রেডিয়েটা", "থিকা ইন্টারনা ও থিকা এক্সটারনা", "এপিডারমিস ও এন্ডোথেলিয়াম", "পেরিমেট্রিয়াম ও মায়োমেট্রিয়াম"], ans: 1, exp: "ব্যাখ্যা: পরিণত গ্রাফিয়ান ফলিকলের বাইরের দিকে থিকা ইন্টারনা ও থিকা এক্সটারনা নামক দুটি কোশস্তরের আচ্ছাদনী থাকে।" },
+            { q: "১৫. শুক্রাশয়কে ঘিরে থাকা তিনটি আবরকের মধ্যে সবচেয়ে ভেতরের স্তরটির নাম কী?", opts: ["টিউনিকা ভ্যাজাইনালিস", "টিউনিকা অ্যালবুজিনিয়া", "টিউনিকা ভাসকুলোসা", "ডার্টস পেশি"], ans: 2, exp: "ব্যাখ্যা: শুক্রাশয় তিনটি আবরক দ্বারা আবৃত থাকে— বহিঃস্থ টিউনিকা ভ্যাজাইনালিস, মধ্যস্থ টিউনিকা অ্যালবুজিনিয়া এবং অন্তঃস্থ টিউনিকা ভাসকুলোসা।" }
+        ]
+    },
+    4: {
+        name: 'Set 4', icon: '🧬', topic: 'গ্যামেটোজেনেসিস',
+        questions: [
+            { q: "১. স্পার্মাটোজেনেসিস প্রক্রিয়ায় একটি ডিপ্লয়েড প্রাথমিক স্পার্মাটোসাইট (2n) থেকে মিয়োসিস বিভাজনের পর মোট কয়টি হ্যাপ্লয়েড শুক্রাণু সৃষ্টি হয়?", opts: ["১টি", "২টি", "৪টি", "৮টি"], ans: 2, exp: "ব্যাখ্যা: প্রাথমিক স্পার্মাটোসাইট মায়োসিস প্রক্রিয়ায় বিভাজিত হয়ে প্রথমে দুটি গৌণ স্পার্মাটোসাইট এবং পরে চারটি হ্যাপ্লয়েড স্পার্মাটিড তৈরি করে, যা চারটি শুক্রাণুতে পরিণত হয়।" },
+            { q: "২. গোলাকার ও নিষ্ক্রিয় স্পার্মাটিড থেকে লেজবিশিষ্ট ও চলনক্ষম স্পার্মাটোজোয়া (শুক্রাণু) উৎপন্ন হওয়ার পদ্ধতিকে কী বলে?", opts: ["স্পার্মাটোজেনেসিস", "স্পার্মিওজেনেসিস", "স্পার্মিয়েশন", "ক্যাপাসিটেশন"], ans: 1, exp: "ব্যাখ্যা: স্পার্মাটিডগুলি সারটোলি কোষ থেকে পুষ্টি পেয়ে লেজবিশিষ্ট পরিণত শুক্রাণু গঠন করে, এই রূপান্তরকে স্পার্মিওজেনেসিস বলে।" },
+            { q: "৩. পরিণত শুক্রাণুগুলি সারটোলির কোশ থেকে মুক্ত হয়ে নির্গত হওয়ার প্রক্রিয়াকে কী বলে?", opts: ["স্পার্মিয়েশন", "ওভ্যুলেশন", "ইনসেমিনেশন", "ইজাকুলেশন"], ans: 0, exp: "ব্যাখ্যা: অপরিণত শুক্রাণুর মস্তক সারটোলি কোষে প্রোথিত থাকে। পরিণত হওয়ার পর এই কোষ থেকে শুক্রাণুর মুক্তি বা নির্গমনকে স্পার্মিয়েশন বলে।" },
+            { q: "৪. স্পার্মাটোজেনেসিসে কোন কোশটি সর্বপ্রথম হ্যাপ্লয়েড (n) দশায় পৌঁছায়?", opts: ["স্পার্মাটোগোনিয়া", "প্রাথমিক স্পার্মাটোসাইট", "গৌণ স্পার্মাটোসাইট", "স্পার্মাটিড"], ans: 2, exp: "ব্যাখ্যা: ডিপ্লয়েড (2n) প্রাথমিক স্পার্মাটোসাইট মায়োসিস-I (হ্রাস বিভাজন) সম্পন্ন করে হ্যাপ্লয়েড (n) গৌণ স্পার্মাটোসাইট গঠন করে।" },
+            { q: "৫. উজেনেসিস প্রক্রিয়ায় একটি প্রাথমিক উসাইট (2n) থেকে মায়োসিস বিভাজনের ফলে কয়টি ডিম্বাণু ও কয়টি পোলার বডি উৎপন্ন হয়?", opts: ["চারটি ডিম্বাণু", "দুটি ডিম্বাণু ও দুটি পোলার বডি", "একটি ডিম্বাণু ও একটি পোলার বডি", "একটি ডিম্বাণু ও তিনটি পোলার বডি"], ans: 3, exp: "ব্যাখ্যা: উজেনেসিসে অসম সাইটোকাইনেসিস হওয়ায় একটি উগোনিয়াম বা প্রাথমিক উসাইট থেকে একটিমাত্র বড়ো ডিম্বাণু এবং তিনটি ক্ষুদ্র পোলার বডি সৃষ্টি হয়।" },
+            { q: "৬. মহিলাদের ডিম্বাশয়ে উগোনিয়া (oogonia) বা ডিম্বাণু মাতৃকোষের উৎপত্তি ও বিভাজন কোন বয়সে শুরু হয়?", opts: ["বয়ঃসন্ধিকালে", "মাতৃজঠরে ভ্রূণ অবস্থাতেই", "জন্মের ঠিক পর", "২০ বছর বয়সের পর"], ans: 1, exp: "ব্যাখ্যা: ভ্রূণ অবস্থায় ডিম্বাশয়ের প্রজনন কলা থেকে মাইটোসিস বিভাজনের মাধ্যমে উগোনিয়া তৈরি হয় এবং প্রাথমিক উসাইট দশায় এসে তা পিউবার্টি পর্যন্ত স্থগিত থাকে।" },
+            { q: "৭. ঋতুচক্রের ১৪ দিনের মাথায় গ্রাফিয়ান ফলিকল বিদীর্ণ হয়ে ডিম্বাণু নির্গমনকে (ওভ্যুলেশন) কী বলে এবং এই সময় ডিম্বাণুটি কোন দশায় থাকে?", opts: ["প্রাথমিক উসাইট", "গৌণ উসাইট", "উটিড", "পোলার বডি"], ans: 1, exp: "ব্যাখ্যা: ডিম্বাশয় থেকে ডিম্বাণু গৌণ উসাইট (Secondary oocyte) দশায় নির্গত হয় এবং এই নির্গমনকে ওভ্যুলেশন বলে।" },
+            { q: "৮. মানব ডিম্বাণুতে মায়োসিস-II (সদৃশ বিভাজন) কখন সম্পূর্ণ হয়?", opts: ["বয়ঃসন্ধিকালে", "ওভ্যুলেশনের ঠিক আগে", "শুক্রাণু ডিম্বাণুর ভেতর প্রবেশ করলে (নিষেকের সময়)", "জাইগোট রোপণের সময়"], ans: 2, exp: "ব্যাখ্যা: ফ্যালোপিয়ান নালিতে গৌণ উসাইটের সঙ্গে শুক্রাণুর মিলন ঘটলে তবেই মায়োসিস-II সম্পূর্ণ হয় এবং একটি পরিণত ওভাম ও দ্বিতীয় পোলার বডি উৎপন্ন হয়।" },
+            { q: "৯. শুক্রাণুর মস্তকের অগ্রভাগে থাকা টুপির মতো অ্যাক্রোজোম (Acrosome) কোশের কোন অঙ্গাণু থেকে সৃষ্টি হয়?", opts: ["মাইটোকনড্রিয়া", "এন্ডোপ্লাজমিক রেটিকুলাম", "গলগি বডি", "রাইবোজোম"], ans: 2, exp: "ব্যাখ্যা: স্পার্মিওজেনেসিসের সময় গলগি বডিতে থাকা প্রোঅ্যাক্রোজোমাল দানাগুলি থেকে অ্যাক্রোজোম বা অ্যাক্রোজোম ক্যাপ তৈরি হয়।" },
+            { q: "১০. শুক্রাণুর কোন অংশে প্রচুর মাইটোকনড্রিয়া সর্পিলাকারে সজ্জিত থাকে যা শুক্রাণুর চলনে শক্তি জোগায়?", opts: ["মস্তকে", "গ্রীবায়", "দেহ বা মধ্যাংশে", "লেজে"], ans: 2, exp: "ব্যাখ্যা: শুক্রাণুর দেহ বা মধ্যাংশে মাইটোকনড্রিয়াল সিদ কুণ্ডলীকৃতভাবে বিন্যস্ত থাকে যা শুক্রাণুর চলনের জন্য প্রয়োজনীয় শক্তি সরবরাহ করে।" },
+            { q: "১১. ওজেনেসিসের সময় প্রথম পোলার বডি কখন সৃষ্টি হয়?", opts: ["মাইটোসিস বিভাজনের পর", "মায়োসিস-I (হ্রাস বিভাজন) সম্পন্ন হওয়ার পর", "মায়োসিস-II সম্পন্ন হওয়ার পর", "নিষেকের পর"], ans: 1, exp: "ব্যাখ্যা: প্রাথমিক উসাইট মায়োসিস-I সম্পন্ন করে একটি বড়ো গৌণ উসাইট এবং একটি ছোটো প্রথম পোলার বডি উৎপন্ন করে।" },
+            { q: "১২. মানবদেহে স্পার্মাটোজেনেসিস প্রক্রিয়া শুরু হতে সাহায্যকারী গোনাডোট্রপিক রিলিজিং হরমোন (GnRH) কোথা থেকে নিঃসৃত হয়?", opts: ["অগ্র পিটুইটারি", "পশ্চাৎ পিটুইটারি", "হাইপোথ্যালামাস", "শুক্রাশয়"], ans: 2, exp: "ব্যাখ্যা: হাইপোথ্যালামাস থেকে ক্ষরিত GnRH অগ্র পিটুইটারিকে উদ্দীপিত করে FSH ও LH ক্ষরণ করায় যা স্পার্মাটোজেনেসিস নিয়ন্ত্রণ করে।" },
+            { q: "১৩. শুক্রাণু উৎপাদনের সময় 'B-স্পার্মাটোগোনিয়া' কোন কাজ করে?", opts: ["এরা স্টেম কোষ হিসেবে থেকে যায়", "এরা শুক্রাণু মাতৃকোষ হিসেবে কাজ করে এবং বৃদ্ধি পেয়ে প্রাথমিক স্পার্মাটোসাইট গঠন করে", "এরা সারটোলি কোষে পরিণত হয়", "এরা টেস্টোস্টেরন ক্ষরণ করে"], ans: 1, exp: "ব্যাখ্যা: A-স্পার্মাটোগোনিয়া স্টেম কোষ হিসেবে থাকে, কিন্তু B-স্পার্মাটোগোনিয়া শুক্রাণু মাতৃকোষ হিসেবে কাজ করে এবং বৃদ্ধি দশায় প্রাথমিক স্পার্মাটোসাইট গঠন করে।" },
+            { q: "১৪. ডিম্বাশয়ে ওভ্যুলেশন ঘটানোর জন্য প্রধানত কোন হরমোনটির মাত্রা বৃদ্ধি দায়ী?", opts: ["FSH", "ইস্ট্রোজেন", "LH", "প্রোজেস্টেরন"], ans: 2, exp: "ব্যাখ্যা: অগ্র-পিটুইটারির লিউটিনাইজিং হরমোন (LH)-এর প্রভাবে ডিম্বাশয়ের গ্রাফিয়ান ফলিকল বিদীর্ণ হয়ে ডিম্বাণু (গৌণ উসাইট) নির্গত হয়।" },
+            { q: "১৫. মানুষের পরিণত শুক্রাণুর ক্রোমোজোম বিন্যাস কী হতে পারে?", opts: ["44A + XY", "22A + XX", "22A + X অথবা 22A + Y", "44A + X"], ans: 2, exp: "ব্যাখ্যা: স্পার্মাটোজেনেসিস প্রক্রিয়ায় সৃষ্ট হ্যাপ্লয়েড (n=23) শুক্রাণুগুলিতে 22টি অটোজোমের সাথে একটি X অথবা একটি Y ক্রোমোজোম থাকে।" }
+        ]
+    },
+    5: {
+        name: 'Set 5', icon: '🩸', topic: 'শুক্রাণু ও ডিম্বাণুর গঠন এবং রজঃচক্র',
+        questions: [
+            { q: "১. শুক্রাণুর মস্তকের অ্যাক্রোজোমে থাকা কোন প্রোটিন ভঙ্গক উৎসেচকটি ডিম্বাণুর আবরণ ভেদ করতে সাহায্য করে?", opts: ["লাইসোজাইম", "হায়ালুরোনিডেজ", "রিলাক্সিন", "ক্যাটালেজ"], ans: 1, exp: "ব্যাখ্যা: অ্যাক্রোজোমের ভেতরে হায়ালুরোনিডেজ এবং অন্যান্য প্রোটিওলাইটিক উৎসেচক থাকে যা ডিম্বাণুর জোনা পেলুসিডা ও করোনা রেডিয়েটা ভেদ করতে শুক্রাণুকে সাহায্য করে।" },
+            { q: "২. ডিম্বাণুর প্লাজমা মেমব্রেনের (ভাইটেলাইন পর্দা) ঠিক বাইরে থাকা কোষবিহীন গ্লাইকোপ্রোটিনের স্তরটিকে কী বলে?", opts: ["জোনা পেলুসিডা", "করোনা রেডিয়েটা", "কুমুলাস ওফোরাস", "পেরিভাইটেলাইন স্পেস"], ans: 0, exp: "ব্যাখ্যা: ভাইটেলাইন পর্দার বাইরে যে কোষবিহীন গ্লাইকোপ্রোটিন স্তর থাকে তাকে জোনা পেলুসিডা বলে। এর বাইরে কোষযুক্ত করোনা রেডিয়েটা থাকে।" },
+            { q: "৩. শুক্রাণুর অ্যাক্সিয়াল ফিলামেন্টকে ঘিরে থাকা মাইটোকন্ড্রিয়ার সর্পিলাকার আবরণটিকে কী বলা হয়?", opts: ["অ্যাক্রোজোম", "নিবেনকার্ন", "প্রক্সিমাল সেন্ট্রিওল", "টেলোমিয়ার"], ans: 1, exp: "ব্যাখ্যা: শুক্রাণুর মস্তকের নিচে সেন্ট্রিওলের পরে মাইটোকন্ড্রিয়ার যে সর্পিলাকার আবরণ দেখতে পাওয়া যায় তাকে নিবেনকার্ন (Nebenkern) বলা হয়।" },
+            { q: "৪. মানুষের ডিম্বাণুকে 'অ্যালৈসিথাল' (Alecithal) ডিম্বাণু বলা হয় কেন?", opts: ["কারণ এতে প্রচুর কুসুম থাকে", "কারণ কুসুম এক প্রান্তে থাকে", "কারণ এটি সম্পূর্ণ কুসুমবিহীন", "কারণ কুসুম কেন্দ্রে থাকে"], ans: 2, exp: "ব্যাখ্যা: মানুষের ডিম্বাণুতে কোনো কুসুম (yolk) সঞ্চিত থাকে না, তাই এই প্রকার ডিম্বাণুকে অ্যালৈসিথাল বলে।" },
+            { q: "৫. ডিম্বাণুর যে মেরু বা প্রান্ত থেকে দ্বিতীয় পোলার বডি (মেরুডিংশ) নিক্ষিপ্ত হয় তাকে কী বলে?", opts: ["অ্যানিম্যাল পোল", "ভেজিটাল পোল", "পেরিভাইটেলাইন স্পেস", "উপ্লাজম"], ans: 0, exp: "ব্যাখ্যা: পরিণত ডিম্বাণু গঠনকালে গৌণ পরডিম্বাণুর যে প্রান্ত থেকে দ্বিতীয় মেরুডিংশ নিক্ষিপ্ত হয় তাকে অ্যানিম্যাল পোল বলে। এর বিপরীত মেরুকে ভেজিটাল পোল বলে।" },
+            { q: "৬. নারীদের যৌনজীবনে প্রথমবার রজঃস্রাব শুরু হওয়াকে কী বলা হয়?", opts: ["মেনোপজ", "মেনার্কি", "ওভ্যুলেশন", "ইনসেমিনেশন"], ans: 1, exp: "ব্যাখ্যা: বয়ঃসন্ধিকালে মেয়েদের (১০-১২ বছর বয়সে) প্রথম রজঃস্রাব শুরু হওয়াকে মেনার্কি (Menarche) বলে।" },
+            { q: "৭. রজঃস্রাবের রক্ত কেন সাধারণত তঞ্চিত (clot) হয় না?", opts: ["হেপারিন থাকার জন্য", "প্লাজমিন নামক রাসায়নিক পদার্থ উপস্থিত থাকার জন্য", "হিস্টামিন থাকার জন্য", "ক্যালশিয়ামের অভাবের জন্য"], ans: 1, exp: "ব্যাখ্যা: রজঃস্রাবের সঙ্গে গৌণ পরডিম্বাণু নিঃসৃত প্লাজমিন (Plasmin) নামক রাসায়নিক পদার্থের উপস্থিতির জন্য রজঃস্রাবের রক্ত জমাট বাঁধে না বা তঞ্চিত হয় না।" },
+            { q: "৮. স্ত্রীলোকদের জীবনচক্রের যে দশায় (সাধারণত ৪০-৫০ বছর বয়সে) রজঃস্রাব ও ডিম্ব নিঃসরণ সম্পূর্ণরূপে বন্ধ হয়ে যায় তাকে কী বলে?", opts: ["মেনোরেজিয়া", "মেনার্কি", "মেনোপজ", "অ্যামেনোরিয়া"], ans: 2, exp: "ব্যাখ্যা: ৪০-৫০ বছরের মধ্যে ডিম্বাশয়ে ফলিকল বা হরমোনের অভাবে রজঃস্রাব চিরতরে বন্ধ হয়ে যাওয়াকে রজঃনিবৃত্তি বা মেনোপজ বলে।" },
+            { q: "৯. রজঃচক্রের কোন দশায় (১৬-২৮ দিন) জরায়ুর এন্ডোমেট্রিয়াম স্তর সবচেয়ে বেশি পুরু ও রক্তজালক সমৃদ্ধ হয়?", opts: ["মেনস্ট্রুয়াল দশা", "প্রোলিফারেটিভ দশা", "ওভিউলেটারি দশা", "প্রাক্‌রজঃস্রাবীয় দশা বা লিউটিয়াল দশা"], ans: 3, exp: "ব্যাখ্যা: প্রাক্‌রজঃস্রাবীয় দশা বা লিউটিয়াল দশায় করপাস লিউটিয়াম থেকে প্রোজেস্টেরন ক্ষরণের ফলে এন্ডোমেট্রিয়াম আরও পুরু ও রক্তজালক সমৃদ্ধ হয়ে ভ্রূণ রোপণের জন্য তৈরি হয়।" },
+            { q: "১০. রজঃচক্রের মেনস্ট্রুয়াল বা রজঃস্রাবীয় দশা (১-৫ দিন) কেন শুরু হয়?", opts: ["ইস্ট্রোজেনের মাত্রা বৃদ্ধির জন্য", "পীতগ্রন্থি ধ্বংসপ্রাপ্ত হয়ে প্রোজেস্টেরন ক্ষরণ হঠাৎ বন্ধ হয়ে যাওয়ার জন্য", "LH হরমোন বেড়ে যাওয়ার জন্য", "ডিম্বাণু জরায়ুতে প্রোথিত হওয়ার জন্য"], ans: 1, exp: "ব্যাখ্যা: নিষেক না হলে পীতগ্রন্থি नष्ट হয়ে যায়, ফলে প্রোজেস্টেরনের ক্ষরণ হঠাৎ বন্ধ হয়ে যাওয়ায় জরায়ুর এন্ডোমেট্রিয়াম বিচ্ছিন্ন হয়ে রক্তক্ষরণ শুরু হয়।" },
+            { q: "১১. প্রাইমেট বর্গের স্তন্যপায়ী ছাড়া অন্যান্য স্তন্যপায়ী প্রাণীদের (যেমন- কুকুর, ইঁদুর) যৌনচক্রকে কী বলে?", opts: ["রজঃচক্র (Menstrual cycle)", "ঋতুচক্র (Oestrous cycle)", "সার্কেডিয়ান রিদম", "ওভ্যুলেশন চক্র"], ans: 1, exp: "ব্যাখ্যা: প্রাইমেট ছাড়া অন্যান্য স্তন্যপায়ী প্রাণীদের জননতন্ত্রে যে নির্দিষ্ট ঋতুভিত্তিক যৌনচক্র সংঘটিত হয় তাকে ঋতুচক্র বা Oestrous cycle বলে।" },
+            { q: "১২. ডিম্বাশয় থেকে ডিম্বাণু (গৌণ উসাইট) নিঃসরণের পর সাধারণত কত ঘণ্টার মধ্যে নিষেক না ঘটলে তা বিনষ্ট হয়?", opts: ["২-৪ ঘণ্টা", "১২-২৪ ঘণ্টা", "৭২ ঘণ্টা", "৭ দিন"], ans: 1, exp: "ব্যাখ্যা: ডিম্বাণু নিঃসরণের ১২-২৪ ঘণ্টার মধ্যে শুক্রাণুর সঙ্গে মিলন বা নিষেক না ঘটলে ডিম্বাণুটি বিনষ্ট হয়ে যায়।" },
+            { q: "১৩. রজঃচক্রের প্রোলিফারেটিভ দশা (৬-১৩ দিন) প্রধানত কোন হরমোন দ্বারা নিয়ন্ত্রিত হয়?", opts: ["ইস্ট্রোজেন ও FSH", "প্রোজেস্টেরন ও LH", "রিলাক্সিন ও অক্সিটোসিন", "প্রোল্যাকটিন"], ans: 0, exp: "ব্যাখ্যা: এই দশায় পিটুইটারির FSH এর প্রভাবে ডিম্বথলি পরিণত হয় এবং ইস্ট্রোজেন ক্ষরণ বৃদ্ধি পেয়ে এন্ডোমেট্রিয়াম পুনরায় সৃষ্টি করে।" },
+            { q: "১৪. জরায়ুর প্রাচীর থেকে রজঃস্রাবের সঙ্গে কোন উপাদানগুলি দেহের বাইরে নির্গত হয়?", opts: ["কেবল রক্ত", "রক্ত, জরায়ুর এন্ডোমেট্রিয়ামের ভগ্নাংশ, অনিষিক্ত ডিম্বাণু ও মিউকাস", "রক্ত ও নিষিক্ত ডিম্বাণু", "অ্যামনিওটিক তরল"], ans: 1, exp: "ব্যাখ্যা: রজঃস্রাবে রক্ত ছাড়াও জরায়ুর এন্ডোমেট্রিয়াম স্তরের খসে পড়া অংশ, লিউকোসাইট, মিউকাস এবং অনিষিক্ত ডিম্বাণু থাকে।" },
+            { q: "১৫. স্ত্রীলোকদের যন্ত্রণাদায়ক রজঃস্রাবকে চিকিৎসাবিজ্ঞানের পরিভাষায় কী বলে?", opts: ["অ্যামেনোরিয়া", "মেনোরেজিয়া", "ডিসমেনোরিয়া", "ওফোরাইটিস"], ans: 2, exp: "ব্যাখ্যা: অস্বাভাবিক বা যন্ত্রণাদায়ক রজঃস্রাব হওয়াকে ডিসমেনোরিয়া (Dysmenorrhea) বলে।" }
+        ]
+    },
+    6: {
+        name: 'Set 6', icon: '👶', topic: 'নিষেক ও ভ্রূণের পরিস্ফুটন',
+        questions: [
+            { q: "১. স্ত্রীজননপথে প্রবেশের পর শুক্রাণুর মস্তকের আবরণী থেকে গ্লাইকোপ্রোটিন অপসারিত হয়ে ডিম্বাণুকে নিষিক্ত করার ক্ষমতা অর্জনকে কী বলে?", opts: ["ইনসেমিনেশন", "ক্যাপাসিটেশন", "কর্টিক্যাল বিক্রিয়া", "স্পার্মিয়েশন"], ans: 1, exp: "ব্যাখ্যা: স্ত্রীজননপথে শুক্রাণুর অ্যাক্রোজোমের ওপর থেকে গ্লাইকোপ্রোটিন ও কোলেস্টেরল অপসারিত হয়ে শুক্রাণু অধিক সক্রিয় হয়, এই পদ্ধতিকে ক্যাপাসিটেশন বলে। এর জন্য ৫-৬ ঘণ্টা সময় লাগে।" },
+            { q: "২. মানুষের নিষেক (Fertilization) প্রক্রিয়া স্ত্রীজননতন্ত্রের ঠিক কোন স্থানে সম্পন্ন হয়?", opts: ["জরায়ু (Uterus)", "সারভিক্স (Cervix)", "ফ্যালোপিয়ান নালির অ্যাম্পুলা (Ampulla)", "ডিম্বাশয় (Ovary)"], ans: 2, exp: "ব্যাখ্যা: ডিম্বাশয় থেকে নির্গত ডিম্বাণু ফ্যালোপিয়ান নালিতে আসে এবং এর অ্যাম্পুলা অংশেই শুক্রাণুর সাথে ডিম্বাণুর সাক্ষাৎ ও নিষেক সম্পন্ন হয়।" },
+            { q: "৩. ডিম্বাণুতে একটি শুক্রাণু প্রবেশ করার পর অন্য শুক্রাণুর প্রবেশ রোধ করার জন্য জোনা পেলুসিডার সাথে কর্টিক্যাল গ্রানিউলস যুক্ত হয়ে কী গঠন করে?", opts: ["ভাইটেলাইন পর্দা", "নিষেক পর্দা (Fertilization membrane)", "করোনা রেডিয়েটা", "পেরিমেট্রিয়াম"], ans: 1, exp: "ব্যাখ্যা: প্রথম শুক্রাণুটি প্রবেশের পর ডিম্বাণুর কর্টিক্যাল গ্রানিউলসের রাসায়নিক পদার্থগুলি জোনা পেলুসিডার সঙ্গে যুক্ত হয়ে নিষেক পর্দা গঠন করে, যা পলিস্পার্মি রোধ করে।" },
+            { q: "৪. শুক্রাণু ও ডিম্বাণুর ক্রোমোজোমগুলির (প্রোনিউক্লিয়াস) একত্রে মিলিত হওয়াকে কী বলে?", opts: ["ক্যাপাসিটেশন", "ক্লিভেজ", "ক্যারিয়োগ্যামি বা অ্যামফিমিক্সিস", "মরুলেশন"], ans: 2, exp: "ব্যাখ্যা: পুং এবং স্ত্রী প্রোনিউক্লিয়াসের ক্রোমোজোমগুলির বেমতন্তুর সঙ্গে যুক্ত হয়ে মিলিত হওয়াকে ক্যারিয়োগ্যামি (karyogamy) বা অ্যাম্ফিমিক্সিস (amphimixis) বলে।" },
+            { q: "৫. জাইগোট বারবার মাইটোসিস প্রক্রিয়ায় বিভাজিত (ক্লিভেজ) হয়ে যে ১৬টি কোশবিশিষ্ট নিরেট বলের মতো ভ্রূণ গঠন করে তাকে কী বলে?", opts: ["মরুলা", "ব্লাস্টুলা", "গ্যাস্ট্রুলা", "ফিটাস"], ans: 0, exp: "ব্যাখ্যা: জাইগোটের ক্লিভেজের ফলে সৃষ্ট ১৬ কোশবিশিষ্ট নিরেট বলের মতো আদি ভ্রূণ গঠনকে মরুলা (morula) বলে।" },
+            { q: "৬. মরুলার পরবর্তী দশা, যা একটি তরলপূর্ণ গহ্বরযুক্ত একস্তরবিশিষ্ট ফাঁপা বলের মতো দেখতে হয় তাকে কী বলে?", opts: ["জাইগোট", "গ্যাস্ট্রুলা", "ব্লাস্টুলা বা ব্লাস্টোসিস্ট", "ট্রোফোব্লাস্ট"], ans: 2, exp: "ব্যাখ্যা: মরুলা পরিবর্তিত হয়ে ব্লাস্টোসিল গহ্বরযুক্ত যে একস্তরবিশিষ্ট ফাঁপা বলের গঠন সৃষ্টি করে তাকে ব্লাস্টুলা বা ব্লাস্টোসিস্ট বলে। এটিই জরায়ুতে রোপিত হয়।" },
+            { q: "৭. ব্লাস্টোসিস্ট জরায়ুর এন্ডোমেট্রিয়াম গাত্রে প্রোথিত হওয়ার পদ্ধতিকে কী বলা হয় এবং এটি নিষেকের কতদিন পর ঘটে?", opts: ["ওভ্যুলেশন, ১৪ দিন", "রোপণ বা ইমপ্লানটেশন, ৬-১২ দিন", "জেসটেশন, ২৮০ দিন", "প্রসব, ৯ মাস"], ans: 1, exp: "ব্যাখ্যা: ব্লাস্টোসিস্ট এন্ডোমেট্রিয়ামে প্রতিস্থাপিত হওয়ার পদ্ধতিকে রোপণ বা ইমপ্লানটেশন বলে, যা নিষেকের ৬-৭ দিন পর শুরু হয়ে ১২ দিনের মাথায় সম্পূর্ণ হয়।" },
+            { q: "৮. গ্যাস্ট্রুলা দশায় সৃষ্টি হওয়া কোন্ ভ্রূণজ স্তর থেকে মানুষের স্নায়ুতন্ত্র (মস্তিষ্ক, সুষুম্নাকাণ্ড) এবং ত্বকের এপিডারমিস গঠিত হয়?", opts: ["এন্ডোডার্ম", "মেসোডার্ম", "এক্টোডার্ম", "ট্রোফোব্লাস্ট"], ans: 2, exp: "ব্যাখ্যা: গ্যাস্ট্রুলার সবচেয়ে বাইরের স্তর এক্টোডার্ম থেকে স্নায়ুতন্ত্র, চোখ, ত্বক, চুল, নখ ইত্যাদি সৃষ্টি হয়।" },
+            { q: "৯. ভ্রূণের হৃৎপিণ্ড, রক্ত, রক্তবাহ, বৃক্ক এবং পেশিতন্ত্র প্রধানত কোন্ ভ্রূণজ স্তর থেকে গঠিত হয়?", opts: ["এক্টোডার্ম", "মেসোডার্ম", "এন্ডোডার্ম", "প্লাসেন্টা"], ans: 1, exp: "ব্যাখ্যা: গ্যাস্ট্রুলার মাঝের স্তর মেসোডার্ম থেকে হৃৎপিণ্ড, রক্ত, পেশি, অস্থি, বৃক্ক, জনন অঙ্গ ইত্যাদি গঠিত হয়।" },
+            { q: "১০. মাতৃকলা ও ভ্রূণকলার সমন্বয়ে গঠিত যে চাকতির মতো অঙ্গ দিয়ে মাতৃদেহ থেকে ভ্রূণে পুষ্টি ও অক্সিজেন পৌঁছায় তাকে কী বলে?", opts: ["নাভিরজ্জু", "অ্যামনিয়ন", "অমরা বা প্লাসেন্টা", "কোরিওন"], ans: 2, exp: "ব্যাখ্যা: প্লাসেন্টা হল মাতা ও ভ্রূণের রক্তসংবহন তন্ত্রের সংযোগস্থল, যার মাধ্যমে ভ্রূণ পুষ্টি ও অক্সিজেন সংগ্রহ করে এবং বর্জ্য পদার্থ মাতৃদেহে প্রেরণ করে।" },
+            { q: "১১. মানুষের প্লাসেন্টার প্রকৃতি কীরূপ?", opts: ["এন্ডোথেলিokোরিয়াল ও ডিসকয়ডাল", "এপিথেলিওকোরিয়াল ও ডিফিউজ", "হিমোকোরিয়াল, ডিসকয়ডাল ও ডেসিডুয়াস", "সিনডেসমেকোরিয়াল"], ans: 2, exp: "ব্যাখ্যা: মানুষের প্লাসেন্টায় কোরিওনিক ভিলাই মাতৃরক্তে সরাসরি নিমজ্জিত থাকে (হিমোকোরিয়াল), এটি চাকতির মতো (ডিসকয়ডাল) এবং প্রসবের পর খসে পড়ে (ডেসিডুয়াস)।" },
+            { q: "১২. গর্ভাবস্থা বা প্রেগন্যান্সি নিশ্চিত করার জন্য মূত্রে কোন্ হরমোনের উপস্থিতি পরীক্ষা করা হয়?", opts: ["ইস্ট্রোজেন", "HCS", "HCG (Human Chorionic Gonadotropin)", "রিলাক্সিন"], ans: 2, exp: "ব্যাখ্যা: ব্লাস্টোসিস্ট রোপিত হওয়ার পর প্লাসেন্টার ট্রোফোব্লাস্ট কোষ থেকে HCG ক্ষরিত হয় যা মূত্রে নির্গত হয়। এই হরমোনের উপস্থিতিতেই প্রেগন্যান্সি টেস্ট করা হয়।" },
+            { q: "১৩. গর্ভাবস্থার শেষ পর্যায়ে প্লাসেন্টা থেকে ক্ষরিত কোন্ হরমোনটি শ্রোণিধমনীর লিগামেন্ট ও জরায়ুকণ্ঠকে শিথিল করে প্রসব সহজ করে?", opts: ["রিলাক্সিন", "HCG", "প্রোজেস্টেরন", "ইনহিবিন"], ans: 0, exp: "ব্যাখ্যা: গর্ভাবস্থার শেষে রিলাক্সিন হরমোন ক্ষরিত হয় যা পেলভিক লিগামেন্টের রিলাক্সেশন ঘটিয়ে যোনিপথের প্রসারণ ঘটায় এবং প্রসব বা Parturition-এ সাহায্য করে।" },
+            { q: "১৪. প্রসব বা Parturition-এর সময় জরায়ুর শক্তিশালী সংকোচন ঘটায় মাতৃদেহের পিটুইটারি থেকে ক্ষরিত কোন্ হরমোন?", opts: ["প্রোল্যাকটিন", "অক্সিটোসিন", "প্রোস্টাগ্ল্যান্ডিন", "ইস্ট্রোজেন"], ans: 1, exp: "ব্যাখ্যা: মায়ের নিউরোহাইপোফাইসিস (পশ্চাৎ পিটুইটারি) থেকে অক্সিটোসিন নির্গত হয় যা মায়োমেট্রিয়ামের প্রবল সংকোচন ঘটিয়ে শিশুকে বাইরে বেরিয়ে আসতে সাহায্য করে।" },
+            { q: "১৫. ভ্রূণকে ঘিরে থাকা যে তরল ভ্রূণকে ঘর্ষণজনিত বা যান্ত্রিক আঘাত থেকে রক্ষা করে এবং শরীরের উষ্ণতা বজায় রাখে তার নাম কী?", opts: ["পেরিভাইটেলাইন তরল", "লিকার ফলিকুলি", "অ্যামনিওটিক তরল (Amniotic fluid)", "ব্লাস্টোসিল তরল"], ans: 2, exp: "ব্যাখ্যা: অ্যামনিওটিক থলিতে থাকা অ্যামনিওটিক তরল ভ্রূণকে শক্ অ্যাবজরবার হিসেবে কাজ করে বাইরের আঘাত থেকে রক্ষা করে।" }
+        ]
+    },
+    7: {
+        name: 'Set 7', icon: '🤰', topic: 'রোপণ, গর্ভাবস্থা ও ভ্রূণের পরিস্ফুটন',
+        questions: [
+            { q: "১. নিষেকের পর জাইগোট বারবার বিভাজিত হয়ে ১৬টি কোশ নিয়ে গঠিত যে নিরেট বলের মতো কোশপুঞ্জ গঠন করে তাকে কী বলে?", opts: ["ব্লাস্টুলা", "মরুলা", "গ্যাস্ট্রুলা", "ট্রোফোব্লাস্ট"], ans: 1, exp: "ব্যাখ্যা: জাইগোট বারবার বিভাজিত (ক্লিভেজ) হয়ে ১৬টি কোষ নিয়ে গঠিত নিরেট বলের মতো যে আদি ভ্রূণ গঠন করে তাকে মরুলা বলে।" },
+            { q: "২. ব্লাস্টুলার বা ব্লাস্টোসিস্টের কেন্দ্রীয় গহ্বরটিকে কী বলা হয়?", opts: ["আর্কেনটেরন", "অ্যামনিওটিক গহ্বর", "ব্লাস্টোসিল", "ব্লাস্টোডার্ম"], ans: 2, exp: "ব্যাখ্যা: মরুলা বিভাজিত হয়ে একস্তরবিশিষ্ট ফাঁপা বলের মতো গঠন সৃষ্টি করে যাকে ব্লাস্টুলা বলে এবং এর ভেতরের তরলপূর্ণ কেন্দ্রীয় গহ্বরকে ব্লাস্টোসিল বলা হয়।" },
+            { q: "৩. ব্লাস্টোসিস্ট জরায়ুর কোন স্তরে রোপিত (Implantation) হয়?", opts: ["মায়োমেট্রিয়াম", "পেরিমেট্রিয়াম", "এন্ডোমেট্রিয়াম", "সারভিক্স"], ans: 2, exp: "ব্যাখ্যা: নিষিক্ত ডিম্বাণু ব্লাস্টোসিস্টে রূপান্তরিত হওয়ার পর জরায়ুর অভ্যন্তরীণ গাত্র অর্থাৎ এন্ডোমেট্রিয়ামের নির্দিষ্ট অঞ্চলে রোপিত বা প্রতিস্থাপিত হয়।" },
+            { q: "৪. নিষেকের পর কত দিনের মাথায় জরায়ুগাত্রে ভ্রূণের রোপণ সম্পূর্ণ হয়?", opts: ["৪ দিন", "৭ দিন", "১২ দিন", "২০ দিন"], ans: 2, exp: "ব্যাখ্যা: নিষেকের ৬-৭ দিন পর ব্লাস্টোসিস্ট জরায়ুগাত্র স্পর্শ করে এবং ১২ দিনের মাথায় জরায়ুগাত্রে ভ্রূণের রোপণ বা প্রোথিত হওয়া সম্পূর্ণ হয়।" },
+            { q: "৫. গ্যাস্ট্রুলা দশায় মোট কয়টি ভ্রূণজ স্তর (Germinal layers) গঠিত হয়?", opts: ["১টি", "২টি", "৩টি", "৪টি"], ans: 2, exp: "ব্যাখ্যা: গ্যাস্ট্রুলা দশায় ভ্রূণে তিনটি জার্ম স্তর বা ভ্রূণজ স্তর গঠিত হয়— এক্টোডার্ম, মেসোডার্ম এবং এন্ডোডার্ম।" },
+            { q: "৬. মানব ভ্রূণের স্নায়ুতন্ত্র (মস্তিষ্ক, সুষুম্নাকাণ্ড) এবং ত্বক কোন ভ্রূণজ স্তর থেকে তৈরি হয়?", opts: ["এন্ডোডার্ম", "মেসোডার্ম", "এক্টোডার্ম", "ব্লাস্টোডার্ম"], ans: 2, exp: "ব্যাখ্যা: গ্যাস্ট্রুলার সবচেয়ে বাইরের স্তর এক্টোডার্ম থেকে দেহের বহিঃস্থ আবরণী (ত্বক, চুল, নখ) এবং স্নায়ুতন্ত্র (মস্তিষ্ক ও সুষুম্নাকাণ্ড) সৃষ্টি হয়।" },
+            { q: "৭. ভ্রূণের সংবহনতন্ত্র (রক্ত, রক্তবাহ ও হৃৎপিণ্ড) এবং পেশিতন্ত্র কোন স্তর থেকে গঠিত হয়?", opts: ["এক্টোডার্ম", "মেসোডার্ম", "এন্ডোডার্ম", "পেরিমেট্রিয়াম"], ans: 1, exp: "ব্যাখ্যা: ভ্রূণের মাঝের স্তর মেসোডার্ম থেকে রক্ত, লসিকা, হৃৎপিণ্ড, পেশি, অস্থি, বৃক্ক ইত্যাদি গুরুত্বপূর্ণ অঙ্গ গঠিত হয়।" },
+            { q: "৮. রোপণের পর জরায়ুর এন্ডোমেট্রিয়াম স্তর ভ্রূণকে পুষ্টি প্রদান করে, এই পরিবর্তিত স্তরটি কী নামে পরিচিত হয়?", opts: ["ট্রোফোব্লাস্ট", "ডেসিডুয়া", "অ্যামনিয়ন", "কোরিয়ন"], ans: 1, exp: "ব্যাখ্যা: রোপণের সময় এন্ডোমেট্রিয়ামের কোষস্তরের ডেসিডুয়ালাইজেশন ঘটে এবং এটি ডেসিডুয়া গঠন করে যা প্রথম ট্রাইমেস্টার পর্যন্ত ভ্রূণকে পুষ্টিদ্রব্য ও অক্সিজেন প্রদান করে।" },
+            { q: "৯. গর্ভাবস্থা বা প্রেগন্যান্সি নিশ্চিত করার জন্য (Pregnancy Test) মূত্র বা রক্তে কোন হরমোন পরীক্ষা করা হয়?", opts: ["ইস্ট্রোজেন", "প্রোজেস্টেরন", "HCG", "রিলাক্সিন"], ans: 2, exp: "ব্যাখ্যা: নিষেকের ৮-১০ দিন পর থেকেই গর্ভবতী মহিলাদের রক্ত ও মূত্রে HCG (Human Chorionic Gonadotrophin) পাওয়া যায় যা গর্ভনির্ধারক পরীক্ষায় শনাক্ত করা হয়।" },
+            { q: "১০. মানব ভ্রূণের হৃৎপিণ্ডে স্পন্দন শুরু হয় গর্ভাবস্থার কততম সপ্তাহে?", opts: ["৩য় সপ্তাহে", "৫ম সপ্তাহে", " ৮ম সপ্তাহে", "১২তম সপ্তাহে"], ans: 1, exp: "ব্যাখ্যা: ভ্রূণ পরিস্ফুটনের ৫ম সপ্তাহে রক্তবাহ ও হৃৎপিণ্ড গঠিত হয় এবং হৃৎপিণ্ডে স্পন্দন শুরু হয় যা আলট্রাসাউন্ডের মাধ্যমে শোনা যায়।" },
+            { q: "১১. গর্ভাবস্থার কত সপ্তাহ পর থেকে মানব ভ্রূণকে 'ফিটাস' (foetus) বলা হয়?", opts: ["৪ সপ্তাহ", "৬ সপ্তাহ", "৯ সপ্তাহ", "২০ সপ্তাহ"], ans: 2, exp: "ব্যাখ্যা: অন্তঃসত্ত্বা হওয়ার সূচনাকাল থেকে প্রথম আট সপ্তাহ পর্যন্ত জীবকে ভ্রূণ বা এমব্রায়ো বলে এবং নবম সপ্তাহ থেকে জন্ম পর্যন্ত একে ফিটাস বলা হয়।" },
+            { q: "১২. ব্লাস্টোসিস্টের বাইরের দিকের স্তর যা জরায়ুর এন্ডোমেট্রিয়ামে প্রবর্ধিত হয়ে রোপণে সাহায্য করে, তাকে কী বলে?", opts: ["ট্রোফোব্লাস্ট", "ব্লাস্টোডার্ম", "মরুলা", "ইনার সেল মাস"], ans: 0, exp: "ব্যাখ্যা: ব্লাস্টোসিস্টের ট্রোফোব্লাস্ট স্তরের কোষগুলি ভেঙে সিনসাইটিও ট্রোফোব্লাস্ট ও সাইটোট্রোফোব্লাস্ট গঠন করে যা এন্ডোমেট্রিয়ামে প্রোথিত হয়ে রোপণে সাহায্য করে।" },
+            { q: "১৩. ভ্রূণের শ্বাসতন্ত্রের আবরণী কলা, থাইরয়েড, যকৃৎ ও অগ্ন্যাশয় কোন ভ্রূণজ স্তর থেকে উৎপন্ন হয়?", opts: ["এক্টোডার্ম", "মেসোডার্ম", "এন্ডোডার্ম", "ডেসিডুয়া"], ans: 2, exp: "ব্যাখ্যা: গ্যাস্ট্রুলার সবচেয়ে ভেতরের স্তর এন্ডোডার্ম থেকে শ্বাসতন্ত্রের আবরণী, যকৃৎ, অগ্ন্যাশয়, থাইরয়েড ইত্যাদি সৃষ্টি হয়।" },
+            { q: "১৪. মানুষের ডিম্বাণু ও শুক্রাণুর ক্রোমোজোমগুলির মিলিত হওয়ার পদ্ধতিকে এককথায় কী বলে?", opts: ["ইনসেমিনেশন", "অ্যামফিমিক্সিস বা ক্যারিয়োগ্যামি", "ক্যাপাসিটেশন", "স্পার্মিয়েশন"], ans: 1, exp: "ব্যাখ্যা: পুং প্রোনিউক্লিয়াস ও স্ত্রী প্রোনিউক্লিয়াসের ক্রোমোজোমগুলি বেমতন্তুর সাথে যুক্ত হয়ে মিলিত হওয়ার ঘটনাকে ক্যারিয়োগ্যামি বা অ্যামফিমিক্সিস বলে।" },
+            { q: "১৫. মানব ভ্রূণ মাতৃগর্ভে স্বাভাবিকভাবে কতদিন পালিত হয়ে শিশুর জন্ম দেয়?", opts: ["২০০ দিন", "২৪০ দিন", "২৮০ দিন", "৩২০ দিন"], ans: 2, exp: "ব্যাখ্যা: মানব ভ্রূণ স্ত্রীলোকের জরায়ুর মধ্যে পূর্ণাঙ্গ শিশুতে পরিণত হয়ে স্বাভাবিকভাবে ২৮০ দিন (বা ৪০ সপ্তাহ) পর ভূমিষ্ঠ হয়।" }
+        ]
+    },
+    8: {
+        name: 'Set 8', icon: '🍼', topic: 'অমরা, প্রসব ও দুগ্ধক্ষরণ',
+        questions: [
+            { q: "১. মাতৃকলা ও ভ্রূণকলার মিলনস্থলকে কী বলে যার মাধ্যমে ভ্রূণের সাথে মাতৃদেহের বস্তুর আদানপ্রদান ঘটে?", opts: ["জরায়ু", "ডিম্বাশয়", "অমরা বা প্লাসেন্টা", "অ্যামনিয়ন"], ans: 2, exp: "ব্যাখ্যা: মাতা ও ভ্রূণের রক্ত সংবহনতন্ত্রের মধ্যে শারীরবৃত্তীয় আদানপ্রদানের জন্য সৃষ্টি হওয়া বিশেষ গঠনকে অমরা বা প্লাসেন্টা বলে।" },
+            { q: "২. প্লাসেন্টার ভ্রূণজাত অংশ প্রধানত কী দিয়ে গঠিত হয়?", opts: ["রক্ত সাইনাস", "ভিলাস বা কোরিওনিক ভিলাই", "মায়োমেট্রিয়াম", "ডেসিডুয়া"], ans: 1, exp: "ব্যাখ্যা: প্লাসেন্টা চাকতির মতো দেখতে, যার মাতৃজাত অংশ রক্ত সাইনাস দিয়ে এবং ভ্রূণজাত অংশ অসংখ্য ভিলাসের (ভিলাই) সমন্বয়ে গঠিত।" },
+            { q: "৩. ভ্রূণের রক্ত কার মাধ্যমে প্লাসেন্টার ভিলাসে প্রবেশ করে?", opts: ["জরায়ু ধমনী", "জরায়ু শিরা", "নাভি-ধমনী (umbilical artery)", "নাভি-শিরা (umbilical vein)"], ans: 2, exp: "ব্যাখ্যা: ভ্রূণের রক্ত নাভি-ধমনীর মাধ্যমে প্লাসেন্টার ভিলাসে প্রবেশ করে এবং নাভি-শিরার মাধ্যমে পুনরায় ভ্রূণদেহে ফিরে আসে।" },
+            { q: "৪. জরায়ু ছাড়া অন্য কোনো স্থানে (যেমন ডিম্বনালিতে) ভ্রূণের রোপণ ঘটলে তাকে কী ধরনের গর্ভাবস্থা বলে?", opts: ["নরমাল প্রেগন্যান্সি", "একটোপিক প্রেগন্যান্সি", "ওভারিয়ান প্রেগন্যান্সি", "সারভাইক্যাল প্রেগন্যান্সি"], ans: 1, exp: "ব্যাখ্যা: জরায়ু ছাড়া অন্য কোনো স্থানে, বিশেষ করে ডিম্বনালিতে বা ফ্যালোপিয়ান নালিতে ভ্রূণের রোপণ ঘটলে সেই অস্বাভাবিক গর্ভাবস্থাকে একটোপিক প্রেগন্যান্সি বলে।" },
+            { q: "৫. মানব ভ্রূণের লিঙ্গ কার ক্রোমোজোম দ্বারা নির্ধারিত হয়?", opts: ["মাতার X ক্রোমোজোম", "মাতার অটোজোম", "পিতার শুক্রাণুর সেক্স ক্রোমোজোম (X বা Y)", "প্লাসেন্টা"], ans: 2, exp: "ব্যাখ্যা: মাতার ডিম্বাণু সর্বদা X ক্রোমোজোমযুক্ত হয়। পিতার X ক্রোমোজোমযুক্ত শুক্রাণু নিষেক করলে কন্যা এবং Y ক্রোমোজোমযুক্ত শুক্রাণু নিষেক করলে পুত্র সন্তান হয়। তাই লিঙ্গ নির্ধারণে পিতার ভূমিকাই প্রধান।" },
+            { q: "৬. সন্তান প্রসবের পর প্রথম ২-৩ দিন মায়ের স্তনগ্রন্থি থেকে যে পুষ্টিদায়ক হরিদ্রাভ তরল ক্ষরিত হয়, তাকে কী বলে?", opts: ["মিল্ক", "কোলোস্ট্রাম", "প্রোল্যাকটিন", "সিরাম"], ans: 1, exp: "ব্যাখ্যা: শিশু জন্মানোর ২-৩ দিন ধরে মাতার স্তনগ্রন্থি থেকে যে গাঢ়, হরিদ্রাভ এবং অত্যন্ত পুষ্টিদায়ক তরল ক্ষরিত হয়, তাকে কোলোস্ট্রাম বলে।" },
+            { q: "৭. গর্ভাবস্থায় স্ত্রীদেহের পরিবর্তন এবং ভ্রূণের বৃদ্ধি নিয়ন্ত্রণ করে কোন হরমোন?", opts: ["টেস্টোস্টেরন", "রিলাক্সিন", "প্রোজেস্টেরন", "অক্সিটোসিন"], ans: 2, exp: "ব্যাখ্যা: গর্ভাবস্থায় পীতগ্রন্থি (করপাস লিউটিয়াম) এবং প্লাসেন্টা থেকে ক্ষরিত প্রোজেস্টেরন স্ত্রীদেহের পরিবর্তন এবং ভ্রূণের বৃদ্ধি নিয়ন্ত্রণ করে।" },
+            { q: "৮. পীতগ্রন্থি থেকে নিঃসৃত কোন পেপটাইডধর্মী হরমোনটি প্রসব নিয়ন্ত্রণে গুরুত্বপূর্ণ ভূমিকা পালন করে?", opts: ["ইস্ট্রোজেন", "রিলাক্সিন", "প্রোজেস্টেরন", "প্রোল্যাকটিন"], ans: 1, exp: "ব্যাখ্যা: গর্ভাবস্থায় পীতগ্রন্থি বা করপাস লিউটিয়াম থেকে রিলাক্সিন নামক পেপটাইডধর্মী যৌন হরমোন ক্ষরিত হয়, যা মূলত প্রসব নিয়ন্ত্রণ ও শ্রোণিচক্রকে শিথিল করতে সাহায্য করে।" },
+            { q: "৯. জরায়ুর এন্ডোমেট্রিয়াম স্তর জরায়ুর বাইরে বৃদ্ধি পেলে তাকে চিকিৎসাবিজ্ঞানের ভাষায় কী বলে?", opts: ["এন্ডোমেট্রিয়োসিস", "ওফোরাইটিস", "হিস্টেরেকটমি", "সারভাইক্যাল ক্যানসার"], ans: 0, exp: "ব্যাখ্যা: জরায়ুর ভেতরের দেওয়ালে থাকা এন্ডোমেট্রিয়াম স্তর যদি কোনো কারণে জরায়ুর বাইরে বৃদ্ধি পায়, তখন সেই যন্ত্রণাদায়ক অবস্থাকে এন্ডোমেট্রিয়োসিস বলা হয়।" },
+            { q: "১০. ভ্রূণ জরায়ু থেকে যোনিপথে মাতৃদেহের বাইরে নির্গত হওয়ার প্রক্রিয়াকে কী বলে?", opts: ["জেস্টেশন", "ইমপ্লানটেশন", "প্রসব বা Parturition", "ইনসেমিনেশন"], ans: 2, exp: "ব্যাখ্যা: ৯ মাস ১০ দিন গর্ভধারণের পর পরিণত শিশু মাতৃজরায়ু থেকে যোনিপথে দেহের বাইরে বেরিয়ে আসাকে প্রসব বা পারচুরিশন বলে।" },
+            { q: "১১. ডিম্বাশয়ে তরলপূর্ণ সিস্ট গঠিত হওয়াকে কী বলে?", opts: ["একটোপিক প্রেগন্যান্সি", "ওভারিয়ান সিস্ট", "ওফোরাইটিস", "সারভাইক্যাল ক্যানসার"], ans: 1, exp: "ব্যাখ্যা: অনেক সময় ডিম্বাশয়ের মধ্যে তরলপূর্ণ সিস্ট গঠিত হয়, যা সাধারণত ক্ষতিকারক হয় না। একে ওভারিয়ান সিস্ট বলা হয়।" },
+            { q: "১২. গর্ভাবস্থার প্রথম ট্রাইমেস্টারে (প্রথম ৩ মাস) ভ্রূণকে কে পুষ্টিদ্রব্য ও অক্সিজেন প্রদান করে?", opts: ["ডিম্বাশয়", "ডেসিডুয়া", "ফ্যালোপিয়ান নালি", "সারভিক্স"], ans: 1, exp: "ব্যাখ্যা: প্লাসেন্টা সম্পূর্ণভাবে গঠিত হওয়ার আগে রোপণ হওয়ার পর প্রথম ট্রাইমেস্টার পর্যন্ত এন্ডোমেট্রিয়ামের ডেসিডুয়া ভ্রূণকে পুষ্টিদ্রব্য ও অক্সিজেন প্রদান করে।" },
+            { q: "১৩. শিশুর জন্মের কত সপ্তাহ পর স্বাভাবিক ওজন প্রায় ৩ কেজি হয় এবং শিশু ভূমিষ্ঠ হওয়ার জন্য প্রস্তুত হয়?", opts: ["২০ সপ্তাহ", "৩০ সপ্তাহ", "৩৫ সপ্তাহ", "৪০ সপ্তাহ"], ans: 3, exp: "ব্যাখ্যা: ৪০ সপ্তাহে ভ্রূণ সম্পূর্ণভাবে গঠিত হয়, স্বাভাবিক শিশুর ওজন প্রায় ৩ কেজির মতো হয় এবং গর্ভবেদনা শুরু হয়ে শিশু জন্মগ্রহণ করে।" },
+            { q: "১৪. অমরা বা প্লাসেন্টার মাতৃজাত অংশ প্রধানত কী দ্বারা গঠিত?", opts: ["কোরিওনিক ভিলাই", "বৃহদাকৃতি রক্ত সাইনাস", "নাভি রজ্জু", "অ্যামনিওটিক গহ্বর"], ans: 1, exp: "ব্যাখ্যা: প্লাসেন্টার দুটি অংশের মধ্যে মাতৃজাত অংশটি প্রধানত বৃহদাকৃতি রক্ত সাইনাস দ্বারা গঠিত হয় যেখানে মাতৃরক্ত অবস্থান করে।" },
+            { q: "১৫. ব্লাস্টোসিস্টের কোন কোষগুচ্ছ থেকে ভবিষ্যতে ভ্রূণের প্রধান অংশ গঠিত হয়?", opts: ["ট্রোফোব্লাস্ট", "কোরিয়ন", "বহিঃস্থ কোষগুচ্ছ", "অন্তঃস্থ কোষগুচ্ছ"], ans: 3, exp: "ব্যাখ্যা: ব্লাস্টুলার বহিঃস্থ কোষগুচ্ছ (ট্রোফোব্লাস্ট) থেকে কোরিয়ন ও অ্যামনিয়ন গঠিত হয় এবং অন্তঃস্থ কোষগুচ্ছ থেকে ভ্রূণের প্রধান অংশ গঠিত হয়।" }
+        ]
+    }
+};
+
+// ================== STATE VARIABLES ==================
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+// ================== LOCAL STORAGE LOGIC ==================
+function getGlobalUsers() {
+    const data = localStorage.getItem("testBazarGlobalUsers");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+    const data = localStorage.getItem("testBazarAttemptsBio3Ch2_v1");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    attempts[key] = (attempts[key] || 0) + 1;
+    localStorage.setItem("testBazarAttemptsBio3Ch2_v1", JSON.stringify(attempts));
+    return attempts[key];
+}
+
+// ================== INITIALIZATION ==================
+window.onload = () => {
+    renderHub();
+};
+
+function renderHub() {
+    const grid = document.getElementById("setGrid");
+    grid.innerHTML = "";
+
+    for(let id in ALL_SETS) {
+        const set = ALL_SETS[id];
+        const div = document.createElement("div");
+        div.className = "set-card";
+
+        let attemptCount = 0;
+        let isLocked = false;
+
+        if (currentUser) {
+            attemptCount = getAttemptCount(currentUser, id);
+            isLocked = attemptCount >= MAX_ATTEMPTS;
+            if (isLocked) div.classList.add("locked");
+        }
+
+        div.innerHTML = `
+            <div class="icon">${set.icon}</div>
+            <div class="set-num">${set.name}</div>
+            <div class="set-title">${set.topic}</div>
+            <div class="set-meta"><span>${set.questions.length} Qs</span><span>10 Mins</span></div>
+            ${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+        `;
+
+        div.onclick = () => {
+            if (isLocked) {
+                alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+                return;
+            }
+            handleSetClick(id);
+        };
+        grid.appendChild(div);
+    }
+}
+
+function handleSetClick(setId) {
+    activeSetId = setId;
+    if (!currentUser) {
+        document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+        document.getElementById("loginOverlay").classList.add("active");
+        document.getElementById("loginUsername").value = "";
+        document.getElementById("loginPassword").value = "";
+        document.getElementById("loginError").style.display = "none";
+    } else {
+        startQuiz(setId);
+    }
+}
+
+function doLogin() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+    const err = document.getElementById("loginError");
+    const GLOBAL_USERS = getGlobalUsers();
+
+    if(!u || !p) {
+        err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!";
+        err.style.display = "block";
+        return;
+    }
+
+    if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+        let attempts = getAttemptCount(u, activeSetId);
+        if (attempts >= MAX_ATTEMPTS) {
+            err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+            err.style.display = "block";
+            return;
+        }
+        currentUser = u;
+        document.getElementById("loginOverlay").classList.remove("active");
+        document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+        document.getElementById("userDisplay").classList.remove("hidden");
+        renderHub();
+        startQuiz(activeSetId);
+    } else {
+        err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+        err.style.display = "block";
+    }
+}
+
+function closeLogin() {
+    document.getElementById("loginOverlay").classList.remove("active");
+}
+
+function goToHub() {
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("hubPage").style.display = "block";
+    document.getElementById("timerBox").classList.add("hidden");
+    clearInterval(timerInterval);
+    renderHub();
+}
+
+// ================== QUIZ LOGIC ==================
+function startQuiz(setId) {
+    incrementAttempt(currentUser, setId);
+    questions = ALL_SETS[setId].questions;
+    currentQIndex = 0;
+    score = 0;
+    wrongAnswers = 0;
+    userAnswers = {};
+    isReviewMode = false;
+    timeLeft = TIME_LIMIT;
+
+    document.getElementById("hubPage").style.display = "none";
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    document.getElementById("timerBox").classList.remove("hidden");
+    document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+    document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+
+    startTimer();
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const qData = questions[currentQIndex];
+    document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+    document.getElementById("qText").innerHTML = qData.q;
+    const progress = ((currentQIndex) / questions.length) * 100;
+    document.getElementById("progressFill").style.width = `${progress}%`;
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+
+    const optsBox = document.getElementById("qOpts");
+    optsBox.innerHTML = "";
+    document.getElementById("explanation").classList.remove("show");
+    document.getElementById("nextBtn").disabled = true;
+    document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+    qData.opts.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "opt";
+        btn.innerHTML = `<div class="opt-circle">${LABELS[idx] || '—'}</div> <div class="opt-text">${optText}</div>`;
+
+        if (isReviewMode) {
+            btn.classList.add("disabled");
+            if (idx === qData.ans) btn.classList.add("correct");
+            else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+        } else {
+            btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+        }
+        optsBox.appendChild(btn);
+    });
+
+    if (isReviewMode) {
+        document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+        document.getElementById("explanation").classList.add("show");
+        document.getElementById("nextBtn").disabled = false;
+        if (currentQIndex === questions.length - 1) {
+            document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন";
+        }
+    }
+
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+    const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+    allBtns.forEach(b => b.classList.add("disabled"));
+    userAnswers[currentQIndex] = selectedIdx;
+
+    if (selectedIdx === correctIdx) {
+        btn.classList.add("correct");
+        score++;
+    } else {
+        btn.classList.add("wrong");
+        allBtns[correctIdx].classList.add("correct");
+        wrongAnswers++;
+    }
+
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+    document.getElementById("explanation").classList.add("show");
+    document.getElementById("nextBtn").disabled = false;
+
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function nextQ() {
+    if (isReviewMode && currentQIndex === questions.length - 1) {
+        document.getElementById("testArea").classList.add("hidden");
+        document.getElementById("resultWrap").classList.add("show");
+        return;
+    }
+    if (!isReviewMode && currentQIndex === questions.length - 1) {
+        finishQuiz();
+        return;
+    }
+    currentQIndex++;
+    loadQuestion();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    const tBox = document.getElementById("timerBox");
+    tBox.classList.remove("danger");
+
+    timerInterval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishQuiz();
+            return;
+        }
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        if (timeLeft < 60) tBox.classList.add("danger");
+    }, 1000);
+}
+
+function finishQuiz() {
+    clearInterval(timerInterval);
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("timerBox").classList.add("hidden");
+    document.getElementById("resultWrap").classList.add("show");
+
+    const total = questions.length;
+    const skipped = total - (score + wrongAnswers);
+    const percent = Math.round((score / total) * 100);
+
+    document.getElementById("finalScore").innerText = `${percent}%`;
+    document.getElementById("rbCorrect").innerText = score;
+    document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+
+    const gradeEl = document.getElementById("resultGrade");
+    if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+    else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+    else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+
+    const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+    document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+    if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+        alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+        return;
+    }
+    startQuiz(activeSetId);
+}
+
+function showReview() {
+    isReviewMode = true;
+    currentQIndex = 0;
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    loadQuestion();
+}
+</script>
+</body>
+</html>
+
+
