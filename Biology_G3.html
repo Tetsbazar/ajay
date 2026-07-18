@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Bazar — Biology 3rd Sem | Ch 6</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- MathJax for rendering mathematical equations -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* ================= COLOR SCHEME & VARIABLES ================= */
+        :root {
+            --primary: #1a7a4a;
+            --primary-hover: #2aad68;
+            --accent: #f9a825;
+            --bg-main: #f0faf4;
+            --bg-card: #ffffff;
+            --bg-correct: #e8f7ef;
+            --bg-wrong: #fdf0f0;
+            --text-main: #1c2e24;
+            --text-meta: #5a7a66;
+            --text-exp: #2c4035;
+            --alert-danger: #dc3545;
+            --alert-warning: #e8730a;
+            --border-color: #c5dccb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+        .en-font { font-family: 'Syne', sans-serif; }
+
+        /* Top Bar */
+        .top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+        .top-logo span { color: var(--accent); }
+        .timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+        .user-info { color: white; font-weight: 700; background: rgba(0,0,0,0.2); padding: 0.4rem 1rem; border-radius: 8px; }
+
+        .main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+
+        /* Hub View */
+        .hub-header { text-align: center; margin-bottom: 2rem; }
+        .hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+        .hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+
+        .set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; justify-content: center; }
+        .set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; max-width: 350px; margin: 0 auto; width: 100%;}
+        .set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+        .set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+
+        .set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+        .set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+        .set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+        .set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+        .attempt-badge { position: absolute; top: 10px; right: 10px; background: var(--bg-main); color: var(--primary); font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; font-weight: bold; border: 1px solid var(--border-color); }
+        .attempt-badge.locked-badge { background: var(--bg-wrong); color: var(--alert-danger); border-color: var(--alert-danger); }
+
+        /* Quiz View */
+        .quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+        .info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+        .info-item strong { color: var(--primary); }
+
+        .progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+
+        .q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+        .q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; overflow-x: auto; }
+
+        .opts { display: flex; flex-direction: column; gap: 0.6rem; }
+        .opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main); overflow-x: auto;}
+        .opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+
+        .opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+        .opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+        .opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+        .opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+        .opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+        .opt.disabled { cursor: default; }
+
+        .explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; overflow-x: auto;}
+        .explanation.show { display: block; }
+        .explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+
+        .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+        .score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+        .next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+        .next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+
+        /* Result View */
+        .result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+        .result-wrap.show { display: block; }
+        .result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+        .result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+        .result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+        .result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+
+        .result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+        .result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+        .rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+        .rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+
+        .attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+
+        .action-btns { display: flex; flex-direction: column; gap: 10px; }
+        .action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-retry { background: #17a2b8; color: white; }
+        .btn-review { background: var(--bg-main); color: var(--primary); border: 2px solid var(--primary) !important; }
+        .btn-home { background: var(--border-color); color: var(--text-main); }
+
+        /* Login Modal */
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s; }
+        .login-overlay.active { opacity: 1; visibility: visible; }
+        .login-modal { background: white; padding: 2rem; border-radius: 14px; width: 90%; max-width: 380px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(20px); transition: 0.3s; }
+        .login-overlay.active .login-modal { transform: translateY(0); }
+
+        .login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+        .login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+
+        .input-group { text-align: left; margin-bottom: 1.2rem; }
+        .input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+        .input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+
+        .login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .login-btn:hover { background: var(--primary-hover); }
+        .cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+        .error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <header class="top-bar">
+        <div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+        <div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+        <div class="user-info en-font hidden" id="userDisplay"></div>
+    </header>
+
+    <div class="main">
+
+        <!-- ================= LOGIN MODAL ================= -->
+        <div class="login-overlay" id="loginOverlay">
+            <div class="login-modal">
+                <h2>লগইন করুন</h2>
+                <p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+                <div class="login-set-name" id="loginSetName">📚 Set 1</div>
+
+                <div class="input-group">
+                    <label>ইউজারনেম</label>
+                    <input type="text" id="loginUsername" placeholder="Username">
+                </div>
+                <div class="input-group">
+                    <label>পাসওয়ার্ড</label>
+                    <input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+                </div>
+
+                <button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+                <button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+                <div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+            </div>
+        </div>
+
+        <!-- ================= HUB PAGE ================= -->
+        <div id="hubPage">
+            <div class="hub-header">
+                <h1>জীববিজ্ঞান 3rd Sem <br>অধ্যায় ৬: অভিব্যক্তি বা বিবর্তন</h1>
+                <p>আপনার নির্বাচিত ৮টি সেট (১, ২, ৩, ৪, ১৫, ১৬, ১৭, ১৮)। Test শুরু করতে সেটে ক্লিক করুন।</p>
+            </div>
+
+            <div class="set-grid" id="setGrid"></div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+            </div>
+        </div>
+
+        <!-- ================= QUIZ AREA ================= -->
+        <div id="testArea" class="hidden">
+            <div class="quiz-info">
+                <div class="info-item">🎓 <strong>Biology</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+                <div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+            </div>
+
+            <div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+            <div class="q-card">
+                <div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+                <div class="q-text" id="qText">Question Text</div>
+                <div class="opts" id="qOpts"></div>
+                <div class="explanation" id="explanation"><p id="explanationText"></p></div>
+
+                <div class="nav-row">
+                    <div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+                    <button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= RESULT AREA ================= -->
+        <div class="result-wrap" id="resultWrap">
+            <div class="result-icon" id="resultIcon">🏆</div>
+            <div class="result-score en-font" id="finalScore">100%</div>
+            <div class="result-total">স্কোর</div>
+            <div class="result-grade" id="resultGrade">অসাধারণ!</div>
+
+            <div class="result-bars">
+                <div class="result-bar">
+                    <div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+                    <div class="rb-label">সঠিক</div>
+                </div>
+                <div class="result-bar">
+                    <div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+                    <div class="rb-label">ভুল/স্কিপ</div>
+                </div>
+            </div>
+
+            <div class="attempt-info-box" id="attemptInfo"></div>
+
+            <div class="action-btns">
+                <button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+                <button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+                <button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+// ============================================================
+// Global Config & Database
+// ============================================================
+const MAX_ATTEMPTS = 10;
+const TIME_LIMIT = 10 * 60; // 10 Minutes
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+    1: {
+        name: 'Set 1', icon: '🌍', topic: 'জীবনের উৎপত্তি ও আদি মতবাদ (Origin of Life)',
+        questions: [
+            { q: "১. বায়োলজিতে সর্বপ্রথম 'ইভোলিউশন' (Evolution) শব্দটি কে ব্যবহার করেন?", opts: ["চার্লস ডারউইন", "হার্বার্ট স্পেন্সার", "অ্যালবার্ট ভন হেলার (Albert Von Hellar)", "চার্লস লিয়েল"], ans: 2, exp: "ব্যাখ্যা: ল্যাটিন শব্দ evolutionem থেকে ইভোলিউশন কথাটির জন্ম হলেও বায়োলজিতে প্রথম শব্দটি ব্যবহার করেন অ্যালবার্ট ভন হেলার (1708–1777)।" },
+            { q: "২. জীব সৃষ্টির পূর্বে সরল অজৈব যৌগ থেকে সরল ও জটিল জৈব যৌগ সৃষ্টির প্রক্রিয়াকে কী বলা হয়?", opts: ["জৈব বিবর্তন", "রাসায়নিক বিবর্তন (Chemical evolution)", "কসমিক উৎপত্তি", "স্বতঃস্ফূর্ত উদ্ভব"], ans: 1, exp: "ব্যাখ্যা: হ্যালডেন ও ওপারিনের মতবাদ অনুযায়ী, সরল অজৈব যৌগ (বায়ুমণ্ডলীয় গ্যাস) থেকে সরল ও জটিল জৈব যৌগ সৃষ্টি হওয়ার ঘটনাকে রাসায়নিক বিবর্তন বলা হয়।" },
+            { q: "৩. জীব সৃষ্টির রাসায়নিক সংশ্লেষ মতবাদ (Chemosynthetic theory) বা প্রাকৃতিক মতবাদ কারা প্রস্তাব করেন?", opts: ["মিলার ও উরে", "ওপারিন ও হ্যালডেন (Oparin and Haldane)", "লুই পাস্তুর ও রেডি", "ওয়াটসন ও ক্রিক"], ans: 1, exp: "ব্যাখ্যা: 1920 ও 1930 এর দশকে ওপারিন এবং হ্যালডেন জীব সৃষ্টি সম্পর্কে যে মতবাদ প্রকাশ করেন তা রাসায়নিক সংশ্লেষ মতবাদ বা প্রাকৃতিক মতবাদ নামে পরিচিত।" },
+            { q: "৪. ওপারিনের মতে প্রথম কোশীয় জীব কোনটি ছিল?", opts: ["প্রোটোবায়োন্ট", "মাইক্রোস্ফিয়ার", "কোয়াসারভেট (Coacervate)", "ইয়োবায়োন্ট"], ans: 2, exp: "ব্যাখ্যা: ওপারিন মনে করেন যে, জীব সৃষ্টির ইতিহাসে লিপিড, প্রোটিন ও কার্বোহাইড্রেট দ্বারা গঠিত কোয়াসারভেটই ছিল প্রথম কোষীয় জীব।" },
+            { q: "৫. 'হট ডাইল্যুট সূপ' (Hot dilute soup) বা প্রি-বায়োটিক সূপ কথাটি কে প্রথম বলেন?", opts: ["ওপারিন", "হ্যালডেন (Haldane)", "স্ট্যানলি মিলার", "ফক্স"], ans: 1, exp: "ব্যাখ্যা: হ্যালদেনের মতে আদিম পরিবেশে আবির্ভূত জৈব অণুগুলি সমুদ্র জলে মিশে জীব সৃষ্টির অনুকূল একটি মাধ্যম সৃষ্টি করেছিল, যাকে তিনি Hot dilute soup বা Pre-biotic soup নাম দেন।" },
+            { q: "৬. মাইক্রোস্ফিয়ার (Microsphere) মডেল কে প্রস্তাব করেন?", opts: ["সিডনি ফক্স (S. W. Fox)", "ওপারিন", "স্ট্যানলি মিলার", "লুই পাস্তুর"], ans: 0, exp: "ব্যাখ্যা: এস ডব্লিউ ফক্স (S. W. Fox) মাইক্রোস্ফিয়ার মডেল রচনা করেন যা অর্ধভেদ্য পর্দাবেষ্টিত প্রধানত প্রোটিনের একটি গঠন।" },
+            { q: "৭. মিলার ও উরের পরীক্ষায় মিথেন, অ্যামোনিয়া ও হাইড্রোজেনের অনুপাত কত ছিল?", opts: ["১ : ২ : ১", "২ : ১ : ২", "২ : ২ : ১", "৩ : ১ : ১"], ans: 2, exp: "ব্যাখ্যা: মিলার ও উরে তাঁদের পরীক্ষায় একটি আবদ্ধ গোলাকার পাত্রে মিথেন, অ্যামোনিয়া ও হাইড্রোজেন 2:2:1 অনুপাতে জলীয় বাষ্পের মধ্যে রাখেন।" },
+            { q: "৮. মিলার ও উরের পরীক্ষায় কৃত্রিমভাবে আদিম পৃথিবীর পরিবেশ সৃষ্টির জন্য কত ভোল্টের বিদ্যুৎ প্রয়োগ করা হয়েছিল?", opts: ["১০,০০০ ভোল্ট", "২০,০০০ ভোল্ট", "৫০,০০০ ভোল্ট", "৬০,০০০ ভোল্ট"], ans: 3, exp: "ব্যাখ্যা: তাঁরা টাংস্টেন ইলেকট্রোডের সাহায্যে গোলাকার আবদ্ধ ফ্লাস্কে 60,000 ভোল্টের বিদ্যুৎ প্রয়োগ করেন যাতে বজ্রপাতের পরিবেশ তৈরি হয়।" },
+            { q: "৯. আদিম পৃথিবীর বায়ুমণ্ডলে জীবন সৃষ্টির সময় কোন্ গ্যাসটি সম্পূর্ণ অনুপস্থিত ছিল?", opts: ["মিথেন", "অ্যামোনিয়া", "মুক্ত অক্সিজেন (O2)", "হাইড্রোজেন"], ans: 2, exp: "ব্যাখ্যা: আদিম পার্থিব পরিবেশে বায়ুমণ্ডলে মুক্ত অক্সিজেনের (O2) কোনো অস্তিত্বই ছিল গঠনগত ছিল না, পরিবেশ ছিল বিজারক প্রকৃতির।" },
+            { q: "১০. মিলার ও উরের পরীক্ষায় উৎপন্ন প্রথম সরল অ্যামাইনো অ্যাসিডগুলির মধ্যে অন্যতম কোনটি ছিল?", opts: ["গ্লুটামিক অ্যাসিড", "ভ্যালিন", "গ্লাইসিন (Glycine)", "আর্জিনিন"], ans: 2, exp: "ব্যাখ্যা: মিলার ও উরের পরীক্ষায় কার্বন থেকে 22টি অ্যামাইনো অ্যাসিড উৎপন্ন হয় যার মধ্যে গ্লাইসিন, অ্যালানিন অন্যতম ছিল।" },
+            { q: "১১. জীবের স্বতঃস্ফূর্ত উদ্ভবতত্ত্বের (Spontaneous Generation) প্রথম বৈজ্ঞানিক বিরোধিতা বা ভুল প্রমাণ করেন কে?", opts: ["রেডি", "লুই পাস্তুর", "ওপারিন", "উরে ও মিলার"], ans: 1, exp: "ব্যাখ্যা: লুই পাস্তুর প্রথম তাঁর বিখ্যাত 'হংসগ্রীব ফ্লাস্ক' পরীক্ষা করে প্রমাণ করেন যে জীবনের স্বতঃস্ফূর্ত উদ্ভব ভিত্তিহীন এবং কেবল পূর্বতন জীবন থেকেই নতুন জীবনের সৃষ্টি হয়।" },
+            { q: "১২. আদিম পৃথিবীর বিজারক বায়ুমণ্ডলে কোন্ গ্যাসগুলি প্রধানত অবস্থান করত?", opts: ["অ্যামোনিয়া ও হিলিয়াম", "জলীয় বাষ্প ও আর্গন", "অক্সিজেন ও হাইড্রোজেন", "হাইড্রোজেন, মিথেন ও অ্যামোনিয়া"], ans: 3, exp: "ব্যাখ্যা: আদিম পৃথিবীর বিজারক বায়ুমণ্ডলে প্রচুর পরিমাণে হাইড্রোজেন, মিথেন, অ্যামোনিয়া এবং জলীয় বাষ্প উপস্থিত ছিল।" },
+            { q: "১৩. সূর্যের মূল উপাদান বা সূর্যের মধ্যে কোন্ গ্যাসটি সবথেকে বেশি পরিমাণে আছে?", opts: ["অক্সিজেন", "হিলিয়াম", "কার্বন", "হাইড্রোজেন"], ans: 3, exp: "ব্যাখ্যা: সূর্যের মূল উপাদান হলো হাইড্রোজেন গ্যাস, যা ফিউশন প্রক্রিয়ায় হিলিয়ামে পরিণত হয়ে বিপুল শক্তি উৎপন্ন করে।" },
+            { q: "১৪. প্রথম সৃষ্ট আদি কোষীয় জীব (First life form) প্রকৃতিতে কেমন ছিল?", opts: ["অবায়ুজীবী এবং কেমোহেটারোট্রফ", "বায়ুজীবী এবং স্বভোজী", "অবায়ুজীবী এবং স্বভোজী", "বায়ুজীবী এবং কেমোহেটারোট্রফ"], ans: 0, exp: "ব্যাখ্যা: প্রথম কোষীয় জীব ছিল আদি বা প্রোকারিওট। তারা ছিল অবায়ুজীবী এবং কেমোহেটারোট্রফ, যারা পরিবেশ থেকে জৈব যৌগ শোষণ করে পুষ্টি গ্রহণ করত।" },
+            { q: "১৫. 'RNA World' (আরএনএ ওয়ার্ল্ড) ধারণা অনুযায়ী পৃথিবীর আদি পরিবেশে প্রথম জেনেটিক বস্তু কোনটি ছিল?", opts: ["DNA", "প্রোটিন", "RNA", "লিপিড"], ans: 2, exp: "ব্যাখ্যা: 'RNA World' ধারণা অনুযায়ী আদি পৃথিবীতে সম্ভবত RNA প্রথম জেনেটিক বস্তু এবং অনুঘটক হিসেবে গঠিত হয়েছিল।" }
+        ]
+    },
+    2: {
+        name: 'Set 2', icon: '🪨', topic: 'ভূতাত্ত্বিক সময়কাল ও জীবাশ্ম (Geological Time Scale)',
+        questions: [
+            { q: "১৬. ভূতত্ত্ববিদদের হিসাব অনুযায়ী পৃথিবীর বয়স আনুমানিক কত?", opts: ["২.৫ বিলিয়ন বছর", "৩.৫ বিলিয়ন বছর", "৪.৬ বিলিয়ন বছর", "৫.২ বিলিয়ন বছর"], ans: 2, exp: "ব্যাখ্যা: ভূতত্ত্ববিদদের বৈজ্ঞানিক ও তেজস্ক্রিয় আইসোটোপ হিসেব অনুযায়ী, পৃথিবীর বয়স প্রায় ৪.৫ বা ৪.৬ বিলিয়ন বছর।" },
+            { q: "১৭. পৃথিবীর সৃষ্টির শুরু থেকে আজ অবধি দীর্ঘ সময়কালকে প্রধানত কোন্ দুটি 'ইওন' (Eon)-এ ভাগ করা হয়?", opts: ["প্যালিওজোয়িক ও মেসোজোয়িক", "প্রিক্যাম্ব্রিয়ান ও ফেনেরোজোয়িক", "আর্কিয়ান ও প্রোটেবোজোয়িক", "মেসোজোয়িক ও সিনোজোয়িক"], ans: 1, exp: "ব্যাখ্যা: পৃথিবীর জন্ম থেকে শুরু করে আজ অবধি দীর্ঘ ভূতাত্ত্বিক সময়কালকে দুটি ইওনে ভাগ করা হয়, যথা— প্রিক্যাম্ব্রিয়ান ও ফেনেরোজোয়িক।" },
+            { q: "১৮. সৌরজগতের কোন্ গ্রহের মাটিতে আয়রন অক্সাইডের আধিক্য থাকায় একে 'লাল গ্রহ' বলা হয়?", opts: ["মঙ্গল (Mars)", "বৃহস্পতি", "ইউরেনাস", "শুক্র"], ans: 0, exp: "ব্যাখ্যা: মঙ্গল গ্রহের পৃষ্ঠে আয়রন অক্সাইড (মরচে) প্রচুর পরিমাণে থাকায় এটি দেখতে লাল রঙের হয়, তাই একে লাল গ্রহ বলে।" },
+            { q: "১৯. প্রস্তরীভূত জীবাশ্মে পরিণত প্রাণীর মলকে কী বলা হয়?", opts: ["গ্যাস্ট্রোলিথ", "কাস্ট", "কপ্রোলাইট (Coprolite)", "মোল্ড"], ans: 2, exp: "ব্যাখ্যা: প্রস্তরীভূত জীবাশ্মে পরিণত মলকে কপ্রোলাইট (Coprolite) বলে, যা থেকে পুরাতন যুগের প্রাণীর খাদ্যাভ্যাস সম্পর্কে জানা যায়।" },
+            { q: "২০. ব্যক্তবীজী উদ্ভিদের গাত্র থেকে নির্গত রজন (resin) জীবাশ্ম হিসেবে ভূস্তরে সংরক্ষিত থাকলে তাকে কী বলে?", opts: ["গ্যাস্ট্রোলিথ", "অ্যাম্বার (Amber)", "ট্রেস ফসিল", "কপ্রোলাইট"], ans: 1, exp: "ব্যাখ্যা: ব্যক্তবীজী কনিফার বা পাইন জাতীয় উদ্ভিদের গাত্র থেকে নির্গত রজন জীবাশ্ম হিসেবে ভূস্তরে সংরক্ষিত থাকলে তাকে অ্যাম্বার বলে। এতে অনেক পতঙ্গও আটকে জীবাশ্ম হয়ে যায়।" },
+            { q: "২১. কোনো প্রাণীর পাকস্থলী মধ্যস্থ অপাচ্য পদার্থ যখন পাথরের রূপ পায় তখন তাকে কী বলে?", opts: ["কপ্রোলাইট", "গ্যাস্ট্রোলিথ (Gastrolith)", "ট্রেস ফসিল", "পেট্রিফিকেশন"], ans: 1, exp: "ব্যাখ্যা: ডাইনোসর বা কোনো প্রাচীন প্রাণীর পাকস্থলী মধ্যস্থ পদার্থ যখন পাথরের রূপ পায় তখন তাকে গ্যাস্ট্রোলিথ বলে।" },
+            { q: "২২. বহু পুরাতন যুগের জীবের পায়ের চিহ্ন বা তার গতিপথের প্রস্তরীভূত নিদর্শনকে কী জীবাশ্ম বলে?", opts: ["সাঙ্কেতিক জীবাশ্ম বা ট্রেস ফসিল (Trace fossil)", "আনুবীক্ষণিক জীবাশ্ম", "ছদ্মজীবাশ্ম", "মোল্ড"], ans: 0, exp: "ব্যাখ্যা: পুরাতন যুগের জীবের পায়ের চিহ্ন, হামাগুড়ির দাগ বা গতিপথের নিদর্শন পাথরের উপর ধরা পড়লে তাকে সাঙ্কেতিক জীবাশ্ম বা ট্রেস ফসিল (Imprint) বলে।" },
+            { q: "২৩. কার্বন-১৪ (C14) ডেটিং পদ্ধতিতে C14 এর অর্ধজীবনকাল (half-life) আনুমানিক কত বছর ধরা হয়?", opts: ["500 বছর", "10,000 বছর", "5000 বছর (5730 বছর)", "1 মিলিয়ন বছর"], ans: 2, exp: "ব্যাখ্যা: রেডিও-কার্বন বা C14 এর অর্ধজীবনকাল প্রায় 5000 থেকে 5730 বছর ধরা হয়, যা দিয়ে তুলনামূলক নতুন জীবাশ্মের বয়স মাপা যায়।" },
+            { q: "২৪. জীবাশ্মের বয়স নির্ধারণ করা হয় নিম্নলিখিত কোন্ পদ্ধতিতে?", opts: ["ইউরেনিয়াম ডেটিং", "রেডিয়ো-কার্বন ডেটিং", "রেডিয়াম ডেটিং", "সব কটি ঠিক"], ans: 1, exp: "ব্যাখ্যা: জীবাশ্ম বা প্রস্তরীভূত শিলাস্তরের বয়স নির্ধারণ করার জন্য রেডিয়ো-কার্বন (C14) ডেটিং পদ্ধতি বহুল ব্যবহৃত হয়।" },
+            { q: "২৫. কোন্ এরা বা যুগকে 'ডাইনোসর বা সরীসৃপদের স্বর্ণযুগ' বলা হয়?", opts: ["প্যালিওজোয়িক", "মেসোজোয়িক (Mesozoic)", "সিনোজোয়িক", "প্রিক্যাম্ব্রিয়ান"], ans: 1, exp: "ব্যাখ্যা: মেসোজোয়িক যুগে (বিশেষ করে জুরাসিক পিরিয়ডে) ডাইনোসররা পৃথিবীতে রাজত্ব করত, তাই একে সরীসৃপদের যুগ বলে।" },
+            { q: "২৬. আধুনিক মানুষ বা স্তন্যপায়ীদের বিবর্তন পৃথিবীর ইতিহাসের কোন্ যুগে বা এরা-তে ঘটেছে?", opts: ["প্যালিওজোয়িক", "মেসোজোয়িক", "সিনোজোয়িক (Cenozoic)", "প্রোটেবোজোয়িক"], ans: 2, exp: "ব্যাখ্যা: সিনোজোয়িক যুগ হলো বর্তমান যুগ, যে সময়ে স্তন্যপায়ী প্রাণী, পাখি এবং আধুনিক মানুষের বিবর্তন ঘটেছে।" },
+            { q: "২৭. ভূতাত্ত্বিক সময়কাল অনুযায়ী কোন্ যুগকে 'মাছেদের যুগ' (Age of Fishes) বলা হয়?", opts: ["সিলুরিয়ান", "ডিভোনিয়ান (Devonian)", "পারমিয়ান", "কার্বোনিফেরাস"], ans: 1, exp: "ব্যাখ্যা: প্যালিওজোয়িক এরার ডিভোনিয়ান পিরিয়ডকে মাছেদের যুগ বলা হয় কারণ এই সময়ে পৃথিবীতে প্রচুর এবং বিভিন্ন প্রজাতির মাছের উদ্ভব হয়েছিল।" },
+            { q: "২৮. জীবাশ্ম এবং অতীত কালের বিলুপ্ত জীবদের নিয়ে পাঠ বা গবেষণার বিজ্ঞানকে কী বলা হয়?", opts: ["প্যালিয়ন্টোলজি (Paleontology)", "অ্যানথ্রোপোলজি", "ইকোলজি", "মর্ফোলজি"], ans: 0, exp: "ব্যাখ্যা: প্যালিয়ন্টোলজি বা প্রত্নজীববিদ্যা হলো জীবাশ্ম বা ফসিল নিয়ে অধ্যয়নের বিজ্ঞান।" },
+            { q: "২৯. পৃথিবীর প্রাচীনতম জ্ঞাত জীবাশ্ম (Fossil) কোনটি যা আদিম সায়ানোব্যাকটেরিয়ার প্রমাণ দেয়?", opts: ["আর্কিওপটেরিক্স", "ট্রাইলোবাইট", "স্ট্রোমাটোলাইট (Stromatolite)", "অ্যামোনাইট"], ans: 2, exp: "ব্যাখ্যা: স্ট্রোমাটোলাইট হলো আদিম সায়ানোব্যাকটেরিয়া বা নীল-সবুজ শৈবাল দ্বারা গঠিত স্তরীভূত কাঠামো, যা পৃথিবীর প্রাচীনতম জীবাশ্ম হিসেবে স্বীকৃত।" },
+            { q: "৩০. আধুনিক ঘোড়ার (Equus) বিবর্তনের ধারায় প্রাচীনতম বা আদিমতম পূর্বপুরুষের নাম কী ছিল?", opts: ["মেসোহিপ্পাস", "মেরিচিপ্পাস", "ইওহিপ্পাস (Eohippus)", "প্লিওহিপ্পাস"], ans: 2, exp: "ব্যাখ্যা: ঘোড়ার বিবর্তনে সবথেকে প্রাচীন পূর্বপুরুষ হলো ইওহিপ্পাস (Eohippus) বা ডন হর্স, যাদের উচ্চতা ছিল মাত্র শিয়ালের মতো।" }
+        ]
+    },
+    3: {
+        name: 'Set 3', icon: '🦴', topic: 'বিবর্তনের প্রমাণ - সমসংস্থ ও সমবৃত্তীয় অঙ্গ',
+        questions: [
+            { q: "৩১. যে সব অঙ্গ উৎপত্তি ও গঠনগত দিক থেকে এক কিন্তু ভিন্ন পরিবেশে অভিযোজনের কারণে কাজের ধরন আলাদা, তাদের কী বলে?", opts: ["সমবৃত্তীয় অঙ্গ", "সমসংস্থ অঙ্গ (Homologous organ)", "লুপ্তপ্রায় অঙ্গ", "নিষ্ক্রিয় অঙ্গ"], ans: 1, exp: "ব্যাখ্যা: যে সব অঙ্গ গঠনের দিক দিয়ে ও উৎপত্তিগত দিকে সমান কিন্তু তাদের কাজের ধরন আলাদা, তাদের হোমোলোগাস অর্গান বা সমসংস্থ অঙ্গ বলে।" },
+            { q: "৩২. মানুষের হাত, তিমির ফ্লিপার, বাদুড়ের ডানা এবং ঘোড়ার সামনের পা— এগুলি কী ধরনের অঙ্গের উদাহরণ?", opts: ["সমবৃত্তীয় অঙ্গ", "সমসংস্থ অঙ্গ (Homologous organ)", "লুপ্তপ্রায় অঙ্গ", "প্রতিস্থাপিত অঙ্গ"], ans: 1, exp: "ব্যাখ্যা: ব্যাঙের অগ্রপদ, ঘোড়ার সামনের পা, বাদুড়ের ডানা, পাখির ডানা, তিমি মাছের ফ্লিপার ও মানুষের হাত সমসংস্থ অঙ্গের উদাহরণ, যাদের উৎপত্তি এক কিন্তু কাজ আলাদা।" },
+            { q: "৩৩. সমসংস্থ অঙ্গগুলি বিবর্তনের কোন্ ধারাকে নির্দেশ করে?", opts: ["অভিসারী বিবর্তন", "অপসারী বিবর্তন (Divergent evolution)", "সমান্তরাল বিবর্তন", "সহবিবর্তন"], ans: 1, exp: "ব্যাখ্যা: একই উৎপত্তিগত স্থান থেকে বিভিন্ন পরিবেশে বিভিন্ন কাজ করার জন্য অভিযোজিত হওয়াকে অপসারী অভিযোজন বা Divergent evolution বলে, যা সমসংস্থ অঙ্গ তৈরি করে।" },
+            { q: "৩৪. যে সব অঙ্গ উৎপত্তি ও গঠনগত দিক থেকে আলাদা কিন্তু একই পরিবেশে অভিযোজনের কারণে একই রকম কাজ করে, তাদের কী বলে?", opts: ["সমসংস্থ অঙ্গ", "সমবৃত্তীয় অঙ্গ (Analogous organ)", "লুপ্তপ্রায় অঙ্গ", "হোমোলোগাস অঙ্গ"], ans: 1, exp: "ব্যাখ্যা: প্রাণীদের কিছু অঙ্গ আছে যেগুলি কেবল কাজের ভিত্তিতে সাদৃশ্যযুক্ত, কিন্তু তাদের উৎপত্তি আলাদা, এই ধরনের অঙ্গগুলিকে সমবৃত্তীয় অঙ্গ (Analogous organ) বলে।" },
+            { q: "৩৫. পাখির ডানা এবং পতঙ্গের ডানা কী ধরনের অঙ্গের উদাহরণ?", opts: ["সমসংস্থ অঙ্গ", "সমবৃত্তীয় অঙ্গ (Analogous organ)", "লুপ্তপ্রায় অঙ্গ", "আংশিক সমসংস্থ অঙ্গ"], ans: 1, exp: "ব্যাখ্যা: পাখির ডানা ও পতঙ্গের ডানা দুটিই উড়বার কাজে ব্যবহৃত হলেও এদের উৎপত্তি ও অভ্যন্তরীণ অস্থিগঠন আলাদা। তাই এরা সমবৃত্তীয় অঙ্গ।" },
+            { q: "৩৬. সমবৃত্তীয় অঙ্গগুলি বিবর্তনের কোন্ ধারাকে নির্দেশ করে?", opts: ["অপসারী বিবর্তন", "অভিসারী বিবর্তন (Convergent evolution)", "মেগা বিবর্তন", "মাইক্রো বিবর্তন"], ans: 1, exp: "ব্যাখ্যা: উৎপত্তিগত দিক থেকে আলাদা হলেও জীবেরা একই পরিবেশে অভিযোজনের জন্য একই প্রকার কাজ করে, একে অভিসারী অভিযোজন বা Convergent evolution বলে।" },
+            { q: "৩৭. বোগেনভিলিয়ার কাঁটা (thorn) এবং কুমড়ো গাছের আকর্ষ (tendril) কীসের উদাহরণ?", opts: ["উদ্ভিদের সমবৃত্তীয় অঙ্গ", "উদ্ভিদের সমসংস্থ অঙ্গ", "উদ্ভিদের লুপ্তপ্রায় অঙ্গ", "কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: বোগেনভিলিয়ার কাঁটা ও কুমড়ো গাছের আকর্ষ উভয়েই কাক্ষিক মুকুল থেকে উৎপন্ন হয় (উৎপত্তি এক), কিন্তু এদের কাজ আলাদা। তাই এরা উদ্ভিদের সমসংস্থ অঙ্গ।" },
+            { q: "৩৮. আলু এবং মিষ্টি আলুর (রাঙা আলু) মধ্যে কী ধরনের বিবর্তনীয় সম্পর্ক বা অঙ্গগত সাদৃশ্য দেখা যায়?", opts: ["এরা সমসংস্থ অঙ্গ", "এরা সমবৃত্তীয় অঙ্গ", "এরা লুপ্তপ্রায় অঙ্গ", "এরা উভয়েই কাক্ষিক মুকুল"], ans: 1, exp: "ব্যাখ্যা: আলুর উৎপত্তি কাণ্ড থেকে এবং মিষ্টি আলুর উৎপত্তি মূল থেকে (উৎপত্তি আলাদা), কিন্তু উভয়ের কাজই খাদ্য সঞ্চয় করা। তাই এরা সমবৃত্তীয় অঙ্গ।" },
+            { q: "৩৯. ঝুমকলতার আকর্ষ এবং মটর গাছের আকর্ষ কীসের উদাহরণ?", opts: ["সমসংস্থ অঙ্গ", "সমবৃত্তীয় অঙ্গ", "নিষ্ক্রিয় অঙ্গ", "প্রতিস্থাপিত অঙ্গ"], ans: 1, exp: "ব্যাখ্যা: ঝুমকলতা এবং মটর গাছের আকর্ষ উভয়েই আরোহণের কাজে সাহায্য করলেও এদের উৎপত্তিগত উৎস ভিন্ন, তাই এরা সমবৃত্তীয় অঙ্গ।" },
+            { q: "৪০. পাখির ডানার সাথে নীচের কোন্টি সমসংস্থ (Homologous) অঙ্গ?", opts: ["মথের ডানা", "ইঁদুরের পশ্চাদপদ", "তিমির ফ্লিপার", "হাঙরের পৃষ্ঠীয় পাখনা"], ans: 2, exp: "ব্যাখ্যা: পাখির ডানা এবং তিমির ফ্লিপার উভয়েই অগ্রপদের পরিবর্তিত রূপ, যাদের উৎপত্তি ও অভ্যন্তরীণ অস্থিগঠন এক, তাই এরা সমসংস্থ অঙ্গ।" },
+            { q: "৪১. পূর্বপুরুষদের দেহে থাকা সক্রিয় অঙ্গ বর্তমানে কর্মক্ষমতা হারিয়ে ছোট ও অকেজো হয়ে গেলে তাকে কী বলে?", opts: ["সমসংস্থ অঙ্গ", "নিষ্ক্রিয় বা লুপ্তপ্রায় অঙ্গ (Vestigial organ)", "সমবৃত্তীয় অঙ্গ", "প্রতিস্থাপিত অঙ্গ"], ans: 1, exp: "ব্যাখ্যা: বিবর্তনের পথে পরিবেশের পরিবর্তনের কারণে অব্যবহারের ফলে যে অঙ্গগুলি বর্তমানে নিষ্ক্রিয় হয়ে গেছে, তাদের লুপ্তপ্রায় অঙ্গ বলে।" },
+            { q: "৪২. মানুষের কোন্ নিষ্ক্রিয় অঙ্গটি ৩-৫ টি ক্ষয়প্রাপ্ত লেজের কশেরুকা যুক্ত হয়ে গঠিত হয়েছে?", opts: ["স্যাক্রাম", "অ্যাপেন্ডিক্স", "কক্সিস (Coccyx)", "ইলিয়াম"], ans: 2, exp: "ব্যাখ্যা: কক্সিস ৩-৫ টি ক্ষয়প্রাপ্ত লেজের কশেরুকার একটি সংযোজিত গঠন, যা মানুষের একটি লুপ্তপ্রায় অঙ্গ।" },
+            { q: "৪৩. মানুষের চোখের কোন অংশটি একটি নিষ্ক্রিয় বা লুপ্তপ্রায় অঙ্গের উদাহরণ?", opts: ["কর্নিয়া", "আইরিস", "প্লিকা সেমিলুনারিস (Plica semilunaris)", "রেটিনা"], ans: 2, exp: "ব্যাখ্যা: মানুষের চোখের কোণে থাকা ছোটো লালচে মাংসল অংশটি হলো নিকটিটেটিং পর্দা বা প্লিকা সেমিলুনারিস, যা একটি নিষ্ক্রিয় অঙ্গ।" },
+            { q: "৪৪. মানুষের পরিপাকতন্ত্রে থাকা 'অ্যাপেন্ডিক্স' (Appendix) কোন প্রাচীন সক্রিয় অঙ্গের লুপ্তপ্রায় রূপ?", opts: ["পাকস্থলী", "ক্ষুদ্রান্ত্র", "সিকাম (Caecum)", "মলাশয়"], ans: 2, exp: "ব্যাখ্যা: গিনিপিগের মতো তৃণভোজীদের সিকাম বেশ বড় এবং সেলুলোজ পরিপাকে সাহায্য করে, কিন্তু মানুষের ক্ষেত্রে তা ছোটো হয়ে অ্যাপেন্ডিক্সে পরিণত হয়েছে।" },
+            { q: "৪৫. মানুষের দেহের কোন অঙ্গটি লুপ্তপ্রায় (Vestigial) অঙ্গ নয়?", opts: ["অ্যাপেন্ডিক্স", "কক্সিস", "কান নাড়ার পেশি (Auricular muscle)", "প্লীহা (Spleen)"], ans: 3, exp: "ব্যাখ্যা: অ্যাপেন্ডিক্স, কক্সিস এবং কান নাড়ার পেশি সবই নিষ্ক্রিয় অঙ্গ। কিন্তু প্লীহা বা স্প্লিন একটি অত্যন্ত সক্রিয় লসিকা গ্রন্থি এবং রক্তভাণ্ডার।" }
+        ]
+    },
+    4: {
+        name: 'Set 4', icon: '🧬', topic: 'বিবর্তনের প্রমাণ - আণবিক, ভ্রূণতত্ত্ব ও মিসিং লিংক',
+        questions: [
+            { q: "৪৬. \"অন্টোজেনি রিপিটস ফাইলোজেনি\" (Ontogeny repeats phylogeny) — এই মতবাদটি কে দিয়েছেন?", opts: ["চার্লস ডারউইন", "আর্নস্ট হেকেল (Ernst Haeckel)", "ল্যামার্ক", "হ্যালডেন"], ans: 1, exp: "ব্যাখ্যা: বিজ্ঞানী হেকেলের (Haeckel) রিক্যাপচুলেশন থিওরি বলে যে অন্টোজেনি রিপিটস ফায়লোজেনি (Ontogeny repeats phylogeny), অর্থাৎ প্রাণীদের জন্ম বৃত্তান্ত তাদের উৎপত্তির ইতিহাসের পুনরাবৃত্তি।" },
+            { q: "৪৭. হেকেলের \"Ontogeny repeats phylogeny\" তত্ত্বটি কী নামে পরিচিত?", opts: ["মিউটেশন তত্ত্ব", "বায়োজেনেটিক সূত্র বা রিক্যাপচুলেশন থিওরি (Biogenetic law)", "স্পেশাল ক্রিয়েশন", "ন্যাচারাল সিলেকশন"], ans: 1, exp: "ব্যাখ্যা: হেকেলের এই তত্ত্বকে রিক্যাপচুলেশন থিওরি বা বায়োজেনেটিক সূত্র বলা হয়, যা ভ্রূণতত্ত্বঘটিত প্রমাণ হিসেবে ব্যবহৃত হয়।" },
+            { q: "৪৮. আণবিক প্রমাণ (Molecular evidence) হিসেবে শক্তি উৎপাদনের জন্য প্রায় সকল জীব কোন্ প্রোটিন ব্যবহার করে, যার গঠন বিবর্তনের সম্পর্ক নির্দেশ করে?", opts: ["ইনসুলিন", "হিমোগ্লোবিন", "সাইটোক্রোম-C (Cytochrome-C)", "কোলাজেন"], ans: 2, exp: "ব্যাখ্যা: শক্তি উৎপাদনের জন্য প্রায় সকল জীব সাইটোক্রোম-C নামক প্রোটিন ব্যবহার করে থাকে এবং এর অ্যামাইনো অ্যাসিড সজ্জা বিবর্তনের সম্পর্ক নির্দেশ করে।" },
+            { q: "৪৯. যেসব অবলুপ্ত জীবের জীবাশ্মে দুটি ভিন্ন গোষ্ঠীর প্রাণীর বৈশিষ্ট্য পাওয়া যায় এবং যারা দুটি গোষ্ঠীর মধ্যে বিবর্তনগত যোগসূত্র স্থাপন করে, তাদের কী বলে?", opts: ["কানেক্টিং লিংক", "মিসিং লিংক বা লুপ্ত সংযোজক (Missing link)", "লিভিং ফসিল", "অ্যানালগাস প্রাণী"], ans: 1, exp: "ব্যাখ্যা: অবলুপ্ত জীব যাদের জীবাশ্মরূপে দেহাবশেষ পাওয়া যায় এবং যাদের মধ্যে দুই গোষ্ঠীর জীবের গুণাগুণ মেলে, তাদের মিসিং লিংক বলে।" },
+            { q: "৫০. আর্কিওপটেরিক্স (Archaeopteryx) নামক মিসিং লিংকটি কোন দুটি মেরুদণ্ডী প্রাণী গোষ্ঠীর উন্নয়নগত সংযোগ স্থাপন করে?", opts: ["মৎস্য ও উভচর", "উভচর ও সরীসৃপ", "সরীসৃপ ও স্তন্যপায়ী", "সরীসৃপ ও পক্ষী (Reptiles and Birds)"], ans: 3, exp: "ব্যাখ্যা: আর্কিওপটেরিক্সের মধ্যে সরীসৃপের মতো দাঁত ও লেজ এবং পাখির মতো ডানা ও পালক ছিল, যা প্রমাণ করে সরীসৃপ থেকেই পাখির উদ্ভব।" },
+            { q: "৫১. পেরিপেটাস (Peripatus) নামক প্রাণীটি কোন দুটি পর্বের মধ্যে যোগসূত্র স্থাপনকারী কানেক্টিং লিংক হিসেবে পরিচিত?", opts: ["প্রোটোজোয়া ও পরিফেরা", "অ্যানিলিডা ও আর্থ্রোপোডা (Annelida and Arthropoda)", "মলাস্কা ও একাইনোডার্মাটা", "কর্ডাটা ও নন-কর্ডাটা"], ans: 1, exp: "ব্যাখ্যা: পেরিপেটাসের মধ্যে অ্যানিলিডা (কেঁচোর মতো খণ্ডিত দেহ) এবং আর্থ্রোপোডার (পতঙ্গের মতো শ্বাসতন্ত্র) উভয়ের বৈশিষ্ট্যই উপস্থিত।" },
+            { q: "৫২. প্লাটিপাস (Platypus) বা হংসচঞ্চু কোন দুটি প্রাণীর গোষ্ঠীর বৈশিষ্ট্য বহনকারী একটি জীবন্ত সংযোগকারী প্রাণী?", opts: ["মৎস্য ও উভচর", "সরীসৃপ ও পক্ষী", "সরীসৃপ ও স্তন্যপায়ী (Reptiles and Mammals)", "পক্ষী ও স্তন্যপায়ী"], ans: 2, exp: "ব্যাখ্যা: প্লাটিপাস ডিম পাড়ে (সরীসৃপের বৈশিষ্ট্য) কিন্তু তাদের দেহে স্তনগ্রন্থি ও লোম থাকে (স্তন্যপায়ীর বৈশিষ্ট্য)।" },
+            { q: "৫৩. আর্কিওপটেরিক্সের জীবাশ্ম সর্বপ্রথম কোন্ পিরিয়ডের শিলাস্তরে পাওয়া যায়?", opts: ["ট্রায়াসিক", "জুরাসিক (Jurassic)", "ক্রিটেসিয়াস", "ডিভোনিয়ান"], ans: 1, exp: "ব্যাখ্যা: প্রায় 150 মিলিয়ন বছর আগে জুরাসিক পিরিয়ডের শেষের দিকে জার্মানির দক্ষিণাঞ্চলে আর্কিওপটেরিক্স বিরাজ করত।" },
+            { q: "৫৪. মানুষের ভ্রূণে পরিলক্ষিত ফুলকা ছিদ্র বা মানব শিশুর দেহে লেজের উপস্থিতি, অর্থাৎ প্রাচীন বৈশিষ্ট্য ফিরে আসাকে কী বলে?", opts: ["অ্যাটাভিজম (Atavism)", "মিউটেশন", "পলিড্যাক্টাইলি", "অ্যালবিনিজম"], ans: 0, exp: "ব্যাখ্যা: কোনো লুপ্তপ্রায় বা পূর্বপুরুষের প্রাচীন বৈশিষ্ট্য (যেমন মানুষের লেজ) হঠাৎ করে নতুন প্রজন্মে পুনরায় আবির্ভূত হওয়াকে অ্যাটাভিজম বলে।" },
+            { q: "৫৫. প্রোটিন অণুর অ্যামাইনো অ্যাসিডের সজ্জা বা DNA সিকোয়েন্স বিশ্লেষণ করে জীবদের মধ্যে বিবর্তনের সম্পর্ক নির্ণয় করাকে কী বলে?", opts: ["মর্ফোলজিক্যাল ইভোলিউশন", "আণবিক বিবর্তন (Molecular Evolution)", "এমব্রায়োলজি", "প্যালিয়ন্টোলজি"], ans: 1, exp: "ব্যাখ্যা: DNA, RNA বা প্রোটিনের মতো জৈব অণুর আণবিক স্তরের পরিবর্তন বিশ্লেষণ করে বিবর্তনের ধারা নির্ণয় করাকে মলিকুলার ইভোলিউশন বলে।" },
+            { q: "৫৬. ব্লাড প্রোটিন প্রেসিপিটেশন টেস্ট (Blood protein precipitation test) অনুযায়ী মানুষের সবথেকে কাছের বা ঘনিষ্ঠ আত্মীয় কে?", opts: ["রেসাস বানর", "গরিলা ও শিম্পাঞ্জি (Gorilla and Chimpanzee)", "ম্যাকাও", "গিবন"], ans: 1, exp: "ব্যাখ্যা: রক্ত ও লসিকার প্রোটিন পরীক্ষা এবং DNA বিশ্লেষণ থেকে জানা যায় যে মানুষ গরিলা বা শিম্পাঞ্জির অনেক কাছের আত্মীয়।" },
+            { q: "৫৭. আধুনিক মানুষ এবং শিম্পাঞ্জির মধ্যে DNA-র সাদৃশ্য (Similarity) আনুমানিক কত শতাংশ?", opts: ["৫০-৬০%", "৭৫-৮০%", "৯০-৯৫%", "৯৮-৯৯%"], ans: 3, exp: "ব্যাখ্যা: আণবিক স্তরের পরীক্ষায় দেখা গেছে যে আধুনিক মানুষ এবং শিম্পাঞ্জির জিনোমে প্রায় 98% থেকে 99% সাদৃশ্য রয়েছে।" },
+            { q: "৫৮. মানব ভ্রূণের পরিস্ফুরণকালে পরিলক্ষিত ফুলকা ছিদ্র বা মানব শিশুর লেজের উপস্থিতি কীসের প্রমাণ দেয়?", opts: ["সমবৃত্তীয় অঙ্গ", "সমসংস্থ অঙ্গ", "ভ্রূণতত্ত্বঘটিত প্রমাণ (Recapitulation theory)", "অ্যাটাভিজম"], ans: 2, exp: "ব্যাখ্যা: মানব ভ্রূণের বিকাশে মাছের মতো ফুলকা ছিদ্র দেখা যায় যা হেকেলের রিক্যাপচুলেশন থিওরি বা অন্টোজেনি রিপিটস ফায়লোজেনি-কে সমর্থন করে।" },
+            { q: "৫৯. আর্কিওপটেরিক্সের কোন্ বৈশিষ্ট্যটি প্রমাণ করে যে এটি সরীসৃপ গোষ্ঠীর অন্তর্ভুক্ত ছিল?", opts: ["ডানায় পালক থাকা", "উষ্ণশোণিত রক্ত", "দাঁতযুক্ত চোয়াল ও লম্বা অস্থিময় লেজ", "ঠোঁটের উপস্থিতি"], ans: 2, exp: "ব্যাখ্যা: আর্কিওপটেরিক্সের চোয়ালে দাঁত ছিল এবং লম্বা অস্থিময় লেজ ছিল, যা সম্পূর্ণ সরীসৃপের বৈশিষ্ট্য।" },
+            { q: "৬০. আধুনিক ঘোড়ার বৈজ্ঞানিক নাম কী যা বিবর্তনের ধারায় সর্বশেষ উদ্ভূত হয়েছে?", opts: ["ইওহিপ্পাস (Eohippus)", "মেসোহিপ্পাস (Mesohippus)", "ইকুয়াস (Equus)", "প্লিওহিপ্পাস (Pliohippus)"], ans: 2, exp: "ব্যাখ্যা: ঘোড়ার বিবর্তনের সর্বশেষ এবং আধুনিকতম রূপটি হলো ইকুয়াস (Equus), যা দ্রুত দৌড়ানোর জন্য খুরযুক্ত পায়ে অভিযোজিত হয়েছে।" }
+        ]
+    },
+   5: {
+        name: 'Set 5', icon: '🚢', topic: 'ডারউইনবাদ ও প্রাকৃতিক নির্বাচন (Darwinism & Natural Selection)',
+        questions: [
+            { q: "৬১. চার্লস ডারউইন কোন্ জাহাজে করে তাঁর বিশ্ব পরিভ্রমণ করেছিলেন?", opts: ["H.M.S Beagle", "H.M.S Challenger", "H.M.S Titan", "H.M.S Victoria"], ans: 0, exp: "ব্যাখ্যা: ডারউইন H.M.S Beagle-এ একটি অভিযানে প্রকৃতিবিদ হিসেবে 1831-1836 সাল পর্যন্ত বহু জায়গা পরিভ্রমণ করেন।" },
+            { q: "৬২. চার্লস ডারউইনের লেখা বিখ্যাত বই \"On the Origin of Species by means of Natural Selection\" কত খ্রিস্টাব্দে প্রকাশিত হয়?", opts: ["১৮০৯", "১৮৩১", "১৮৫৯ (1859)", "১৯০০"], ans: 2, exp: "ব্যাখ্যা: 1859 খ্রিস্টাব্দে ডারউইনের গবেষণা লব্ধ ফলাফল \"On the Origin of Species by means of Natural Selection\" নামক পুস্তিকায় প্রকাশ পায়।" },
+            { q: "৬৩. ডারউইন তাঁর বিশ্বভ্রমণের সময় কোন্ দ্বীপপুঞ্জে বিখ্যাত 'ফিঞ্চ' (Finch) পাখিদের পর্যবেক্ষণ করেছিলেন?", opts: ["আন্দামান দ্বীপপুঞ্জ", "গ্যালাপাগোস দ্বীপপুঞ্জ (Galapagos Islands)", "মালয় দ্বীপপুঞ্জ", "মাদাগাস্কার"], ans: 1, exp: "ব্যাখ্যা: ডারউইন গ্যালাপাগোস দ্বীপপুঞ্জে ফিঞ্চ পাখি পর্যবেক্ষণ করেন এবং দেখেন সেখানে প্রায় 13টি প্রজাতির ফিঞ্চ বিশেষিত হয়েছে।" },
+            { q: "৬৪. ডারউইনবাদের মূল প্রতিপাদ্য বিষয় বা প্রধান ভিত্তি কী ছিল?", opts: ["অর্জিত বৈশিষ্ট্যের বংশানুসরণ", "প্রাকৃতিক নির্বাচন (Natural Selection)", "মিউটেশন বা পরিব্যক্তি", "অঙ্গের ব্যবহার ও অব্যবহার"], ans: 1, exp: "ব্যাখ্যা: ডারউইনের মতে প্রকৃতি যোগ্যতমকেই বেঁচে থাকবার জন্য নির্বাচন করে। ডারউইনবাদের মূল প্রতিপাদ্য বিষয় হল প্রাকৃতিক নির্বাচন তত্ত্ব।" },
+            { q: "৬৫. ডারউইনের মতে জীবজ্যামিতিক হারে বংশবৃদ্ধি করলেও পৃথিবীতে জীবের সংখ্যা নির্দিষ্ট থাকে কেন?", opts: ["কারণ খাদ্যের প্রাচুর্য থাকে", "খাদ্য ও বাসস্থান সীমিত থাকার কারণে বাঁচার জন্য সংগ্রাম হয় (Limited food and space leading to struggle)", "জীবেরা প্রজনন বন্ধ করে দেয়", "মিউটেশন ঘটে বলে"], ans: 1, exp: "ব্যাখ্যা: প্রজননের মাধ্যমে জীব জ্যামিতিক হারে বৃদ্ধি পেলেও বেঁচে থাকার জন্য খাদ্য ও বাসস্থান সীমিত, তাই বাঁচার জন্য সংগ্রাম বা প্রতিযোগিতা শুরু হয় এবং সংখ্যা স্থিতিশীল থাকে।" },
+            { q: "৬৬. ডারউইনের তত্ত্ব অনুযায়ী 'বাঁচার জন্য সংগ্রাম' (Struggle for existence) মূলত কয় প্রকারের হয়?", opts: ["২ প্রকার", "৩ প্রকার (Three types)", "৪ প্রকার", "৫ প্রকার"], ans: 1, exp: "ব্যাখ্যা: বাঁচার জন্য সংগ্রাম তিনরকমের হতে পারে—(a) অন্তঃপ্রজাতি সংগ্রাম, (b) আন্তঃপ্রজাতি সংগ্রাম, (c) পরিবেশীয় সংগ্রাম।" },
+            { q: "৬৭. জীবন সংগ্রামে সফল হওয়ার জন্য জীবের মধ্যে যে পরিবর্তন আসে, যা তাকে অন্যদের থেকে আলাদা করে, ডারউইন তাকে কী বলেছিলেন?", opts: ["মিউটেশন", "প্রকরণ বা ভেরিয়েশন (Variation)", "সলটেশন", "ক্লোনিং"], ans: 1, exp: "ব্যাখ্যা: বাঁচার জন্য লড়াইয়ে সফল হওয়ার মূলে থাকে প্রকরণ বা ভেদের সঞ্চার। ডারউইন একে ভেরিয়েশন বা প্রকরণ বলেন।" },
+            { q: "৬৮. ডারউইনের মতে কোন্ ধরনের প্রকরণ (Variation) বিবর্তনের জন্য সবথেকে বেশি উপযোগী?", opts: ["বড়ো ও আকস্মিক প্রকরণ (Mutation)", "ছোটো ছোটো চলমান ভেরিয়েশন (Small continuous variations)", "সোমাটিক ভেরিয়েশন", "ক্ষতিকারক ভেরিয়েশন"], ans: 1, exp: "ব্যাখ্যা: ডারউইন মনে করতেন ছোটো ছোটো চলমান ভেরিয়েশনগুলি (small continuous variation) অভিব্যক্তির জন্য বিশেষ উপযোগী।" },
+            { q: "৬৯. \"যোগ্যতমের উদবর্তন\" (Survival of the fittest) — এই ধারণাটি কোন্ বিবর্তন তত্ত্বে উল্লেখ করা হয়েছে?", opts: ["ল্যামার্কবাদ", "ডারউইনবাদ (Darwinism)", "মিউটেশন তত্ত্ব", "সিন্থেটিক তত্ত্ব"], ans: 1, exp: "ব্যাখ্যা: ডারউইনের তত্ত্বের অন্যতম মূল সিদ্ধান্ত হল যোগ্যতমের উদবর্তন। যে জীব প্রকৃতির মাঝে সংগ্রাম করে বেঁচে থাকার অধিকার পায়, সেই যোগ্যতম।" },
+            { q: "৭০. ডারউইনের প্রাকৃতিক নির্বাচনবাদের একটি অন্যতম সীমাবদ্ধতা (Limitation) কী ছিল?", opts: ["তিনি অতিরিক্ত জননহার ব্যাখ্যা করেননি", "তিনি জীবন সংগ্রাম প্রমাণ করতে পারেননি", "তিনি প্রকরণ বা বিভেদ কীভাবে সৃষ্টি হয় তার জিনগত ব্যাখ্যা দিতে পারেননি", "তিনি প্রাকৃতিক নির্বাচন মানতেন না"], ans: 2, exp: "ব্যাখ্যা: ডারউইনের মতে বিভেদ অর্জনের মধ্য দিয়ে প্রজাতির উদ্ভব হয়। কিন্তু কীভাবে কোনো জীবের মধ্যে বিভেদ সৃষ্টি হতে পারে (জিনগত কারণ) সে সম্পর্কে তিনি কোনো ধারণা দিতে পারেননি।" },
+            { q: "৭১. আলফ্রেড রাসেল ওয়ালেস (Alfred Russel Wallace) কোন্ অঞ্চলে পর্যবেক্ষণ চালিয়ে ডারউইনের অনুরূপ প্রাকৃতিক নির্বাচন তত্ত্ব উপস্থাপন করেছিলেন?", opts: ["গ্যালাপাগোস দ্বীপপুঞ্জ", "মালয় দ্বীপপুঞ্জ (Malay Archipelago)", "মাদাগাস্কার", "অস্ট্রেলিয়া"], ans: 1, exp: "ব্যাখ্যা: 1858 খ্রিস্টাব্দে আলফ্রেড ওয়ালেস মালয় দ্বীপপুঞ্জের উপর পর্যবেক্ষণ চালিয়ে ডারউইনের অনুরূপ তত্ত্বের বর্ণনা করেন।" },
+            { q: "৭২. \"প্রিন্সিপলস অফ জিওলজি\" (Principles of Geology) বইটি কে লিখেছিলেন, যা ডারউইনকে বিশেষভাবে প্রভাবিত করেছিল?", opts: ["টি. আর. ম্যালথাস", "চার্লস লিয়েল (Charles Lyell)", "আলফ্রেড ওয়ালেস", "জোসেফ হুকার"], ans: 1, exp: "ব্যাখ্যা: চার্লস লিয়েল (1832) এর \"Principles of Geology\" বইটি ডারউইনকে বিশেষভাবে প্রভাবিত করেছিল।" },
+            { q: "৭৩. ডারউইন তাঁর তত্ত্বের সপক্ষে লম্বা গলাযুক্ত জিরাফের উদাহরণ দিয়ে বলেছিলেন যে—", opts: ["উঁচু গাছের পাতা খাওয়ার চেষ্টায় গলা লম্বা হয়েছে", "লম্বা গলাযুক্ত জিরাফগুলি প্রাকৃতিক নির্বাচনে আনুকূল্য পেয়েছিল এবং বেঁচে ছিল (Natural selection favored long-necked giraffes)", "জিরাফের মিউটেশন হয়েছিল", "জিরাফরা ছোটো গলা ব্যবহার করত না বলে তা লম্বা হয়ে যায়"], ans: 1, exp: "ব্যাখ্যা: ডারউইনের মতে, উঁচু ডাল থেকে খাবার পাওয়ার তাগিদে লম্বা গলার প্রকরণযুক্ত জিরাফরাই প্রাকৃতিক নির্বাচনে যোগ্যতম বলে বিবেচিত হয় এবং বেঁচে থাকে।" },
+            { q: "৭৪. প্রাণীদের মধ্যে 'মিমিক্রি' (Mimicry) বা অনুকৃতি (যেমন পাতাপোকার পাতার মতো রূপ) কিসের উদাহরণ?", opts: ["কৃত্রিম নির্বাচন", "প্রাকৃতিক নির্বাচনের মাধ্যমে অভিযোজন ও বাঁচার লড়াইয়ে সাফল্য (Adaptation and success through natural selection)", "মিউটেশন", "জেনেটিক ড্রিফট"], ans: 1, exp: "ব্যাখ্যা: অনুকৃতি বা মিমিক্রি প্রাণীদের শত্রুর দৃষ্টি এড়িয়ে বেঁচে থাকতে সাহায্য করে যা বিভেদের সঞ্চারের মাধ্যমে সম্ভব হয় এবং এরা প্রাকৃতিক নির্বাচনে সাফল্য লাভ করে।" },
+            { q: "৭৫. ডারউইন বংশগতির সপক্ষে কোন্ মতবাদটি উপস্থাপন করেছিলেন যা পরবর্তীতে ভুল প্রমাণিত হয়?", opts: ["থিওরি অফ মিউটেশন", "থিওরি অফ প্যানজেনেসিস (Theory of pangenesis)", "জার্মপ্লাজম তত্ত্ব", "ক্রোমোজোম তত্ত্ব"], ans: 1, exp: "ব্যাখ্যা: চারিত্রিক বৈশিষ্ট্যের সঞ্চারণ ঘটার ব্যাখ্যার জন্য ডারউইন 'থিওরি অব প্যানজেনেসিস' (Theory of pangenesis) মতবাদ দেন, যা মোটেই যুক্তিগ্রাহ্য নয়।" }
+        ]
+    },
+    6: {
+        name: 'Set 6', icon: '📈', topic: 'মডার্ন সিন্থেটিক থিওরি ও প্রকরণ (Modern Synthetic Theory & Variations)',
+        questions: [
+            { q: "৭৬. বিবর্তনের আধুনিক সংশ্লেষ তত্ত্ব বা মডার্ন সিন্থেটিক থিওরি (Modern Synthetic theory) কাদের দ্বারা প্রতিষ্ঠিত?", opts: ["শুধুমাত্র ডারউইন", "ফিশার, রাইট, হ্যালডেন, ডবঝনস্কি, মেয়ার প্রমুখ (Fisher, Wright, Haldane, Dobzhansky, Mayr, etc.)", "হুগো দ্য ভ্রিস", "ল্যামার্ক"], ans: 1, exp: "ব্যাখ্যা: ডারউইন তত্ত্বকে জিনতত্ত্ব ও মিউটেশনের সাপেক্ষে নতুনভাবে ব্যাখ্যা করে মডার্ন সিন্থেটিক থিওরি রচিত হয়, যাতে ফিশার, রাইট, হ্যালডেন, ডবঝনস্কি, মেয়ার প্রমুখের অবদান অনস্বীকার্য।" },
+            { q: "৭৭. মডার্ন সিন্থেটিক থিওরির মতে বিবর্তনের একক (Unit of evolution) কোনটি?", opts: ["একটি নির্দিষ্ট জীব (Individual)", "প্রজাতি পপুলেশন (Population)", "একটি কোষ", "একটি জিন"], ans: 1, exp: "ব্যাখ্যা: নতুন এই তত্ত্ব মতে, এককভাবে কোনো জীব অভিব্যক্তি ঘটাতে সক্ষম হয় না, প্রজাতি পপুলেশনই অভিব্যক্তির একক হিসাবে কাজ করে।" },
+            { q: "৭৮. একই প্রজাতিভুক্ত জীবেদের আকার, আকৃতি, গঠন ও ব্যবহারগত পার্থক্যকে কী বলা হয়?", opts: ["মিউটেশন", "হেরিডিটি", "প্রকরণ বা বিভেদ (Variation)", "জেনেটিক ড্রিফট"], ans: 2, exp: "ব্যাখ্যা: একই প্রজাতিভুক্ত জীবেদের আকার, আকৃতি, গঠন ও ব্যবহারগত পার্থক্যকে বিভেদ বা ভেরিয়েশন (Variation) বলে।" },
+            { q: "৭৯. যে সকল বিভেদ গ্যামেট তৈরির সময় জনন কোষে বা জার্ম কোষে দেখা দেয় এবং বংশানুক্রমে সঞ্চারিত হয়, তাদের কী বলে?", opts: ["সোমাটিক ভেরিয়েশন", "ব্লাস্টোজেনিক বা জার্মিনাল ভেরিয়েশন (Blastogenic or Germinal variation)", "ইনডিটারমিনেট ভেরিয়েশন", "ফিনোকপি"], ans: 1, exp: "ব্যাখ্যা: যে সকল বিভেদ জীবের জনন কলায় সৃষ্টি হয় এবং পরবর্তী বংশধরদের মধ্যে সঞ্চারিত হওয়ার ক্ষমতা রাখে, তাদের জার্মিনাল বা ব্লাস্টোজেনিক ভেরিয়েশন বলে।" },
+            { q: "৮০. দেহকোষের বিভেদ বা সোমাটিক ভেরিয়েশনের (Somatic variation) একটি উদাহরণ কোনটি?", opts: ["মানুষের চোখের রঙের পার্থক্য", "বডি বিল্ডারের বা ব্যায়ামবীরের সুগঠিত পেশি (Well-developed muscles of a bodybuilder)", "বর্ণান্ধতা", "ছ'টি আঙুল থাকা"], ans: 1, exp: "ব্যাখ্যা: ব্যবহার ও অব্যবহার বা পরিবেশের প্রভাবে দেহকোষে সীমাবদ্ধ বিভেদ যা বংশানুক্রমে সঞ্চারিত হয় না, তা সোমাটিক ভেরিয়েশন। যেমন ব্যায়ামবীরের পেশি।" },
+            { q: "৮১. যে সকল চরিত্রকে গুণগত মান দ্বারা পরিমাপ করা যায় এবং যাদের একটি মধ্যমান (Average) পাওয়া যায় (যেমন মানুষের উচ্চতা), তাদের কী ধরনের বিভেদ বলে?", opts: ["ডিসকন্টিনিউয়াস ভেরিয়েশন", "কন্টিনিউয়াস ভেরিয়েশন (Continuous variation)", "মেরিস্টিক ভেরিয়েশন", "সোমাটোজেনিক ভেরিয়েশন"], ans: 1, exp: "ব্যাখ্যা: যে সকল চরিত্রের প্রকাশকে গুণগত মান দ্বারা নির্দেশ করা যায় এবং যাদের একটি মধ্যমান হওয়া সম্ভব, সেগুলিকে কন্টিনিউয়াস বা চলমান ভেরিয়েশন বলে।" },
+            { q: "৮২. কন্টিনিউয়াস ভেরিয়েশনের বৈশিষ্ট্যগুলিকে গ্রাফে বসালে কী আকৃতির লেখচিত্র পাওয়া যায়?", opts: ["সরলরৈখিক", "S-আকৃতির", "ঘণ্টাকৃতি বা Bell-shaped (Bell-shaped curve)", "J-আকৃতির"], ans: 2, exp: "ব্যাখ্যা: কন্টিনিউয়াস ভেরিয়েশনের ক্ষেত্রে গুণগত মানগুলির সাপেক্ষে প্রজাতি সদস্য সংখ্যাকে ছক কাগজে সাজালে একটি ঘণ্টাকৃতি লেখচিত্র পাওয়া যায়।" },
+            { q: "৮৩. হঠাৎ করে কোনো জীবে সাধারণত মিউটেশন জনিত কারণে আবির্ভূত বৃহৎ ও অনন্য বিভেদকে কী বলা হয়?", opts: ["কন্টিনিউয়াস ভেরিয়েশন", "ডিসকন্টিনিউয়াস ভেরিয়েশন (Discontinuous variation)", "সোমাটিক ভেরিয়েশন", "ফিনোকপি"], ans: 1, exp: "ব্যাখ্যা: হঠাৎ জেগে ওঠা কোনো সম্যক বৈশিষ্ট্যকে বলে ডিসকন্টিনিউয়াস ভেরিয়েশন বা সলটেশন/মিউটেশন।" },
+            { q: "৮৪. হুগো দ্য ভ্রিস (Hugo de Vries) তাঁর মিউটেশন তত্ত্ব কোন্ উদ্ভিদের ওপর গবেষণা করে প্রতিষ্ঠা করেছিলেন?", opts: ["মটর গাছ", "ড্রসোফিলা মাছি", "ইভনিং প্রিমরোজ (Evening primrose / Oenothera lamarckiana)", "স্ন্যাপড্রাগন"], ans: 2, exp: "ব্যাখ্যা: দ্য ভ্রিস ইভনিং প্রিমরোজ (Oenothera lamarckiana) নিয়ে গবেষণা করে মিউটেশন তত্ত্ব প্রস্তাব করেন।" },
+            { q: "৮৫. দ্য ভ্রিসের মতে, বৃহৎ বিচ্ছিন্ন পরিবর্তনশীলতার অকস্মাৎ উৎপত্তির ফলে নতুন প্রজাতির উদ্ভব হওয়াকে কী বলা হয়?", opts: ["প্রাকৃতিক নির্বাচন", "সলটেশন (Saltation)", "কন্টিনিউয়াস ভেরিয়েশন", "জেনেটিক ড্রিফট"], ans: 1, exp: "ব্যাখ্যা: হুগো দ্য ভ্রিসের মতে মিউটেশান এর কারণেই প্রজাতিকরণ ঘটে, যা এক ধাপের বৃহৎ পরিবর্তন। তাই একে সলটেশান (Saltation) বলে।" },
+            { q: "৮৬. মেরিস্টিক ভেরিয়েশন (Meristic variation) বলতে কী বোঝায়?", opts: ["গায়ের রঙের পরিবর্তন", "চোখের রঙের পরিবর্তন", "সংখ্যার ভিত্তিতে চারিত্রিক পরিবর্তন (Numerical variation, e.g., number of fingers)", "দেহের উচ্চতার পরিবর্তন"], ans: 2, exp: "ব্যাখ্যা: সংখ্যার ভিত্তিতে যখন দেহের কোনো অংশ বা অঙ্গ চারিত্রিক বৈশিষ্ট্য হিসেবে বিবেচিত হয় তখন তাকে মেরিস্টিক চরিত্র বলা হয়, যেমন হাতে আঙুলের সংখ্যা।" },
+            { q: "৮৭. সাবস্ট্যানটিভ ভেরিয়েশন (Substantive variation) বলতে কী বোঝায়?", opts: ["সংখ্যার পরিবর্তন", "গুণগত বা অবয়বগত চরিত্রের পরিবর্তন (Qualitative or morphological changes, e.g., skin/eye color)", "ক্রোমোজোমের সংখ্যার পরিবর্তন", "অস্থায়ী পরিবর্তন"], ans: 1, exp: "ব্যাখ্যা: গুণগত মানের বা অবয়বগত ভিত্তিতে যে চরিত্র বিচার্য হয় (যেমন চোখের রং, চুলের রং) তাকে সাবস্ট্যানটিভ ভেরিয়েশন বলে।" },
+            { q: "৮৮. যে সকল বিভেদ কোনো লক্ষ্যে পৌঁছানোর উদ্দেশ্যে দেখা দেয় এবং জীবকে অভিযোজনে সাহায্য করে, তাদের কী বলে?", opts: ["ইনডিটারমিনেট ভেরিয়েশন", "ডিটারমিনেট ভেরিয়েশন (Determinate variation)", "মেরিস্টিক ভেরিয়েশন", "ফিনোকপি"], ans: 1, exp: "ব্যাখ্যা: যে সকল বিভেদ কোনো লক্ষ্যে পৌঁছানোর উদ্দেশ্যে দেখা দেয় বা দিকনির্ণীত পরিবর্তন আনে, তাদের ডিটারমিনেট ভেরিয়েশন বলে।" },
+            { q: "৮৯. জীবের যে সকল চারিত্রিক পরিবর্তন শুধুমাত্র পরিবেশের প্রভাবে দেখা দেয় এবং জিনগত নয় (তাই বিবর্তনে অংশ নেয় না), তাদের কী বলে?", opts: ["মিউটেশন", "জেনোটাইপ", "ফিনোকপি (Phenocopy)", "রিকম্বিনেশন"], ans: 2, exp: "ব্যাখ্যা: এমন বিভেদের জন্য কোনো জিনগত পরিবর্তন আসে না এবং পরিবেশ স্বাভাবিক হলে বিভেদটি আর থাকে না, এদের ফিনোকপি বলে, যা দিশাহীন বিভেদ।" },
+            { q: "৯০. মডার্ন সিন্থেটিক থিওরি অনুযায়ী, বিবর্তনের প্রধান হাতিয়ার বা শক্তিগুলি কী কী?", opts: ["শুধুমাত্র প্রাকৃতিক নির্বাচন", "মিউটেশন, রিকম্বিনেশন, জেনেটিক ড্রিফট, জিন ফ্লো এবং প্রাকৃতিক নির্বাচন (Mutation, Recombination, Genetic drift, Gene flow, Natural selection)", "কেবল মিউটেশন", "ব্যবহার ও অব্যবহার"], ans: 1, exp: "ব্যাখ্যা: মডার্ন সিন্থেটিক থিওরি মিউটেশন, বংশগতি, বিভেদ, রিকম্বিনেশন, জেনেটিক ড্রিফ্ট ও প্রাকৃতিক নির্বাচনের সমন্বয়ে রচিত।" }
+        ]
+    },
+    7: {
+        name: 'Set 7', icon: '🧬', topic: 'মিউটেশন ও জেনেটিক ড্রিফট (Mutation & Genetic Drift)',
+        questions: [
+            { q: "৯১. জীবের মধ্যে সঞ্চারণযোগ্য হঠাৎ জেগে ওঠা স্থায়ী কোনো জিনগত পরিবর্তনকে কী বলে?", opts: ["ক্রসিং ওভার", "রিকম্বিনেশন", "মিউটেশন বা পরিব্যক্তি (Mutation)", "জিন ফ্লো"], ans: 2, exp: "ব্যাখ্যা: জীবের মধ্যে সঞ্চারণযোগ্য হঠাৎ জেগে ওঠা স্থায়ী কোনো জিনগত পরিবর্তনকে মিউটেশন বলে।" },
+            { q: "৯২. DNA তে একটি পিউরিন বেস (A বা G) যদি অপর একটি পিউরিন বেস দ্বারা প্রতিস্থাপিত হয়, তবে তাকে কী ধরনের মিউটেশন বলে?", opts: ["ট্রান্সভার্শন", "ট্রানজিশন (Transition)", "ফ্রেম শিফট মিউটেশন", "ডিলিশন"], ans: 1, exp: "ব্যাখ্যা: যে প্রতিস্থাপনে পিউরিন বেস অপর একটি পিউরিন বেস দ্বারা অথবা পিরিমিডিন বেস অপর একটি পিরিমিডিন বেস দ্বারা প্রতিস্থাপিত হয়, তাকে ট্রানজিশন বলে।" },
+            { q: "৯৩. DNA তে একটি পিউরিন বেস যদি পিরিমিডিন বেস দ্বারা বা পিরিমিডিন বেস যদি পিউরিন বেস দ্বারা প্রতিস্থাপিত হয়, তাকে কী বলে?", opts: ["ট্রানজিশন", "ট্রান্সভার্শন (Transversion)", "ডুপ্লিকেশন", "ইনভার্শন"], ans: 1, exp: "ব্যাখ্যা: যখন একটি পিউরিন বেস পিরিমিডিন বেস দ্বারা অথবা পিরিমিডিন বেস পিউরিন বেস দ্বারা প্রতিস্থাপিত হয় তখন তাকে ট্রান্সভার্শন বলে।" },
+            { q: "৯৪. যে রাসায়নিক বা ভৌত উপাদানের প্রভাবে মিউটেশন ঘটে (যেমন X-ray বা 5-Bromouracil), তাকে কী বলে?", opts: ["মিউট্যান্ট", "মিউটাজেন (Mutagen)", "কো-রিপ্রেসর", "কার্সিনোজেন"], ans: 1, exp: "ব্যাখ্যা: যে সকল পদার্থের প্রভাবে মিউটেশন দেখা দেয় (ভৌত বা রাসায়নিক উপাদান) তাদের মিউটাজেন (Mutagen) বলে।" },
+            { q: "৯৫. ক্রোমোজোমের কোনো অংশ ভেঙে গিয়ে 180° ঘুরে আবার একই স্থানে জোড়া লাগলে তাকে কোন্ ধরনের ক্রোমোজোমাল মিউটেশন বলে?", opts: ["ডিলিশন", "ডুপ্লিকেশন", "ইনভারশন (Inversion)", "ট্রান্সলোকেশন"], ans: 2, exp: "ব্যাখ্যা: কোনো ক্রোমোজোমের একটি অংশ ভেঙে গিয়ে ওই জায়গাতেই 180° কোণে ঘুরে আবার জোড়া লাগাকে ইনভারশন বলে।" },
+            { q: "৯৬. দুটি অসমসংস্থ (Non-homologous) ক্রোমোজোমের মধ্যে খণ্ড বিনিময় ঘটলে তাকে কী বলে?", opts: ["ক্রসিং ওভার", "ডিলিশন", "ইনভারশন", "রেসিপ্রোকাল ট্রান্সলোকেশন (Reciprocal Translocation)"], ans: 3, exp: "ব্যাখ্যা: যখন দুটি অসমসংস্থ ক্রোমোজোমের মধ্যে অংশ বিনিময় ঘটে, তখন তাকে রেসিপ্রোকাল ট্রান্সলোকেশন বলে।" },
+            { q: "৯৭. একটি বৃহৎ পপুলেশন থেকে ব্যক্তিবিশেষের ছোটো একটি গ্রুপ যখন দৈবক্রমে (By chance) পৃথক হয় তখন জিন ফ্রিকোয়েন্সির যে আকস্মিক পরিবর্তন ঘটে, তাকে কী বলে?", opts: ["প্রাকৃতিক নির্বাচন", "জিন ফ্লো", "জেনেটিক ড্রিফ্ট (Genetic Drift)", "মিউটেশন"], ans: 2, exp: "ব্যাখ্যা: একটি বৃহৎ পপুলেশন থেকে ব্যক্তিবিশেষের ছোটো একটি গ্রুপ যখন পৃথক হয় তখন দৈবক্রমে জিন ফ্রিকোয়েন্সির যে পরিবর্তন ঘটে, তাকে জেনেটিক ড্রিফ্ট বলে।" },
+            { q: "৯৮. জেনেটিক ড্রিফ্ট তত্ত্বটি (Theory of Genetic drift) কে প্রস্তাব করেন?", opts: ["চার্লস ডারউইন", "সিওয়াল রাইট (Sewall Wright)", "হার্ডি ও উইনবার্গ", "আর্নস্ট মেয়ার"], ans: 1, exp: "ব্যাখ্যা: বিজ্ঞানী সিওয়াল রাইট (Sewall Wright) 1930 খ্রিস্টাব্দে জেনেটিক ড্রিফ্ট মতবাদ বর্ণনা করেন, তাই একে সিওয়াল রাইট এফেক্টও বলে।" },
+            { q: "৯৯. জেনেটিক ড্রিফ্ট কোন্ ধরনের পপুলেশনে সবচেয়ে বেশি কার্যকরী হয়?", opts: ["বৃহৎ পপুলেশনে", "ছোটো ও বিচ্ছিন্ন পপুলেশনে (Small isolated population)", "মিউটেটিং পপুলেশনে", "সর্বত্র সমান"], ans: 1, exp: "ব্যাখ্যা: জেনেটিক ড্রিফ্টের মূল কথা হল পপুলেশন যত ছোটো হবে তাতে স্যাম্পলিং ত্রুটি তত বেশি হবে এবং জিন ফ্রিকোয়েন্সির পরিবর্তন বেশি হবে।" },
+            { q: "১০০. কোনো প্রাকৃতিক বিপর্যয়ের কারণে পপুলেশনের সংখ্যা অস্বাভাবিকভাবে কমে গেলে এবং বেঁচে থাকা কিছু সদস্যের মধ্যে জেনেটিক ড্রিফ্ট ঘটলে তাকে কী বলে?", opts: ["ফাউন্ডার ইফেক্ট", "পপুলেশন বটলনেক (Population bottleneck)", "ন্যাচারাল সিলেকশন", "জিন ফ্লো"], ans: 1, exp: "ব্যাখ্যা: কোনো প্রাকৃতিক পরিবেশে কোনো কারণে অস্বাভাবিকভাবে জনসংখ্যা বা প্রাণী সংখ্যা কমে গেলে বেঁচে থাকা অল্প সংখ্যক জীবে জেনেটিক ড্রিফট হয়, একে পপুলেশন বটলনেক বলে।" },
+            { q: "১০১. চিতা বাঘের (Cheetah) পপুলেশনে বর্তমানে জেনেটিক বৈচিত্র্য খুব কম। এটি কোন্ বিবর্তনগত ঘটনার উদাহরণ?", opts: ["ফাউন্ডার ইফেক্ট", "পপুলেশন বটলনেক (Population bottleneck)", "পরিযান", "ডাইরেকশনাল সিলেকশন"], ans: 1, exp: "ব্যাখ্যা: হাজার বছর আগে চিতা বাঘের পপুলেশন অস্বাভাবিকভাবে কমে গিয়ে পপুলেশন বটলনেক দেখা দিয়েছিল, তাই এদের জেনেটিক বৈচিত্র্য আজ খুব কম।" },
+            { q: "১০২. কোনো বৃহৎ পপুলেশন থেকে বিচ্ছিন্ন হয়ে কিছু মানুষ বা প্রাণী নতুন কোনো জায়গায় বসতি স্থাপন করলে যে জেনেটিক ড্রিফ্ট দেখা যায়, তাকে কী বলে?", opts: ["পপুলেশন বটলনেক", "ফাউন্ডার ইফেক্ট (Founder effect)", "জিন ফ্লো", "মিউটেশন"], ans: 1, exp: "ব্যাখ্যা: কোনো বৃহৎ পপুলেশন থেকে বিচ্ছিন্ন হয়ে কিছু মানুষ বা প্রাণী নতুন কোনো জায়গায় বসতি স্থাপন করলে যে জিনগত বৈচিত্র্য বা ড্রিফট দেখা দেয়, তাকে ফাউন্ডার ইফেক্ট বলে।" },
+            { q: "১০৩. এক পপুলেশন থেকে গ্যামেট বা জীবের স্থানান্তরের ফলে দুটি পপুলেশনের মধ্যে জেনেটিক ফ্যাক্টরের বিনিময় ঘটাকে কী বলে?", opts: ["জেনেটিক ড্রিফ্ট", "জিন প্রবাহ বা জিন ফ্লো (Gene flow)", "রিকম্বিনেশন", "ক্রসিং ওভার"], ans: 1, exp: "ব্যাখ্যা: জাইগোট বা গ্যামেটের স্থানান্তরের ফলে (পরিযান) দুটি পপুলেশনের মধ্যে জিনের বা জেনেটিক ফ্যাক্টরের বিনিময়কে জিন ফ্লো বা জিন প্রবাহ বলে।" },
+            { q: "১০৪. মানুষের পপুলেশনে নিকট আত্মীয়দের মধ্যে বিবাহ বা ইনব্রিডিং (Inbreeding) ঘটলে কী হওয়ার সম্ভাবনা বেড়ে যায়?", opts: ["হেটেরোজাইগাস অবস্থার বৃদ্ধি", "প্রচ্ছন্ন ক্ষতিকারক জিনের হোমোজাইগাস অবস্থায় প্রকাশ পাওয়ার সম্ভাবনা (Increased chance of recessive lethal genes becoming homozygous)", "নতুন প্রজাতির সৃষ্টি", "জেনেটিক ড্রিফ্ট বন্ধ হওয়া"], ans: 1, exp: "ব্যাখ্যা: ইনব্রিডিং-এর ফলে অপত্য জনুগুলিতে কোনো ক্ষতিকারক প্রচ্ছন্ন জিনের মধ্যে হোমোজাইগাস অবস্থা সৃষ্টি হওয়ার সম্ভাবনা বেড়ে যায় এবং লিথাল জিন প্রকাশ পায়।" },
+            { q: "১০৫. পপুলেশনে সুপ্ত বা প্রচ্ছন্ন অবস্থায় থাকা ক্ষতিকারক বা লিথাল জিনগুলিকে একত্রে কী বলা হয়?", opts: ["জেনেটিক লোড (Genetic load)", "জেনেটিক ড্রিফ্ট", "ফিনোকপি", "সিউডোজিন"], ans: 0, exp: "ব্যাখ্যা: মানুষের পপুলেশনে সুপ্ত অবস্থায় থাকা প্রচ্ছন্নধর্মী লিথাল বা মারাত্মক জিনগুলিকে জেনেটিক লোড (genetic load) বলে, যা ইনব্রিডিং-এ প্রকাশ পায়।" }
+        ]
+    },
+    8: {
+        name: 'Set 8', icon: '🦅', topic: 'প্রাকৃতিক নির্বাচনের প্রকারভেদ ও অভিযোজিত বিকিরণ (Natural Selection & Adaptive Radiation)',
+        questions: [
+            { q: "১০৬. যখন পপুলেশনে মধ্যবর্তী গুণমানগুলি (Intermediate phenotype) প্রাকৃতিক নির্বাচনে বেশি গুরুত্ব পায় এবং দুই প্রান্তীয় গুণমানের জীবগুলি বঞ্চিত হয়, তাকে কোন্ প্রকার নির্বাচন বলে?", opts: ["ডাইরেকশনাল সিলেকশন", "স্টেবিলাইজিং সিলেকশন (Stabilizing or normalizing selection)", "ডিসরাপটিভ সিলেকশন", "কিন সিলেকশন"], ans: 1, exp: "ব্যাখ্যা: মধ্যবর্তী গুণমানগুলি প্রাকৃতিক নির্বাচনে প্রাধান্য পেলে তাকে স্টেবিলাইজিং বা নরমালাইজিং সিলেকশন বলে। যেমন, বেশি বা কম উচ্চতার গাছের চেয়ে মাঝারি গাছ বেশি সুরক্ষিত থাকে।" },
+            { q: "১০৭. মানব শিশুদের জন্মের সময় নবজাতকদের গড় ওজন 7.3 পাউন্ড হলে মৃত্যুর হার কম হয়, কিন্তু এর চেয়ে খুব কম বা বেশি ওজনের শিশুদের মৃত্যুর হার বেশি। এটি কীসের উদাহরণ?", opts: ["ডাইরেকশনাল সিলেকশন", "ডিসরাপটিভ সিলেকশন", "স্টেবিলাইজিং সিলেকশন (Stabilizing Selection)", "সেক্সুয়াল সিলেকশন"], ans: 2, exp: "ব্যাখ্যা: গড় বা মধ্যমান ওজনযুক্ত শিশুদের মৃত্যুর হার কম হওয়া এবং প্রান্তীয় ওজনের শিশুদের মৃত্যুহার বেশি হওয়া স্টেবিলাইজিং বা স্থিতিশীল নির্বাচনের প্রকৃষ্ট উদাহরণ।" },
+            { q: "১০৮. যখন কোনো পপুলেশনে জীবের কোনো একটি প্রান্তীয় গুণমান (One extreme phenotype) প্রাকৃতিক নির্বাচন পায়, তখন তাকে কী বলে?", opts: ["স্টেবিলাইজিং সিলেকশন", "ডাইরেকশনাল সিলেকশন (Directional Selection)", "ডিসরাপটিভ সিলেকশন", "ফিনোকপি"], ans: 1, exp: "ব্যাখ্যা: জীবের কোনো চরিত্রের এক দিকের প্রান্তীয় গুণমানগুলি প্রাকৃতিক নির্বাচন পেলে তাকে ডাইরেকশনাল সিলেকশন বলে। যেমন জিরাফের লম্বা গলা।" },
+            { q: "১০৯. ইংল্যান্ডে শিল্পবিপ্লবের পর গাছের গুঁড়ির রং কালো হয়ে যাওয়ায় কালো রঙের পেপার্ড মথ (Biston betularia carbonaria) বেশি বেঁচে যায় এবং সাদা মথ মারা পড়ে। এটি কোন্ ধরনের প্রাকৃতিক নির্বাচনের উদাহরণ?", opts: ["স্টেবিলাইজিং সিলেকশন", "ডাইরেকশনাল সিলেকশন (Directional Selection)", "ডিসরাপটিভ সিলেকশন", "কৃত্রিম নির্বাচন"], ans: 1, exp: "ব্যাখ্যা: ইন্ডাস্ট্রিয়াল মেলানিজমে কালো বর্ণের বৈশিষ্ট্যটি একমুখী পরিবর্তনসাধিত পরিবেশে প্রাকৃতিক আনুকূল্য লাভ করে, এটি ডাইরেকশনাল বা নির্দেশিত নির্বাচনের উদাহরণ।" },
+            { q: "১১০. যখন পপুলেশনে বৈশিষ্ট্যের মধ্যমানযুক্ত জীবেরা নির্বাচন থেকে বঞ্চিত হয় এবং দুই প্রান্তীয় বিস্তারযুক্ত (Both extreme phenotypes) জীবেরা নির্বাচন লাভ করে, তাকে কী বলে?", opts: ["ডাইরেকশনাল সিলেকশন", "ডিসরাপটিভ সিলেকশন (Disruptive Selection)", "স্টেবিলাইজিং সিলেকশন", "ইনব্রিডিং"], ans: 1, exp: "ব্যাখ্যা: মধ্যমানের চরিত্র নির্বাচন না পেয়ে দুটি প্রান্তীয় চরিত্র নির্বাচন পেলে তাকে ডিসরাপটিভ সিলেকশন বা বিচ্ছিন্নকারক নির্বাচন বলে।" },
+            { q: "১১১. ময়ূরের দৃষ্টিনন্দন পেখম বা পুরুষ হরিণের শাখান্বিত শিং স্ত্রী প্রাণীদের আকৃষ্ট করার জন্য বিকশিত হয়েছে। এটি কোন্ নির্বাচনের উদাহরণ?", opts: ["কিন সিলেকশন", "সেক্সুয়াল সিলেকশন বা যৌন নির্বাচন (Sexual Selection)", "আর্টিফিসিয়াল সিলেকশন", "স্টেবিলাইজিং সিলেকশন"], ans: 1, exp: "ব্যাখ্যা: সেক্সুয়াল সিলেকশনের প্রভাবে পুরুষ প্রাণীরা বিশেষ চারিত্রিক বৈশিষ্ট্য (যেমন পেখম, শিং) দ্বারা স্ত্রী প্রাণীদের মিলনের জন্য আকৃষ্ট করে।" },
+            { q: "১১২. সমাজবদ্ধ প্রাণী যেমন শ্রমিক মৌমাছি নিজেরা প্রজনন না করে রানি মৌমাছিকে সন্তান পালনে সাহায্য করে (অ্যালট্রুইজম)। এটি কীসের উদাহরণ?", opts: ["সেক্সুয়াল সিলেকশন", "কিন সিলেকশন (Kin Selection)", "ডাইরেকশনাল সিলেকশন", "মিউটেশন"], ans: 1, exp: "ব্যাখ্যা: নিজের জিন সংরক্ষণের জন্য নিকট আত্মীয়ের পরিচর্যা করা বা অ্যালট্রুইজম (Altruism) দেখানো কিন সিলেকশনের উদাহরণ, যা সমাজবদ্ধ প্রাণী ও কিছু পাখিতে দেখা যায়।" },
+            { q: "১১৩. একই পূর্বপুরুষ থেকে উদ্ভূত সমগোত্রীয় প্রাণীরা বিভিন্ন ভৌগোলিক পরিবেশে বাস করার জন্য বা পরিবর্তিত পরিবেশের সঙ্গে অভিযোজিত হওয়ার জন্য যে বিচিত্র রূপ ধারণ করে, তাকে কী বলে?", opts: ["অভিসারী বিবর্তন", "অভিযোজিত বিকিরণ বা অ্যাডাপটিভ রেডিয়েশন (Adaptive radiation)", "কো-ইভোলিউশন", "জেনেটিক ড্রিফট"], ans: 1, exp: "ব্যাখ্যা: আদি পূর্বপুরুষ থেকে উদ্ভূত সমগোত্রীয় প্রাণীরা বিভিন্ন পরিবেশে অভিযোজনের তাগিদে বৈচিত্র্যপূর্ণ হলে তাকে অভিযোজিত বিকিরণ বা অ্যাডাপটিভ রেডিয়েশন বলে।" },
+            { q: "১১৪. প্রশান্ত মহাসাগরের গ্যালাপাগোস দ্বীপপুঞ্জে ডারউইনের পর্যবেক্ষণ করা ফিঞ্চ (Finch) পাখিদের বিবর্তন কোন্ ঘটনার প্রকৃষ্ট উদাহরণ?", opts: ["অভিসারী বিবর্তন", "অ্যাডাপটিভ রেডিয়েশন (Adaptive radiation)", "জেনেটিক ড্রিফ্ট", "আর্টিফিসিয়াল সিলেকশন"], ans: 1, exp: "ব্যাখ্যা: গ্যালাপাগোস দ্বীপপুঞ্জে ফিঞ্চ পাখিদের বিভিন্ন খাদ্যাভ্যাসের জন্য বিভিন্ন চঞ্চু গঠন করে নতুন প্রজাতির উদ্ভব অ্যাডাপটিভ রেডিয়েশনের একটি আদর্শ উদাহরণ।" },
+            { q: "১১৫. অস্ট্রেলিয়ার আদি মারসুপিয়াল স্তন্যপায়ী থেকে ক্যাঙারু, কোয়ালা, ফ্লাইং ফ্যালেঞ্জার ইত্যাদি প্রাণী সৃষ্টি হয়েছে। এটি কীসের উদাহরণ?", opts: ["অপসারী বিবর্তন / অ্যাডাপটিভ রেডিয়েশন (Divergent evolution / Adaptive radiation)", "অভিসারী বিবর্তন", "সমান্তরাল বিবর্তন", "রেট্রোগ্রেসিভ বিবর্তন"], ans: 0, exp: "ব্যাখ্যা: একটি আদি স্তন্যপায়ী পূর্বপুরুষ থেকে বিভিন্ন পরিবেশে অভিযোজিত হয়ে ক্যাঙারু, কোয়ালা ইত্যাদি তৈরি হওয়া অপসারী বিবর্তন বা অ্যাডাপটিভ রেডিয়েশনের উদাহরণ।" },
+            { q: "১১৬. একই পরিবেশে বসবাস করার উদ্দেশ্যে সম্পর্কহীন আলাদা আলাদা প্রাণীর (যেমন হাঙর, ইকথিওসোউর ও ডলফিন) একই ধরনের বৈশিষ্ট্য বা দেহের আকৃতি অর্জনের প্রক্রিয়াকে কী বলে?", opts: ["অপসারী বিবর্তন", "অভিসারী বিবর্তন (Convergent evolution)", "সমান্তরাল বিবর্তন", "ডাইরেকশনাল সিলেকশন"], ans: 1, exp: "ব্যাখ্যা: সম্পর্কহীন জীবগোষ্ঠী একই পরিবেশে বাস করার কারণে একই প্রকার অভিযোজন দেখালে তাকে অভিসারী বিবর্তন বলে।" },
+            { q: "১১৭. অভিসারী বিবর্তনের (Convergent evolution) ফলে কোন্ ধরনের অঙ্গ গঠিত হয়?", opts: ["সমসংস্থ অঙ্গ", "সমবৃত্তীয় অঙ্গ (Analogous organs)", "লুপ্তপ্রায় অঙ্গ", "হোমোলোগাস অঙ্গ"], ans: 1, exp: "ব্যাখ্যা: অভিসারী বিবর্তনের কারণেই সমবৃত্তীয় অঙ্গ (যেমন ডলফিনের ফ্লিপার ও মাছের পাখনা, বা পাখির ডানা ও পতঙ্গের ডানা) গঠিত হয়, যাদের উৎপত্তি আলাদা কিন্তু কাজ এক।" },
+            { q: "১১৮. অপসারী বিবর্তনের (Divergent evolution) ফলে কোন্ ধরনের অঙ্গ গঠিত হয়?", opts: ["সমবৃত্তীয় অঙ্গ", "সমসংস্থ অঙ্গ (Homologous organs)", "লুপ্তপ্রায় অঙ্গ", "অ্যানালগাস অঙ্গ"], ans: 1, exp: "ব্যাখ্যা: একই উৎস থেকে সৃষ্ট কিন্তু ভিন্ন পরিবেশে কাজ করার জন্য অভিযোজিত হয়ে যে অঙ্গ তৈরি হয় তাকে সমসংস্থ অঙ্গ বলে। অপসারী বিবর্তনের কারণেই সমসংস্থ অঙ্গ গঠিত হয়।" },
+            { q: "১১৯. বিবর্তন বা ইভোলিউশন যখন সুপ্রা-স্পেসিফিক স্তরে (শ্রেণি, গোত্র, পর্ব ইত্যাদি) ঘটে এবং নতুন গণ বা গোত্র তৈরি করে, তখন তাকে কী বলে?", opts: ["মাইক্রো ইভোলিউশন", "ম্যাক্রো ইভোলিউশন (Macroevolution / Megaevolution)", "সমান্তরাল বিবর্তন", "সলটেশন"], ans: 1, exp: "ব্যাখ্যা: অ্যাডাপটিভ রেডিয়েশন নতুন গণ, গোত্র, বর্গ ও শ্রেণি সৃষ্টি করে। একে ম্যাক্রোইভোলিউশন বা মেগাইভোলিউশন বলে।" },
+            { q: "১২০. একটি অ্যানসেস্ট্রাল বা পূর্বপুরুষ প্রজাতি থেকে শাখা-প্রশাখার মাধ্যমে দুটি বা তার বেশি নতুন প্রজাতি তৈরি হওয়াকে কী বলে?", opts: ["অ্যানাজেনেসিস", "ক্ল্যাডোজেনেসিস (Cladogenesis)", "কনভারজেন্স", "ফিনোকপি"], ans: 1, exp: "ব্যাখ্যা: একটি অ্যানসেস্ট্রাল প্রজাতি থেকে দুটি প্রজাতি তৈরি হওয়াকে ক্ল্যাডোজেনেসিস বলে। (আর একক লিনিয়েজ বদলে নতুন প্রজাতি হলে অ্যানাজেনেসিস বলে)।" }
+        ]
+    },
+    9: {
+        name: 'Set 9', icon: '➗', topic: 'হার্ডি-উইনবার্গ নীতি (Hardy-Weinberg Principle)',
+        questions: [
+            { q: "১২১. হার্ডি-উইনবার্গ নীতি (Hardy-Weinberg Principle) মূলত কীসের ব্যাখ্যা দেয়?", opts: ["জেনেটিক ড্রিফট কীভাবে ঘটে", "পপুলেশনে জিন ফ্রিকোয়েন্সি এবং জেনেটিক ইক্যুইলিব্রিয়াম বা সাম্যাবস্থা কীভাবে বজায় থাকে (Genetic equilibrium)", "মিউটেশন কীভাবে হয়", "ডিএনএ রেপ্লিকেশন কীভাবে হয়"], ans: 1, exp: "ব্যাখ্যা: হার্ডি-উইনবার্গ সূত্র একটি বৃহৎ পপুলেশনে অ্যালিলগুলির আচরণ কীরূপ হবে এবং কীভাবে জেনেটিক ইকুইলিব্রিয়াম বা সাম্যাবস্থা বজায় থাকে তার ব্যাখ্যা দেয়।" },
+            { q: "১২২. হার্ডি-উইনবার্গ সাম্যাবস্থার গাণিতিক সমীকরণটি কী?", opts: ["p + q = 0", "p^2 + q^2 = 1", "p^2 + 2pq + q^2 = 1", "2p + 2q + pq = 1"], ans: 2, exp: "ব্যাখ্যা: হার্ডি-উইনবার্গ সমীকরণটি হল (p + q)^2 = p^2 + 2pq + q^2 = 1, যেখানে p ও q দুটি অ্যালিলের ফ্রিকোয়েন্সি।" },
+            { q: "১২৩. হার্ডি-উইনবার্গ সমীকরণে 'p²' (p square) কী নির্দেশ করে?", opts: ["প্রচ্ছন্ন অ্যালিলের ফ্রিকোয়েন্সি", "হোমোজাইগাস প্রকট জেনোটাইপের ফ্রিকোয়েন্সি (Frequency of homozygous dominant genotype)", "হেটেরোজাইগাস জেনোটাইপের ফ্রিকোয়েন্সি", "হোমোজাইগাস প্রচ্ছন্ন জেনোটাইপের ফ্রিকোয়েন্সি"], ans: 1, exp: "ব্যাখ্যা: p² হোমোজাইগাস প্রকট (যেমন pp বা AA) ব্যক্তি বিশেষকে উপস্থাপিত করে।" },
+            { q: "১২৪. হার্ডি-উইনবার্গ সমীকরণে '2pq' কী নির্দেশ করে?", opts: ["হোমোজাইগাস প্রকট জেনোটাইপ", "হোমোজাইগাস প্রচ্ছন্ন জেনোটাইপ", "হেটেরোজাইগাস জেনোটাইপের ফ্রিকোয়েন্সি (Frequency of heterozygous genotype)", "সম্পূর্ণ জিন ফ্রিকোয়েন্সি"], ans: 2, exp: "ব্যাখ্যা: 2pq হেটেরোজাইগাস অবস্থা (যেমন pq বা Aa) জেনোটাইপযুক্ত জীবের ফ্রিকোয়েন্সি উপস্থাপন করে।" },
+            { q: "১২৫. কোনো পপুলেশনে একটি জিনের দুটি অ্যালিল (p ও q) থাকলে, হার্ডি-উইনবার্গ সূত্র অনুসারে তাদের যোগফল সর্বদা কত হবে?", opts: ["০", "১ (1)", "২", "১০০"], ans: 1, exp: "ব্যাখ্যা: p + q = 1, অর্থাৎ কোনো পপুলেশনে অ্যালিল ফ্রিকোয়েন্সির যোগফল সর্বদা ১ হয়।" },
+            { q: "১২৬. হার্ডি-উইনবার্গ সাম্যাবস্থা বজায় থাকার জন্য কোন্ শর্তটি আবশ্যক?", opts: ["পপুলেশন ছোটো হতে হবে", "পপুলেশনে স্ত্রী-পুরুষের অবাধ বা র‍্যান্ডম মিলন (Random mating) হতে হবে", "প্রাকৃতিক নির্বাচন চলতে হবে", "মিউটেশন হতে হবে"], ans: 1, exp: "ব্যাখ্যা: সাম্যাবস্থা বজায় থাকার অন্যতম শর্ত হল পপুলেশন বৃহৎ হতে হবে এবং পপুলেশনে স্ত্রী-পুরুষের অবাধ মিলন বা Random mating হতে হবে।" },
+            { q: "১২৭. নীচের কোন্ উপাদানটি হার্ডি-উইনবার্গ সাম্যাবস্থাকে বিঘ্নিত করে বা নষ্ট করে?", opts: ["র‍্যান্ডম মেটিং", "বৃহৎ পপুলেশন", "জেনেটিক ড্রিফ্ট, মিউটেশন ও প্রাকৃতিক নির্বাচন (Genetic drift, mutation, and natural selection)", "মেয়োসিস"], ans: 2, exp: "ব্যাখ্যা: মিউটেশন, প্রাকৃতিক নির্বাচন, জেনেটিক ড্রিফট, জিন প্রবাহ ইত্যাদি অভিব্যক্তিমূলক শক্তি কার্যকরী হলে হার্ডি-উইনবার্গ সাম্যাবস্থা বিঘ্নিত হয়।" },
+            { q: "১২৮. কোনো পপুলেশনে প্রচ্ছন্ন অ্যালিল 'a'-এর ফ্রিকোয়েন্সি (q) যদি 0.4 হয়, তবে প্রকট অ্যালিল 'A'-এর ফ্রিকোয়েন্সি (p) কত হবে?", opts: ["0.4", "0.6", "0.16", "0.8"], ans: 1, exp: "ব্যাখ্যা: যেহেতু p + q = 1, তাই q = 0.4 হলে p = 1 - 0.4 = 0.6 হবে।" },
+            { q: "১২۹. যদি কোনো পপুলেশনে প্রচ্ছন্ন অ্যালিল (q) = 0.2 হয়, তবে ওই পপুলেশনে হেটেরোজাইগাস (Aa) জীবের ফ্রিকোয়েন্সি কত হবে?", opts: ["0.04", "0.16", "0.32", "0.64"], ans: 2, exp: "ব্যাখ্যা: q = 0.2 হলে, p = 1 - 0.2 = 0.8। হেটেরোজাইগাস (Aa) ফ্রিকোয়েন্সি = 2pq = 2 × 0.8 × 0.2 = 0.32 বা 32%।" },
+            { q: "১৩০. একটি পপুলেশনে 4% লোক অ্যালবিনোজমের (প্রচ্ছন্ন বৈশিষ্ট্য) শিকার। ওই পপুলেশনে অ্যালবিনোজমের জিন 'a' এর ফ্রিকোয়েন্সি কত?", opts: ["0.04", "0.2", "0.4", "0.8"], ans: 1, exp: "ব্যাখ্যা: প্রচ্ছন্ন ফিনোটাইপ (q²) = 4% = 0.04। সুতরাং প্রচ্ছন্ন অ্যালিল 'a' এর ফ্রিকোয়েন্সি (q) = √0.04 = 0.2।" },
+            { q: "১৩১. হার্ডি-উইনবার্গ সূত্রটি কোন্ ধরনের পপুলেশনের ক্ষেত্রে প্রযোজ্য?", opts: ["খুব ছোটো পপুলেশনে", "শুধুমাত্র ল্যাবরেটরির প্রাণীতে", "বৃহৎ মেন্ডেলীয় পপুলেশনে (Large Mendelian population)", "ইনব্রিডিং পপুলেশনে"], ans: 2, exp: "ব্যাখ্যা: জীবজগতে যে-কোনো পপুলেশনে হার্ডি ও উইনবার্গের সূত্রটি প্রযোজ্য হয় না। শুধুমাত্র বৃহৎ মেন্ডেলীয় পপুলেশনে (যেখানে অবাধ মিলন ঘটে) এই সূত্রটি প্রযোজ্য।" },
+            { q: "১৩২. পপুলেশন ছোটো হলে হার্ডি-উইনবার্গ সাম্যাবস্থা বজায় থাকে না কেন?", opts: ["ছোটো পপুলেশনে মিউটেশন বেশি হয়", "ছোটো পপুলেশনে নমুনাগত বা স্যাম্পলিং ত্রুটি জনিত কারণে জেনেটিক ড্রিফ্ট ঘটে (Genetic drift due to sampling error)", "ছোটো পপুলেশনে প্রজনন হয় না", "ছোটো পপুলেশনে প্রাকৃতিক নির্বাচন কাজ করে না"], ans: 1, exp: "ব্যাখ্যা: পপুলেশন ছোটো হলে স্যাম্পলিং ত্রুটি (sampling error) জনিত কারণে জেনেটিক ড্রিফ্ট বা জিন ফ্রিকোয়েন্সির বড়ো বিচ্যুতি ঘটে, তাই সাম্যাবস্থা বিঘ্নিত হয়।" },
+            { q: "১৩৩. কোনো পপুলেশনে হেটেরোজাইগাস জেনোটাইপের (Aa) সর্বাধিক ফ্রিকোয়েন্সি কত হতে পারে (যখন p = q = 0.5)?", opts: ["0.25", "0.50 (বা 50%)", "0.75", "1.00"], ans: 1, exp: "ব্যাখ্যা: যখন p = 0.5 এবং q = 0.5, তখন 2pq = 2 × 0.5 × 0.5 = 0.50 বা 50%। এটিই হেটেরোজাইগাসের সর্বাধিক সম্ভাব্য মান।" },
+            { q: "১৩৪. মানুষের সেক্স-লিঙ্কড জিনের (X ক্রোমোজোমে অবস্থিত) ক্ষেত্রে হার্ডি-উইনবার্গ সাম্যাবস্থা অর্জিত হতে হলে কী শর্ত প্রয়োজন?", opts: ["পুরুষদের মধ্যে মিউটেশন হতে হবে", "জিনটির আনুপাতিক মান স্ত্রী ও পুরুষ উভয় পপুলেশনে সমান হতে হবে (Equal allele frequency in males and females)", "শুধু স্ত্রীলোকদের অবাধ মিলন হতে হবে", "জিনটি Y ক্রোমোজোমে থাকতে হবে"], ans: 1, exp: "ব্যাখ্যা: পপুলেশনে কোনো জিনের আনুপাতিক মান স্ত্রী ও পুরুষে আলাদা হলে, পপুলেশন জেনোটাইপীয় সাম্যাবস্থায় থাকে না। সাম্যাবস্থা সৃষ্টির জন্য সমগ্র পপুলেশনে জিনটির মান স্ত্রী ও পুরুষে এক হতে হবে।" },
+            { q: "১৩৫. হার্ডি-উইনবার্গ সাম্যাবস্থা বিবর্তনের ক্ষেত্রে কী তাৎপর্য বহন করে?", opts: ["এটি বিবর্তনকে ত্বরান্বিত করে", "এটি নতুন প্রজাতি সৃষ্টি করে", "এটি বিবর্তনজনিত পরিবর্তন পরিমাপের একটি তাত্ত্বিক ভিত্তি বা সূচক দেয় (Provides a baseline to measure evolutionary changes)", "এটি প্রাকৃতিক নির্বাচন বন্ধ করে"], ans: 2, exp: "ব্যাখ্যা: হার্ডি-উইনবার্গ সূত্র থেকে অভিব্যক্তিজনিত পরিবর্তন পরিমাপের জন্য একটি তাত্ত্বিক প্রাথমিক স্তরের সন্ধান পাওয়া যায়। যদি ফ্রিকোয়েন্সি ধ্রুবক থাকে তবে বিবর্তন হচ্ছে না, আর পরিবর্তন হলে বিবর্তন ঘটছে তা পরিমাপ করা যায়।" }
+        ]
+    },
+    10: {
+        name: 'Set 10', icon: '🦕', topic: 'বিবর্তনের প্রমাণ ও তত্ত্ব (Evidences and Theories of Evolution)',
+        questions: [
+            { q: "১৩৬. নীচের কোনটি ল্যামার্কের প্রস্তাবনা—“অর্জিত বৈশিষ্ট্যের বংশানুসরণকে”—সমর্থন করে না?", opts: ["সাপের পায়ের অনুপস্থিতি", "মথের মেলানাইজেশন", "জলজ পাখির জোড়া অঙ্গুলিপদ", "গুহায় বসবাসকারীদের দেহে রঞ্জকের অভাব"], ans: 1, exp: "ব্যাখ্যা: মথের মেলানাইজেশন (Industrial melanism) হলো ডারউইনের প্রাকৃতিক নির্বাচনের একটি উদাহরণ, এটি ল্যামার্কের অর্জিত বৈশিষ্ট্যের বংশানুসরণকে সমর্থন করে না।" },
+            { q: "১৩৭. নিও-ডারউইনিজম তত্ত্ব অনুসারে প্রজাতির উদ্ভবের জন্য নীচের কোনটি দায়ী?", opts: ["পরিব্যক্তি", "প্রকরণ", "পরিব্যক্তি ও প্রাকৃতিক নির্বাচন", "সংকরায়ন"], ans: 2, exp: "ব্যাখ্যা: নিও-ডারউইনিজম বা আধুনিক সংশ্লেষণ তত্ত্বে মিউটেশন (পরিব্যক্তি) এবং প্রাকৃতিক নির্বাচন উভয়কেই প্রজাতির উদ্ভবের প্রধান কারণ হিসেবে বিবেচনা করা হয়।" },
+            { q: "১৩৮. Darwin-এর ফিঞ্চ পাখিদের মধ্যে নীচের কোন ধরনের বিবর্তনগত প্রমাণ দেখতে পাওয়া যায়?", opts: ["জীবাশ্ম", "ভ্রূণতত্ত্ব", "শারীরস্থান", "ভৌগোলিক বিস্তার"], ans: 3, exp: "ব্যাখ্যা: ডারউইনের ফিঞ্চ পাখিরা গ্যালাপাগোস দ্বীপপুঞ্জে বিভিন্ন পরিবেশে অভিযোজিত হয়ে ভৌগোলিক বিস্তারের মাধ্যমে বিবর্তনের চমৎকার প্রমাণ দেয়।" },
+            { q: "১৩৯. নীচের কোনটি দাঁতযুক্ত পাখি?", opts: ["ডোডো", "উট পাখি", "পেঙ্গুইন", "আর্কিওপটেরিক্স"], ans: 3, exp: "ব্যাখ্যা: আর্কিওপটেরিক্স হলো সরীসৃপ ও পাখির মধ্যবর্তী একটি লুপ্ত সংযোজক যার চোয়ালে সরীসৃপের মতো সমআকারের দাঁত ছিল।" },
+            { q: "১৪০. নীচের কোনটি Hardy-Weinberg নীতিকে ব্যাখ্যায়িত করে?", opts: ["p^2 + pq + q^2 = 1", "p^2 + 2pq + q^2 = 1", "p^2 + 2pq + q^2 = 0", "q^2 + p^2 + 2pq = 0"], ans: 1, exp: "ব্যাখ্যা: হার্ডি-উইনবার্গ সাম্যাবস্থার গাণিতিক সমীকরণটি হলো p^2 + 2pq + q^2 = 1, যা পপুলেশনে জেনোটাইপ ফ্রিকোয়েন্সি নির্দেশ করে।" },
+            { q: "১৪১. সিকল সেল অ্যানিমিয়া-যুক্ত ব্যক্তির দেহে কোন্ রোগের প্রতিরোধ ক্ষমতা সবচেয়ে বেশি থাকে?", opts: ["ম্যালেরিয়া", "ফাইলেরিয়া", "চিকেন পক্স", "ডেঙ্গু"], ans: 0, exp: "ব্যাখ্যা: সিকল সেল অ্যানিমিয়ার বাহক বা আক্রান্ত ব্যক্তিদের লোহিত রক্তকণিকার আকৃতি পরিবর্তিত হওয়ায় এদের দেহে ম্যালেরিয়া পরজীবী বাসা বাঁধতে পারে না।" },
+            { q: "১৪২. মানুষের সবচেয়ে নিকট সম্পর্কযুক্ত এপ হল-", opts: ["ওরাং ওটাং", "গিবন", "শিম্পাঞ্জি", "গোরিলা"], ans: 2, exp: "ব্যাখ্যা: আণবিক প্রমাণ ও সাইটোক্রোম-C প্রোটিনের গঠন বিশ্লেষণে দেখা যায় মানুষ এবং শিম্পাঞ্জির মধ্যে সবচেয়ে বেশি সাদৃশ্য রয়েছে।" },
+            { q: "১৪৩. প্রদত্ত কোনটি প্রাণ সৃষ্টির সময় বায়ুমণ্ডলে অনুপস্থিত ছিল?", opts: ["NH_3", "H_2", "CH_4", "O_2"], ans: 3, exp: "ব্যাখ্যা: আদিম পৃথিবীর বায়ুমণ্ডলে জীবন সৃষ্টির সময় মুক্ত অক্সিজেন (O_2) সম্পূর্ণ অনুপস্থিত ছিল এবং পরিবেশ ছিল বিজারক প্রকৃতির।" },
+            { q: "১৪৪. কে প্রথম প্রমাণ করেন যে জীবনের উৎপত্তি স্বতঃস্ফূর্তভাবে হয় না?", opts: ["ওপারিন", "পাস্তুর", "মিলার ও উরে", "হ্যালডেন"], ans: 1, exp: "ব্যাখ্যা: লুই পাস্তুর তাঁর পরীক্ষার মাধ্যমে প্রমাণ করেন যে জীবনের উৎপত্তি পূর্বের অস্তিত্বশীল কোনো প্রাণ থেকেই ঘটে, স্বতঃস্ফূর্তভাবে জড় পদার্থ থেকে নয়।" },
+            { q: "১৪৫. জীবের উদ্ভবের জৈব-রাসায়নিক তত্ত্বটি প্রথম কে উপস্থাপন করেন?", opts: ["ডারউইন", "হেকেল", "ওপারিন", "ফক্স"], ans: 2, exp: "ব্যাখ্যা: আলেকজান্ডার ওপারিন (এবং হ্যালডেন) প্রথম প্রস্তাব করেন যে রাসায়নিক বিবর্তনের মাধ্যমে পৃথিবীতে প্রথম প্রাণের উৎপত্তি ঘটেছিল।" },
+            { q: "১৪৬. প্রাণের উৎপত্তির জন্য কোন্ যৌগটি সবচেয়ে প্রয়োজন?", opts: ["নিউক্লিক অ্যাসিড", "উৎসেচক", "প্রোটিন", "শর্করা"], ans: 0, exp: "ব্যাখ্যা: নিউক্লিক অ্যাসিড (DNA এবং RNA) হলো বংশগতির ধারক এবং আত্মপ্রতিলিপি গঠনে সক্ষম, যা প্রাণ সৃষ্টির জন্য সবচেয়ে অপরিহার্য উপাদান।" },
+            { q: "১৪৭. প্রিবায়োটিক সূপ বা হট ডাইল্যুট সূপের কথা প্রথম বলেন কে?", opts: ["মিলার", "অ্যারিস্টটল", "হ্যালডেন", "পাস্তুর"], ans: 2, exp: "ব্যাখ্যা: বিজ্ঞানী জে. বি. এস. হ্যালডেনের মতে আদিম পরিবেশে আবির্ভূত জৈব অণুগুলি সমুদ্র জলে মিশে যে অনুকূল মাধ্যম সৃষ্টি করেছিল, তাকে তিনি হট ডাইল্যুট সূপ বা প্রি-বায়োটিক সূপ নাম দেন।" },
+            { q: "১৪৮. রাসায়নিক বিবর্তন এবং জীবনের উৎপত্তি সম্পর্কে প্রথম পরীক্ষা করেন কে বা কারা?", opts: ["ওয়াটসন ও ক্রিক", "ডারউইন", "মিলার ও উরে", "বিডল ও ট্যাটাম"], ans: 2, exp: "ব্যাখ্যা: স্ট্যানলি মিলার এবং হ্যারল্ড উরে কৃত্রিমভাবে আদিম পৃথিবীর পরিবেশ তৈরি করে রাসায়নিক বিবর্তনের সপক্ষে প্রথম পরীক্ষামূলক প্রমাণ দেন।" },
+            { q: "১৪৯. নিম্নলিখিত কোন্ সময়কাল (Period) ডাইনোসোরের অবলুপ্তি এবং সপুষ্পক উদ্ভিদ ও সরীসৃপের সংখ্যা বৃদ্ধির সঙ্গে সবচেয়ে বেশি সম্পর্কযুক্ত?", opts: ["ট্রায়াসিক", "জুরাসিক", "ক্রিটেসিয়াস", "পারমিয়ান"], ans: 2, exp: "ব্যাখ্যা: মেসোজোয়িক এরার ক্রিটেসিয়াস পিরিয়ডে ডাইনোসরদের সর্বাধিক বিকাশের পাশাপাশি তাদের অবলুপ্তি ঘটে এবং সপুষ্পক উদ্ভিদের সংখ্যাবৃদ্ধি হয়।" },
+            { q: "১৫০. 'সরীসৃপদের স্বর্ণযুগ' বলা হয়-", opts: ["মেসোজোয়িক যুগকে", "সিনোজোয়িক যুগকে", "প্যালিওজোয়িক যুগকে", "প্রোটেরোজোয়িক যুগকে"], ans: 0, exp: "ব্যাখ্যা: মেসোজোয়িক এরা বা যুগ সরীসৃপদের যুগ বা স্বর্ণযুগ নামে পরিচিত, কারণ এই সময়ে ডাইনোসর ও অন্যান্য সরীসৃপ প্রাণীর সর্বাধিক বিকাশ ঘটেছিল।" }
+        ]
+    },
+    11: {
+        name: 'Set 11', icon: '🦴', topic: 'বিবর্তনের স্বপক্ষে প্রমাণ (Evidences of Evolution)',
+        questions: [
+            { q: "১৫১. প্রদত্ত কোনটি সমসংস্থ অঙ্গের উদাহরণ নয়?", opts: ["পাখির ডানা ও ঘোড়ার অগ্রপদ", "ঘোড়ার অগ্রপদ ও মানুষের হাত", "মানুষের হাত ও পাখির ডানা", "পাখির ডানা ও পতঙ্গের ডানা"], ans: 3, exp: "ব্যাখ্যা: পাখির ডানা ও পতঙ্গের ডানা উভয়েই ওড়ার কাজ করলেও এদের উৎপত্তি ও গঠন আলাদা, তাই এরা সমবৃত্তীয় অঙ্গ, সমসংস্থ নয়।" },
+            { q: "১৫২. ঝুমকলতার আকর্ষ এবং মটর গাছের আকর্ষ হল-", opts: ["সমসংস্থ অঙ্গ", "সমবৃত্তীয় অঙ্গ", "নিষ্ক্রিয় অঙ্গ", "প্রতিস্থাপিত অঙ্গ"], ans: 1, exp: "ব্যাখ্যা: ঝুমকলতা এবং মটর গাছের আকর্ষ উভয়েই আরোহণের কাজে সাহায্য করলেও এদের উৎপত্তিগত উৎস ভিন্ন, তাই এরা সমবৃত্তীয় অঙ্গ।" },
+            { q: "১৫৩. বাগানবিলাসের কাঁটা ও কুমড়োর আকর্ষ কীসের উদাহরণ?", opts: ["নিষ্ক্রিয় অঙ্গ", "রেট্রোগ্রেসিভ বিবর্তন", "সমবৃত্তীয় অঙ্গ", "সমসংস্থ অঙ্গ"], ans: 3, exp: "ব্যাখ্যা: বোগেনভিলিয়ার (বাগানবিলাস) কাঁটা এবং কুমড়োর আকর্ষ উভয়েই কাক্ষিক মুকুল থেকে উৎপন্ন হয়, কিন্তু এদের কাজ ভিন্ন, তাই এরা সমসংস্থ অঙ্গ।" },
+            { q: "১৫৪. কোনটি মানুষের ক্ষয়প্রাপ্ত অঙ্গ নয়?", opts: ["এপিলটিস", "দেহলোম", "আক্কেল দাঁত", "ভার্মিফর্ম অ্যাপেনডিক্স"], ans: 0, exp: "ব্যাখ্যা: এপিগ্লটিস (এপিলটিস) মানবদেহের একটি কার্যকরী অঙ্গ, এটি নিষ্ক্রিয় বা ক্ষয়প্রাপ্ত অঙ্গ নয়।" },
+            { q: "১৫৫. প্রদত্ত কোনটি জীবন্ত জীবাশ্ম?", opts: ["জেনোপাস", "ইকুয়াস", "সিলাকান্থ", "ইলেকট্রিক ইল"], ans: 2, exp: "ব্যাখ্যা: সিলাকান্থ বা ল্যাটিমেরিয়া একটি প্রাচীন লোবফিন মাছ যা অপরিবর্তিত অবস্থায় আজও টিকে আছে, তাই একে জীবন্ত জীবাশ্ম বলা হয়।" },
+            { q: "১৫৬. আর্কিওপটেরিক্স কোন্ দুটি প্রাণীগোষ্ঠীর মিসিং লিংক?", opts: ["রেপটিলিয়া ও ম্যামালিয়া", "পিসেস ও অ্যামফিবিয়া", "রেপটিলিয়া ও অ্যাভিস", "অ্যামফিবিয়া ও রেপটিলিয়া"], ans: 2, exp: "ব্যাখ্যা: আর্কিওপটেরিক্স-এর জীবাশ্মে সরীসৃপ (Reptilia) এবং পাখি (Aves) উভয়ের বৈশিষ্ট্য পরিলক্ষিত হয়, তাই এটি এই দুই শ্রেণির সংযোজক প্রাণী।" },
+            { q: "১৫৭. মানুষের ভ্রূণে পরিলক্ষিত ফুলকা ছিদ্র বা মানব শিশুর দেহে লেজের উপস্থিতি কীসের উদাহরণ?", opts: ["সমবৃত্তীয় অঙ্গ", "সমসংস্থ অঙ্গ", "লুপ্তপ্রায় অঙ্গ", "অ্যাটাভিজম"], ans: 3, exp: "ব্যাখ্যা: কোনো লুপ্তপ্রায় বা পূর্বপুরুষের প্রাচীন বৈশিষ্ট্য হঠাৎ করে নতুন প্রজন্মে পুনরায় আবির্ভূত হওয়াকে অ্যাটাভিজম বলে।" },
+            { q: "১৫৮. প্রথম সৃষ্ট অর্গানিজম বিক্রিয়ায় কেবলমাত্র ব্যবহৃত হয়-", opts: ["DNA", "অ্যামাইনো অ্যাসিড", "ফ্যাটি অ্যাসিড", "RNA"], ans: 3, exp: "ব্যাখ্যা: 'RNA World' ধারণা অনুযায়ী আদি পৃথিবীতে প্রথম জেনেটিক বস্তু এবং অনুঘটক হিসেবে RNA ব্যবহৃত হত।" },
+            { q: "১৫৯. 'অরিজিন অফ লাইফ'-এর আর এক নাম হল-", opts: ["বায়োজেনেসিস", "প্রোটোবায়োজেনেসিস", "বায়োপোয়েসিস", "সবকটি"], ans: 0, exp: "ব্যাখ্যা: জীবনের উৎপত্তি বা জীবন থেকে জীবনের উদ্ভব সম্পর্কিত ধারণাকে বায়োজেনেসিস বলে।" },
+            { q: "১৬০. ওপারিনের অ্যাবায়োজেনিক মতবাদ অনুযায়ী প্রথম সৃষ্ট সরলতম জৈব অণু হল-", opts: ["জৈব অ্যাসিড", "হাইড্রোকার্বন", "কার্বোহাইড্রেট", "প্রোটিন"], ans: 1, exp: "ব্যাখ্যা: ওপারিনের মতবাদ অনুসারে, সমুদ্রের উত্তপ্ত জলে কার্বন ও হাইড্রোজেন যুক্ত হয়ে প্রথম সরলতম জৈব অণু হাইড্রোকার্বন তৈরি করেছিল।" },
+            { q: "১৬১. জীবের স্বতঃস্ফূর্ত উদ্ভবতত্ত্বের প্রথম বিরোধিতা করেন-", opts: ["রেডি", "পাস্তুর", "ওপারিন", "উরে ও মিলার"], ans: 1, exp: "ব্যাখ্যা: লুই পাস্তুর প্রথম পরীক্ষা করে প্রমাণ করেন যে জীবনের স্বতঃস্ফূর্ত উদ্ভব ভিত্তিহীন এবং কেবল পূর্বতন জীবন থেকেই নতুন জীবনের সৃষ্টি হয়।" },
+            { q: "১৬২. নীচের কোনটি আদিম পৃথিবীর বায়ুমণ্ডলে অবস্থান করত?", opts: ["অ্যামোনিয়া ও হিলিয়াম", "জলীয় বাষ্প ও আর্গন", "অক্সিজেন ও হাইড্রোজেন", "হাইড্রোজেন ও মিথেন"], ans: 3, exp: "ব্যাখ্যা: আদিম পৃথিবীর বিজারক বায়ুমণ্ডলে প্রচুর পরিমাণে হাইড্রোজেন, মিথেন, অ্যামোনিয়া এবং জলীয় বাষ্প উপস্থিত ছিল।" },
+            { q: "১৬৩. বায়োলজিতে 'অভিব্যক্তি'র অর্থ হল-", opts: ["জীবাশ্মগুলি খুব পুরোনো", "সমুদ্রজলেই জীবন সৃষ্টি হয়", "সজীব বস্তু সতত পরিবর্তনশীল", "বনমানুষ থেকে মানুষ সৃষ্টি হয়েছে"], ans: 2, exp: "ব্যাখ্যা: অভিব্যক্তির অর্থ হলো মন্থর ও পর্যায়ক্রমিক পরিবর্তনের মাধ্যমে সরল জীব থেকে জটিল জীবের উদ্ভব, অর্থাৎ সজীব বস্তু সতত পরিবর্তনশীল।" },
+            { q: "১৬৪. নীচের কোনটি ডারউইনের মতবাদকে সমর্থন করে?", opts: ["অস্তিত্বের জন্য সংগ্রাম", "এনটোমোফাইলিপি", "কৃত্রিম নির্বাচন", "সবকটিই"], ans: 0, exp: "ব্যাখ্যা: ডারউইনের প্রাকৃতিক নির্বাচন তত্ত্বের একটি প্রধান প্রতিপাদ্য বিষয় হলো খাদ্য ও বাসস্থানের সীমাবদ্ধতার জন্য জীবের 'অস্তিত্বের জন্য সংগ্রাম'।" },
+            { q: "১৬৫. ডারউইনের মতবাদ নীচের কোন্টির ব্যাখ্যা দিতে পারেনি?", opts: ["প্রকৃতির ক্রিয়া", "অত্যধিক বংশবৃদ্ধি", "যোগ্যতমের উদবর্তন", "প্রকরণের উৎস"], ans: 3, exp: "ব্যাখ্যা: ডারউইন প্রকরণ বা ভেরিয়েশনের উপস্থিতির কথা উল্লেখ করলেও কীভাবে জীনগতভাবে এই প্রকরণের সৃষ্টি হয়, তার কোনো ব্যাখ্যা তিনি দিতে পারেননি।" }
+        ]
+    },
+    12: {
+        name: 'Set 12', icon: '⏳', topic: 'বিবর্তনের তত্ত্ব ও সময়কাল (Theories of Evolution and Geological Time Scale)',
+        questions: [
+            { q: "১৬৬. ডারউইনের 'প্রাকৃতিক নির্বাচন তত্ত্ব' কোন্টির ব্যাখ্যা দেয়নি?", opts: ["যোগ্যতমের উদবর্তন", "যোগ্যতমের আবির্ভাব", "অত্যধিক বংশবৃদ্ধি", "অস্তিত্বের জন্য সংগ্রাম"], ans: 1, exp: "ব্যাখ্যা: প্রাকৃতিক নির্বাচন তত্ত্ব যোগ্যতমের উদবর্তনের ব্যাখ্যা দেয় কিন্তু কীভাবে যোগ্যতম প্রকরণ বা বৈশিষ্ট্য আবির্ভূত হয় (অর্থাৎ প্রকরণের উৎস) তা ডারউইন ব্যাখ্যা করতে পারেননি।" },
+            { q: "১৬৭. কোন্ পদ্ধতির জননের ফলে প্রজাতির মধ্যে বংশগত ও বিবর্তনজনিত পরিবর্তন বেশি দেখা যায়?", opts: ["ফিশন", "বাডিং", "অযৌন জনন", "যৌন জনন"], ans: 3, exp: "ব্যাখ্যা: যৌন জননের সময় মিয়োসিস বিভাজনে ক্রসিংওভার ও রিকম্বিনেশন ঘটে বলে প্রজাতির মধ্যে বংশগত প্রকরণ বা বিবর্তনজনিত পরিবর্তন বেশি আসে।" },
+            { q: "১৬৮. 'স্তন্যপায়ীর যুগ' হল-", opts: ["সিনোজোয়িক", "মেসোজোয়িক", "প্যালিওজোয়িক", "সাইকোজোয়িক"], ans: 0, exp: "ব্যাখ্যা: সিনোজোয়িক এরার টার্সিয়ারি ও কোয়াটার্নারি পিরিয়ডে স্তন্যপায়ী প্রাণীদের সর্বাধিক বিকাশ ও প্রাচুর্য দেখা যায় বলে একে স্তন্যপায়ীর যুগ বলা হয়।" },
+            { q: "১৬৯. ডারউইন \"অরিজিন অফ স্পিসিস\" কবে লিখেছিলেন?", opts: ["১৮৯৫", "১৮৫৮", "১৭৯৫", "১৫৩০"], ans: 1, exp: "ব্যাখ্যা: চার্লস ডারউইন ও আলফ্রেড ওয়ালেস ১৮৫৮ সালে লিনিয়ান সোসাইটিতে তাদের গবেষণাপত্র পেশ করেন (১৮৫৯ সালে বইটি প্রকাশ পায়)।" },
+            { q: "১৭০. সূর্যরশ্মি পৃথিবীতে আসতে সময় লাগে-", opts: ["0.1 min", "0.03 min", "6.7 min", "8.3 min"], ans: 3, exp: "ব্যাখ্যা: সূর্য থেকে পৃথিবীতে আলো এসে পৌঁছাতে প্রায় ৮.৩ মিনিট সময় লাগে।" },
+            { q: "১৭১. সূর্যের উপরিভাগের উষ্ণতা-", opts: ["6000°C", "10,000°C", "2000–3000°C", "50,000°C"], ans: 0, exp: "ব্যাখ্যা: সূর্যের উপরিভাগের তাপমাত্রা প্রায় ৬০০০°C অনুমান করা হয়।" },
+            { q: "১৭২. যে শক্তির প্রভাবে মহাবিশ্ব ধীরে ধীরে প্রসারিত হচ্ছে তা হলো-", opts: ["মহাকর্ষীয় বল", "ডার্ক এনার্জি বা কৃষ্ণ শক্তি", "তড়িৎচৌম্বকীয় বল", "নিউক্লিয় বল"], ans: 1, exp: "ব্যাখ্যা: বিগ ব্যাং তত্ত্ব অনুযায়ী, ডার্ক এনার্জি বা কৃষ্ণ শক্তির প্রভাবে মহাবিশ্ব ক্রমাগত প্রসারিত হচ্ছে।" },
+            { q: "১৭৩. পৃথিবীর আদিম বায়ুমণ্ডলে উপস্থিত কার্বন যৌগটি ছিল-", opts: ["কার্বন ডাই-অক্সাইড", "কার্বন মনোক্সাইড", "মিথেন (CH4)", "সায়ানাইড"], ans: 2, exp: "ব্যাখ্যা: পৃথিবীর আদিম বায়ুমণ্ডল বিজারক প্রকৃতির হওয়ায় কার্বন মূলত মিথেন (CH4) হিসেবে বর্তমান ছিল।" },
+            { q: "১৭৪. পৃথিবীর প্রাচীনতম জ্ঞাত জীবাশ্ম (Stromatolite) কোন্ জীবগোষ্ঠীর প্রমাণ দেয়?", opts: ["সায়ানোব্যাকটেরিয়া বা নীলাভ-সবুজ শৈবাল", "আদিম ছত্রাক", "ভাইরাস", "উভচর প্রাণী"], ans: 0, exp: "ব্যাখ্যা: স্ট্রোমাটোলাইট হলো আদিম সায়ানোব্যাকটেরিয়া বা নীল-সবুজ শৈবাল দ্বারা গঠিত স্তরীভূত কাঠামো, যা পৃথিবীর প্রাচীনতম জীবাশ্ম হিসেবে স্বীকৃত।" },
+            { q: "১৭৫. কার ক্রেনিয়ালের আয়তন সবচেয়ে কম?", opts: ["আধুনিক মানুষের", "জাভা মানুষের", "নিয়ানডারথাল মানুষের", "ক্রো-ম্যাগনন মানুষের"], ans: 1, exp: "ব্যাখ্যা: উল্লিখিত বিকল্পগুলির মধ্যে জাভা মানুষের (Homo erectus) ক্রেনিয়াল ক্যাপাসিটি (প্রায় ৮৫০-১২০০ cc) তুলনামূলকভাবে সবচেয়ে কম।" },
+            { q: "১৭৬. প্রথম সামাজিক মানুষ হল-", opts: ["ক্রো-ম্যাগনন মানুষ", "নিয়ানডারথাল মানুষ", "হিডেলবার্গ মানুষ", "টারনিফায়ার মানুষ"], ans: 0, exp: "ব্যাখ্যা: ক্রো-ম্যাগনন মানুষ গুহাবাসী ছিল, দলবদ্ধভাবে বাস করত এবং শিল্পকর্মে পারদর্শী হওয়ায় তাদের প্রথম সামাজিক মানুষ ধরা হয়।" },
+            { q: "১৭৭. মানুষের পূর্ব পুরুষদের মধ্যে কার ক্রেনিয়ামের আয়তন 1000 cc-এর বেশি?", opts: ["Homo habilis", "Homo erectus", "Ramapithecus", "Homo erectus neanderthalensis"], ans: 3, exp: "ব্যাখ্যা: নিয়ানডারথাল মানুষের (Homo erectus neanderthalensis) ক্রেনিয়ামের আয়তন ১৪০০-১৪৫০ cc ছিল, যা 1000 cc-এর বেশি।" },
+            { q: "১৭৮. প্রোকনসালের অপর নাম হল-", opts: ["রামা পিথেকাস", "প্যারাপিথেকাস", "এজিপটোপিথেকাস", "ড্রায়োপিথেকাস"], ans: 3, exp: "ব্যাখ্যা: ড্রায়োপিথেকাস (Dryopithecus) নামের আদিম প্রাইমেট প্রোকনসাল নামেও পরিচিত, যা মায়োসিন যুগে আবির্ভূত হয়েছিল।" },
+            { q: "১৭৯. নিয়ানডারথাল মানুষের জীবাশ্ম প্রথম আবিস্কার হয়েছিল-", opts: ["১৯৯৪", "১৮৬৮", "১৯২৪", "১৮৫৬"], ans: 3, exp: "ব্যাখ্যা: ১৮৫৬ সালে জার্মানির নিয়ানডারথাল উপত্যকায় প্রথম নিয়ানডারথাল মানুষের জীবাশ্ম আবিষ্কৃত হয়।" },
+            { q: "১৮০. মানুষের ফোরামেন ম্যাগনাম হল-", opts: ["পৃষ্ঠীয়", "অঙ্কীয়", "পার্শ্বীয়", "অগ্রবর্তী"], ans: 1, exp: "ব্যাখ্যা: মানুষ দ্বিপদ গমনে সক্ষম এবং সোজা হয়ে দাঁড়ায় বলে মানুষের করোটির ফোরামেন ম্যাগনাম নীচের দিকে বা অঙ্কীয়ভাবে (ventrally) অবস্থান করে।" }
+        ]
+    },
+    13: {
+        name: 'Set 13', icon: '🚶', topic: 'মানব বিবর্তন ও জীবাশ্ম (Human Evolution and Fossils)',
+        questions: [
+            { q: "১৮১. এপ-এর ফোরামেন ম্যাগনাম হল-", opts: ["পৃষ্ঠীয়", "পার্শ্বীয়", "অঙ্কীয়", "পশ্চাদ্বর্তী"], ans: 3, exp: "ব্যাখ্যা: এপদের দেহভঙ্গি আংশিক খাড়া বা চতুষ্পদ গমনের জন্য অভিযোজিত থাকায় তাদের ফোরামেন ম্যাগনাম করোটির পশ্চাদ্বর্তী অংশে (posteriorly) থাকে।" },
+            { q: "১৮২. পিল্টডাউন মানুষ আবিষ্কৃত হয়-", opts: ["১৯১২", "১৯১১", "১৯১০", "১৯০৯"], ans: 0, exp: "ব্যাখ্যা: পিল্টডাউন মানুষের জীবাশ্ম ইংল্যান্ডের পিল্টডাউনে ১৯১২ সালে আবিষ্কৃত হয়, যা পরে একটি প্রতারণা বা জাল জীবাশ্ম হিসেবে প্রমাণিত হয়েছিল।" },
+            { q: "১৮৩. নতুন প্রজাতি ও গণের উৎপতিকে বলে-", opts: ["মেগাঅভিবর্তন", "ম্যাক্রোঅভিবর্তন", "মাইক্রোঅভিবর্তন", "সহবিবর্তন"], ans: 1, exp: "ব্যাখ্যা: বিবর্তনে যখন সুপ্রা-স্পেসিফিক স্তরে (যেমন নতুন গণ, গোত্র বা পরিবার) বড় পরিবর্তন ঘটে তখন তাকে ম্যাক্রোঅভিবর্তন বা মেগাঅভিবর্তন বলে।" },
+            { q: "১৮৪. Homo erectus আধুনিক মানুষের থেকে কোন ক্ষেত্রে পৃথক?", opts: ["যন্ত্র তৈরি করার ক্ষমতা", "বৃহৎ চোয়াল", "ছবি আঁকার ক্ষমতা", "ছোটো চোয়াল"], ans: 1, exp: "ব্যাখ্যা: হোমো ইরেকটাস-এর মুখমণ্ডল প্রোগন্যাথাস ধরনের এবং চোয়াল বৃহৎ ও মজবুত ছিল, যা আধুনিক মানুষের অর্থোগন্যাথাস মুখের চেয়ে আলাদা।" },
+            { q: "১৮৫. হোমিনিডি গোত্রের জীবিত সদস্য হল-", opts: ["H. erectus", "H. sapiens", "H. habilis", "সবগুলি"], ans: 1, exp: "ব্যাখ্যা: হোমিনিডি গোত্রের একমাত্র জীবিত ও বর্তমান প্রজাতি হলো আধুনিক মানুষ বা হোমো স্যাপিয়েন্স (Homo sapiens)।" },
+            { q: "১৮৬. কোন্ বৈশিষ্ট্যটি বন মানুষদের থাকে না?", opts: ["ক্ষুদ্র ক্রেনিয়াম", "লম্বা পশ্চাদপদ", "প্রোগন্যাথাস মুখমন্ডল", "ঘন দেহজ লোম"], ans: 1, exp: "ব্যাখ্যা: বনমানুষ বা এপের পায়ের তুলনায় হাত (অগ্রপদ) বেশি লম্বা হয়, তাই মানুষের মতো লম্বা পশ্চাদপদ তাদের বৈশিষ্ট্য নয়।" },
+            { q: "১৮৭. কোন্তি মানুষের বৈশিষ্ট্য নয়?", opts: ["শিল্পকলা দক্ষতা", "900 cc ক্রেনিয়াম গহ্বর", "ঋজু দেহ", "সুস্পষ্ট ভ্রূ রেখা"], ans: 3, exp: "ব্যাখ্যা: আদিম পূর্বপুরুষদের (যেমন হোমো ইরেকটাস) পুরু ও সুস্পষ্ট ভ্রূ রেখা (brow ridges) থাকলেও আধুনিক মানুষের কপাল চওড়া এবং ভ্রূ রেখা খুব সুস্পষ্ট নয়।" },
+            { q: "১৮৮. অস্ট্রালোপিথেকাস (Australopithecus) হল-", opts: ["ফল খাদক", "মাংসাশী", "শাকাশী", "সর্বভুক"], ans: 3, exp: "ব্যাখ্যা: অস্ট্রালোপিথেকাস প্রজাতির খাদ্যাভ্যাস মূলত তৃণভোজী হলেও কিছু প্রজাতি সর্বভুক প্রকৃতির ছিল।" },
+            { q: "১৮৯. নিয়ানডারথাল মানুষের জীবাশ্ম আবিষ্কার করেন-", opts: ["পাই", "ম্যাক গ্রেগর", "ফালরোট (Fuhlrott)", "লাললেট (Lartet)"], ans: 3, exp: "ব্যাখ্যা: ১৮৫৬ সালে জার্মানির নিয়ানডারথাল উপত্যকায় এই জীবাশ্ম আবিষ্কারের কৃতিত্ব বিজ্ঞানী ফালরোট বা লারটেট-এর সাথে জড়িত।" },
+            { q: "১৯০. পিকিং মানুষ কী নামে পরিচিত?", opts: ["সাইনান্ন্থেপাস", "হোমো স্যাপিয়েন্স", "পিথেকান্থ্রোপাস", "অস্ট্রালোপিথেকাস"], ans: 0, exp: "ব্যাখ্যা: পিকিং মানুষের বৈজ্ঞানিক নাম হিসেবে প্রথমে সাইনান্ন্থেপাস পিকিনেনসিস (Sinanthropus pekinensis) ব্যবহৃত হতো।" },
+            { q: "১৯১. চুলের রং একটি-", opts: ["মেরিস্টিক চরিত্র", "সাবস্ট্যানটিভ চরিত্র", "সোমাটোজেনিক চরিত্র", "কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: চোখের রং, চুলের রং ইত্যাদি গুণগত বা অবয়বগত বৈশিষ্ট্যগুলিকে সাবস্ট্যানটিভ চরিত্র বা সাবস্ট্যানটিভ ভেরিয়েশন বলা হয়।" },
+            { q: "১৯২. মিউটেশন মরণকারী হলে তাকে বলে-", opts: ["প্রভাবিত মিউটেশন", "নিরপেক্ষ মিউটেশন", "লিথাল মিউটেশন", "ক্ষতিকারক মিউটেশন"], ans: 2, exp: "ব্যাখ্যা: যে মিউটেশনের কারণে জীবের মৃত্যু ঘটে বা ভ্রূণ অবস্থাতেই জীব মারা যায়, তাকে লিথাল বা মরণকারী মিউটেশন বলে।" },
+            { q: "১৯৩. নালিসোমি অবস্থা হল-", opts: ["2n - 2", "2n + 1", "2n - 1", "2n - 1 - 1"], ans: 0, exp: "ব্যাখ্যা: ডিপ্লয়েড ক্রোমোজোম সেট থেকে একটি সম্পূর্ণ হোমোলোগাস জোড়া ক্রোমোজোম হ্রাস পেলে তাকে নালিসোমি (2n-2) বলা হয়।" },
+            { q: "১৯৪. মানুষের 21 নং ক্রোমোজোমের ট্রাইসোমির জন্য দেখা যায়-", opts: ["এডওয়ার্ড সিনড্রোম", "ডাউন সিনড্রোম", "পাটাউ সিনড্রোম", "ক্লাইনফেল্টার সিনড্রোম"], ans: 1, exp: "ব্যাখ্যা: মানুষের ২১নং অটোজোমের তিনটি কপি থাকার ফলে (ট্রাইসোমি ২১) ডাউন সিন্ড্রোম দেখা দেয়।" },
+            { q: "১৯৫. জিন প্রবাহ জেনেটিক ড্রিফটের-", opts: ["একই দিকে কাজ করে", "বিপরীত কাজ করে", "a ও b উভয়ই", "কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: জেনেটিক ড্রিফট পপুলেশনের মধ্যে অ্যালিল বৈচিত্র্য কমিয়ে দেয়, অন্যদিকে জিন প্রবাহ নতুন অ্যালিল যুক্ত করে বৈচিত্র্য বৃদ্ধি করে, অর্থাৎ এরা একে অপরের বিপরীত কাজ করে।" }
+        ]
+    },
+    14: {
+        name: 'Set 14', icon: '📉', topic: 'ক্রোমোজোমীয় মিউটেশন ও পপুলেশন জেনেটিক্স (Chromosomal Mutations & Population Genetics)',
+        questions: [
+            { q: "১৯৬. চামড়ার রং ধবধবে সাদা হয় কোন্টির ক্ষেত্রে?", opts: ["হিমোফিলিয়া", "ফিনাইল কিটোনুরিয়া", "অ্যালবিনিজম", "জেরোডার্মা পিগমেন্টোসাম"], ans: 2, exp: "ব্যাখ্যা: অ্যালবিনিজম একটি মিউটেশনজনিত ত্রুটি যেখানে চামড়ায় মেলানিন রঞ্জক তৈরি না হওয়ার কারণে চামড়ার রং ধবধবে সাদা হয়ে যায়।" },
+            { q: "১৯৭. মানুষের দেহকোষে মোট ক্রোমোজোম সংখ্যা-", opts: ["43", "46", "47", "23"], ans: 1, exp: "ব্যাখ্যা: মানুষের প্রতিটি স্বাভাবিক দেহকোষে ২৩ জোড়া অর্থাৎ মোট ৪৬টি ক্রোমোজোম থাকে।" },
+            { q: "১৯৮. দ্বৈত মনোসোমির ক্ষেত্রে বলা হয়-", opts: ["2n - 2", "2n - 1 - 1", "2n + 2", "2n + 1"], ans: 1, exp: "ব্যাখ্যা: ডিপ্লয়েড সেট থেকে দুটি আলাদা জোড়া থেকে একটি করে মোট দুটি ক্রোমোজোম হ্রাস পেলে তাকে দ্বৈত মনোসোমি বা ডাবল মনোজোমি (2n - 1 - 1) বলা হয়।" },
+            { q: "১৯৯. Homo erectus-এর আবির্ভাবকাল-", opts: ["প্লাইস্টোসিন যুগে", "প্রায়োসিন যুগে", "মায়োসিন যুগে", "কোনোটিই নয়"], ans: 0, exp: "ব্যাখ্যা: হোমো ইরেকটাস (জাভা মানব, পিকিং মানব ইত্যাদি) প্লাইস্টোসিন যুগে পৃথিবীতে আবির্ভূত হয়েছিল।" },
+            { q: "২০০. নীচের কোন্তি অভিব্যক্তির সাপেক্ষে সবথেকে উপযুক্ত প্রমাণ?", opts: ["জীবাশ্ম", "ভ্রূণ", "নিষ্ক্রিয় অঙ্গ", "সমসংস্থ অঙ্গ"], ans: 0, exp: "ব্যাখ্যা: ভূতাত্ত্বিক কালে শিলাস্তরে সংরক্ষিত জীবাশ্মগুলি বিবর্তনের সবচেয়ে সরাসরি এবং বাস্তব প্রমাণ হিসেবে কাজ করে।" },
+            { q: "২০১. ডারউইনের ফিঞ্চগুলি কোন্টির প্রকৃত উদাহরণ?", opts: ["মাইক্রোএভোলিউশন", "অ্যাডাপটিভ রেডিয়েশন", "অ্যাটাভিজম", "মাইগ্রেশন"], ans: 1, exp: "ব্যাখ্যা: গ্যালাপাগোস দ্বীপপুঞ্জে একটি সাধারণ পূর্বপুরুষ থেকে ফিঞ্চ পাখিদের বিভিন্ন খাদ্যাভ্যাসের জন্য বৈচিত্র্যময় ঠোঁট গঠন করে ছড়িয়ে পড়া অ্যাডাপটিভ রেডিয়েশনের উৎকৃষ্ট উদাহরণ।" },
+            { q: "২০২. জীবাশ্মের বয়স নির্ধারণ করা হয় নিম্নলিখিত কোন্ পদ্ধতিতে?", opts: ["ইউরেনিয়াম ডেটিং", "রেডিয়ো-কার্বন ডেটিং", "রেডিয়াম ডেটিং", "কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: জীবাশ্ম বা প্রস্তরীভূত শিলাস্তরের বয়স নির্ধারণ করার জন্য রেডিয়ো-কার্বন (C-14) ডেটিং বা তেজস্ক্রিয় আইসোটোপ পদ্ধতি ব্যবহার করা হয়।" },
+            { q: "২০৩. প্রায় কত বছর আগে পৃথিবীর জন্ম হয়?", opts: ["4.5 বিলিয়ন বছর", "8.2 বিলিয়ন বছর", "3 বিলিয়ন বছর", "1 বিলিয়ন বছর"], ans: 0, exp: "ব্যাখ্যা: ভূতত্ত্ববিদদের হিসেব অনুযায়ী, আজ থেকে প্রায় 4.6 বা 4.5 বিলিয়ন বছর আগে পৃথিবীর জন্ম হয়েছিল।" },
+            { q: "২০৪. মিলার ও উরের পরীক্ষায় CH_4, NH_3 ও H_2O-এর অনুপাত ছিল-", opts: ["2 : 2 : 1", "1 : 2 : 1", "2 : 1 : 2", "1 : 2 : 2"], ans: 0, exp: "ব্যাখ্যা: মিলার ও উরে তাঁদের রাসায়নিক বিবর্তনের পরীক্ষায় মিথেন, অ্যামোনিয়া ও হাইড্রোজেনের অনুপাত 2:2:1 রেখেছিলেন (বিকল্পে H_2O উল্লেখ থাকলেও অনুপাতটি 2:2:1 ছিল)।" },
+            { q: "২০৫. মাইক্রোস্ফিয়ার মডেলটির প্রস্তাবক হলেন-", opts: ["ওপারিন", "হ্যালডেন", "ফক্স", "মিলার"], ans: 2, exp: "ব্যাখ্যা: সিডনি ডব্লিউ. ফক্স প্রথম প্রোটিন সমন্বিত মাইক্রোস্ফিয়ার মডেলের প্রস্তাব দেন, যা আদি কোষের একটি সম্ভাব্য রূপ।" },
+            { q: "২০৬. \"Ontogeny repeats phylogeny\" বক্তব্যের উপস্থাপক কে?", opts: ["আর্নস্ট হেকেল", "হ্যালডেন", "মিলার", "ওপারিন"], ans: 0, exp: "ব্যাখ্যা: বিজ্ঞানী আর্নস্ট হেকেল তাঁর 'বায়োজেনেটিক সূত্রে' বা রিক্যাপচুলেশন থিওরিতে এই বক্তব্যটি উপস্থাপন করেন।" },
+            { q: "২০৭. কোন্তি বিবর্তনের সঙ্গে সম্পর্কিত?", opts: ["জনন", "প্রকরণ", "প্রতিযোগিতা", "বিলুপ্তিকরণ"], ans: 1, exp: "ব্যাখ্যা: প্রকরণ বা ভেরিয়েশন (Variation) হলো জৈব অভিব্যক্তির প্রধান কাঁচামাল, যার ভিত্তিতে বিবর্তন অগ্রসর হয়।" },
+            { q: "২০৮. বায়োজেনেসিস তত্ত্বের প্রবর্তক কে?", opts: ["পাস্তুর", "ওপারিন", "ভ্যান হেলমন্ট", "হেকেল"], ans: 1, exp: "ব্যাখ্যা: ওপারিন (দ্রষ্টব্য: বায়োজেনেসিস লুই পাস্তুরের দ্বারা প্রমাণিত হলেও, প্রদত্ত উত্তরমালা অনুযায়ী উত্তর ওপারিন হিসেবে নির্দেশিত)।" },
+            { q: "২০৯. কোনটি জীবন্ত জীবাশ্ম?", opts: ["প্রবাল", "রাজকাঁকড়া", "অ্যাসিডিয়া", "অক্টোপাস"], ans: 1, exp: "ব্যাখ্যা: রাজকাঁকড়া (Limulus) হলো একটি জীবন্ত জীবাশ্ম যা লক্ষ লক্ষ বছর ধরে অপরিবর্তিত অবস্থায় টিকে আছে।" },
+            { q: "২১০. কোন্ যুগে জীবনের উৎপত্তি হয়?", opts: ["মেসোজোয়িক", "সিনোজোয়িক", "প্রিক্যামব্রিয়ান", "প্যালিওজোয়িক"], ans: 2, exp: "ব্যাখ্যা: প্রিক্যামব্রিয়ান ইওনের আর্কিয়ান এরার সমুদ্রে প্রথম আদিম সরল জলজ জীবের উৎপত্তি হয়েছিল বলে মনে করা হয়।" }
+        ]
+    },
+    15: {
+        name: 'Set 15', icon: '📊', topic: 'বিবর্তনের জিনতত্ত্ব ও পপুলেশন গতিবিদ্যা ১',
+        questions: [
+            { q: "২১১. সমসংস্থ অঙ্গ (Homologous organs) বিবর্তনের কোন্ ধারাটি দেখায়?", opts: ["অভিসারী অভিযোজন", "অপসারী অভিযোজন (Divergent Evolution)", "জেনেটিক ড্রিফট", "মাইক্রোএভোলিউশন"], ans: 1, exp: "ব্যাখ্যা: একই পূর্বপুরুষ থেকে উদ্ভূত হয়ে ভিন্ন ভিন্ন পরিবেশে কাজ করার জন্য অভিযোজিত হওয়াকে অপসারী বিবর্তন বলে, যার ফলে সমসংস্থ অঙ্গের সৃষ্টি হয়।" },
+            { q: "২১২. প্রদত্ত কোনটি ক্রোমোজোমের ট্রাইজোমি (Trisomy) অবস্থার নির্দেশক?", opts: ["2n - 1", "2n + 1", "2n - 1 - 1", "2n + 1 + 1"], ans: 1, exp: "ব্যাখ্যা: একটি ডিপ্লয়েড সেটে অতিরিক্ত একটি সমসংস্থ ক্রোমোজোম যুক্ত হলে সেই অবস্থাকে ট্রাইজোমি (2n+1) বলা হয়।" },
+            { q: "২১৩. মনোজোমিতে (Monosomy) কোন ক্যারিওটাইপটি পরিলক্ষিত হয়?", opts: ["2n - 1", "2n + 1", "2n - 2", "2n + 2"], ans: 0, exp: "ব্যাখ্যা: একটি ডিপ্লয়েড ক্রোমোজোম সেট থেকে একটি ক্রোমোজোমের ঘাটতি বা হ্রাস পেলে তাকে মনোজোমি (2n-1) বলে।" },
+            { q: "২১৪. মানুষের টার্নার সিন্ড্রোমে (Turner's Syndrome) ক্রোমোজোমের অবস্থা কীরূপ হয়?", opts: ["47, XXY", "45, XO বা 2n-1", "47, XXX", "2n+1"], ans: 1, exp: "ব্যাখ্যা: টার্নার সিন্ড্রোম একটি মনোজোমিক অবস্থা (2n-1), যেখানে মেয়েদের একটি X ক্রোমোজোম কম থাকে (45, XO)।" },
+            { q: "২১৫. মানুষের 21 নং ক্রোমোজোমের ট্রাইসোমির (Trisomy 21) কারণে কোন্ সিনড্রোম দেখা যায়?", opts: ["এডওয়ার্ড সিনড্রোম", "ডাউন সিনড্রোম (Down Syndrome)", "পাটাউ সিনড্রোম", "ক্লাইনফেল্টার সিনড্রোম"], ans: 1, exp: "ব্যাখ্যা: মানুষের ২১নং অটোজোমের তিনটি কপি থাকার ফলে (ট্রাইসোমি ২১) ডাউন সিন্ড্রোম বা মঙ্গোলিজম দেখা দেয়।" },
+            { q: "২১৬. ক্রোমোজোমের গঠনগত পরিবর্তন বা মিউটেশন ঘটে যে কারণে, তা হল-", opts: ["DNA খন্ডকের ডিলিশন", "DNA খন্ডকের অ্যাডিশন", "DNA খন্ডকের ডুপ্লিকেশন", "সব ক-টি"], ans: 3, exp: "ব্যাখ্যা: ক্রোমোজোমাল অ্যাবারেশন বা গঠনগত পরিবর্তন ডিলিশন, ইনসারশন/অ্যাডিশন, ডুপ্লিকেশন এবং ইনভারশন—এই সকল কারণেই ঘটতে পারে।" },
+            { q: "২১৭. ক্রোমোজোমাল অ্যাবারেশন (Chromosomal Aberration) সাধারণত দেখা যায় নীচের কোন্টিতে?", opts: ["জার্মিনাল কোশে", "ক্যানসার কোশে", "নখের কোশে", "গ্যামেটে"], ans: 1, exp: "ব্যাখ্যা: ক্রোমোজোমাল অ্যাবারেশন বা অস্বাভাবিক গঠনগত পরিবর্তন প্রায়শই অনিয়ন্ত্রিত কোষ বিভাজনকারী ক্যানসার কোষে দেখা যায়।" },
+            { q: "২১৮. কোশচক্রের প্রদত্ত কোন্ ঘটনাটি পলিপ্লয়েডির (Polyploidy) জন্য দায়ী?", opts: ["ক্যারিওকাইনেসিসের অনুপস্থিতি", "সাইটোকাইনেসিসের অনুপস্থিতি", "স্পিন্ডিল অ্যাপারেটাসের অনুপস্থিতি", "কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: ক্যারিওকাইনেসিস বা নিউক্লিয়াসের বিভাজন ঘটার পর যদি সাইটোকাইনেসিস বা সাইটোপ্লাজমের বিভাজন না ঘটে, তবে কোষে ক্রোমোজোম সেট বহুগুণ বৃদ্ধি পেয়ে পলিপ্লয়েডি ঘটায়।" },
+            { q: "২১৯. হার্ডি উইনবার্গের ভারসাম্যকে বিঘ্নিত করে প্রদত্ত কোন্টি?", opts: ["প্রাকৃতিক নির্বাচন", "জেনেটিক ড্রিফট", "মিউটেশন", "সব ক-টি"], ans: 3, exp: "ব্যাখ্যা: প্রাকৃতিক নির্বাচন, জেনেটিক ড্রিফট, মিউটেশন, জিন প্রবাহ প্রভৃতি কারণে পপুলেশনের জিন ফ্রিকোয়েন্সি পরিবর্তিত হয় এবং হার্ডি উইনবার্গ ভারসাম্য বিঘ্নিত হয়।" },
+            { q: "২২০. হার্ডি উইনবার্গের মূলনীতিটি নীচের কোন্টির ক্ষেত্রে প্রযোজ্য?", opts: ["বৃহৎ জীবগোষ্ঠীর ক্ষেত্রে (Large population)", "ক্ষুদ্র জীবগোষ্ঠীর ক্ষেত্রে", "নির্বাচিত জননকার্য সম্পন্নকারী জীবগোষ্ঠীর ক্ষেত্রে", "স্থানাত্তর গমনকারী জীবগোষ্ঠীর ক্ষেত্রে"], ans: 0, exp: "ব্যাখ্যা: হার্ডি-উইনবার্গ সূত্রটি শুধুমাত্র এমন একটি বৃহৎ পপুলেশনের ক্ষেত্রে প্রযোজ্য যেখানে স্ত্রী ও পুরুষের মধ্যে অবাধ মিলন (Random mating) ঘটে।" },
+            { q: "২২১. কোন্ ফ্যাক্টরটি জেনেটিক সাম্যাবস্থাকে বা পপুলেশনের জিন ফ্রিকোয়েন্সিকে প্রভাবিত করে না?", opts: ["জিন ফ্লো", "জেনেটিক ড্রিফট", "সোম্যাটিক ভেরিয়েশন (Somatic Variation)", "মিউটেশন"], ans: 2, exp: "ব্যাখ্যা: দেহকোষের বা সোম্যাটিক ভেরিয়েশন পরবর্তী বংশে সঞ্চারিত হয় না, তাই এটি জিন ফ্রিকোয়েন্সি বা জেনেটিক সাম্যাবস্থাকে প্রভাবিত করে না।" },
+            { q: "২২২. জেনেটিক ড্রিফট (Genetic Drift) নীচের কোন্ ধরনের পপুলেশনে দেখতে পাওয়া যায়?", opts: ["বড়ো বিচ্ছিন্ন পপুলেশনে", "ক্ষুদ্র বিচ্ছিন্ন পপুলেশনে (Small isolated population)", "দ্রুত প্রজননশীল পপুলেশনে", "ধীর প্রজননশীল পপুলেশনে"], ans: 1, exp: "ব্যাখ্যা: স্যাম্পলিং ত্রুটির কারণে জিন ফ্রিকোয়েন্সির যে আকস্মিক পরিবর্তন ঘটে তা ক্ষুদ্র ও বিচ্ছিন্ন পপুলেশনে সবচেয়ে বেশি প্রকট হয়।" },
+            { q: "২২৩. জিনপ্রবাহ বা জিন ফ্লো (Gene Flow) জেনেটিক ড্রিফটের-", opts: ["একই দিকে কাজ করে", "বিপরীতে কাজ করে", "উভয় দিকেই কাজ করে", "সব ক-টিই সঠিক"], ans: 1, exp: "ব্যাখ্যা: জেনেটিক ড্রিফট বিচ্ছিন্ন পপুলেশনে বৈচিত্র্য কমায়, কিন্তু জিন প্রবাহ পরিযানের মাধ্যমে বিভিন্ন পপুলেশনের মধ্যে জেনেটিক বৈচিত্র্য বিনিময় করে। তাই এরা বিপরীত কাজ করে।" },
+            { q: "২২৪. একটি জিনপুল থেকে অন্য জিনের স্থানান্তরকে বা মাইগ্রেশনের ফলে জিনের আদানপ্রদানকে কী বলে?", opts: ["জিনপ্রবাহ (Gene Flow)", "জেনেটিক ড্রিফট", "মিউটেশন", "স্পিশিয়েশন"], ans: 0, exp: "ব্যাখ্যা: পরিযানের মাধ্যমে একটি পপুলেশন থেকে অন্য পপুলেশনে অ্যালিল বা জিনের স্থানান্তরকে জিন ফ্লো বা জিনপ্রবাহ বলা হয়।" },
+            { q: "২২৫. হার্ডি-উইনবার্গ সমীকরণে (p² + 2pq + q² = 1) নীচের কোন্টি হেটেরোজাইগাস (Heterozygous) অবস্থা উপস্থাপন করে?", opts: ["p²", "q²", "2pq", "pq"], ans: 2, exp: "ব্যাখ্যা: সমীকরণে p² এবং q² হোমোজাইগাস প্রকট ও প্রচ্ছন্ন অবস্থা নির্দেশ করে, আর 2pq হেটেরোজাইগাস অবস্থার ফ্রিকোয়েন্সি উপস্থাপন করে।" }
+        ]
+    },
+    16: {
+        name: 'Set 16', icon: '🧬', topic: 'বিবর্তনের জিনতত্ত্ব ও পপুলেশন গতিবিদ্যা ২',
+        questions: [
+            { q: "২২৬. ছোটো জনগোষ্ঠী থেকে দৈবক্রমে বা আকস্মিকভাবে কোনো অ্যালিলের বাদ পড়ার সম্ভাবনাকে কী বলা হয়?", opts: ["জেনেটিক ড্রিফট (Genetic Drift)", "অভিযোজন", "প্রজাতিভবন", "নির্বাচন চাপ"], ans: 0, exp: "ব্যাখ্যা: ছোটো পপুলেশনে আকস্মিক বা স্যাম্পলিং ত্রুটির কারণে অ্যালিল হারিয়ে যাওয়ার সম্ভাবনাকে জেনেটিক ড্রিফট বলা হয়।" },
+            { q: "২২৭. একটি জনসমষ্টির মধ্যে ‘ফাউন্ডার এফেক্ট’ (Founder Effect) ঘটায় যে প্রভাবটি, তার নাম কী?", opts: ["প্রাকৃতিক নির্বাচন", "জিনগত পুনর্বিন্যাস", "পরিব্যক্তি", "জেনেটিক ড্রিফট"], ans: 3, exp: "ব্যাখ্যা: কোনো বৃহৎ পপুলেশন থেকে কিছু সদস্য বিচ্ছিন্ন হয়ে নতুন কলোনি গড়লে জিন ফ্রিকোয়েন্সির যে আকস্মিক পরিবর্তন হয় তাকে জেনেটিক ড্রিফট বলে, ফাউন্ডার এফেক্ট হলো এরই একটি রূপ।" },
+            { q: "২২৮. নীচের কোন্ একটি উপাদান হার্ডি-ওয়েইনবার্গ সাম্যাবস্থা (Hardy-Weinberg equilibrium) প্রভাবিত করবে না?", opts: ["জেনেটিক recombination", "জেনেটিক ড্রিফট", "জিন মাইগ্রেশন", "স্থির জিন পুল (Constant gene pool)"], ans: 3, exp: "ব্যাখ্যা: একটি স্থির জিন পুল হার্ডি-উইনবার্গ সাম্যাবস্থা বজায় রাখার প্রধান শর্ত, এটি সাম্যাবস্থাকে বিঘ্নিত বা প্রভাবিত করে하지 না।" },
+            { q: "২২৯. 'Species' বা প্রজাতি কথাটির প্রথম বৈজ্ঞানিক প্রবর্তন করেন কে?", opts: ["লিনিয়াস", "জন রে (John Ray)", "অ্যারিস্টটল", "এপলার"], ans: 1, exp: "ব্যাখ্যা: ব্রিটিশ প্রকৃতিবিদ জন রে (John Ray) সর্বপ্রথম জীববিজ্ঞানে 'প্রজাতি' বা 'Species' কথাটির প্রবর্তন করেন।" },
+            { q: "২৩০. মানব বিবর্তনের ইতিহাসে কার ক্রেনিয়ালের (Cranial Capacity) বা মস্তিষ্কের আয়তন সবচেয়ে বেশি ছিল?", opts: ["জাভা মানুষের", "আধুনিক মানুষের", "ক্রো-ম্যাগনন মানুষের (Cro-Magnon)", "নিয়ানডারথাল মানুষের"], ans: 2, exp: "ব্যাখ্যা: ক্রো-ম্যাগনন মানুষের ক্রেনিয়াল ক্যাপাসিটি বা করোটি গহ্বরের আয়তন প্রায় ১৬০০-১৬৫০ cc ছিল, যা আধুনিক মানুষের (১৩০০-১৪০০ cc) থেকেও সামান্য বেশি।" },
+            { q: "২৩১. মানুষের আদিম পূর্বপুরুষদের কোন্ বৈশিষ্ট্যটি বর্তমান বন মানুষদের (Apes) থাকে না?", opts: ["ক্ষুদ্র ক্রেনিয়াম", "লম্বা পশ্চাদপদ (Long hind limbs)", "প্রোগন্যাথাস মুখমন্ডল", "ঘন দেহজ লোম"], ans: 1, exp: "ব্যাখ্যা: বনমানুষ বা এপের পায়ের তুলনায় হাত (অগ্রপদ) বেশি লম্বা হয়, তাই মানুষের মতো লম্বা পশ্চাদপদ তাদের বৈশিষ্ট্য নয়।" },
+            { q: "২৩২. নিচের কোন্টি আধুনিক মানুষের (Homo sapiens) বৈশিষ্ট্য নয়?", opts: ["শিল্পকলা দক্ষতা", "900 cc ক্রেনিয়াম গহ্বর", "ঋজু দেহ", "সুস্পষ্ট ভ্রূ রেখা (Prominent brow ridges)"], ans: 3, exp: "ব্যাখ্যা: আদিম পূর্বপুরুষদের (যেমন হোমো ইরেকটাস) পুরু ও সুস্পষ্ট ভ্রূ রেখা থাকলেও আধুনিক মানুষের কপাল চওড়া এবং ভ্রূ রেখা খুব সুস্পষ্ট নয়।" },
+            { q: "২৩৩. মানুষের গায়ের রং, চোখের রং বা চুলের রং- এগুলি কী ধরনের বৈশিষ্ট্যের বা ভেরিয়েশনের উদাহরণ?", opts: ["মেরিস্টিক চরিত্র", "সাবস্ট্যানটিভ চরিত্র (Substantive variation)", "সোমাটোজেনিক চরিত্র", "কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: চোখের রং, চুলের রং ইত্যাদি গুণগত বা অবয়বগত বৈশিষ্ট্যগুলিকে সাবস্ট্যানটিভ চরিত্র বা সাবস্ট্যানটিভ ভেরিয়েশন বলা হয়।" },
+            { q: "২৩৪. যে মিউটেশনের ফলে জীবের মৃত্যু ঘটে বা ভ্রূণ অবস্থাতেই জীব মারা যায়, তাকে কী বলে?", opts: ["প্রভাবিত মিউটেশন", "নিরপেক্ষ মিউটেশন", "লিথাল মিউটেশন (Lethal Mutation)", "ক্ষতিকারক মিউটেশন"], ans: 2, exp: "ব্যাখ্যা: যে মিউটেশনের কারণে জীবের মৃত্যু ঘটে, তাকে লিথাল বা মরণকারী মিউটেশন বলে।" },
+            { q: "২৩৫. অ্যালবিনিজম (Albinism) নামক জিনগত ত্রুটিতে মানুষের চামড়ার রং কীরূপ হয়?", opts: ["কালো", "বাদামী", "ধবধবে সাদা", "হলুদ"], ans: 2, exp: "ব্যাখ্যা: অ্যালবিনিজম একটি মিউটেশনজনিত ত্রুটি যেখানে চামড়ায় মেলানিন রঞ্জক তৈরি না হওয়ার কারণে চামড়ার রং ধবধবে সাদা হয়ে যায়।" },
+            { q: "২৩৬. মানুষের প্রতিটি স্বাভাবিক দেহকোষে মোট ক্রোমোজোম সংখ্যা কত?", opts: ["43", "46", "47", "23"], ans: 1, exp: "ব্যাখ্যা: মানুষের প্রতিটি স্বাভাবিক দেহকোষে ২৩ জোড়া অর্থাৎ মোট ৪৬টি ক্রোমোজোম থাকে।" },
+            { q: "২৩৭. গ্যালাপাগোস দ্বীপপুঞ্জে ডারউইনের ফিঞ্চ (Darwin's Finches) পাখিরা কোন্টির প্রকৃত উদাহরণ?", opts: ["মাইক্রোএভোলিউশন", "অ্যাডাপটিভ রেডিয়েশন (Adaptive Radiation)", "অ্যাটাভিজম", "মাইগ্রেশন"], ans: 1, exp: "ব্যাখ্যা: গ্যালাপাগোস দ্বীপপুঞ্জে একটি সাধারণ পূর্বপুরুষ থেকে ফিঞ্চ পাখিদের বিভিন্ন খাদ্যাভ্যাসের জন্য বৈচিত্র্যময় ঠোঁট গঠন করে ছড়িয়ে পড়া অ্যাডাপটিভ রেডিয়েশনের (অভিযোজিত বিকিরণ) উৎকৃষ্ট উদাহরণ।" },
+            { q: "২৩৮. বিবর্তনের আধুনিক সংশ্লেষ তত্ত্ব বা Modern Synthetic Theory-র প্রধান চালিকাশক্তি কোন্টি নয়?", opts: ["প্রাকৃতিক নির্বাচন", "মিউটেশন ও রিকম্বিনেশন", "জেনেটিক ড্রিফট", "অর্জিত গুণের বংশানুসরণ"], ans: 3, exp: "ব্যাখ্যা: অর্জিত গুণের বংশানুসরণ হলো ল্যামার্কের তত্ত্ব। আধুনিক তত্ত্বে মিউটেশন, প্রকরণ, প্রাকৃতিক নির্বাচন ও জেনেটিক ড্রিফটকে প্রাধান্য দেওয়া হয়।" },
+            { q: "২৩৯. ডারউইনবাদ অনুসারে বিবর্তনের মূল চালিকাশক্তি (Driving force) কোনটি?", opts: ["মিউটেশন", "প্রাকৃতিক নির্বাচন (Natural Selection)", "অন্তঃপ্রজাতি সংগ্রাম", "ব্যবহার ও অব্যবহার"], ans: 1, exp: "ব্যাখ্যা: ডারউইনবাদ বা ডারউইনের বিবর্তন তত্ত্বের মূল ভিত্তিই হলো প্রাকৃতিক নির্বাচন যার মাধ্যমে প্রকৃতি যোগ্যতমকে বেছে নেয়।" },
+            { q: "২৪০. বিবর্তনের বা জৈব অভিব্যক্তির প্রধান কাঁচামাল (Raw material) কোনটি?", opts: ["জনন", "প্রকরণ বা ভেরিয়েশন (Variation)", "প্রতিযোগিতা", "বিলুপ্তিকরণ"], ans: 1, exp: "ব্যাখ্যা: প্রকরণ বা ভেরিয়েশন (Variation) হলো জৈব অভিব্যক্তির প্রধান কাঁচামাল, যার ভিত্তিতে প্রাকৃতিক নির্বাচন কাজ করে ও বিবর্তন অগ্রসর হয়।" }
+        ]
+    },
+    17: {
+        name: 'Set 17', icon: '🚶', topic: 'মানব বিবর্তন ও আদিম মানুষ (Human Evolution)',
+        questions: [
+            { q: "২৪১. মানব বিবর্তনের কিছু ধাপ নীচে দেওয়া হয়েছে। অতীত থেকে বর্তমান সঠিক ক্রমে সেগুলি সাজাও: A. হোমো হ্যাবিলিস B. হোমো সেপিয়েন্স C. হোমো নিয়ানডারথালেনসিস D. হোমো ইরেকটাস", opts: ["D-A-C-B", "B-A-D-C", "C-B-D-A", "A-D-C-B"], ans: 3, exp: "ব্যাখ্যা: বিবর্তনের সঠিক ধারা হলো: হোমো হ্যাবিলিস (Handy man) → হোমো ইরেকটাস (Upright man) → হোমো নিয়ানডারথালেনসিস → হোমো সেপিয়েন্স (আধুনিক মানুষ)।" },
+            { q: "২৪২. মানব বিবর্তনের ইতিহাসে সর্বপ্রথম আগুন ব্যবহার করতে শেখে কে?", opts: ["অস্ট্রালোপিথেকাস", "হোমো হ্যাবিলিস", "হোমো ইরেকটাস (Homo erectus)", "নিয়ানডারথাল মানব"], ans: 2, exp: "ব্যাখ্যা: হোমো ইরেকটাসরাই প্রথম দলবদ্ধভাবে বসবাস, শিকার এবং আগুনের ব্যবহার শুরু করেছিল বলে প্রমাণ পাওয়া যায়।" },
+            { q: "২৪৩. সর্বপ্রথম মৃতদেহ কবর দেওয়ার প্রথা এবং ধর্মীয় চেতনার বিকাশ কাদের মধ্যে দেখা যায়?", opts: ["জাভা ম্যান", "পিকিং ম্যান", "নিয়ানডারথাল মানব (Neanderthal man)", "ক্রো-ম্যাগনন মানব"], ans: 2, exp: "ব্যাখ্যা: নিয়ানডারথাল মানবদের জীবাশ্ম আবিষ্কারের স্থানে ফুল এবং মৃতদেহ সমাধিস্থ করার প্রমাণ মিলেছে, যা তাদের ধর্মীয় চেতনার ইঙ্গিত দেয়।" },
+            { q: "২৪৪. মানব বিবর্তনের ধারায় কোন মানব পূর্বপুরুষ প্রথম পাথরের হাতিয়ার তৈরি করেছিল বলে মনে করা হয়?", opts: ["রামাপিতেকাস", "অস্ট্রালোপিথেকাস", "হোমো হ্যাবিলিস (Homo habilis)", "হোমো ইরেকটাস"], ans: 2, exp: "ব্যাখ্যা: হোমো হ্যাবিলিস বা 'Handy Man' রাই প্রথম পাথরের টুকরো দিয়ে আদিম হাতিয়ার বানাতে সক্ষম হয়েছিল।" },
+            { q: "২৪৫. আধুনিক মানুষের (Homo sapiens sapiens) উদ্ভব আনুমানিক কত বছর আগে এবং কোথায় হয়েছিল বলে বৈজ্ঞানিকরা মনে করেন?", opts: ["১ মিলিয়ন বছর আগে, ইউরোপে", "প্রায় ৭৫,০০০ বছর আগে, আফ্রিকায়", "প্রায় ৫ লক্ষ বছর আগে, এশিয়ায়", "প্রায় ২ মিলিয়ন বছর আগে, আমেরিকায়"], ans: 1, exp: "ব্যাখ্যা: আধুনিক মানুষের উৎপত্তি মূলত আফ্রিকায় হয়েছিল প্রায় ৭৫,০০০ থেকে ১ লক্ষ বছর আগে এবং সেখান থেকে তারা সারা পৃথিবীতে ছড়িয়ে পড়ে।" },
+            { q: "২৪৬. আফ্রিকার ইথিওপিয়ায় পাওয়া মানুষের প্রাচীনতম বিখ্যাত পূর্বপুরুষের জীবাশ্মটির (Australopithecus afarensis) নাম কী দেওয়া হয়েছিল?", opts: ["লুসি (Lucy)", "তাউং চাইল্ড", "জাভা ম্যান", "নিয়ানডারথাল"], ans: 0, exp: "ব্যাখ্যা: ১৯৭৪ সালে আবিষ্কৃত ৩.২ মিলিয়ন বছরের পুরোনো অস্ট্রালোপিথেকাসের এই প্রায় সম্পূর্ণ কঙ্কালটির নাম দেওয়া হয়েছিল 'লুসি'।" },
+            { q: "২৪৭. মানুষের বিবর্তন প্রক্রিয়ায় কোনটি সবচেয়ে গুরুত্বপূর্ণ পরিবর্তন হিসেবে ধরা হয়?", opts: ["লোম কমে যাওয়া", "মস্তিষ্কের আয়তন বা ক্রেনিয়াল ক্যাপাসিটি বৃদ্ধি", "লেজ খসে পড়া", "দাঁতের আকার ছোট হওয়া"], ans: 1, exp: "ব্যাখ্যা: দুই পায়ে হাঁটা শেখার পাশাপাশি মানুষের বিবর্তনের সবচেয়ে উল্লেখযোগ্য দিক হলো মস্তিষ্কের আকারের দ্রুত বৃদ্ধি যা বুদ্ধিমত্তার পরিচয় দেয়।" },
+            { q: "২৪৮. জাভা ম্যান (Java Man) এবং পিকিং ম্যান (Peking Man) কোন প্রজাতির অন্তর্গত?", opts: ["হোমো হ্যাবিলিস", "অস্ট্রালোপিথেকাস", "হোমো ইরেকটাস (Homo erectus)", "হোমো সেপিয়েন্স"], ans: 2, exp: "ব্যাখ্যা: ইন্দোনেশিয়া এবং চীনে প্রাপ্ত এই জীবাশ্মগুলি হোমো ইরেকটাস প্রজাতির অন্তর্গত।" },
+            { q: "২৪৯. নিয়ানডারথাল মানবের জীবাশ্ম প্রথম কোন দেশে আবিষ্কৃত হয়?", opts: ["আফ্রিকা", "চীন", "জার্মানিতে", "ফ্রান্সে"], ans: 2, exp: "ব্যাখ্যা: ১৮৫৬ সালে জার্মানির নিয়ান্ডার উপত্যকায় (Neander Valley) প্রথম এদের জীবাশ্ম আবিষ্কৃত হওয়ায় এদের নিয়ানডারথাল নাম দেওয়া হয়।" },
+            { q: "২৫০. আধুনিক মানুষের মস্তিষ্কের গড় আয়তন বা ক্রেনিয়াল ক্যাপাসিটি কত?", opts: ["900 cc", "1000 cc", "প্রায় 1350-1400 cc", "1650 cc"], ans: 2, exp: "ব্যাখ্যা: আধুনিক মানুষের (Homo sapiens) মস্তিষ্কের গড় আয়তন প্রায় 1350 থেকে 1400 cc এর মধ্যে হয়ে থাকে।" },
+            { q: "২৫১. প্রাণের উৎপত্তির জন্য সমুদ্রের উত্তপ্ত জলে প্রয়োজনীয় উপাদান কোনটি ছিল?", opts: ["N2", "O2", "H2O (জল)", "C"], ans: 2, exp: "ব্যাখ্যা: প্রাণের উৎপত্তির প্রথম ধাপগুলি সমুদ্রের উত্তপ্ত জলেই সংঘটিত হয়েছিল, তাই জল (H2O) একটি অপরিহার্য উপাদান।" },
+            { q: "২৫২. আদিম পৃথিবীতে সৃষ্ট প্রোটোবায়োন্ট বা আদি কোষীয় সংগঠনগুলির পর্যায়ক্রমিক বিকাশে প্রথম প্রাণের সঞ্চার কার মধ্যে ঘটেছিল?", opts: ["প্রোটোভাইরাস", "ভাইরাস", "প্রোভাইরাস", "ব্যাকটেরিয়া"], ans: 0, exp: "ব্যাখ্যা: রাসায়নিক বিবর্তনের পর প্রোটোবায়োন্ট থেকে প্রথম প্রাণের সঞ্চার প্রোটোভাইরাস রূপে ঘটেছিল।" },
+            { q: "২৫৩. জীবনের উৎপত্তির রাসায়নিক তত্ত্বটি (Chemical Evolution / Chemogeny) প্রথম কারা স্বাধীনভাবে প্রস্তাব করেন?", opts: ["মিলার ও ফক্স", "ওপারিন ও হ্যালডেন (Oparin and Haldane)", "মিলার ও ওয়াটসন", "ওয়াটসন ও ক্রিক"], ans: 1, exp: "ব্যাখ্যা: জীবনের উৎপত্তি সম্পর্কে রাসায়নিক বিবর্তনের তত্ত্ব বা কেমোজেনি ১৯২০-৩০ দশকে ওপারিন এবং হ্যালডেন স্বাধীনভাবে প্রস্তাব করেছিলেন।" },
+            { q: "২৫৪. কৃষিকাজ, পশুপালন এবং দলবদ্ধভাবে সমাজ ও সংস্কৃতি তৈরি করে কে?", opts: ["হোমো ইরেকটাস", "নিয়ানডারথাল মানব", "আধুনিক মানুষ (Homo sapiens)", "অস্ট্রালোপিথেকাস"], ans: 2, exp: "ব্যাখ্যা: আধুনিক হোমো সেপিয়েন্সরাই প্রথম গুহাচিত্র, কৃষিকাজ এবং স্থায়ী সমাজ গড়ে তোলে।" },
+            { q: "২৫৫. ডারউইনের লেখা বিখ্যাত বইটির নাম কী যাতে তিনি প্রাকৃতিক নির্বাচন তত্ত্ব প্রকাশ করেন?", opts: ["Philosophie Zoologique", "On the Origin of Species (1859)", "Systema Naturae", "The Descent of Man"], ans: 1, exp: "ব্যাখ্যা: ১৮৫৯ সালে ডারউইন তাঁর বিখ্যাত গ্রন্থ 'On the Origin of Species by Means of Natural Selection' প্রকাশ করেন।" }
+        ]
+    },
+    18: {
+        name: 'Set 18', icon: '📚', topic: 'বিবর্তন তত্ত্বের প্রবক্তা ও বিবিধ (Evolution Theories)',
+        questions: [
+            { q: "২৫৬. \"ব্যবহার ও অব্যবহারের সূত্র\" (Law of Use and Disuse) এবং \"অর্জিত গুণের বংশানুসরণ\" কার বিবর্তন মতবাদের মূল ভিত্তি?", opts: ["চার্লস ডারউইন", "জ্যঁ ব্যাপটিস্ট দ্য ল্যামার্ক (Lamarck)", "হুগো দ্য ভ্রিস", "আর্নস্ট মেয়ার"], ans: 1, exp: "ব্যাখ্যা: ফরাসি বিজ্ঞানী ল্যামার্ক তাঁর তত্ত্বে বলেছিলেন যে অঙ্গের বেশি ব্যবহার তা সুগঠিত করে এবং তা পরবর্তী বংশে সঞ্চারিত হয়।" },
+            { q: "২৫৭. \"যোগ্যতমের উদ্বর্তন\" (Survival of the Fittest) কথাটি প্রথম কে প্রয়োগ করেন যা ডারউইন পরবর্তীতে গ্রহণ করেন?", opts: ["ল্যামার্ক", "আলফ্রেড রাসেল ওয়ালেস", "হার্বার্ট স্পেন্সার (Herbert Spencer)", "টমাস ম্যালথাস"], ans: 2, exp: "ব্যাখ্যা: ব্রিটিশ দার্শনিক হার্বার্ট স্পেন্সার প্রথম 'যোগ্যতমের উদ্বর্তন' কথাটি ব্যবহার করেন যা ডারউইনের প্রাকৃতিক নির্বাচনকে সংজ্ঞায়িত করতে সাহায্য করেছিল।" },
+            { q: "২৫৮. ল্যামার্কের বিখ্যাত বইটির নাম কী যাতে তিনি তাঁর বিবর্তন তত্ত্ব প্রকাশ করেন?", opts: ["Philosophie Zoologique (1809)", "On the Origin of Species", "Historia Animalium", "Micrographia"], ans: 0, exp: "ব্যাখ্যা: ল্যামার্ক ১৮০৯ সালে তাঁর 'Philosophie Zoologique' নামক গ্রন্থে প্রথম জৈব বিবর্তনের সুস্পষ্ট মতবাদ প্রকাশ করেন।" },
+            { q: "২৫৯. ডারউইন তাঁর বিবর্তনের প্রমাণ সংগ্রহের জন্য এইচ.এম.এস বিগল (HMS Beagle) জাহাজে করে কোন বিখ্যাত দ্বীপে গিয়েছিলেন?", opts: ["মাদাগাস্কার", "গ্যালাপাগোস দ্বীপপুঞ্জ (Galapagos Islands)", "আন্দামান", "হাওয়াই"], ans: 1, exp: "ব্যাখ্যা: ডারউইন প্রশান্ত মহাসাগরের গ্যালাপাগোস দ্বীপপুঞ্জে গিয়ে ফিঞ্চ পাখিসহ অনেক বৈচিত্র্যময় প্রাণী পর্যবেক্ষণ করেন।" },
+            { q: "২৬০. হুগো দ্য ভ্রিস (Hugo de Vries) কোন উদ্ভিদের উপর গবেষণা করে তাঁর বিখ্যাত 'মিউটেশন তত্ত্ব' দিয়েছিলেন?", opts: ["মটর গাছ", "ইভনিং প্রিমরোজ (Oenothera lamarckiana)", "ভুট্টা", "স্ন্যাপড্রাগন"], ans: 1, exp: "ব্যাখ্যা: দ্য ভ্রিস ইভনিং প্রিমরোজ বা সন্ধ্যামালতী গাছের উপর গবেষণা করে দেখেছিলেন যে হঠাৎ করে নতুন বৈশিষ্ট্যের গাছ জন্মাচ্ছে, একেই তিনি মিউটেশন বলেন।" },
+            { q: "২৬১. যখন প্রাকৃতিক নির্বাচনে পপুলেশনের মধ্যবর্তী গুণমানগুলি (Average phenotype) বেশি গুরুত্ব পায় এবং দুই প্রান্তীয় বৈশিষ্ট্য বাদ পড়ে, তাকে কী নির্বাচন বলে?", opts: ["ডাইরেকশনাল সিলেকশন", "স্টেবিলাইজিং সিলেকশন (Stabilizing Selection)", "ডিসরাপটিভ সিলেকশন", "আর্টিফিশিয়াল সিলেকশন"], ans: 1, exp: "ব্যাখ্যা: মধ্যবর্তী গুণমানগুলি প্রাকৃতিক নির্বাচনে প্রাধান্য পেলে তাকে স্টেবিলাইজিং বা নরমালাইজিং সিলেকশন বলে।" },
+            { q: "২৬২. একটি অ্যানসেস্ট্রাল বা পূর্বপুরুষ প্রজাতি থেকে শাখা-প্রশাখার মাধ্যমে একাধিক নতুন প্রজাতি তৈরি হওয়াকে কী বলে?", opts: ["অ্যানাজেনেসিস", "ক্ল্যাডোজেনেসিস (Cladogenesis)", "কনভারজেন্স", "অ্যাডাপ্টেশন"], ans: 1, exp: "ব্যাখ্যা: একটি অ্যানসেস্ট্রাল প্রজাতি থেকে দুটি বা ততোধিক প্রজাতি তৈরি হওয়াকে ক্ল্যাডোজেনেসিস বলে।" },
+            { q: "২৬৩. ইন্ডাস্ট্রিয়াল মেলানিজম (Industrial Melanism) বা শিল্পবিপ্লবের সময় পেপারড মথের (Biston betularia) কালো রং ধারণ কিসের উৎকৃষ্ট উদাহরণ?", opts: ["মিউটেশন", "জেনেটিক ড্রিফট", "প্রাকৃতিক নির্বাচন (Natural Selection)", "ল্যামার্কবাদ"], ans: 2, exp: "ব্যাখ্যা: শিল্প দূষণের কারণে গাছের গুঁড়ি কালো হয়ে যাওয়ায় কালো মথেরা শিকারীর হাত থেকে রক্ষা পায়। এটি ডাইরেকশনাল প্রাকৃতিক নির্বাচনের প্রমাণ।" },
+            { q: "২৬৪. ইনব্রিডিং (Inbreeding) বা নিকট আত্মীয়দের মধ্যে প্রজননের ফলে পপুলেশনে কী বৃদ্ধি পায়?", opts: ["জেনেটিক ড্রিফট", "হেটেরোজাইগোসিটি", "হোমোজাইগোসিটি (Homozygosity)", "মিউটেশন রেট"], ans: 2, exp: "ব্যাখ্যা: ইনব্রিডিং-এর ফলে অপত্য জনুগুলিতে জিনগত বৈচিত্র্য কমে যায় এবং প্রচ্ছন্ন জিনের হোমোজাইগাস অবস্থা সৃষ্টি হওয়ার সম্ভাবনা বেড়ে যায়।" },
+            { q: "২৬৫. \"জেনেটিক লোড\" (Genetic Load) বলতে কী বোঝায়?", opts: ["পপুলেশনের মোট জিন", "পপুলেশনে সুপ্ত অবস্থায় থাকা প্রচ্ছন্ন ক্ষতিকারক জিনগুলির সমষ্টি", "নতুন সৃষ্ট জিন", "উপকারী জিনের হার"], ans: 1, exp: "ব্যাখ্যা: মানুষের বা কোনো পপুলেশনে সুপ্ত অবস্থায় থাকা প্রচ্ছন্নধর্মী লিথাল বা ক্ষতিকারক জিনগুলিকে জেনেটিক লোড বলে, যা ইনব্রিডিং-এ প্রকাশ পেতে পারে।" },
+            { q: "২৬۶. পৃথিবীতে ডাইনোসরদের সম্পূর্ণ বিলুপ্তি ঘটেছিল কোন যুগের শেষে?", opts: ["জুরাসিক", "ক্রিটেসিয়াস (Cretaceous)", "ট্রায়াসিক", "ডিভোনিয়ান"], ans: 1, exp: "ব্যাখ্যা: মেসোজোয়িক এরার ক্রিটেসিয়াস যুগের শেষে একটি বিরাট উল্কাপাতের ফলে পৃথিবী থেকে ডাইনোসররা বিলুপ্ত হয়ে যায়।" },
+            { q: "২৬৭. আধুনিক সংশ্লেষ তত্ত্ব বা Modern Synthetic Theory-র প্রবক্তা কারা?", opts: ["ল্যামার্ক ও ডারউইন", "ফিশার, রাইট, হ্যালডেন, ডবঝনস্কি এবং মেয়ার", "ওয়াটসন ও ক্রিক", "ওপারিন ও হ্যালডেন"], ans: 1, exp: "ব্যাখ্যা: ডারউইনবাদকে জেনেটিক্স ও মিউটেশনের সাপেক্ষে আধুনিকীকরণ করে যারা এই তত্ত্ব দেন তারা হলেন ফিশার, রাইট, হ্যালডেন, মেয়ার প্রমুখ।" },
+            { q: "২৬৮. হার্ডি-উইনবার্গ সমীকরণটি (Hardy-Weinberg Equation) কী যা একটি পপুলেশনে জিন ফ্রিকোয়েন্সি স্থির থাকার গাণিতিক প্রমাণ দেয়?", opts: ["p + q = 2", "p² + q² = 1", "p² + 2pq + q² = 1", "p² + 2pq + q² = 0"], ans: 2, exp: "ব্যাখ্যা: হার্ডি-উইনবার্গ সাম্যাবস্থার গাণিতিক সমীকরণটি হলো p² + 2pq + q² = 1, যা পপুলেশনে জেনোটাইপ ফ্রিকোয়েন্সি নির্দেশ করে।" },
+            { q: "২৬৯. বিবর্তনের ধারায় নতুন প্রজাতি সৃষ্টির প্রক্রিয়াকে বৈজ্ঞানিক পরিভাষায় কী বলা হয়?", opts: ["স্পেসিয়েশন (Speciation)", "মিউটেশন", "রিকম্বিনেশন", "অ্যাটাভিজম"], ans: 0, exp: "ব্যাখ্যা: একটি প্রজাতি থেকে বিবর্তনের মাধ্যমে সম্পূর্ণ নতুন এবং প্রজননগতভাবে বিচ্ছিন্ন প্রজাতির উদ্ভবকে স্পেসিয়েশন বলে।" },
+            { q: "২৭০. নিচের কোনটি 'লিভিং ফসিল' বা জীবন্ত জীবাশ্মের উদাহরণ?", opts: ["লিমুলাস (রাজকাঁকড়া) ও পেরিপেটাস", "আর্কিওপটেরিক্স", "ডাইনোসর", "ম্যামথ"], ans: 0, exp: "ব্যাখ্যা: লিমুলাস (Limulus), স্ফেনোডন, পেরিপেটাস ইত্যাদি প্রাণী লক্ষ লক্ষ বছর ধরে অপরিবর্তিত আছে এবং এদের সমসাময়িক আত্মীয়রা বিলুপ্ত, তাই এদের জীবন্ত জীবাশ্ম বলে।" }
+        ]
+    }
+};
+
+// ================== STATE VARIABLES ==================
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+// ================== LOCAL STORAGE LOGIC ==================
+function getGlobalUsers() {
+    const data = localStorage.getItem("testBazarGlobalUsers");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+    const data = localStorage.getItem("testBazarAttemptsBio3Ch6_v1");
+    return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+    const attempts = getAttemptsData();
+    const key = username + '|' + setId;
+    attempts[key] = (attempts[key] || 0) + 1;
+    localStorage.setItem("testBazarAttemptsBio3Ch6_v1", JSON.stringify(attempts));
+    return attempts[key];
+}
+
+// ================== INITIALIZATION ==================
+window.onload = () => {
+    renderHub();
+};
+
+function renderHub() {
+    const grid = document.getElementById("setGrid");
+    grid.innerHTML = "";
+
+    for(let id in ALL_SETS) {
+        const set = ALL_SETS[id];
+        const div = document.createElement("div");
+        div.className = "set-card";
+
+        let attemptCount = 0;
+        let isLocked = false;
+        if (currentUser) {
+            attemptCount = getAttemptCount(currentUser, id);
+            if (attemptCount >= MAX_ATTEMPTS) {
+                isLocked = true;
+                div.classList.add("locked");
+            }
+        }
+
+        div.innerHTML = `
+            <div class="icon">${set.icon}</div>
+            <div class="set-num">${set.name}</div>
+            <div class="set-title">${set.topic}</div>
+            <div class="set-meta"><span>${set.questions.length} Qs</span><span>10 Mins</span></div>
+            ${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+        `;
+
+        div.onclick = () => {
+            if (isLocked) {
+                alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+                return;
+            }
+            handleSetClick(id);
+        };
+        grid.appendChild(div);
+    }
+}
+
+function handleSetClick(setId) {
+    activeSetId = setId;
+    if (!currentUser) {
+        document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+        document.getElementById("loginOverlay").classList.add("active");
+        document.getElementById("loginUsername").value = "";
+        document.getElementById("loginPassword").value = "";
+        document.getElementById("loginError").style.display = "none";
+    } else {
+        startQuiz(setId);
+    }
+}
+
+function doLogin() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+    const err = document.getElementById("loginError");
+    const GLOBAL_USERS = getGlobalUsers();
+
+    if(!u || !p) {
+        err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!";
+        err.style.display = "block";
+        return;
+    }
+
+    if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+        let attempts = getAttemptCount(u, activeSetId);
+        if (attempts >= MAX_ATTEMPTS) {
+            err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+            err.style.display = "block";
+            return;
+        }
+        currentUser = u;
+        document.getElementById("loginOverlay").classList.remove("active");
+        document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+        document.getElementById("userDisplay").classList.remove("hidden");
+        renderHub();
+        startQuiz(activeSetId);
+    } else {
+        err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+        err.style.display = "block";
+    }
+}
+
+function closeLogin() {
+    document.getElementById("loginOverlay").classList.remove("active");
+}
+
+function goToHub() {
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("hubPage").style.display = "block";
+    document.getElementById("timerBox").classList.add("hidden");
+    clearInterval(timerInterval);
+    renderHub();
+}
+
+// ================== QUIZ ENGINE ==================
+function startQuiz(setId) {
+    incrementAttempt(currentUser, setId);
+    renderHub();
+
+    document.getElementById("hubPage").style.display = "none";
+    document.getElementById("testArea").classList.remove("hidden");
+    document.getElementById("timerBox").classList.remove("hidden");
+
+    const set = ALL_SETS[setId];
+    document.getElementById("testSetLabel").innerText = set.name;
+    document.getElementById("testTopic").innerText = set.topic;
+
+    questions = [...set.questions];
+    currentQIndex = 0;
+    score = 0;
+    wrongAnswers = 0;
+    isReviewMode = false;
+    userAnswers = {};
+
+    timeLeft = TIME_LIMIT;
+    updateTimerDisplay();
+    clearInterval(timerInterval);
+    timerInterval = setInterval(timerTick, 1000);
+
+    loadQuestion();
+}
+
+function timerTick() {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        showResult();
+    }
+}
+
+function updateTimerDisplay() {
+    const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+    const s = (timeLeft % 60).toString().padStart(2, '0');
+    document.getElementById("timerDisplay").innerText = `${m}:${s}`;
+}
+
+function loadQuestion() {
+    const qData = questions[currentQIndex];
+    document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+    document.getElementById("qText").innerHTML = qData.q;
+
+    const progress = ((currentQIndex) / questions.length) * 100;
+    document.getElementById("progressFill").style.width = `${progress}%`;
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+
+    const optsBox = document.getElementById("qOpts");
+    optsBox.innerHTML = "";
+    document.getElementById("explanation").classList.remove("show");
+    document.getElementById("nextBtn").disabled = true;
+    document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+    qData.opts.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "opt";
+        btn.innerHTML = `<div class="opt-circle">${LABELS[idx] || '—'}</div> <div class="opt-text">${optText}</div>`;
+
+        if (isReviewMode) {
+            btn.classList.add("disabled");
+            if (idx === qData.ans) btn.classList.add("correct");
+            if (userAnswers[currentQIndex] === idx && idx !== qData.ans) {
+                btn.classList.add("wrong");
+            }
+        } else {
+            btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+        }
+        optsBox.appendChild(btn);
+    });
+
+    if (isReviewMode) {
+        document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+        document.getElementById("explanation").classList.add("show");
+        document.getElementById("nextBtn").disabled = false;
+        if (currentQIndex === questions.length - 1) {
+            document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন";
+        }
+    }
+
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+    const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+    allBtns.forEach(b => b.classList.add("disabled"));
+
+    userAnswers[currentQIndex] = selectedIdx;
+
+    if (selectedIdx === correctIdx) {
+        btn.classList.add("correct");
+        score++;
+    } else {
+        btn.classList.add("wrong");
+        allBtns[correctIdx].classList.add("correct");
+        wrongAnswers++;
+    }
+
+    document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+    document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+    document.getElementById("explanation").classList.add("show");
+    document.getElementById("nextBtn").disabled = false;
+
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch((err) => console.log('MathJax typeset failed: ' + err.message));
+    }
+}
+
+function nextQ() {
+    if (isReviewMode && currentQIndex === questions.length - 1) {
+        document.getElementById("testArea").classList.add("hidden");
+        document.getElementById("resultWrap").classList.add("show");
+        return;
+    }
+
+    if (currentQIndex < questions.length - 1) {
+        currentQIndex++;
+        loadQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+    clearInterval(timerInterval);
+    document.getElementById("testArea").classList.add("hidden");
+    document.getElementById("timerBox").classList.add("hidden");
+    document.getElementById("resultWrap").classList.add("show");
+
+    const total = questions.length;
+    const skipped = total - (score + wrongAnswers);
+    const percent = Math.round((score / total) * 100);
+
+    document.getElementById("finalScore").innerText = `${percent}%`;
+    document.getElementById("rbCorrect").innerText = score;
+    document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+
+    const gradeEl = document.getElementById("resultGrade");
+    if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+    else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+    else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+
+    const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+    document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+    if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+        alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`);
+        return;
+    }
+    startQuiz(activeSetId);
+}
+
+function showReview() {
+    isReviewMode = true;
+    currentQIndex = 0;
+    document.getElementById("resultWrap").classList.remove("show");
+    document.getElementById("testArea").classList.remove("hidden");
+    loadQuestion();
+}
+</script>
+</body>
+</html>
