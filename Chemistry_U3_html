@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Chemistry 3rd Sem | Unit 3</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main);}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; }
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header class="top-bar">
+<div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+<div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+<div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+<div class="main">
+<!-- LOGIN MODAL -->
+<div class="login-overlay" id="loginOverlay">
+<div class="login-modal">
+<h2>লগইন করুন</h2>
+<p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+<div class="login-set-name" id="loginSetName">📚 Set 1</div>
+<div class="input-group">
+<label>ইউজারনেম</label>
+<input type="text" id="loginUsername" placeholder="Username">
+</div>
+<div class="input-group">
+<label>পাসওয়ার্ড</label>
+<input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+</div>
+<button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+<button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+<div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+</div>
+</div>
+<!-- HUB PAGE -->
+<div id="hubPage">
+<div class="hub-header">
+<h1>রসায়ন 3rd Sem Unit 3:<br>হ্যালোঅ্যালকেন এবং হ্যালোঅ্যারিনসমূহ</h1>
+<p>মোট ১০৫টি প্রশ্ন সম্বলিত ৭টি সেট। Test শুরু করতে সেটে ক্লিক করুন।</p>
+</div>
+<div class="set-grid" id="setGrid"></div>
+<div style="text-align: center; margin-top: 30px;">
+<button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+</div>
+</div>
+<!-- QUIZ AREA -->
+<div id="testArea" class="hidden">
+<div class="quiz-info">
+<div class="info-item">🎓 <strong>Chemistry</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+<div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+</div>
+<div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="q-card">
+<div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+<div class="q-text" id="qText">Question Text</div>
+<div class="opts" id="qOpts"></div>
+<div class="explanation" id="explanation"><p id="explanationText"></p></div>
+<div class="nav-row">
+<div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+<button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+</div>
+</div>
+</div>
+<!-- RESULT AREA -->
+<div class="result-wrap" id="resultWrap">
+<div class="result-icon" id="resultIcon">🏆</div>
+<div class="result-score en-font" id="finalScore">100%</div>
+<div class="result-total">স্কোর</div>
+<div class="result-grade" id="resultGrade">অসাধারণ!</div>
+<div class="result-bars">
+<div class="result-bar">
+<div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+<div class="rb-label">সঠিক</div>
+</div>
+<div class="result-bar">
+<div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+<div class="rb-label">ভুল/স্কিপ</div>
+</div>
+</div>
+<div class="attempt-info-box" id="attemptInfo"></div>
+<div class="action-btns">
+<button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+<button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+<button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+</div>
+</div>
+</div>
+<script>
+const MAX_ATTEMPTS = 10;
+const TIME_LIMIT = 10 * 60;
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+const ALL_SETS = {
+1: {
+name: 'Set 1', icon: '📚', topic: 'হ্যালোঅ্যালকেনের শ্রেণিবিভাগ, নামকরণ এবং C-X বন্ধনের প্রকৃতি',
+questions: [
+{ q: "১. নীচের কোন্টি একটি 3° অ্যালকিল হ্যালাইড?", opts: ["2-ব্রোমোপ্রোপেন", "1-ফ্লুরো-2-মিথাইলপ্রোপেন", "2-ক্লোরো-2-মিথাইলপ্রোপেন", "আয়োডোইথেন"], ans: 2, exp: "ব্যাখ্যা: হ্যালোজেন বাহক কার্বনের সঙ্গে 3টি কার্বন যুক্ত থাকলে তাকে টারসিয়ারি বা 3° অ্যালকিল হ্যালাইড বলে। 2-ক্লোরো-2-মিথাইলপ্রোপেনে ক্লোরিন যুক্ত কার্বনটির সাথে তিনটি মিথাইল গ্রুপ যুক্ত থাকে।" },
+{ q: "২. ইথিলিডিন ডাইক্লোরাইড হল যেটির একটি উদাহরণ-", opts: ["ভিস্-ডাইহ্যালাইড", "জেম্-ডাইহ্যালাইড", "অ্যালাইলিক ডাইহ্যালাইড", "ভিনাইলিক ডাইহ্যালাইড"], ans: 1, exp: "ব্যাখ্যা: দুটি একই হ্যালোজেন পরমাণু যদি একই কার্বনে অবস্থান করে তবে সাধারণ পদ্ধতিতে তাদের অ্যালকিলিডিন ডাইহ্যালাইড বা জেম্-ডাইহ্যালাইড বলা হয়।" },
+{ q: "৩. নীচের কোন্টি ভিনাইলিক হ্যালাইড?", opts: ["CH₂=CH-CH₂Cl", "CH₃CH₂Cl", "CH₂=CH-Cl", "ClCH₂CH₂CH₃"], ans: 2, exp: "ব্যাখ্যা: ভিনাইলিক হ্যালাইডে হ্যালোজেন পরমাণুটি কার্বন-কার্বন দ্বি-বন্ধনের sp²-সংকরায়িত কার্বন পরমাণুর সঙ্গে সরাসরি যুক্ত থাকে।" },
+{ q: "৪. প্রোপারজিল হ্যালাইডগুলিতে হ্যালোজেন যুক্ত কার্বনের সংকরায়ণ অবস্থা হল-", opts: ["sp²", "sp", "sp³d", "sp³"], ans: 3, exp: "ব্যাখ্যা: প্রোপারজিল হ্যালাইডে হ্যালোজেন পরমাণুর সঙ্গে যুক্ত sp³-সংকরায়িত কার্বন পরমাণুটি একটি কার্বন-কার্বন ত্রি-বন্ধনের সঙ্গে যুক্ত থাকে।" },
+{ q: "৫. নীচের কোন্টি একটি 3° অ্যালাইলিক হ্যালাইড?", opts: ["CH₂=CHCH₂Br", "(CH₃)₂C=CH-CBr(CH₃)₂", "CH₂=CH-CBr(CH₃)₂", "CH₃CH₂C(CH₃)₂Br"], ans: 2, exp: "ব্যাখ্যা: অ্যালাইলিক হ্যালাইডে হ্যালোজেন পরমাণুটি C=C বন্ধনের ঠিক পাশের sp³ কার্বনের সাথে যুক্ত থাকে। গ বিকল্পটিতে এই কার্বনটি আরও তিনটি কার্বনের সাথে যুক্ত থাকায় এটি 3° অ্যালাইলিক হ্যালাইড।" },
+{ q: "৬. নীচের কোন্টি একটি পারহ্যালোহাইড্রোকার্বন?", opts: ["ClCH₂CH₂CHCl₂", "CF₃CF₂CF₃", "C₆H₅Cl", "Br₂CHCH₂CHClCH₂Br"], ans: 1, exp: "ব্যাখ্যা: হাইড্রোকার্বনের সমস্ত হাইড্রোজেন পরমাণু হ্যালোজেন দ্বারা প্রতিস্থাপিত হলে তাকে পারহ্যালোহাইড্রোকার্বন বলা হয়।" },
+{ q: "৭. C₄H₉Br আণবিক সংকেতবিশিষ্ট অ্যালকিল হ্যালাইডের কয়টি সমাবয়বী পাওয়া সম্ভব?", opts: ["3", "5", "4", "2"], ans: 2, exp: "ব্যাখ্যা: C₄H₉Br-এর চারটি সমাবয়বী হলো: 1-ব্রোমোবিউটেন, 2-ব্রোমোবিউটেন, 1-ব্রোমো-2-মিথাইলপ্রোপেন এবং 2-ব্রোমো-2-মিথাইলপ্রোপেন।" },
+{ q: "৮. CH₃F, CH₃Cl, CH₃Br ও CH₃I-এর দ্বি-মেরু ভ্রামকের সঠিক ক্রম-", opts: ["CH₃I > CH₃Cl > CH₃F > CH₃Br", "CH₃F > CH₃Cl > CH₃Br > CH₃I", "CH₃Br > CH₃I > CH₃Cl > CH₃F", "CH₃Cl > CH₃F > CH₃Br > CH₃I"], ans: 3, exp: "ব্যাখ্যা: তড়িৎ-ঋণাত্মকতা F > Cl হলেও C-F বন্ধন-দৈর্ঘ্য C-Cl অপেক্ষা কম হওয়ায় আধান ও দূরত্বের গুণফল (দ্বি-মেরু ভ্রামক) CH₃Cl-এর ক্ষেত্রে CH₃F অপেক্ষা কিছুটা বেশি হয়।" },
+{ q: "৯. বেঞ্জাইলিক হ্যালাইড, প্রোপারজিল হ্যালাইড, ভিনাইলিক হ্যালাইড এবং অ্যারাইল হ্যালাইডে হ্যালোজেন পরমাণুটি যে সকল কার্বনের সঙ্গে যুক্ত তাদের সংকরায়ণ অবস্থা হল যথাক্রমে-", opts: ["sp³, sp, sp² এবং sp²", "sp², sp², sp এবং sp³", "sp³, sp³, sp² এবং sp²", "sp, sp², sp³ এবং sp"], ans: 2, exp: "ব্যাখ্যা: বেঞ্জাইলিক ও প্রোপারজিল হ্যালাইডে হ্যালোজেন sp³ কার্বনে যুক্ত থাকে, কিন্তু ভিনাইলিক ও অ্যারাইল হ্যালাইডে এটি sp² কার্বনে যুক্ত থাকে।" },
+{ q: "১০. C(sp²)-X বন্ধনবিশিষ্ট যৌগগুলি হল যথাক্রমে-", opts: ["বেঞ্জাইলিক এবং ভিনাইলিক হ্যালাইড", "অ্যালকিল হ্যালাইড এবং অ্যারাইল হ্যালাইড", "প্রোপারজিল হ্যালাইড এবং ভিনাইলিক হ্যালাইড", "অ্যারাইল এবং ভিনাইলিক হ্যালাইড"], ans: 3, exp: "ব্যাখ্যা: অ্যারাইল এবং ভিনাইলিক হ্যালাইডে হ্যালোজেন পরমাণুটি কার্বন-কার্বন দ্বি-বন্ধনের sp²-সংকরায়িত কার্বন পরমাণুর সঙ্গে যুক্ত থাকে।" },
+{ q: "১১. নীচের কোন্ মিথাইল হ্যালাইডটির C-X বন্ধন-শক্তি সবচেয়ে কম?", opts: ["CH₃-I", "CH₃-Br", "CH₃-Cl", "CH₃-F"], ans: 0, exp: "ব্যাখ্যা: হ্যালোজেন পরমাণুর আকার বৃদ্ধির সাথে সাথে C-X বন্ধন-দৈর্ঘ্য ক্রমশ বৃদ্ধি পায় এবং বন্ধন-এনথ্যালপি C-F থেকে C-I-তে ক্রমশ হ্রাস পায়।" },
+{ q: "১২. হ্যালোঅ্যালকেনগুলির C-X বন্ধনের প্রকৃতি কী রূপ?", opts: ["আয়নীয়", "ধ্রুবীয় সমযোজী", "অধ্রুবীয় সমযোজী", "অসমযোজী"], ans: 1, exp: "ব্যাখ্যা: হ্যালোজেন কার্বন অপেক্ষা অধিক তড়িৎ-ঋণাত্মক হওয়ায়, C-X বন্ধনটি একটি ধ্রুবীয় সমযোজী বন্ধন যেখানে কার্বনে আংশিক ধনাত্মক এবং হ্যালোজেনে আংশিক ঋণাত্মক চার্জ সৃষ্টি হয়।" },
+{ q: "১৩. নীচের সমাবয়বী অ্যালকিল ব্রোমাইডগুলির স্ফুটনাঙ্ক বৃদ্ধির সঠিক ক্রম হল-", opts: ["(CH₃)₃CBr < (CH₃)₂CHCH₂Br < CH₃CH₂CH₂CH₂Br", "(CH₃)₂CHCH₂Br < (CH₃)₃CBr < CH₃CH₂CH₂CH₂Br", "CH₃CH₂CH₂CH₂Br < (CH₃)₂CHCH₂Br < (CH₃)₃CBr", "(CH₃)₃CBr < CH₃CH₂CH₂CH₂Br < (CH₃)₂CHCH₂Br"], ans: 0, exp: "ব্যাখ্যা: সমাবয়বী অ্যালকিল হ্যালাইডগুলির মধ্যে পার্শ্বশাখার সংখ্যা বৃদ্ধির সঙ্গে স্পর্শতলের ক্ষেত্রফল ও ভ্যান ডার ওয়াল্স আকর্ষণ বল ক্রমশ হ্রাস পায়, ফলে স্ফুটনাঙ্ক হ্রাস পায়।" },
+{ q: "১৪. নীচের কোন্ বিবৃতিটি সঠিক নয়?", opts: ["অ্যারাইল এবং ভিনাইল হ্যালাইডে হ্যালোজেন পরমাণুটি sp²-সংকরায়িত কার্বনের সঙ্গে যুক্ত থাকে", "অ্যালকিল হ্যালাইড, ভিনাইল হ্যালাইড এবং বেঞ্জাইল হ্যালাইডে হ্যালোজেন পরমাণুটি sp²-সংকরায়িত কার্বন পরমাণুর সঙ্গে যুক্ত থাকে", "যে হ্যালাইডে হ্যালোজেন পরমাণুটি C=C বন্ধনের ঠিক পাশের sp³ কার্বনে যুক্ত থাকে তাকে অ্যালাইলিক হ্যালাইড বলা হয়", "যে সকল হ্যালাইডে হ্যালোজেন পরমাণুটি অ্যারোমেটিক বলয়ের সঙ্গে সরাসরি যুক্ত কার্বনের সঙ্গে যুক্ত থাকে তাদের বেঞ্জাইলিক হ্যালাইড বলা হয়"], ans: 1, exp: "ব্যাখ্যা: অ্যালকিল হ্যালাইড ও বেঞ্জাইলিক হ্যালাইডে হ্যালোজেন sp³-সংকরায়িত কার্বনে যুক্ত থাকে, sp² তে নয়।" },
+{ q: "১৫. ফিংকেলস্টেইন (Finkelstein) বিক্রিয়ার মাধ্যমে কোন্ হ্যালাইড প্রস্তুত করা হয়?", opts: ["অ্যালকিল ফ্লুরাইড", "অ্যালকিল ক্লোরাইড", "অ্যালকিল আয়োডাইড", "অ্যারাইল ব্রোমাইড"], ans: 2, exp: "ব্যাখ্যা: ক্লোরো বা ব্রোমোঅ্যালকেনকে অ্যাসিটোনে দ্রবীভূত NaI-এর গাঢ় দ্রবণসহ উত্তপ্ত করে অ্যালকিল আয়োডাইড প্রস্তুত করা হয়। এটি ফিংকেলস্টেইন বিক্রিয়া নামে পরিচিত।" }
+]
+},
+2: {
+name: 'Set 2', icon: '🧪', topic: 'হ্যালোঅ্যালকেনের প্রস্তুতি (Preparation of Haloalkanes)',
+questions: [
+{ q: "১. অ্যালকোহল থেকে ক্লোরোঅ্যালকেন প্রস্তুতির উৎকৃষ্ট বিকারক হল-", opts: ["SOCl₂/ পিরিডিন", "PCl₃", "HCl/ZnCl₂", "PCl₅"], ans: 0, exp: "ব্যাখ্যা: থায়োনিল ক্লোরাইডের (SOCl₂) ব্যবহার সবচেয়ে সুবিধাজনক কারণ এক্ষেত্রে অন্য বিক্রিয়াজাত পদার্থগুলি (SO₂ ও HCl) গ্যাসীয় হওয়ায় বিক্রিয়া-মিশ্রণ থেকে সহজেই অপসারিত হয় এবং বিশুদ্ধ অ্যালকিল ক্লোরাইড পাওয়া যায়।" },
+{ q: "২. কোন্ অ্যালকোহলটির সঙ্গে HCl/অনার্দ্র ZnCl₂-এর বিক্রিয়ায় পুনর্বিন্যাস ঘটে এবং একাধিক অ্যালকিল ক্লোরাইড গঠিত হয়?", opts: ["(CH₃)₃CCH₂OH", "CH₃CH₂CH₂OH", "(CH₃)₃CC(CH₃)₂OH", "CH₃CH₂OH"], ans: 0, exp: "ব্যাখ্যা: নিওপেন্টাইল অ্যালকোহল স্টেরিক হিনড্রেন্সের কারণে SN2 বিক্রিয়া দেয় না। এটি SN1 পথে অগ্রসর হওয়ার সময় উৎপন্ন 1° কার্বোক্যাটায়নটি পুনর্বিন্যাসিত হয়ে অধিক স্থিতিশীল 3° কার্বোক্যাটায়নে পরিণত হয়।" },
+{ q: "৩. অ্যালকেনের হ্যালোজেনেশন বিক্রিয়ায় বিভিন্ন প্রকার হাইড্রোজেনের সক্রিয়তার ক্রম-", opts: ["3° H > 1° H > 2° H", "1° H > 2° H > 3° H", "3° H > 2° H > 1° H", "2° H > 3° H > 1° H"], ans: 2, exp: "ব্যাখ্যা: অ্যালকেনের হ্যালোজেনেশন মুক্ত-মূলক গঠনের মাধ্যমে ঘটে। মুক্ত-মূলকগুলির স্থিতিশীলতার ক্রম 3° > 2° > 1° হওয়ায় হাইড্রোজেনের সক্রিয়তার ক্রমও একই হয়।" },
+{ q: "৪. নীচের কোন্ বিক্রিয়ায় মিথাইল ব্রোমাইড (CH₃Br) পাওয়া যায় না?", opts: ["CH₃COOAg + Br₂", "CH₃OH + HBr", "CH₃OH + PBr₃", "CH₃OH + Br₂"], ans: 3, exp: "ব্যাখ্যা: অ্যালকোহলের সাথে হ্যালোজেনের সরাসরি বিক্রিয়ায় অ্যালকিল হ্যালাইড পাওয়া যায় না। হ্যালোজেন অ্যাসিড বা ফসফরাস হ্যালাইড ব্যবহার করতে হয়।" },
+{ q: "৫. আলোকের উপস্থিতিতে নীচের কোন্ যৌগটির ক্লোরিনেশনের ফলে একটিমাত্র ক্লোরোঅ্যালকেন উৎপন্ন হয়?", opts: ["CH₃CH₂CH₂CH₃", "নিওপেন্টেন বা 2,2-ডাইমিথাইলপ্রোপেন", "আইসোপেন্টেন", "আইসোবিউটেন"], ans: 1, exp: "ব্যাখ্যা: নিওপেন্টেনের সমস্ত ১২টি হাইড্রোজেন পরমাণু সমতুল্য। তাই এর ক্লোরিনেশনে শুধুমাত্র এক প্রকারেরই মনোক্লোরোঅ্যালকেন তৈরি হয়।" },
+{ q: "৬. নীচের বিকারকগুলির মধ্যে কোন্টি অ্যালাইলিক ব্রোমিনেশন সংঘটিত করে?", opts: ["HBr/H₂O₂", "NBS", "HOBr", "Br₂/CS₂"], ans: 1, exp: "ব্যাখ্যা: N-ব্রোমোসাক্সিনামাইড (NBS) আলো বা পারক্সাইডের উপস্থিতিতে অ্যালকিনের অ্যালাইলিক অবস্থানে ব্রোমিনেশন ঘটায়।" },
+{ q: "৭. পারক্সাইডের উপস্থিতিতে প্রোপিনের সঙ্গে HCl-এর বিক্রিয়ায় উৎপন্ন অন্তর্বর্তী পদার্থটি হল-", opts: ["CH₃C.HCH₂Cl", "CH₃CH₂C.H₂", "CH₃C.HCH₃", "পারক্সাইড প্রভাবে HCl এর সংযোজন ঘটে না"], ans: 3, exp: "ব্যাখ্যা: পারক্সাইড প্রভাব বা খারাস প্রভাব (Kharasch effect) কেবলমাত্র HBr-এর ক্ষেত্রেই দেখা যায়, HCl বা HI-এর ক্ষেত্রে ঘটে না।" },
+{ q: "৮. ফুটন্ত টলুইনের মধ্যে অতিরিক্ত Cl₂ গ্যাস চালনা করলে উৎপন্ন হয়-", opts: ["C₆H₅CH₂Cl", "C₆H₅CHCl₂", "C₆H₅CCl₃", "p-ক্লোরোটলুইন"], ans: 2, exp: "ব্যাখ্যা: সূর্যালোকের উপস্থিতিতে বা ফুটন্ত অবস্থায় টলুইনে অতিরিক্ত ক্লোরিন গ্যাস চালনা করলে বেঞ্জাইলিক কার্বনের তিনটি হাইড্রোজেনই পর্যায়ক্রমে ক্লোরিন দ্বারা প্রতিস্থাপিত হয়ে বেঞ্জোট্রাইক্লোরাইড (C₆H₅CCl₃) উৎপন্ন করে।" },
+{ q: "৯. অ্যালকেনের সঙ্গে হ্যালোজেনের বিক্রিয়ায় গতির সঠিক ক্রম হল-", opts: ["Cl₂ > F₂ > Br₂ > I₂", "Br₂ > Cl₂ > F₂ > I₂", "I₂ > Br₂ > Cl₂ > F₂", "F₂ > Cl₂ > Br₂ > I₂"], ans: 3, exp: "ব্যাখ্যা: অ্যালকেনের ফ্লুরিনেশন অত্যন্ত তীব্র ও তাপমোচী, যেখানে আয়োডিনেশন অত্যন্ত ধীর ও তাপগ্রাহী। তাই বিক্রিয়ার গতির ক্রম F₂ > Cl₂ > Br₂ > I₂।" },
+{ q: "১০. হান্সডিকার (Hunsdiecker) বিক্রিয়ায় কার্বক্সিলিক অ্যাসিডের সিলভার লবণের সাথে কার বিক্রিয়া ঘটানো হয়?", opts: ["Cl₂ / CCl₄", "Br₂ / CCl₄", "I₂ / CCl₄", "HCl"], ans: 1, exp: "ব্যাখ্যা: কার্বক্সিলিক অ্যাসিডের সিলভার-ঘটিত লবণের সঙ্গে ব্রোমিনের CCl₄ দ্রবণের বিক্রিয়ায় ব্রোমোঅ্যালকেন উৎপন্ন হয়। একে হান্সডিকার বিক্রিয়া বলে।" },
+{ q: "১১. অ্যালকোহলের সঙ্গে KI এবং H₂SO₄-এর বিক্রিয়া ঘটিয়ে অ্যালকিল আয়োডাইড প্রস্তুত করা যায় না কারণ-", opts: ["H₂SO₄ একটি দুর্বল অ্যাসিড", "গাঢ় H₂SO₄ তীব্র জারক হওয়ায় উৎপন্ন HI-কে I₂-তে জারিত করে", "অ্যালকোহল বিয়োজিত হয়ে যায়", "KI একটি দুর্বল বিকারক"], ans: 1, exp: "ব্যাখ্যা: এই বিক্রিয়ায় HI উৎপন্ন হয়, যাকে গাঢ় H₂SO₄ জারক হওয়ায় জারিত করে আয়োডিনে (I₂) পরিণত করে।" },
+{ q: "১২. প্রোপিনের সাথে HBr-এর বিক্রিয়ায় (পারক্সাইডের অনুপস্থিতিতে) প্রধান বিক্রিয়াজাত পদার্থ কোনটি?", opts: ["1-ব্রোমোপ্রোপেন", "2-ব্রোমোপ্রোপেন", "3-ব্রোমোপ্রোপিন", "1,2-ডাইব্রোমোপ্রোপেন"], ans: 1, exp: "ব্যাখ্যা: অপ্রতিসম অ্যালকিনের সঙ্গে হ্যালোজেন অ্যাসিডের বিক্রিয়া মারকনিকফ্ নিয়মানুযায়ী ঘটে, তাই ব্রোমিন অপেক্ষাকৃত কম হাইড্রোজেন যুক্ত কার্বনে যুক্ত হয়ে 2-ব্রোমোপ্রোপেন গঠন করে।" },
+{ q: "১৩. হ্যালোজেন অ্যাসিডগুলির বিক্রিয়ায় অ্যালকোহলের সক্রিয়তার ক্রম হল-", opts: ["1° > 2° > 3°", "2° > 1° > 3°", "3° > 2° > 1°", "3° > 1° > 2°"], ans: 2, exp: "ব্যাখ্যা: বিক্রিয়াটি কার্বোক্যাটায়ন গঠনের মাধ্যমে (SN1) ঘটে। 3° কার্বোক্যাটায়ন সর্বাধিক স্থিতিশীল হওয়ায় 3° অ্যালকোহলের সক্রিয়তা সবচেয়ে বেশি।" },
+{ q: "১৪. অ্যালকিল ফ্লুরাইড প্রস্তুতির সবচেয়ে ভালো পদ্ধতি হল-", opts: ["হান্সডিকার বিক্রিয়া", "সোয়ার্টস বিক্রিয়া", "ফিংকেলস্টেইন বিক্রিয়া", "উর্জ বিক্রিয়া"], ans: 1, exp: "ব্যাখ্যা: অ্যালকিল ক্লোরাইড বা ব্রোমাইডকে AgF, Hg₂F₂ বা CoF₃-এর উপস্থিতিতে উত্তপ্ত করে অ্যালকিল ফ্লুরাইড প্রস্তুত করা হয়। এটি সোয়ার্টস বিক্রিয়া (Swarts reaction) নামে পরিচিত।" },
+{ q: "১৫. মুক্ত-মূলক ব্রোমিনেশনের গতির সঠিক ক্রম হল-", opts: ["R₃CH > R₂CH₂ > RCH₃", "R₂CH₂ > R₃CH > RCH₃", "RCH₃ > R₃CH > R₂CH₂", "R₃CH > RCH₃ > R₂CH₂"], ans: 0, exp: "ব্যাখ্যা: ব্রোমিনেশন মুক্ত-মূলক মেকানিজমের মাধ্যমে ঘটে। 3° মুক্ত-মূলক সর্বাধিক স্থিতিশীল হওয়ায় 3° C-H বন্ধনের ব্রোমিনেশনের গতি সবচেয়ে বেশি।" }
+]
+},
+3: {
+name: 'Set 3', icon: '🔬', topic: 'নিউক্লিওফিলিক প্রতিস্থাপন বিক্রিয়া (SN1 এবং SN2)',
+questions: [
+{ q: "১. পোলার প্রোটিক দ্রাবকে কোন্ হ্যালাইড আয়নটি সবচেয়ে শক্তিশালী নিউক্লিওফাইল?", opts: ["F⁻", "Cl⁻", "Br⁻", "I⁻"], ans: 3, exp: "ব্যাখ্যা: পোলার প্রোটিক দ্রাবকে ছোট আকারের অ্যানায়নগুলি হাইড্রোজেন বন্ধনের মাধ্যমে অত্যধিক দ্রাবকায়িত হয়ে পড়ে, তাই বড় আকারের I⁻-এর নিউক্লিওফিলিসিটি সর্বাধিক হয়।" },
+{ q: "২. নীচের কোল্টি SN1 বিক্রিয়ার জন্য সবচেয়ে উপযুক্ত সাবস্ট্রেট?", opts: ["CH₃-Cl", "(CH₃)₃CCl", "(CH₃)₂CHCl", "CH₃CH₂Cl"], ans: 1, exp: "ব্যাখ্যা: SN1 বিক্রিয়া কার্বোক্যাটায়ন গঠনের মাধ্যমে ঘটে। টারসিয়ারি বিউটাইল ক্লোরাইড থেকে সৃষ্ট 3° কার্বোক্যাটায়ন সর্বাধিক স্থিতিশীল হওয়ায় এটি SN1 বিক্রিয়ার জন্য সবচেয়ে উপযুক্ত।" },
+{ q: "৩. নীচের কোন্ অ্যালকিল আয়োডাইডটি SN2 বিক্রিয়ার জন্য সর্বাধিক কার্যকরী?", opts: ["(CH₃)₃CI", "CH₃CH₂I", "(CH₃)₃CCH₂I", "CH₃I"], ans: 3, exp: "ব্যাখ্যা: SN2 বিক্রিয়ায় স্টেরিক হিনড্রেন্স কম হলে বিক্রিয়া দ্রুত হয়। মিথাইল হ্যালাইডে স্টেরিক বাধা সবচেয়ে কম হওয়ায় এটি SN2 বিক্রিয়ায় সর্বাধিক সক্রিয়।" },
+{ q: "৪. নীচের বিক্রিয়াটি প্রদত্ত দ্রাবকগুলির মধ্যে কোন্টিতে সবচেয়ে দ্রুত ঘটবে? R-Br + NaCN → R-CN + NaBr", opts: ["ইথানল", "মিথানল", "N,N-ডাইমিথাইলফর্মামাইড (DMF)", "জল"], ans: 2, exp: "ব্যাখ্যা: এটি একটি SN2 বিক্রিয়া। পোলার অ্যাপ্রোটিক দ্রাবক (যেমন DMF, DMSO) SN2 বিক্রিয়ার পক্ষে অত্যন্ত অনুকূল কারণ এরা অ্যানায়নকে মুক্ত রেখে তার নিউক্লিওফিলিক শক্তি বৃদ্ধি করে।" },
+{ q: "৫. নীচের ক্লোরাইডগুলির SN2 সক্রিয়তার সঠিক ক্রম হল-", opts: ["CH₃Cl > CH₃CH₂Cl > (CH₃)₂CHCl > (CH₃)₃CCl", "(CH₃)₃CCl > (CH₃)₂CHCl > CH₃CH₂Cl > CH₃Cl", "CH₃CH₂Cl > CH₃Cl > (CH₃)₂CHCl > (CH₃)₃CCl", "(CH₃)₂CHCl > CH₃CH₂Cl > CH₃Cl > (CH₃)₃CCl"], ans: 0, exp: "ব্যাখ্যা: SN2 বিক্রিয়ার ক্ষেত্রে সাবস্ট্রেটে অ্যালকিল গ্রুপের সংখ্যা বৃদ্ধির সাথে সাথে স্টেরিক হিনড্রেন্স বাড়ে, ফলে সক্রিয়তা হ্রাস পায়।" },
+{ q: "৬. নীচের কোন্ আয়নটি নিউক্লিওফাইল হিসেবে নিকৃষ্ট?", opts: ["CH₃CH₂O⁻", "CH₃O⁻", "(CH₃)₃C-O⁻", "CD₃O⁻"], ans: 2, exp: "ব্যাখ্যা: টারসিয়ারি বিউটক্সাইড আয়নের আকার অনেক বড় হওয়ায় তীব্র স্টেরিক হিনড্রেন্স দেখা যায়। তাই শক্তিশালী ক্ষারক হওয়া সত্ত্বেও এটি একটি অত্যন্ত দুর্বল বা নিকৃষ্ট নিউক্লিওফাইল।" },
+{ q: "৭. SN2 বিক্রিয়া-সংক্রান্ত সঠিক তথ্য কোনটি?", opts: ["২ টি ট্রানজিশন স্টেট এবং ১ টি অন্তর্বর্তী পদার্থ", "১ টি ট্রানজিশন স্টেট এবং ১ টি অন্তর্বর্তী পদার্থ", "১ টি ট্রানজিশন স্টেট এবং কোনো অন্তর্বর্তী পদার্থ নেই", "কোনো ট্রানজিশন স্টেট নেই এবং ১ টি অন্তর্বর্তী পদার্থ"], ans: 2, exp: "ব্যাখ্যা: SN2 বিক্রিয়া একটিমাত্র ধাপে ঘটে। লিভিং গ্রুপের অপসারণ ও নিউক্লিওফাইলের সংযুক্তি একইসাথে একটি ট্রানজিশন স্টেটের মাধ্যমে ঘটে, কোনো অন্তর্বর্তী কার্বোক্যাটায়ন তৈরি হয় না।" },
+{ q: "৮. SN1 বিক্রিয়া-সংক্রান্ত সঠিক তথ্য কোনটি?", opts: ["১ টি ট্রানজিশন স্টেট এবং কোনো অন্তর্বর্তী পদার্থ নেই", "২ টি ট্রানজিশন স্টেট এবং ১ টি অন্তর্বর্তী পদার্থ", "১ টি ট্রানজিশন স্টেট এবং ১ টি অন্তর্বর্তী পদার্থ", "কোনো ট্রানজিশন স্টেট নেই এবং ১ টি অন্তর্বর্তী পদার্থ"], ans: 1, exp: "ব্যাখ্যা: SN1 বিক্রিয়া দুটি ধাপে ঘটে। প্রথম ধাপে কার্বোক্যাটায়ন তৈরি হয় এবং দ্বিতীয় ধাপে নিউক্লিওফাইল যুক্ত হয়। ফলে শক্তি চিত্রে দুটি ট্রানজিশন স্টেট দেখা যায়।" },
+{ q: "৯. নীচের কোন্টি একটি অ্যাম্বিডেন্ট (ambident) নিউক্লিওফাইল?", opts: ["OH⁻", "CH₃O⁻", "CN⁻", "NH₃"], ans: 2, exp: "ব্যাখ্যা: যেসব নিউক্লিওফাইলে অন্ততপক্ষে দুটি নিউক্লিওফিলিক কেন্দ্র (যেমন CN⁻-এ C এবং N উভয়ই) বর্তমান, তাদের অ্যাম্বিডেন্ট নিউক্লিওফাইল বলে।" },
+{ q: "১০. কাইরাল সাবস্ট্রেটের ক্ষেত্রে SN2 বিক্রিয়ায় কী ঘটে?", opts: ["100% রিটেনশন অব্ কনফিগারেশন", "রেসিমাইজেশন", "ইনভারশন অব্ কনফিগারেশন", "কোনোটিই নয়"], ans: 2, exp: "ব্যাখ্যা: SN2 বিক্রিয়ায় নিউক্লিওফাইল লিভিং গ্রুপের ঠিক বিপরীত দিক থেকে আক্রমণ করে (backside attack), যার ফলে অণুর ত্রিমাত্রিক বিন্যাস সম্পূর্ণ উল্টে যায় বা ইনভারশন অব্ কনফিগারেশন ঘটে।" },
+{ q: "১১. নীচের কোন্ যৌগটির আর্দ্রবিশ্লেষণ SN1 পদ্ধতিতে সহজসাধ্য?", opts: ["ক্লোরোবেঞ্জিন", "আইসোপ্রোপাইল ক্লোরাইড", "বেঞ্জাইল ক্লোরাইড", "ইথাইল ক্লোরাইড"], ans: 2, exp: "ব্যাখ্যা: বেঞ্জাইল ক্লোরাইডের C-Cl বন্ধন ভাঙলে যে বেঞ্জাইল ক্যাটায়ন তৈরি হয়, তা রেজোনেন্সের মাধ্যমে প্রচুর স্থিতিশীলতা লাভ করে। তাই এটি SN1 পদ্ধতিতে দ্রুত আর্দ্রবিশ্লেষিত হয়।" },
+{ q: "১২. লিভিং গ্রুপ হিসেবে সবচেয়ে কার্যকরী বা উৎকৃষ্ট কোনটি?", opts: ["p-CH₃C₆H₄SO₃⁻ (Tosylate)", "Cl⁻", "OH⁻", "CH₃O⁻"], ans: 0, exp: "ব্যাখ্যা: টসাইলেট (Tosylate) বা ট্রিফলেট (Triflate) আয়নগুলো রেজোনেন্সের মাধ্যমে প্রচুর স্থিতিশীলতা লাভ করে। এরা অত্যন্ত দুর্বল ক্ষারক, তাই এরা সেরা লিভিং গ্রুপ।" },
+{ q: "১৩. একটি কাইরাল সাবস্ট্রেটের SN1 বিক্রিয়ায় প্রধানত কোনটি ঘটে?", opts: ["100% রিটেনশন", "100% ইনভারশন", "রেসিমাইজেশন", "কোনো পরিবর্তন হয় না"], ans: 2, exp: "ব্যাখ্যা: SN1 বিক্রিয়ার প্রথম ধাপে উৎপন্ন সমতলীয় কার্বোক্যাটায়নের দুই দিক থেকেই নিউক্লিওফাইল আক্রমণ করতে পারে। ফলে ইনভারশন ও রিটেনশন উভয়ই ঘটে এবং রেসিমিক মিশ্রণ তৈরি হয়।" },
+{ q: "১৪. নীচের যৌগগুলির মধ্যে কোন্টি SN1 এবং SN2 উভয় প্রকার বিক্রিয়াতেই নিষ্ক্রিয় থাকে?", opts: ["C₆H₅CH₂Cl", "(CH₃)₃C-Cl", "ক্লোরোবেঞ্জিন (C₆H₅Cl)", "CH₃CH₂Cl"], ans: 2, exp: "ব্যাখ্যা: ক্লোরোবেঞ্জিনে C-Cl বন্ধনটি রেজোনেন্সের কারণে আংশিক দ্বি-বন্ধন চরিত্র লাভ করায় অত্যন্ত শক্তিশালী হয়। এছাড়াও বেঞ্জিন বলয়ের ইলেকট্রন মেঘের বিকর্ষণে SN2 আক্রমণ ঘটে না এবং ফিনাইল ক্যাটায়ন অস্থিতিশীল হওয়ায় SN1 ও ঘটে না।" },
+{ q: "১৫. পোলার অ্যাপ্রোটিক দ্রাবকে হ্যালাইড আয়নগুলির নিউক্লিওফিলিসিটির সঠিক ক্রম হল-", opts: ["I⁻ > Br⁻ > Cl⁻ > F⁻", "F⁻ > Cl⁻ > Br⁻ > I⁻", "Cl⁻ > I⁻ > Br⁻ > F⁻", "Br⁻ > F⁻ > Cl⁻ > I⁻"], ans: 1, exp: "ব্যাখ্যা: পোলার অ্যাপ্রোটিক দ্রাবকে অ্যানায়নগুলির দ্রাবকায়ন হয় না। ফলে ছোট আকারের F⁻ আয়নে ইলেকট্রন ঘনত্ব খুব বেশি থাকে এবং এটি সবচেয়ে শক্তিশালী নিউক্লিওফাইল হিসেবে কাজ করে।" }
+]
+},
+4: {
+name: 'Set 4', icon: '⚙️', topic: 'অপনয়ন বিক্রিয়া এবং ধাতুর সঙ্গে বিক্রিয়া (Elimination & Organometallics)',
+questions: [
+{ q: "১. CH₃CH₂Cl, CH₃CHClCH₃ এবং (CH₃)₃CCl-এর ডিহাইড্রোক্লোরিনেশন (E2)-এর সঠিক ক্রম হল-", opts: ["CH₃CH₂Cl > CH₃CHClCH₃ > (CH₃)₃CCl", "(CH₃)₃CCl > CH₃CHClCH₃ > CH₃CH₂Cl", "CH₃CHClCH₃ > (CH₃)₃CCl > CH₃CH₂Cl", "(CH₃)₃CCl > CH₃CH₂Cl > CH₃CHClCH₃"], ans: 1, exp: "ব্যাখ্যা: E2 অপনয়ন বিক্রিয়ায় অধিক প্রতিস্থাপিত অ্যালকিন তৈরি সহজতর হয় (সেটজেফ নিয়ম)। টারসিয়ারি হ্যালাইড থেকে সবচেয়ে বেশি প্রতিস্থাপিত অ্যালকিন উৎপন্ন হয়, তাই এর E2 বিক্রিয়ার হার সর্বাধিক।" },
+{ q: "২. নীচের কোন্ ক্ষারকটি E2 বিক্রিয়ার পক্ষে সবচেয়ে কার্যকরী?", opts: ["CH₃O⁻", "CH₃CH₂O⁻", "(CH₃)₂CH-O⁻", "(CH₃)₃C-O⁻"], ans: 3, exp: "ব্যাখ্যা: টারসিয়ারি বিউটক্সাইড আয়নটি আকারে খুব বড়ো হওয়ায় এটি নিউক্লিওফাইল হিসেবে কাজ করতে পারে না, কিন্তু একটি শক্তিশালী ক্ষারক হিসেবে সহজেই E2 অপনয়ন ঘটায়।" },
+{ q: "৩. CH₃I + C₂H₅I + 2Na → (শুষ্ক ইথার) বিক্রিয়ায় উৎপন্ন পদার্থগুলি হল-", opts: ["CH₃CH₃ এবং CH₃(CH₂)₂CH₃", "CH₃CH₃, CH₃(CH₂)₂CH₃ এবং CH₃CH₂CH₃", "CH₃(CH₂)₂CH₃ এবং CH₃CH₂CH₃", "CH₃CH₃ এবং CH₃CH₂CH₃"], ans: 1, exp: "ব্যাখ্যা: এটি উর্জ বিক্রিয়া (Wurtz reaction)। দুটি ভিন্ন অ্যালকিল হ্যালাইড ব্যবহার করলে তিন ধরনের অ্যালকেন (ইথেন, প্রোপেন এবং বিউটেন)-এর মিশ্রণ উৎপন্ন হয়।" },
+{ q: "৪. নীচের কোন্টি জৈব-ধাতব (Organometallic) যৌগ নয়?", opts: ["CH₃-MgBr", "Pb(C₂H₅)₄", "Mg(OC₂H₅)₂", "CH₃CH₂CH₂CH₂Li"], ans: 2, exp: "ব্যাখ্যা: যেসব যৌগে কার্বন পরমাণু সরাসরি কোনো ধাতব পরমাণুর সঙ্গে যুক্ত থাকে, তাদের জৈব-ধাতব যৌগ বলে। Mg(OC₂H₅)₂-তে কার্বন সরাসরি Mg-এর সাথে যুক্ত নয়।" },
+{ q: "৫. ইথাইল ব্রোমাইডকে অ্যালকোহলীয় KOH সহযোগে উত্তপ্ত করলে কী উৎপন্ন হয়?", opts: ["ইথানল", "ইথেন", "ইথিলিন", "ইথাইন"], ans: 2, exp: "ব্যাখ্যা: অ্যালকিল হ্যালাইডকে পটাশিয়াম হাইড্রক্সাইডের গাঢ় অ্যালকোহলীয় দ্রবণ সহযোগে উত্তপ্ত করলে ডিহাইড্রোহ্যালোজেনেশন (E2 অপনয়ন) ঘটে এবং অ্যালকিন (ইথিলিন) উৎপন্ন হয়।" },
+{ q: "৬. টারসিয়ারি অ্যালকিল হ্যালাইডগুলি শক্তিশালী ক্ষারকের উপস্থিতিতে SN2 বিক্রিয়া না করে প্রধানত কোন্ বিক্রিয়া করে?", opts: ["SN1", "E1", "E2", "ফ্রি র‍্যাডিকেল প্রতিস্থাপন"], ans: 2, exp: "ব্যাখ্যা: টারসিয়ারি অ্যালকিল হ্যালাইডে তীব্র স্টেরিক বাধার কারণে SN2 বিক্রিয়া ঘটে না। শক্তিশালী ক্ষারকের উপস্থিতিতে এরা E2 মেকানিজমের মাধ্যমে হাইড্রোজেন হ্যালাইড অপসারণ করে অ্যালকিন গঠন করে।" },
+{ q: "৭. অ্যালকিল হ্যালাইডের ডিহাইড্রোহ্যালোজেনেশনে অধিক প্রতিস্থাপিত অ্যালকিন মুখ্য বিক্রিয়াজাত পদার্থ হিসেবে উৎপন্ন হওয়ার নিয়মকে কী বলে?", opts: ["হফম্যান নিয়ম", "মারকনিকফ নিয়ম", "খারাস প্রভাব", "সেটজেফ (Saytzeff) নিয়ম"], ans: 3, exp: "ব্যাখ্যা: সেটজেফ নিয়মানুযায়ী ডিহাইড্রোহ্যালোজেনেশনের ফলে সেই অ্যালকিনটিই মুখ্য পদার্থ হিসেবে উৎপন্ন হয়, যাতে দ্বি-বন্ধনে আবদ্ধ কার্বন পরমাণু দুটির সাথে অধিক সংখ্যক অ্যালকিল গ্রুপ যুক্ত থাকে।" },
+{ q: "৮. হফম্যান অপনয়ন কখন প্রধান বিক্রিয়া হয়?", opts: ["যখন শক্তিশালী নিউক্লিওফাইল ব্যবহৃত হয়", "যখন লিভিং গ্রুপটি নিকৃষ্ট (যেমন F⁻) হয় বা ক্ষারকটি আকারে খুব বড়ো হয়", "যখন পোলার প্রোটিক দ্রাবক ব্যবহৃত হয়", "যখন টারসিয়ারি হ্যালাইড জলীয় KOH এর সাথে বিক্রিয়া করে"], ans: 1, exp: "ব্যাখ্যা: লিভিং গ্রুপ খারাপ হলে বা ক্ষারক আকারে বড়ো হলে কম প্রতিস্থাপিত অ্যালকিনটি মুখ্য পদার্থ হিসেবে উৎপন্ন হয়, একে হফম্যান অপনয়ন বলে।" },
+{ q: "৯. C₂H₅Cl-এর সঙ্গে AgCN-এর বিক্রিয়ায় প্রধানত কী উৎপন্ন হয়?", opts: ["ইথাইল সায়ানাইড", "প্রোপেননাইট্রাইল", "ইথাইল আইসোসায়ানাইড", "ইথাইল অ্যামিন"], ans: 2, exp: "ব্যাখ্যা: AgCN একটি সমযোজী যৌগ, তাই নাইট্রোজেনের নিঃসঙ্গ ইলেকট্রন জোড় দিয়ে নিউক্লিওফিলিক আক্রমণ ঘটে এবং আইসোসায়ানাইড (R-NC) উৎপন্ন হয়।" },
+{ q: "১০. C₂H₅Br-এর সঙ্গে KNO₂-এর বিক্রিয়ায় কী উৎপন্ন হয়?", opts: ["নাইট্রোইথেন", "ইথাইল নাইট্রাইট", "ইথাইল অ্যামিন", "ইথেন"], ans: 0, exp: "ব্যাখ্যা: হ্যালোঅ্যালকেনের সঙ্গে পটাশিয়াম নাইট্রাইটের (KNO₂) বিক্রিয়ায় নাইট্রোঅ্যালকেন (নাইট্রোইথেন) উৎপন্ন হয়।" },
+{ q: "১১. ফিংকেলস্টেইন (Finkelstein) বিক্রিয়ায় বিকারক হিসেবে কী ব্যবহৃত হয়?", opts: ["জলে দ্রবীভূত NaCl", "ইথানলে দ্রবীভূত KF", "অ্যাসিটোনে দ্রবীভূত NaI", "CCl₄-এ দ্রবীভূত Br₂"], ans: 2, exp: "ব্যাখ্যা: ক্লোরো বা ব্রোমোঅ্যালকেনকে অ্যাসিটোনে দ্রবীভূত NaI-এর গাঢ় দ্রবণসহ উত্তপ্ত করে আয়োডোঅ্যালকেন প্রস্তুত করা হয়।" },
+{ q: "১২. 2-ব্রোমোবিউটেনের সঙ্গে অ্যালকোহলীয় KOH-এর বিক্রিয়ায় (ডিহাইড্রোব্রোমিনেশন) মুখ্য বিক্রিয়াজাত পদার্থ কোনটি?", opts: ["1-বিউটিন", "2-বিউটিন", "1-বিউটানল", "2-বিউটানল"], ans: 1, exp: "ব্যাখ্যা: সেটজেফ নিয়ম অনুযায়ী অধিক প্রতিস্থাপিত অ্যালকিন 2-বিউটিন মুখ্য বিক্রিয়াজাত পদার্থ হিসেবে উৎপন্ন হয়।" },
+{ q: "১৩. নীচের কোন্ বিকারক ব্যবহার করে CH₃CH₂Br থেকে CH₃CH₃ প্রস্তুত করা যায় না?", opts: ["H₂/Ni বা Pd", "HI / লাল P", "Zn-Cu/C₂H₅OH", "AgCN"], ans: 3, exp: "ব্যাখ্যা: AgCN নিউক্লিওফিলিক প্রতিস্থাপন ঘটিয়ে ইথাইল আইসোসায়ানাইড তৈরি করে, এটি অ্যালকেনে বিজারিত করে না।" },
+{ q: "১৪. লেড (Pb)-এর সঙ্গে ইথাইল ক্লোরাইডের বিক্রিয়ায় উৎপন্ন অ্যান্টি-নক্ যৌগটি কী?", opts: ["ডাইইথাইল লেড", "টেট্রাইথাইললেড (TEL)", "ইথাইল ম্যাগনেশিয়াম ব্রোমাইড", "লেড অ্যাসিটেট"], ans: 1, exp: "ব্যাখ্যা: ইথাইল ক্লোরাইড ও লেড-সোডিয়াম ধাতুসংকরের বিক্রিয়ায় টেট্রাইথাইললেড বা TEL উৎপন্ন হয়, যা একসময় পেট্রোলের অ্যান্টি-নক্ যৌগ হিসেবে ব্যবহৃত হত।" },
+{ q: "১৫. গ্রিগনার্ড বিকারক (RMgX) রাসায়নিক বিক্রিয়ায় কী হিসেবে আচরণ করতে পারে?", opts: ["শুধুমাত্র ইলেকট্রোফাইল", "শুধুমাত্র লিভিং গ্রুপ", "নিউক্লিওফাইল এবং ক্ষারক উভয়ই", "বিজারক"], ans: 2, exp: "ব্যাখ্যা: গ্রিগনার্ড বিকারকের অ্যালকিল গ্রুপ কার্ব-অ্যানায়নের মতো কাজ করে, তাই এটি কার্বনিল যৌগের সাথে বিক্রিয়ায় নিউক্লিওফাইল এবং আম্লিক হাইড্রোজেনের সাথে বিক্রিয়ায় শক্তিশালী ক্ষারক হিসেবে আচরণ করে।" }
+]
+},
+5: {
+name: 'Set 5', icon: '🧪', topic: 'হ্যালোঅ্যারিন ও পলিহ্যালোজেন যৌগ (Haloarenes & Polyhalogens)',
+questions: [
+{ q: "১. অ্যারোমেটিক বলয়ের হ্যালোজেনেশনের ক্ষেত্রে কোন্টি সঠিক নয়?", opts: ["লুইস অ্যাসিডের উপস্থিতিতে বেঞ্জিনের ক্লোরিনেশন ও ব্রোমিনেশন ঘটানো হয়", "বেঞ্জিনের হ্যালোজেনেশন একটি নিউক্লিওফিলিক প্রতিস্থাপন বিক্রিয়া", "অ্যারোমেটিক বলয়ের সরাসরি ফ্লুরিনেশন ঘটিয়ে ফ্লুরোঅ্যারিন প্রস্তুত করা যায় না", "আয়োডিনেশনের সময় তীব্র জারক পদার্থ ব্যবহার করতে হয়"], ans: 1, exp: "ব্যাখ্যা: বেঞ্জিনের হ্যালোজেনেশন আসলে একটি অ্যারোমেটিক ইলেকট্রোফিলিক প্রতিস্থাপন বিক্রিয়া, নিউক্লিওফিলিক নয়।" },
+{ q: "২. সদ্য প্রস্তুত ডায়াজোনিয়াম লবণের সঙ্গে CuCl/HCl এর বিক্রিয়া ঘটিয়ে ক্লোরোবেঞ্জিন প্রস্তুত করার পদ্ধতিকে কী বলে?", opts: ["ফিটিগ বিক্রিয়া", "স্যান্ডমায়ার বিক্রিয়া", "হান্সডিকার বিক্রিয়া", "গ্যাটারম্যান বিক্রিয়া"], ans: 1, exp: "ব্যাখ্যা: ডায়াজোনিয়াম লবণের সাথে CuCl/HCl বা CuBr/HBr ব্যবহার করে যথাক্রমে ক্লোরোবেঞ্জিন বা ব্রোমোবেঞ্জিন তৈরির পদ্ধতি স্যান্ডমায়ার বিক্রিয়া নামে পরিচিত।" },
+{ q: "৩. ডায়াজোনিয়াম ফ্লুরোবোরেটকে উত্তপ্ত করে ফ্লুরোবেঞ্জিন প্রস্তুত করার বিক্রিয়াটিকে কী বলা হয়?", opts: ["বালজ-শীম্যান বিক্রিয়া (Schiemann reaction)", "সোয়ার্টস বিক্রিয়া", "স্যান্ডমায়ার বিক্রিয়া", "ডাউ পদ্ধতি"], ans: 0, exp: "ব্যাখ্যা: অদ্রাব্য ডায়াজোনিয়াম ফ্লুরোবোরেটকে তাপ দিয়ে বিয়োজিত করে ফ্লুরোবেঞ্জিন তৈরির এই পদ্ধতি শীম্যান বিক্রিয়া নামে পরিচিত।" },
+{ q: "৪. র‍্যাশিগ (Raschig) পদ্ধতিতে ক্লোরোবেঞ্জিনের শিল্পোৎপাদনে ব্যবহৃত বিকারকগুলি হল-", opts: ["বেঞ্জিন, HCl, O₂ এবং অনুঘটক CuCl₂", "বেঞ্জিন, Cl₂, অনার্দ্র FeCl₃", "বেঞ্জিন, NaCl, O₂", "বেঞ্জিন, Cl₂, H₂O"], ans: 0, exp: "ব্যাখ্যা: বেঞ্জিন বাষ্প, বায়ু (O₂) ও HCl এর মিশ্রণকে 400°C উয়তায় উত্তপ্ত CuCl₂ অনুঘটকের ওপর দিয়ে চালনা করে ক্লোরোবেঞ্জিন প্রস্তুত করা হয়।" },
+{ q: "৫. ডাইক্লোরোবেঞ্জিনগুলির গলনাঙ্ক বৃদ্ধির সঠিক ক্রম হল-", opts: ["অর্থো- < মেটা- < প্যারা-", "মেটা- < অর্থো- < প্যারা-", "প্যারা- < মেটা- < অর্থো-", "মেটা- < প্যারা- < অর্থো-"], ans: 1, exp: "ব্যাখ্যা: প্যারা-ডাইক্লোরোবেঞ্জিনের অণুগুলো অত্যন্ত সুষম (symmetrical) হওয়ায় এরা কেলাস জালকে খুব ঘনসন্নিবিষ্টভাবে সজ্জিত থাকে। তাই এদের গলনাঙ্ক অনেক বেশি হয়।" },
+{ q: "৬. ক্লোরোবেঞ্জিনের C-Cl বন্ধন মিথাইল ক্লোরাইডের C-Cl বন্ধন অপেক্ষা দৈর্ঘ্যে ছোটো কেন?", opts: ["ক্লোরিনের তড়িৎ-ঋণাত্মকতার জন্য", "বেঞ্জিন বলয়ের বিকর্ষণের জন্য", "রেজোনেন্সের কারণে C-Cl বন্ধনের আংশিক দ্বি-বন্ধন চরিত্রের জন্য", "sp³ সংকরায়ণের জন্য"], ans: 2, exp: "ব্যাখ্যা: ক্লোরোবেঞ্জিনে Cl পরমাণুর নিঃসঙ্গ ইলেকট্রন-জোড় বেঞ্জিন বলয়ের সাথে রেজোনেন্সে অংশগ্রহণ করে, ফলে C-Cl বন্ধন আংশিক দ্বি-বন্ধন চরিত্র লাভ করে এবং দৈর্ঘ্যে ছোটো ও শক্তিশালী হয়।" },
+{ q: "৭. নিউক্লিওফিলিক প্রতিস্থাপন বিক্রিয়ায় হ্যালোঅ্যারিনগুলির সক্রিয়তা অ্যালকিল হ্যালাইডের তুলনায় কেমন?", opts: ["অনেক বেশি", "প্রায় সমান", "অত্যন্ত কম", "বলা সম্ভব নয়"], ans: 2, exp: "ব্যাখ্যা: রেজোনেন্সের কারণে C-X বন্ধন শক্তিশালী হওয়া এবং বেঞ্জিন বলয়ের ইলেকট্রন মেঘের বিকর্ষণে নিউক্লিওফাইলের আক্রমণ বাধাপ্রাপ্ত হওয়ায় এদের সক্রিয়তা অত্যন্ত কম।" },
+{ q: "৮. ডাউ পদ্ধতিতে (Dow's process) ক্লোরোবেঞ্জিন থেকে কী প্রস্তুত করা হয়?", opts: ["অ্যানিলিন", "বেঞ্জিন", "ফেনল", "টলুইন"], ans: 2, exp: "ব্যাখ্যা: ক্লোরোবেঞ্জিনকে 350°C উয়তায় এবং 300 atm চাপে 6-8% NaOH দ্রবণ সহযোগে উত্তপ্ত করলে আর্দ্রবিশ্লেষণের মাধ্যমে ফেনল উৎপন্ন হয়।" },
+{ q: "৯. ক্লোরোবেঞ্জিনে উপস্থিত ক্লোরিন পরমাণু ইলেকট্রোফিলিক প্রতিস্থাপন বিক্রিয়ায় কীরূপ নির্দেশক?", opts: ["মেটা-নির্দেশক", "অর্থো- ও প্যারা-নির্দেশক", "কোনো নির্দেশক ধর্ম নেই", "বলয় সক্রিয়কারী"], ans: 1, exp: "ব্যাখ্যা: হ্যালোজেন পরমাণু -I প্রভাব দ্বারা বলয়কে নিষ্ক্রিয় করলেও এর +R প্রভাব অর্থো ও প্যারা অবস্থানে ইলেকট্রন ঘনত্ব বাড়িয়ে দেয়, তাই এটি অর্থো ও প্যারা-নির্দেশক।" },
+{ q: "১০. ডাইক্লোরোবেঞ্জিনগুলির দ্বি-মেরু ভ্রামক হ্রাসের সঠিক ক্রম হল-", opts: ["অর্থো- > প্যারা- > মেটা-", "প্যারা- > মেটা- > অর্থো-", "অর্থো- > মেটা- > প্যারা-", "মেটা- > প্যারা- > অর্থো-"], ans: 2, exp: "ব্যাখ্যা: হ্যালোজেন পরমাণু দুটির মধ্যে কৌণিক দূরত্ব বৃদ্ধির সঙ্গে দ্বি-মেরু ভ্রামক ক্রমশ হ্রাস পায়। প্যারা-আইসোমারে হ্যালোজেন দুটি বিপরীত দিকে থাকায় এদের লব্ধি ভ্রামক শূন্য হয়।" },
+{ q: "১১. ট্রাইক্লোরোমিথেন (ক্লোরোফর্ম)-এর জারণের ফলে উৎপন্ন অত্যন্ত বিষাক্ত গ্যাসটি হল-", opts: ["কার্বন মনোক্সাইড", "ফসফিন", "কার্বনিল ক্লোরাইড (ফসজিন)", "হাইড্রোজেন সালফাইড"], ans: 2, exp: "ব্যাখ্যা: ক্লোরোফর্ম সূর্যালোক ও বায়ুর উপস্থিতিতে ধীরে ধীরে জারিত হয়ে অত্যন্ত বিষাক্ত কার্বনিল ক্লোরাইড বা ফসজিন গ্যাস উৎপন্ন করে।" },
+{ q: "১২. আয়োডোফর্মের অ্যান্টিসেপ্টিক (জীবাণুনাশক) হিসেবে ব্যবহারের কারণ হল-", opts: ["এর নিজস্ব আয়োডিন অণুর গঠন", "এটি ত্বকের সংস্পর্শে এসে মুক্ত আয়োডিন (I₂) নির্গত করে", "এটি কার্বন আয়োডাইড তৈরি করে", "এর সুমিষ্ট গন্ধ"], ans: 1, exp: "ব্যাখ্যা: আয়োডোফর্মের নিজস্ব কোনো অ্যান্টিসেপ্টিক ধর্ম নেই। এটি ক্ষতের সংস্পর্শে এলে বিয়োজিত হয়ে মুক্ত আয়োডিন রিলিজ করে, যা অ্যান্টিসেপ্টিক হিসেবে কাজ করে।" },
+{ q: "১৩. ক্লোরোবেঞ্জিন, ক্লোরাল (ট্রাইক্লোরোঅ্যাসিট্যালডিহাইড) এবং গাঢ় H₂SO₄-এর মিশ্রণ উত্তপ্ত করে কী প্রস্তুত করা হয়?", opts: ["BHC (বেঞ্জিন হেক্সাক্লোরাইড)", "ফ্রেয়ন", "DDT", "টিয়ার গ্যাস"], ans: 2, exp: "ব্যাখ্যা: ক্লোরালের সাথে দুই অণু ক্লোরোবেঞ্জিনের বিক্রিয়ায় গাঢ় সালফিউরিক অ্যাসিডের উপস্থিতিতে শক্তিশালী কীটনাশক DDT উৎপন্ন হয়।" },
+{ q: "১৪. ফ্রেয়ন-12 (Freon-12)-এর রাসআগনিক সংকেত কী?", opts: ["CF₃Cl", "CF₂Cl₂", "CFCl₃", "CCl₄"], ans: 1, exp: "ব্যাখ্যা: ফ্রেয়ন-12 হলো একটি বহুল ব্যবহৃত ক্লোরোফ্লুরোকার্বন (CFC), যার সংকেত CCl₂F₂ বা CF₂Cl₂। এটি রেফ্রিজারেন্ট হিসেবে ব্যবহৃত হতো।" },
+{ q: "১৫. উর্জ-ফিটিগ (Wurtz-Fittig) বিক্রিয়ার মাধ্যমে অ্যারাইল হ্যালাইড ও অ্যালকিল হ্যালাইডের মিশ্রণকে সোডিয়াম ও শুষ্ক ইথার সহযোগে উত্তপ্ত করলে কী উৎপন্ন হয়?", opts: ["বাইফিনাইল", "অ্যালকেন", "অ্যালকিল-বেঞ্জিন", "ফেনল"], ans: 2, exp: "ব্যাখ্যা: অ্যারাইল হ্যালাইডের সঙ্গে অ্যালকিল হ্যালাইডের সোডিয়ামের উপস্থিতিতে বিক্রিয়ায় অ্যালকিল-বেঞ্জিন (যেমন টলুইন) উৎপন্ন হয়।" }
+]
+},
+6: {
+name: 'Set 6', icon: '🔬', topic: 'হ্যালোঅ্যালকেনের বিক্রিয়া ও মেকানিজম (Advanced SN1, SN2)',
+questions: [
+{ q: "১. নীচের কোন্ বিক্রিয়াটি অ্যালকিল হ্যালাইড গঠন করে না?", opts: ["CH₃COOAg + Br₂ / CCl₄ →", "C₂H₅OH + NaCl →", "CH₃CH₂OH + HCl / ZnCl₂ →", "CH₃CH₂CH₃ + Cl₂ →"], ans: 1, exp: "ব্যাখ্যা: অ্যালকোহলের সাথে NaCl-এর বিক্রিয়া ঘটিয়ে হ্যালোঅ্যালকেন প্রস্তুত করা যায় না, কারণ Cl⁻ শক্তিশালী নিউক্লিওফাইল হলেও এটি অতি নিকৃষ্ট লিভিং গ্রুপ OH⁻-কে প্রতিস্থাপিত করতে পারে না।" },
+{ q: "২. CH₃(CH₂)₃Br (I), CH₂=CH-CHBrCH₃ (II), CH₃CH₂CHBrCH₃ (III) যৌগগুলির SN1 সক্রিয়তার সঠিক ক্রম হল-", opts: ["II > III > I", "II > I > III", "III > II > I", "I > II > III"], ans: 0, exp: "ব্যাখ্যা: SN1 বিক্রিয়া কার্বোক্যাটায়নের স্থায়িত্বের ওপর নির্ভর করে। (II) থেকে উৎপন্ন কার্বোক্যাটায়নটি অ্যালাইলিক হওয়ায় রেজোনেন্স দ্বারা সবচেয়ে বেশি স্থিতিশীল হয়। তাই সক্রিয়তার ক্রম II > III > I।" },
+{ q: "৩. নীচের কোন্ যৌগটি SN2 বিক্রিয়ায় নিষ্ক্রিয় থাকে?", opts: ["CH₃-Br", "CH₃CH₂Br", "ব্রোমোবেঞ্জিন (C₆H₅Br)", "আইসোপ্রোপাইল ব্রোমাইড"], ans: 2, exp: "ব্যাখ্যা: বেঞ্জিন বলয়ের ইলেকট্রন ঘনত্ব খুব বেশি হওয়ায় বিকর্ষণজনিত কারণে নিউক্লিওফাইল ব্রোমিনের সাথে যুক্ত কার্বনে পেছন দিক থেকে আক্রমণ করতে পারে না।" },
+{ q: "৪. নীচের কোন্ অ্যালকোহলটির সঙ্গে SOCl₂ এর বিক্রিয়ায় 'রিটেনশন অব্ কনফিগারেশন' ঘটে?", opts: ["কাইরাল অ্যালকোহলের সাথে SOCl₂/পিরিডিন", "কাইরাল অ্যালকোহলের সাথে শুধুমাত্র SOCl₂ (পিরিডিন ছাড়া)", "PCl₅ এর উপস্থিতিতে", "কাইরাল অ্যালকোহল ও HCl"], ans: 1, exp: "ব্যাখ্যা: পিরিডিনের অনুপস্থিতিতে কাইরাল অ্যালকোহলের সঙ্গে SOCl₂ এর বিক্রিয়ায় রিটেনশন ঘটে, কারণ এটি SNi মেকানিজমে ঘটে।" },
+{ q: "৫. CH₃CH₂CH₂Br + NaCN → CH₃CH₂CH₂CN + NaBr ; এই বিক্রিয়াটি প্রদত্ত দ্রাবকগুলির মধ্যে কোন্টিতে সবচেয়ে দ্রুত ঘটবে?", opts: ["ইথানল", "মিথানল", "N,N-ডাইমিথাইলফর্মামাইড (DMF)", "জল"], ans: 2, exp: "ব্যাখ্যা: এটি একটি SN2 বিক্রিয়া। পোলার অ্যাপ্রোটিক দ্রাবক (যেমন- DMF) SN2 বিক্রিয়ার পক্ষে অত্যন্ত অনুকূল।" },
+{ q: "৬. নীচের কোন্ হ্যালাইড আয়নটি পোলার প্রোটিক দ্রাবকে সবচেয়ে শক্তিশালী নিউক্লিওফাইল?", opts: ["F⁻", "Cl⁻", "Br⁻", "I⁻"], ans: 3, exp: "ব্যাখ্যা: পোলার প্রোটিক দ্রাবকে ছোট আকারের F⁻ বেশি মাত্রায় দ্রাবকায়িত হওয়ায় এর নিউক্লিওফিলিসিটি কমে যায়। বড় আকারের I⁻ এর নিউক্লিওফিলিসিটি সবচেয়ে বেশি হয়।" },
+{ q: "৭. CH₃Cl, CH₃I, CH₃Br এবং CH₃F যৌগগুলির জন্য C-X বন্ধন-দৈর্ঘ্য বৃদ্ধির সঠিক ক্রম হল-", opts: ["CH₃-F < CH₃-Cl < CH₃-Br < CH₃-I", "CH₃-I < CH₃-F < CH₃-Cl < CH₃-Br", "CH₃-Cl < CH₃-Br < CH₃-I < CH₃-F", "CH₃-Br < CH₃-I < CH₃-Cl < CH₃-F"], ans: 0, exp: "ব্যাখ্যা: হ্যালোজেন পরমাণুর আকার ফ্লোরিন থেকে আয়োডিন পর্যন্ত ক্রমশ বৃদ্ধি পায়, যার ফলে কার্বনের সাথে এর বন্ধন-দৈর্ঘ্যও ক্রমশ বৃদ্ধি পায়।" },
+{ q: "৮. নীচের কোন্ কাইরাল যৌগটির SN2 বিক্রিয়ায় ইনভারশন অব্ কনফিগারেশন ঘটে?", opts: ["(R)-2-ক্লোরোবিউটেন", "(S)-2-ক্লোরোবিউটেন", "উপরের দুটিই", "কোনোটিই নয়"], ans: 2, exp: "ব্যাখ্যা: SN2 বিক্রিয়া একটি স্টিরিওস্পেসিফিক বিক্রিয়া। কাইরাল অ্যালকিল হ্যালাইডের SN2 বিক্রিয়ায় সর্বদা ইনভারশন অব্ কনফিগারেশন ঘটে।" },
+{ q: "৯. SN2 বিক্রিয়া-সংক্রান্ত নীচের কোন্ তথ্যটি সঠিক?", opts: ["1 টি ট্রানজিশন স্টেট এবং 1 টি অন্তর্বর্তী পদার্থ গঠিত হয়", "কোনো ট্রানজিশন স্টেট নেই এবং 1 টি অন্তর্বর্তী পদার্থ গঠিত হয়", "1 টি ট্রানজিশন স্টেট এবং কোনো অন্তর্বর্তী পদার্থ গঠিত হয় না", "2 টি ট্রানজিশন স্টেট এবং 2 টি অন্তর্বর্তী পদার্থ গঠিত হয়"], ans: 2, exp: "ব্যাখ্যা: SN2 বিক্রিয়াটি একটিমাত্র ধাপে ঘটে। বিক্রিয়াকালে একটি ট্রানজিশন স্টেট তৈরি হয়, কিন্তু কোনো কার্বোক্যাটায়নের মতো অন্তর্বর্তী পদার্থ তৈরি হয় না।" },
+{ q: "১০. নীচের কোন্ যৌগটি AgNO₃ দ্রবণের সঙ্গে বিক্রিয়ায় সাদা অধঃক্ষেপ উৎপন্ন করে?", opts: ["CCl₄", "CH₂=CH-Cl (ভিনাইল ক্লোরাইড)", "ক্লোরোবেঞ্জিন", "CH₂=CH-CH₂Cl (অ্যালাইল ক্লোরাইড)"], ans: 3, exp: "ব্যাখ্যা: অ্যালাইল ক্লোরাইড সহজেই Cl⁻ আয়ন ত্যাগ করে রেজোনেন্স-স্থিতিশীল অ্যালাইল কার্বোক্যাটায়ন তৈরি করে এবং AgCl এর সাদা অধঃক্ষেপ ফেলে।" },
+{ q: "১১. CH₃OCH₂Cl যৌগটি SN1 বিক্রিয়ায় অত্যন্ত সক্রিয়, এর প্রধান কারণ কী?", opts: ["স্টেরিক হিনড্রেন্স কম", "উৎপন্ন কার্বোক্যাটায়নটি রেজোনেন্সের মাধ্যমে স্থিতিশীলতা লাভ করে", "এটি একটি 3° হ্যালাইড", "অক্সিজেনের -I প্রভাব"], ans: 1, exp: "ব্যাখ্যা: CH₃OCH₂Cl থেকে Cl⁻ নির্গত হলে যে কার্বোক্যাটায়ন তৈরি হয়, সেটি অক্সিজেনের নিঃসঙ্গ ইলেকট্রন জোড়ের সাহায্যে রেজোনেন্স ঘটিয়ে দারুণ স্থিতিশীলতা লাভ করে।" },
+{ q: "১২. নীচের কোন্ বিকারকটি অ্যালাইলিক ব্রোমিনেশন সংঘটিত করে?", opts: ["HBr / H₂O₂", "NBS (N-ব্রোমোসাক্সিনামাইড)", "HOBr", "Br₂ / CS₂"], ans: 1, exp: "ব্যাখ্যা: NBS আলো বা পারক্সাইডের উপস্থিতিতে অ্যালকিনের অ্যালাইলিক অবস্থানে অত্যন্ত সূক্ষ্মভাবে ব্রোমিনেশন ঘটায়।" },
+{ q: "১৩. CH₃-Cl, CH₃CH₂Cl, (CH₃)₂CHCl এবং (CH₃)₃CCl এর SN2 সক্রিয়তার সঠিক ক্রম কোনটি?", opts: ["CH₃Cl > CH₃CH₂Cl > (CH₃)₂CHCl > (CH₃)₃CCl", "(CH₃)₃CCl > (CH₃)₂CHCl > CH₃CH₂Cl > CH₃Cl", "(CH₃)₂CHCl > CH₃CH₂Cl > CH₃Cl > (CH₃)₃CCl", "CH₃CH₂Cl > (CH₃)₂CHCl > CH₃Cl > (CH₃)₃CCl"], ans: 0, exp: "ব্যাখ্যা: SN2 বিক্রিয়ার হার স্টেরিক হিনড্রেন্সের ওপর নির্ভর করে। α-কার্বনে অ্যালকিল গ্রুপের সংখ্যা বাড়লে স্টেরিক বাধা বাড়ে।" },
+{ q: "১৪. গ্যাসীয় মাধ্যমে হ্যালাইড আয়নগুলির নিউক্লিওফিলিক ক্ষমতা বৃদ্ধির সঠিক ক্রম হল-", opts: ["F⁻ < Cl⁻ < Br⁻ < I⁻", "I⁻ < Br⁻ < Cl⁻ < F⁻", "Cl⁻ < I⁻ < F⁻ < Br⁻", "I⁻ < F⁻ < Cl⁻ < Br⁻"], ans: 1, exp: "ব্যাখ্যা: গ্যাসীয় মাধ্যমে দ্রাবক না থাকায় সলভেশন প্রভাব কাজ করে না। ফলে ছোট আকারের অ্যানায়ন (F⁻) সবচেয়ে শক্তিশালী নিউক্লিওফাইল হিসেবে কাজ করে।" },
+{ q: "১৫. একটি কাইরাল সাবস্ট্রেটের SN1 বিক্রিয়ায় প্রধানত কী ঘটে?", opts: ["100% রিটেনশন", "100% ইনভারশন", "রেসিমাইজেশন (Racemisation)", "কোনো পরিবর্তন হয় না"], ans: 2, exp: "ব্যাখ্যা: SN1 বিক্রিয়ার প্রথম ধাপে সমতলীয় কার্বোক্যাটায়ন তৈরি হয়, যা উভয় দিক থেকেই নিউক্লিওফাইল দ্বারা আক্রান্ত হতে পারে। এর ফলে একটি রেসিমিক মিশ্রণ উৎপন্ন হয়।" }
+]
+},
+7: {
+name: 'Set 7', icon: '⚗️', topic: 'Group 17 - হ্যালাইড ও আন্তঃহ্যালোজেন যৌগ',
+questions: [
+{ q: "১. অতিরিক্ত Cl₂ -এর সঙ্গে NH₃ -এর বিক্রিয়ায় উৎপন্ন হয়-", opts: ["N₂ + HCl", "NCl₃ + HCl", "NH₄Cl", "NCl₃"], ans: 1, exp: "ব্যাখ্যা: অ্যামোনিয়ার সঙ্গে অতিরিক্ত ক্লোরিন গ্যাসের বিক্রিয়ায় অত্যন্ত বিস্ফোরক নাইট্রোজেন ট্রাইক্লোরাইড (NCl₃) এবং হাইড্রোজেন ক্লোরাইড (HCl) গ্যাস উৎপন্ন হয়।" },
+{ q: "২. ICl₃ যৌগে আয়োডিনের সংকরায়ণ অবস্থা হল-", opts: ["sp³", "sp²", "sp³d", "sp³d²"], ans: 2, exp: "ব্যাখ্যা: ICl₃ অণুতে কেন্দ্রীয় আয়োডিন পরমাণুটি 3টি বন্ড-পেয়ার এবং 2টি লোন-পেয়ার ধারণ করে। মোট ইলেকট্রন-জোড় 5টি হওয়ায় এর সংকরায়ণ sp³d হয়।" },
+{ q: "৩. [ICl₄]⁻ আয়নের গঠনাকৃতি হল-", opts: ["সরলরৈখিক", "ত্রিকোণীয় দ্বি-পিরামিডীয়", "সমতলীয় বর্গাকার", "পিরামিডীয়"], ans: 2, exp: "ব্যাখ্যা: [ICl₄]⁻ আয়নে কেন্দ্রীয় I পরমাণুর সংকরায়ণ sp³d²। এতে 4টি বন্ড-পেয়ার এবং 2টি লোন-পেয়ার থাকে, তাই VSEPR তত্ত্ব অনুযায়ী এর আকৃতি সমতলীয় বর্গাকার (Square Planar) হয়।" },
+{ q: "৪. I₃⁻ আয়নে কেন্দ্রীয় I-পরমাণুর নিঃসঙ্গ ইলেকট্রন-জোড়ের (Lone pair) মোট সংখ্যা হল-", opts: ["3", "6", "9", "5"], ans: 0, exp: "ব্যাখ্যা: I₃⁻ আয়নে কেন্দ্রীয় আয়োডিন পরমাণুর চারদিকে 2টি বন্ড-পেয়ার এবং 3টি লোন-পেয়ার (নিঃসঙ্গ ইলেকট্রন-জোড়) থাকে। এর গঠনাকৃতি সরলরৈখিক হয়।" },
+{ q: "৫. একটি ছদ্ম হ্যালোজেনের (Pseudohalogen) উদাহরণ হল-", opts: ["ClF", "I₃⁻", "CN⁻", "ICl"], ans: 2, exp: "ব্যাখ্যা: সায়ানাইড (CN⁻), থায়োসায়ানেট (SCN⁻) ইত্যাদি আয়নগুলো হ্যালোজেন না হয়েও হ্যালোজেন আয়নের মতো রাসায়নিক ধর্ম প্রদর্শন করে, তাই এদের ছদ্ম হ্যালোজেন বলা হয়।" },
+{ q: "৬. NaF, NaCl এবং NaI -এর জলীয় দ্রবণের সঙ্গে আলাদাভাবে Br₂ এর বিক্রিয়া ঘটালে-", opts: ["যথাক্রমে F₂, Cl₂ এবং I₂ মুক্ত হয়", "শুধুমাত্র F₂ এবং Cl₂ মুক্ত হয়", "শুধুমাত্র I₂ মুক্ত হয়", "শুধুমাত্র Cl₂ মুক্ত হয়"], ans: 2, exp: "ব্যাখ্যা: হ্যালোজেনগুলির জারণ ক্ষমতা হ্রাসের ক্রম হল F₂ > Cl₂ > Br₂ > I₂। যেহেতু Br₂ শুধুমাত্র I₂ অপেক্ষা শক্তিশালী জারক, তাই এটি কেবল NaI-কে জারিত করে I₂ মুক্ত করতে পারে।" },
+{ q: "৭. হ্যালোজেন অ্যাসিডগুলির স্থায়িত্বের (Thermal stability) ক্রম হল-", opts: ["HF < HCl < HBr < HI", "HF > HCl > HBr > HI", "HF > HBr > HCl > HI", "HBr > HCl > HF > HI"], ans: 1, exp: "ব্যাখ্যা: হ্যালোজেনের আকার বৃদ্ধির সাথে সাথে H-X বন্ধন দৈর্ঘ্য বৃদ্ধি পায়, ফলে বন্ধন-বিয়োজন শক্তি ক্রমশ হ্রাস পায়। একারণে ওপর থেকে নীচে নামলে হাইড্রাইডগুলির তাপীয় স্থায়িত্ব কমে যায়।" },
+{ q: "৮. আয়োডিন দ্রবণকে বিবর্ণ করতে কোন্টির জলীয় দ্রবণ সহযোগে ঝাঁকাতে হয়?", opts: ["Na₂S", "Na₂SO₄", "Na₂S₂O₃", "H₂O₂"], ans: 2, exp: "ব্যাখ্যা: আয়োডিনের বাদামি দ্রবণে সোডিয়াম থায়োসালফেট (Na₂S₂O₃) যোগ করলে এটি আয়োডিনকে বিজারিত করে বর্ণহীন সোডিয়াম আয়োডাইড (NaI) এবং সোডিয়াম টেট্রাথায়োনেট (Na₂S₄O₆) উৎপন্ন করে।" },
+{ q: "৯. গাঢ় HNO₃ -এর সঙ্গে আয়োডিনের বিক্রিয়ায় উৎপন্ন হয়—", opts: ["HI", "HIO₃", "HIO₄", "HOI"], ans: 1, exp: "ব্যাখ্যা: গাঢ় নাইট্রিক অ্যাসিড একটি শক্তিশালী জারক, যা আয়োডিনকে (I₂) জারিত করে আয়োডিক অ্যাসিড (HIO₃) এবং নাইট্রোজেন ডাইঅক্সাইড গ্যাস উৎপন্ন করে।" },
+{ q: "১০. নীচের হ্যালোজেন হাইড্রাসিডগুলির আম্লিক শক্তির সঠিক ক্রম হল-", opts: ["HF > HCl > HBr > HI", "HF < HCl < HBr < HI", "HI < HCl > HBr > HI", "HF > HCl < HBr > HI"], ans: 1, exp: "ব্যাখ্যা: ফ্লোরিন থেকে আয়োডিনে আকার বৃদ্ধির ফলে H-X বন্ধন দুর্বল হয়, ফলে জলীয় দ্রবণে প্রোটন (H⁺) ত্যাগের প্রবণতা বা আম্লিক শক্তি ক্রমশ বৃদ্ধি পায়।" },
+{ q: "১১. C-X বন্ধন এনথ্যালপির সঠিক ক্রমটি হল—", opts: ["CH₃-F > CH₃-Cl > CH₃-Br > CH₃-I", "CH₃-F < CH₃-Cl > CH₃-Br > CH₃-I", "CH₃-Cl > CH₃-F > CH₃-Br > CH₃-I", "CH₃-F < CH₃-Cl < CH₃-Br < CH₃-I"], ans: 0, exp: "ব্যাখ্যা: হ্যালোজেন পরমাণুর আকার যত ছোটো হয়, কার্বনের সাথে তার বন্ধন দৈর্ঘ্য তত কম হয় এবং বন্ধন তত বেশি শক্তিশালী হয়। তাই ফ্লোরাইডের ক্ষেত্রে বন্ধন এনথ্যালপি সর্বাধিক।" },
+{ q: "১২. [ICl₂]⁻ আয়নে আয়োডিনের সংকরায়িত অবস্থা হল—", opts: ["sp³d", "sp³d²", "sp³", "sp²"], ans: 0, exp: "ব্যাখ্যা: [ICl₂]⁻ আয়নে কেন্দ্রীয় I পরমাণুতে মোট ইলেকট্রন জোড় 5টি (2টি বন্ড-পেয়ার এবং 3টি লোন-পেয়ার)। তাই এর সংকরায়ণ sp³d এবং গঠনাকৃতি সরলরৈখিক হয়।" },
+{ q: "১৩. কোন্ আন্তঃহ্যালোজেন যৌগটি সম্ভব নয়?", opts: ["IF₇", "ICl₅", "BrF₂", "ClF"], ans: 2, exp: "ব্যাখ্যা: আন্তঃহ্যালোজেন যৌগগুলির সাধারণ সংকেত হলো XX'ₙ, যেখানে n সর্বদা বিজোড় সংখ্যা (1, 3, 5, 7) হয়। তাই BrF₂ (যেখানে n=2) গঠন করা সম্ভব নয়।" },
+{ q: "১৪. ফ্লুরিন সর্বদা কেবলমাত্র -1 জারণ অবস্থাই প্রদর্শন করে, এর মূল কারণ কী?", opts: ["এর খুব ছোটো আকার", "এর যোজ্যতা কক্ষে ফাঁকা d-অর্বিট্যালের অনুপস্থিতি", "এর সর্বোচ্চ তড়িৎ-ঋণাত্মকতা", "এর উচ্চ আয়নীভবন শক্তি"], ans: 2, exp: "ব্যাখ্যা: ফ্লোরিন পর্যায় সারণির সবচেয়ে বেশি তড়িৎ-ঋণাত্মক মৌল হওয়ায় এটি অন্য কোনো মৌলকে ইলেকট্রন দান করতে পারে না, তাই এটি কেবল ঋণাত্মক (-1) জারণ অবস্থাই দেখায়।" },
+{ q: "১৫. ফ্লুরিনকে সুপার হ্যালোজেন বলা হয়, এর প্রধান কারণ কী?", opts: ["এটি সবচেয়ে তড়িৎ-ঋণাত্মক", "এটি একটি গ্যাস", "হ্যালোজেনগুলির মধ্যে এটি সবচেয়ে সক্রিয়", "এটি সবচেয়ে হালকা"], ans: 2, exp: "ব্যাখ্যা: এর ব্যতিক্রমী ধর্ম এবং অত্যন্ত উচ্চ রাসায়নিক সক্রিয়তার জন্য ফ্লুরিনকে সুপার হ্যালোজেন বলে আখ্যা দেওয়া হয়েছে।" }
+]
+},
+8: {
+name: 'Set 8', icon: '🎈', topic: 'Group 18 - নোব্‌ল্ গ্যাসের সাধারণ ধর্ম',
+questions: [
+{ q: "১. নোব্‌ল্ গ্যাসগুলির মধ্যে কোন্টি জলে সবচেয়ে বেশি দ্রাব্য?", opts: ["He", "Rn", "Kr", "Xe"], ans: 3, exp: "ব্যাখ্যা: নোব্‌ল্ গ্যাসগুলির পারমাণবিক আকার বৃদ্ধির সাথে সাথে তাদের ধ্রুবীয়তা (polarisability) বৃদ্ধি পায়, ফলে জলের অণুর সাথে দ্বিমেরু-আবিষ্ট দ্বিমেরু মিথস্ক্রিয়া বাড়ে এবং দ্রাব্যতাও বৃদ্ধি পায়।" },
+{ q: "২. নীচের কোন্ নোব্‌ল্ গ্যাসটির আয়নীভবন এনথ্যালপি সবচেয়ে বেশি?", opts: ["Kr", "Ar", "Ne", "He"], ans: 3, exp: "ব্যাখ্যা: হিলিয়ামের আকার সবচেয়ে ক্ষুদ্র হওয়ায় নিউক্লিয়াসের সাথে যোজ্যতা কক্ষের ইলেকট্রনগুলোর আকর্ষণ বল সবচেয়ে বেশি থাকে, তাই এর আয়নীভবন এনথ্যালপি সর্বোচ্চ হয়।" },
+{ q: "৩. কোন্ নোব্‌ল্ গ্যাসটির স্ফুটনাঙ্ক সবচেয়ে কম?", opts: ["Ne", "He", "Ar", "Xe"], ans: 1, exp: "ব্যাখ্যা: হিলিয়াম অণুগুলির মধ্যে দুর্বলতম লন্ডন ডিসপারসন বল কাজ করে। তাই সমস্ত মৌলিক পদার্থের মধ্যে হিলিয়ামের স্ফুটনাঙ্ক ও গলনাঙ্ক সবচেয়ে কম হয়।" },
+{ q: "৪. কোন্ নিষ্ক্রিয় গ্যাসটিকে অতি সহজে তরলে পরিণত করা যায়?", opts: ["Ne", "Xe", "Kr", "Ar"], ans: 1, exp: "ব্যাখ্যা: পারমাণবিক আকার বাড়লে ভ্যান ডার ওয়ালস আকর্ষণ বল বৃদ্ধি পায়। জেননের (Xe) আকার বড়ো হওয়ায় আকর্ষণ বল বেশি থাকে, তাই একে তুলনামূলক সহজে তরলে পরিণত করা যায়।" },
+{ q: "৫. জেননের কোন্ যৌগটি গঠিত হয় না?", opts: ["XeO₃", "XeF₄", "XeCl₄", "XeO₂F₂"], ans: 2, exp: "ব্যাখ্যা: জেননের সাথে শুধুমাত্র অত্যধিক তড়িৎ-ঋণাত্মক মৌল ফ্লোরিন (F) এবং অক্সিজেন (O) যৌগ গঠন করতে পারে। ক্লোরিন জেননকে জারিত করতে পারে না, তাই XeCl₄ গঠিত হয় না।" },
+{ q: "৬. XeF₆ -এর জ্যামিতিক আকৃতি হল-", opts: ["ত্রিকোণীয় সমতলীয়", "বিকৃত অষ্টতলকীয়", "চতুস্তলকীয়", "ত্রিকোণীয় দ্বি-পিরামিডীয়"], ans: 1, exp: "ব্যাখ্যা: XeF₆ অণুতে কেন্দ্রীয় Xe পরমাণুর সংকরায়ণ sp³d³ এবং এতে 1টি লোন পেয়ার থাকে। এই লোন পেয়ারের উপস্থিতির কারণে এর আকৃতি একটি বিকৃত অষ্টতলক (Distorted Octahedral) হয়।" },
+{ q: "৭. নীচের কোন্টি 'T' আকৃতিবিশিষ্ট যৌগ?", opts: ["XeOF₂", "XeOF₄", "XeO₃F₂", "XeO₂F₂"], ans: 0, exp: "ব্যাখ্যা: XeOF₂ অণুতে Xe-এর সংকরায়ণ sp³d এবং এতে 2টি লোন-পেয়ার থাকে। এই লোন-পেয়ারগুলি নিরক্ষীয় অবস্থান দখল করায় যৌগটি 'T'-আকৃতি (T-shaped) লাভ করে।" },
+{ q: "৮. নীচের কোন্টি XeF₂ -এর সম-আকৃতিবিশিষ্ট (Isostructural)?", opts: ["BaCl₂", "TeF₂", "ICl₂⁻", "SbCl₂"], ans: 2, exp: "ব্যাখ্যা: XeF₂ এবং ICl₂⁻ উভয়েরই কেন্দ্রীয় পরমাণুর সংকরায়ণ sp³d এবং উভয়েরই 3টি লোন পেয়ার থাকায় এরা সরলরৈখিক (Linear) ও সম-আকৃতিবিশিষ্ট হয়।" },
+{ q: "৯. কোন্ জেনন ফ্লুরাইডটির অস্তিত্ব নেই?", opts: ["XeF₄", "XeF₂", "XeF₆", "XeF₃"], ans: 3, exp: "ব্যাখ্যা: জেননের ফ্লোরাইডগুলো জোড় সংখ্যক ফ্লোরিন পরমাণু নিয়ে গঠিত হয় (যেমন XeF₂, XeF₄, XeF₆)। বিজোড় সংখ্যক ফ্লোরিন পরমাণু নিয়ে কোনো স্থায়ী যৌগ (XeF₃) গঠিত হয় না।" },
+{ q: "১০. ভাস্বর (incandescent) ইলেকট্রিক বাল্বপূর্ণ করতে বায়ুর পরিবর্তে আর্গন গ্যাস ব্যবহার করা হয়। এর কারণ-", opts: ["আর্গন বায়ু অপেক্ষা অধিক সক্রিয়", "আর্গন ভালো তড়িৎপরিবাহী", "ফিলামেন্ট আর্গনের সঙ্গে বিক্রিয়া করে না", "ফিলামেন্ট অধিক উজ্জ্বলভাবে আলো দেয়"], ans: 2, exp: "ব্যাখ্যা: আর্গন একটি নিষ্ক্রিয় গ্যাস। উচ্চ তাপমাত্রায় টাংস্টেন ফিলামেন্ট বাতাসের অক্সিজেনে পুড়ে যেতে পারে, কিন্তু আর্গনের নিষ্ক্রিয় পরিবেশ ফিলামেন্টকে দীর্ঘস্থায়ী করে।" },
+{ q: "১১. আবহাওয়া সংক্রান্ত পর্যবেক্ষণে ব্যবহৃত বেলুন H₂ -এর পরিবর্তে হিলিয়াম দ্বারা পূর্ণ করা হয় কারণ-", opts: ["বাতাসে হিলিয়াম পাওয়া যায়", "হিলিয়ামের ঘনত্ব হাইড্রোজেনের থেকে কম", "হিলিয়ামের ঘনত্ব হাইড্রোজেনের থেকে বেশি", "হিলিয়াম অদাহ্য এবং নিরাপদ"], ans: 3, exp: "ব্যাখ্যা: হাইড্রোজেন হালকা হলেও এটি অত্যন্ত দাহ্য এবং বিস্ফোরক। হিলিয়াম হাইড্রোজেনের চেয়ে কিছুটা ভারী হলেও এটি সম্পূর্ণ নিষ্ক্রিয় ও অদাহ্য, তাই এটি ব্যবহার করা নিরাপদ।" },
+{ q: "১২. XeO₃ -এর গঠন হল-", opts: ["সরলরৈখিক", "পিরামিডাকার", "সামতলিক বর্গাকার", "T-আকৃতির"], ans: 1, exp: "ব্যাখ্যা: XeO₃ অণুতে কেন্দ্রীয় Xe পরমাণুর সংকরায়ণ sp³ এবং এতে 1টি লোন-পেয়ার উপস্থিত থাকে। তাই অ্যামোনিয়ার মতোই এর জ্যামিতিক আকৃতি পিরামিডাকার হয়।" },
+{ q: "১৩. XeF₆ -এর আর্দ্রবিশ্লেষণে কখনোই তৈরি হবে না-", opts: ["Xe", "XeOF₄", "HF", "XeO₃"], ans: 0, exp: "ব্যাখ্যা: XeF₆ এর সম্পূর্ণ বা আংশিক আর্দ্রবিশ্লেষণে XeO₃, XeOF₄ এবং HF তৈরি হতে পারে, কিন্তু XeF₄-এর মতো এটি জেনন (Xe) গ্যাস ও অক্সিজেন উৎপন্ন করে না।" },
+{ q: "১৪. XeF₄ জলীয় দ্রবণে আর্দ্রবিশ্লেষিত হয়ে উৎপন্ন করে-", opts: ["XeO₃", "XeOF₄", "XeOF₂", "XeO₂"], ans: 0, exp: "ব্যাখ্যা: XeF₄ জলের সাথে তীব্রভাবে বিক্রিয়া করে ডিসপ্রোপরসনেশন বিক্রিয়ার মাধ্যমে জেনন (Xe), হাইড্রোজেন ফ্লোরাইড (HF), অক্সিজেন (O₂) এবং জেনন ট্রাইঅক্সাইড (XeO₃) উৎপন্ন করে।" },
+{ q: "১৫. কোন্ যৌগটি জৈব যৌগের সংশ্লেষণে বিকারক (fluorinating agent) হিসেবে ব্যবহৃত হয়?", opts: ["XeOF₄", "XeO₂F₂", "XeF₂", "XeO₂F₄"], ans: 2, exp: "ব্যাখ্যা: জেনন ডাইফ্লুরাইড (XeF₂) একটি চমৎকার ও মৃদু ফ্লুরিনেটিং বিকারক, যা জৈব সংশ্লেষণে অক্সিডেটিভ ফ্লুরিনেশনে খুব সুবিধাজনকভাবে ব্যবহার করা হয়।" }
+]
+},
+9: {
+name: 'Set 9', icon: '🧬', topic: 'Group 18 - জেনন যৌগের গঠন ও ব্যবহার',
+questions: [
+{ q: "১. XeF₆ এর আর্দ্রবিশ্লেষণের ফলে নীচের কোন্টি গঠিত হয় না?", opts: ["XeO₃", "XeOF₄", "XeO₂", "XeO₂F₂"], ans: 2, exp: "ব্যাখ্যা: XeF₆ এর আর্দ্রবিশ্লেষণে মূলত XeO₃ (সম্পূর্ণ), এবং XeOF₄ ও XeO₂F₂ (আংশিক) গঠিত হয়। XeO₂ বলে কোনো যৌগ তৈরি হয় না।" },
+{ q: "২. (a) XeF₆ + 3H₂O → ? এবং (b) XeF₆ + H₂O → ? ওপরের দুটি বিক্রিয়ায় উৎপন্ন যৌগগুলি হল যথাক্রমে-", opts: ["XeO₆, XeOF₄", "XeO₆, XeOF₆", "XeO₃, XeOF₆", "XeO₃, XeOF₄"], ans: 3, exp: "ব্যাখ্যা: 3 অণু জলের সাথে সম্পূর্ণ আর্দ্রবিশ্লেষণে XeO₃ এবং 1 অণু জলের সাথে আংশিক আর্দ্রবিশ্লেষণে XeOF₄ উৎপন্ন হয়।" },
+{ q: "৩. নীচের কোন্ যৌগটির গঠনাকৃতি BrO₃⁻ -এর মতো?", opts: ["XeF₂", "XeF₃", "XeF₄", "XeO₃"], ans: 3, exp: "ব্যাখ্যা: BrO₃⁻ আয়নের মতো XeO₃ অণুতেও কেন্দ্রীয় পরমাণুর সংকরায়ণ sp³ এবং এতে 1টি লোন-পেয়ার থাকে, তাই উভয়েরই গঠনাকৃতি পিরামিডীয় (Pyramidal)।" },
+{ q: "৪. ধরে নাও He, Ne, Ar ও Kr-এর একটি গ্যাসীয় মিশ্রণে নির্দিষ্ট কম্পাঙ্কের ফোটন চালনা করা হল যা Ar গ্যাসকে আয়নিত করার ক্ষেত্রে যথোপযুক্ত। ওই মিশ্রণে কোন্ আয়ন/আয়নগুলি উপস্থিত থাকবে?", opts: ["Ar⁺", "Ar⁺ + He⁺ + Ne⁺", "Ar⁺ + Kr⁺", "He⁺ + Ar⁺ + Kr⁺"], ans: 2, exp: "ব্যাখ্যা: গ্রুপের ওপর থেকে নীচে নামলে আয়নন শক্তি হ্রাস পায়। তাই যে ফোটন আর্গনকে (Ar) আয়নিত করতে পারে, তার শক্তি আর্গনের নিচে থাকা ক্রিপ্টনের (Kr) আয়নন শক্তির চেয়ে বেশি হবে। ফলে Ar এবং Kr উভয়েই আয়নিত হবে।" },
+{ q: "৫. XeF₆, XeOF₄ এবং XeO₃ অণুগুলির কেন্দ্রীয় পরমাণুতে উপস্থিত নিঃসঙ্গ ইলেকট্রন-জোড়ের (Lone Pair) সংখ্যা হল যথাক্রমে-", opts: ["2, 1, 1", "1, 2, 0", "1, 1, 1", "3, 1, 2"], ans: 2, exp: "ব্যাখ্যা: XeF₆ (sp³d³), XeOF₄ (sp³d²) এবং XeO₃ (sp³)- এই তিনটি অণুতেই জেনন পরমাণুর যোজ্যতা কক্ষে 1টি করে লোন-পেয়ার ইলেকট্রন অবশিষ্ট থাকে।" },
+{ q: "৬. XeF₄ অণুর আকৃতি কীরূপ?", opts: ["সরলরৈখিক", "বিকৃত অষ্টতলকীয়", "চতুস্তলকীয়", "সামতলিক বর্গাকার"], ans: 3, exp: "ব্যাখ্যা: XeF₄ অণুতে জেননের sp³d² সংকরায়ণ ঘটে। এতে 4টি বন্ড-পেয়ার এবং 2টি লোন-পেয়ার থাকে, তাই এটি সামতলিক বর্গাকার বা Square Planar আকৃতি লাভ করে।" },
+{ q: "৭. জেনন (Xe)-ঘটিত কোন্ যৌগটি প্রথম তৈরি হয়েছিল?", opts: ["H₂Se", "[XeF]⁺[Pt₂F₁₁]⁻", "XeF₄", "XeO₂F₂"], ans: 1, exp: "ব্যাখ্যা: 1962 সালে নীল বার্টলেট (Neil Bartlett) জেননের প্রথম যৌগটি তৈরি করেন লাল রঙের কেলাস হিসেবে, যার প্রকৃত সংকেত ছিল [XeF]⁺[Pt₂F₁₁]⁻ (যদিও প্রাথমিকভাবে একে Xe⁺[PtF₆]⁻ ভাবা হয়েছিল)।" },
+{ q: "৮. XeF₆ -এর আর্দ্রবিশ্লেষণে কোল্টিন্ট উৎপন্ন হয় না?", opts: ["XeO₃", "XeOF₄", "XeO₂F₂", "XeO₂F₄"], ans: 3, exp: "ব্যাখ্যা: XeF₆ এর আর্দ্রবিশ্লেষণে XeO₃, XeOF₄ এবং XeO₂F₂ তৈরি হতে পারে। কিন্তু XeO₂F₄ তৈরি হয় না, কারণ এতে জেননের জারণ অবস্থা +8 হয়ে যায়, যা XeF₆ (+6) থেকে আর্দ্রবিশ্লেষণে সম্ভব নয়।" },
+{ q: "৯. 2XeF₆ + SiO₂ → ? বিক্রিয়াটিতে কী উৎপন্ন হয়?", opts: ["XeSiO₄ + HF", "2XeOF₄ + SiF₄", "XeF₂ + SiF₄", "কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: জেনন হেক্সাফ্লুরাইড কাচের তৈরি পাত্রের (সিলিকা) সাথে বিক্রিয়া করে জেনন অক্সোটেট্রাফ্লুরাইড এবং সিলিকন টেট্রাফ্লুরাইড গ্যাস উৎপন্ন করে।" },
+{ q: "১০. জেননের আর্দ্রবিশ্লেষণে কোন যৌগটি গঠিত হয় না?", opts: ["XeO₃", "XeOF₄", "XeO₄", "XeO₂F₂"], ans: 2, exp: "ব্যাখ্যা: জেনন ফ্লুরাইডসমূহের আর্দ্রবিশ্লেষণ করে XeO₄ পাওয়া যায় না। XeO₄ প্রস্তুত করতে বেরিয়াম পারজেনেটের সাথে গাঢ় সালফিউরিক অ্যাসিডের বিক্রিয়া ঘটাতে হয়।" },
+{ q: "১১. XeO₄ অণুর গঠনাকৃতি-", opts: ["চতুস্তলকীয়", "অষ্টতলকীয়", "পিরামিডীয়", "সামতলিক বর্গাকার"], ans: 0, exp: "ব্যাখ্যা: জেনন টেট্রক্সাইডে (XeO₄) জেনন পরমাণুর সংকরায়ণ sp³ এবং এতে কোনো লোন-পেয়ার থাকে না, তাই এটি একটি নিখুঁত চতুস্তলকীয় (Tetrahedral) কাঠামো গঠন করে।" },
+{ q: "১২. XeF₆ -কে কাঁচপাত্রে রাখা যায় না কেন?", opts: ["এটি কাচকে গলিয়ে দেয়", "XeF₆ এর সাথে SiO₂ বিক্রিয়া করে XeOF₄ উৎপন্ন করে", "এটি কাচের সাথে বিস্ফোরক মিশ্রণ তৈরি করে", "এটি বাষ্পীভূত হয়ে যায়"], ans: 1, exp: "ব্যাখ্যা: XeF₆ কাচের উপাদান সিলিকার সাথে রাসায়নিক বিক্রিয়া করে XeOF₄ এবং SiF₄ গ্যাস তৈরি করে, তাই একে নিকেল বা মোনেল ধাতুর পাত্রে সংরক্ষণ করতে হয়।" },
+{ q: "১৩. নোব্‌ল্ গ্যাসগুলি রাসায়নিকভাবে নিষ্ক্রিয় হওয়ার প্রধান কারণ কী?", opts: ["এদের খুব ছোট আকার", "এদের উচ্চ আয়নীভবন এনথ্যালপি", "এদের যোজ্যতা কক্ষে স্থিতিশীল ns²np⁶ ইলেকট্রন-বিন্যাস", "এগুলি গ্যাসীয় পদার্থ"], ans: 2, exp: "ব্যাখ্যা: নিষ্ক্রিয় গ্যাসগুলোর যোজ্যতা কক্ষ সম্পূর্ণরূপে ইলেকট্রন দ্বারা পূর্ণ (অষ্টক পূর্ণ) থাকায় এদের ইলেকট্রন গ্রহণ বা বর্জন করার কোনো প্রবণতা থাকে না, তাই এরা রাসায়নিকভাবে নিষ্ক্রিয়।" },
+{ q: "১৪. XeOF₄ অণুর জ্যামিতিক আকৃতি কীরূপ?", opts: ["বর্গ পিরামিডীয়", "ত্রিকোণীয় দ্বি-পিরামিডীয়", "চতুস্তলকীয়", "অষ্টতলকীয়"], ans: 0, exp: "ব্যাখ্যা: XeOF₄ অণুর কেন্দ্রীয় Xe পরমাণু sp³d² সংকরায়িত। এতে 5টি বন্ড-পেয়ার এবং 1টি লোন-পেয়ার থাকে, যার ফলে এর আকৃতি স্কোয়ার পিরামিডাল (Square Pyramidal) বা বর্গ পিরামিডীয় হয়।" },
+{ q: "১৫. নোব্‌ল্ গ্যাসগুলির পারমাণবিক ব্যাসার্ধ বলতে সাধারণত কী বোঝায়?", opts: ["সমযোজী ব্যাসার্ধ", "আয়নীয় ব্যাসার্ধ", "ধাতব ব্যাসার্ধ", "ভ্যান ডার ওয়াল্‌স্ ব্যাসার্ধ"], ans: 3, exp: "ব্যাখ্যা: যেহেতু নোব্‌ল্ গ্যাসগুলি সাধারণ অবস্থায় কোনো সমযোজী বন্ধন তৈরি করে না, তাই এদের ক্ষেত্রে সমযোজী ব্যাসার্ধের বদলে পরমাণুগুলোর মধ্যবর্তী ভ্যান ডার ওয়ালস্ আকর্ষণ বল অনুযায়ী ভ্যান ডার ওয়ালস্ ব্যাসার্ধ মাপা হয়।" }
+]
+},
+10: {
+name: 'Set 10', icon: '🏆', topic: 'অ্যাডভান্সড / Competitive Mixed MCQ',
+questions: [
+{ q: "১. একটি বর্ণহীন উদ্‌দায়ী সোডিয়াম লবণে লঘু অ্যাসিড যোগ করলে বর্ণহীন গ্যাস উৎপন্ন হয়। বর্ণহীন গ্যাসটি অ্যাসিডযুক্ত ডাইক্রোমেট দ্রবণের মধ্য দিয়ে চালনা করলে দ্রবণটি সবুজ বর্ণ ধারণ করে। সোডিয়াম লবণটি হল-", opts: ["Na₂SO₃", "Na₂S₂O₃", "Na₂S", "Na₂S₄O₆"], ans: 0, exp: "ব্যাখ্যা: সোডিয়াম সালফাইট লবণে অ্যাসিড দিলে SO₂ গ্যাস নির্গত হয়। SO₂ একটি বিজারক যা কমলা রঙের পটাশিয়াম ডাইক্রোমেটকে জারিত করে সবুজ বর্ণের ক্রোমিক সালফেটে পরিণত করে।" },
+{ q: "২. H₄P₂O₇, H₄P₂O₆ এবং H₄P₂O₅ অণুগুলিতে P-এর জারণ অবস্থা হল যথাক্রমে-", opts: ["+5, +4 এবং +3", "+5, +5 এবং +3", "+3, +4 এবং +5", "+7, +4 এবং +7"], ans: 0, exp: "ব্যাখ্যা: জারণ সংখ্যার হিসাব করলে পাইরোফসফরিক অ্যাসিডে (+5), হাইপোফসফরিক অ্যাসিডে (+4) এবং পাইরোফসফরাস অ্যাসিডে (+3) পাওয়া যায়।" },
+{ q: "৩. যে দ্রবণটি সর্বোচ্চ স্ফুটনাঙ্কের অ্যাজিওট্রোপ গঠন করে সেটি হল-", opts: ["জল ও নাইট্রিক অ্যাসিড", "ইথানল ও জল", "অ্যাসিটোন ও কার্বন ডাইসালফাইড", "হেপটেন ও অক্টেন"], ans: 0, exp: "ব্যাখ্যা: জল এবং নাইট্রিক অ্যাসিডের মিশ্রণ রাউল্টের সূত্র থেকে বৃহৎ ঋণাত্মক বিচ্যুতি প্রদর্শন করে, তাই এটি একটি সর্বোচ্চ স্ফুটনাঙ্কের অ্যাজিওট্রোপিক মিশ্রণ তৈরি করে।" },
+{ q: "৪. সালফারের নিম্নলিখিত অক্সোঅ্যাসিডগুলির মধ্যে কোল্টিতে -O-O- লিংকেজ বা পারক্সো-বন্ধন আছে?", opts: ["H₂S₂O₇", "H₂S₂O₈", "H₂SO₃", "H₂SO₄"], ans: 1, exp: "ব্যাখ্যা: পারক্সোডাইসালফিউরিক অ্যাসিড বা মার্শালের অ্যাসিড (H₂S₂O₈)-এর আণবিক গঠনে দুটি সালফার পরমাণুর মধ্যে একটি পারক্সো-লিংকেজ (-O-O-) উপস্থিত থাকে।" },
+{ q: "৫. সিলভার নাইট্রেট দ্রবণের সঙ্গে ফসফরাস অ্যাসিডের (H₃PO₃) বিক্রিয়ায় উৎপন্ন হয়-", opts: ["সিলভার ফসফেট", "ফসফরিক অ্যাসিড", "ধাতব সিলভার", "সিলভার ফসফাইড"], ans: 2, exp: "ব্যাখ্যা: ফসফরাস অ্যাসিড একটি ভালো বিজারক। এটি সিলভার নাইট্রেটকে বিজারিত করে কালো রঙের ধাতব সিলভারের (Ag) অধঃক্ষেপ সৃষ্টি করে এবং নিজে ফসফরিক অ্যাসিডে পরিণত হয়।" },
+{ q: "৬. ডাইভিং যন্ত্রে বা স্কুবা ডাইভারদের সিলিন্ডারে অক্সিজেনের লঘুকরণের জন্য হিলিয়াম গ্যাস ব্যবহৃত হয়, এর মূল কারণ কী?", opts: ["এটি অক্সিজেনের সাথে বিক্রিয়া করে না", "উচ্চ চাপে রক্তে হিলিয়ামের দ্রাব্যতা নাইট্রোজেনের চেয়ে অনেক কম", "এটি শ্বাস-প্রশ্বাসে সুগন্ধি দেয়", "হিলিয়াম অক্সিজেনের চেয়ে ভারী"], ans: 1, exp: "ব্যাখ্যা: গভীর সমুদ্রে উচ্চ চাপে নাইট্রোজেন রক্তে দ্রবীভূত হয়ে যায় এবং উপরে উঠলে বুদবুদ সৃষ্টি করে 'বেন্ডস' রোগের সৃষ্টি করে। হিলিয়াম রক্তে প্রায় অদ্রাব্য হওয়ায় এই ঝুঁকি থাকে না।" },
+{ q: "৭. ধূমায়মান সালফিউরিক অ্যাসিডের (ওলিয়াম) রাসায়নিক সংকেতে উপস্থিত অক্সিজেন পরমাণুর সংখ্যা হল-", opts: ["5", "6", "7", "8"], ans: 2, exp: "ব্যাখ্যা: ওলিয়াম বা ধূমায়মান সালফিউরিক অ্যাসিডের রাসায়নিক সংকেত হলো H₂S₂O₇। এতে ৭টি অক্সিজেন পরমাণু থাকে।" },
+{ q: "৮. P₄O₁₀ অণুতে কতগুলি P-O-P লিংকেজ বা সেতুবন্ধন আছে?", opts: ["4", "5", "6", "8"], ans: 2, exp: "ব্যাখ্যা: ফসফরাস পেন্টক্সাইডের খাঁচার মতো গঠনে ৪টি ফসফরাস পরমাণু পরস্পর ৬টি অক্সিজেন সেতুর (P-O-P) সাহায্যে যুক্ত থাকে।" },
+{ q: "৯. H₃PO₃ এবং H₃PO₄ অণুতে উপস্থিত -OH মূলকের সংখ্যা হল-", opts: ["3 এবং 3 যথাক্রমে", "2 এবং 3 যথাক্রমে", "3 এবং 4 যথাক্রমে", "1 এবং 3 যথাক্রমে"], ans: 1, exp: "ব্যাখ্যা: ফসফরাস অ্যাসিডে (H₃PO₃) 2টি P-OH বন্ধন এবং 1টি P-H বন্ধন থাকে। অন্যদিকে ফসফরিক অ্যাসিডে (H₃PO₄) 3টি P-OH বন্ধন থাকে।" },
+{ q: "১০. হ্যালোজেন অ্যাসিড হিসেবে ক্ষমতা (আম্লিকতা) নিম্নলিখিত কোন্ ক্রমে বৃদ্ধি পায়?", opts: ["HF > HCl > HBr > HI", "HI > HBr > HCl > HF", "HF < HCl < HBr < HI", "HCl < HBr < HI < HF"], ans: 2, exp: "ব্যাখ্যা: ফ্লুরিন থেকে আয়োডিন পর্যন্ত পরমাণুর আকার বড়ো হওয়ায় H-X বন্ধন ক্রমশ দুর্বল হয়। ফলে জলীয় দ্রবণে প্রোটন দেওয়ার প্রবণতা বা আম্লিকতা বৃদ্ধি পায়।" },
+{ q: "১১. বর্ণহীন সোডিয়াম লবণের একটি দ্রবণে লেড নাইট্রেট দ্রবণ যোগ করলে একটি সাদা অধঃক্ষেপ উৎপন্ন হয় যেটি গরম জলে দ্রবীভূত হয়ে যায় এবং শীতল করলে সাদা অধঃক্ষেপটি আবার ফিরে আসে। লবণটির মধ্যে নীচের কোন্ অম্ল মূলকটি আছে?", opts: ["Cl⁻", "SO₄²⁻", "S²⁻", "NO₃⁻"], ans: 0, exp: "ব্যাখ্যা: ক্লোরাইড আয়ন লেড নাইট্রেটের সাথে বিক্রিয়া করে লেড ক্লোরাইডের (PbCl₂) সাদা অধঃক্ষেপ দেয়, যা গরম জলে দ্রাব্য কিন্তু ঠান্ডা জলে অদ্রাব্য।" },
+{ q: "১২. ঝামাপাথর (Pumice stone) যে কোলয়ডীয় সিস্টেমের উদাহরণ, সেটি হল-", opts: ["সল", "জেল", "কঠিন ফোম", "ফোম"], ans: 2, exp: "ব্যাখ্যা: ঝামাপাথর হলো একটি সিলিকেট যৌগ যার অভ্যন্তরে প্রচুর পরিমাণ বায়ু আবদ্ধ থাকে। অর্থাৎ এটি কঠিন বিস্তার মাধ্যমে গ্যাসীয় বিস্তৃত দশার উদাহরণ বা 'কঠিন ফোম'।" },
+{ q: "১৩. জলে দ্রবীভূত তিনটি গ্যাস A, B ও C-এর হেনরি ধ্রুবক (K_H) -এর মান যথাক্রমে 145, 2×10⁻⁹ এবং 35 k bar। নির্দিষ্ট চাপে জলে গ্যাসগুলির দ্রাব্যতার ক্রম হল-", opts: ["A > C > B", "B > A > C", "B > C > A", "A > B > C"], ans: 2, exp: "ব্যাখ্যা: হেনরির সূত্র অনুযায়ী, যে গ্যাসের হেনরি ধ্রুবকের (K_H) মান যত কম, তার দ্রাব্যতা তত বেশি। এখানে K_H -এর ক্রম A > C > B, তাই দ্রাব্যতার ক্রম হবে B > C > A।" },
+{ q: "১৪. কোন্ গ্রুপ-16 মৌলটি -2 জারণ অবস্থা প্রদর্শন করে না?", opts: ["O", "Se", "Te", "Po"], ans: 3, exp: "ব্যাখ্যা: পোলোনিয়াম (Po) গ্রুপ-16 এর সর্বনিম্নে অবস্থিত একটি প্রকৃত তেজস্ক্রিয় ধাতু। ধাতব চরিত্রের কারণে এটি কেবল ধনাত্মক জারণ অবস্থা দেখায়, -2 জারণ অবস্থা প্রদর্শন করে না।" },
+{ q: "১৫. 2F₂ + 2H₂O → 4HF + O₂ বিক্রিয়ার ক্ষেত্রে কোন্ বিবৃতিটি সত্য নয়?", opts: ["O₂ অপেক্ষা F₂ তীব্রতর জারক ধর্মী", "O=O বন্ধন অপেক্ষা F-F বন্ধন দুর্বলতর", "H-O বন্ধন অপেক্ষা H-F বন্ধন অধিকতর শক্তিশালী", "O অপেক্ষা F-এর তড়িৎ-ঋণাত্মকতা নিম্নতর"], ans: 3, exp: "ব্যাখ্যা: পর্যায় সারণিতে ফ্লুরিন (F) হলো সর্বোচ্চ তড়িৎ-ঋণাত্মক মৌল। তাই \"O অপেক্ষা F-এর তড়িৎ-ঋণাত্মকতা নিম্নতর\" কথাটি সম্পূর্ণ ভুল।" }
+]
+},
+11: {
+name: 'Set 11', icon: '📚', topic: 'Semester Special - I',
+questions: [
+{ q: "১. প্রদত্ত কোন্ যৌগকে উত্তপ্ত করলে নাইট্রোজেন গ্যাস পাওয়া যায়?", opts: ["NH₄NO₂", "NaN₃", "(NH₄)₂Cr₂O₇", "সবগুলি"], ans: 3, exp: "ব্যাখ্যা: অ্যামোনিয়াম নাইট্রাইট, সোডিয়াম অ্যাজাইড এবং অ্যামোনিয়াম ডাইক্রোমেট—এই তিনটি যৌগের তাপীয় বিয়োজনে নাইট্রোজেন গ্যাস (N₂) উৎপন্ন হয়।" },
+{ q: "২. নীচের কোন্ যৌগটির অস্তিত্ব নেই?", opts: ["NF₅", "PF₅", "AsF₅", "SbF₅"], ans: 0, exp: "ব্যাখ্যা: নাইট্রোজেনের যোজ্যতা কক্ষে কোনো ফাঁকা d-অর্বিট্যাল নেই, তাই এটি তার অষ্টক প্রসারিত করে 5 সমযোজ্যতা প্রদর্শন করতে পারে না। ফলে NF₅ গঠিত হয় না।" },
+{ q: "৩. মাইক্রোকসমিক লবণের সংকেত হল-", opts: ["(NH₄)₂SO₄", "(NH₄)₃PO₄", "Na(NH₄)HPO₄", "কোনোটিই নয়"], ans: 2, exp: "ব্যাখ্যা: সোডিয়াম অ্যামোনিয়াম হাইড্রোজেন ফসফেটকে মাইক্রোকসমিক লবণ বলা হয়, যার সংকেত Na(NH₄)HPO₄।" },
+{ q: "৪. (SiH₃)₃N যৌগটি—", opts: ["পিরামিডীয় এবং (CH₃)₃N এর তুলনায় বেশি ক্ষারকীয়", "সমতলীয় এবং (CH₃)₃N অপেক্ষা কম ক্ষারকীয়", "পিরামিডীয় এবং (CH₃)₃N অপেক্ষা কম ক্ষারকীয়", "সমতলীয় এবং (CH₃)₃N অপেক্ষা বেশি ক্ষারকীয়"], ans: 1, exp: "ব্যাখ্যা: সিলিকনের ফাঁকা d-অর্বিট্যালের সাথে নাইট্রোজেনের নিঃসঙ্গ ইলেকট্রন জোড়ের pπ-dπ ব্যাক বন্ডিং ঘটে, ফলে অণুটি সমতলীয় হয় এবং N-এর নিঃসঙ্গ জোড় কম সহজলভ্য হওয়ায় ক্ষারকীয়তা কমে যায়।" },
+{ q: "৫. কোন্ অক্সোঅ্যাসিডের ক্ষারগ্রাহিতা তিন?", opts: ["H₃PO₃", "H₃PO₂", "H₃PO₄", "H₄P₂O₇"], ans: 2, exp: "ব্যাখ্যা: অর্থোফসফরিক অ্যাসিডে (H₃PO₄) তিনটি প্রতিস্থাপনযোগ্য P-OH বন্ধন থাকে, তাই এটি একটি ত্রি-ক্ষারীয় অ্যাসিড এবং এর ক্ষারগ্রাহিতা 3।" },
+{ q: "৬. প্রদত্ত কোন্ ক্যাটায়নটি অ্যামোনিয়ার সঙ্গে জটিল যৌগ গঠন করে না?", opts: ["Pb²⁺", "Ag⁺", "Cu²⁺", "Cd²⁺"], ans: 0, exp: "ব্যাখ্যা: Ag⁺, Cu²⁺ এবং Cd²⁺ অ্যামোনিয়ার সাথে যুক্ত হয়ে যথাক্রমে [Ag(NH₃)₂]⁺, [Cu(NH₃)₄]²⁺ এবং [Cd(NH₃)₄]²⁺ জটিল আয়ন গঠন করলেও Pb²⁺ এটি করে না।" },
+{ q: "৭. CN⁻ ও N₂ উভয়েই আইসোইলেকট্রনিক কিন্তু CN⁻ অপেক্ষা N₂ রাসায়নিকভাবে নিষ্ক্রিয় কারণ—", opts: ["N₂-এর নিম্ন বন্ধন-শক্তি", "বন্ধন-ভ্রামকের অনুপস্থিতি", "অসমান ইলেকট্রন বন্টন", "বন্ডিং অর্বিট্যাল-এ একাধিক ইলেকট্রনের উপস্থিতি"], ans: 1, exp: "ব্যাখ্যা: N₂ একটি হোমোনিউক্লিয়ার অণু হওয়ায় এর কোনো বন্ধন-ভ্রামক বা ডাইপোল মোমেন্ট নেই, তাই এটি রাসায়নিকভাবে নিষ্ক্রিয়। কিন্তু CN⁻ হেটারোনিউক্লিয়ার হওয়ায় বিক্রিয়ায় সহজে অংশ নেয়।" },
+{ q: "৮. নাইট্রোজেনের অক্সাইডগুলির মধ্যে প্রদত্ত কোন্টি নাইট্রাস অ্যাসিডের অ্যানহাইড্রাইড?", opts: ["NO", "N₂O₃", "N₂O₄", "N₂O₅"], ans: 1, exp: "ব্যাখ্যা: ডাইনাইট্রোজেন ট্রাইঅক্সাইড (N₂O₃) জলের সাথে বিক্রিয়া করে নাইট্রাস অ্যাসিড (HNO₂) উৎপন্ন করে। তাই এটি নাইট্রাস অ্যাসিডের অ্যানহাইড্রাইড।" },
+{ q: "৯. প্রদত্ত কোন্ লবণটির অস্তিত্ব নেই?", opts: ["NaH₂PO₃", "Na₃PO₄", "NaH₂PO₄", "Na₃PO₃"], ans: 3, exp: "ব্যাখ্যা: ফসফরাস অ্যাসিড (H₃PO₃) একটি দ্বি-ক্ষারীয় অ্যাসিড। এতে মাত্র দুটি প্রতিস্থাপনযোগ্য হাইড্রোজেন (P-OH) থাকায় এটি তিনটি সোডিয়াম যুক্ত লবণ (Na₃PO₃) গঠন করতে পারে না।" },
+{ q: "১০. নীচের হাইড্রাইডগুলির স্থায়িত্বের ক্রমগুলির মধ্যে কোন্টি সঠিক?", opts: ["NH₃ > PH₃ > AsH₃ > SbH₃", "NH₃ < PH₃ < AsH₃ < SbH₃", "PH₃ > NH₃ > AsH₃ > SbH₃", "AsH₃ < NH₃ < PH₃ < SbH₃"], ans: 0, exp: "ব্যাখ্যা: গ্রুপের ওপর থেকে নীচে নামলে E-H বন্ধন দৈর্ঘ্য বৃদ্ধি পায় এবং বন্ধন বিয়োজন এনথ্যালপি হ্রাস পায়, ফলে হাইড্রাইডগুলির তাপীয় স্থায়িত্ব ক্রমশ কমতে থাকে।" },
+{ q: "১১. প্রদত্ত কোন্ অক্সাইডটি বেশি আম্লিক?", opts: ["P₄O₆", "N₂O₃", "Bi₂O₃", "N₂O₅"], ans: 3, exp: "ব্যাখ্যা: কেন্দ্রীয় পরমাণুর জারণ সংখ্যা যত বৃদ্ধি পায়, অক্সাইডের আম্লিক চরিত্র তত বাড়ে। ডাইনাইট্রোজেন পেন্টক্সাইডে (N₂O₅) N-এর জারণ অবস্থা +5, তাই এটি প্রদত্ত অক্সাইডগুলির মধ্যে সর্বাধিক আম্লিক।" },
+{ q: "১২. নীচের কোন্টি আর্দ্রবিশ্লেষিত হয় না?", opts: ["AsCl₃", "PF₃", "SbCl₃", "NF₃"], ans: 3, exp: "ব্যাখ্যা: N এবং F উভয় পরমাণুর যোজ্যতা কক্ষে কোনো ফাঁকা d-উপকক্ষ না থাকায় জলের অণু এদের সাথে অসমযোজী বন্ধন তৈরি করতে পারে না, ফলে NF₃ আর্দ্রবিশ্লেষিত হয় না।" },
+{ q: "১৩. H₃PO₃ অ্যাসিডে কয়টি প্রতিস্থাপনযোগ্য H-পরমাণু বর্তমান?", opts: ["0", "1", "2", "3"], ans: 2, exp: "ব্যাখ্যা: ফসফরাস অ্যাসিডে (H₃PO₃) দুটি P-OH বন্ধন থাকে। এই বন্ধনে যুক্ত হাইড্রোজেন পরমাণু দুটিই কেবল প্রতিস্থাপনযোগ্য। সরাসরি P-এর সাথে যুক্ত H পরমাণুটি আয়নিত হয় না।" },
+{ q: "১৪. নাইট্রোজেনের কোন্ অক্সাইডটি প্রশম?", opts: ["N₂O", "N₂O₃", "N₂O₅", "N₂O₄"], ans: 0, exp: "ব্যাখ্যা: নাইট্রোজেনের অক্সাইডগুলির মধ্যে নাইট্রাস অক্সাইড (N₂O) এবং নাইট্রিক অক্সাইড (NO) হলো প্রশম প্রকৃতির অক্সাইড।" },
+{ q: "১৫. নাইট্রোজেনের বিভিন্ন অক্সাইডগুলির অ্যাসিড ধর্মের ক্রম হল-", opts: ["N₂O < NO < N₂O₃ < N₂O₅ < NO₂", "NO < N₂O < N₂O₅ < N₂O₃ < NO₂", "N₂O < NO < N₂O₃ < NO₂ < N₂O₅", "NO₂ < NO < N₂O < N₂O₅ < N₂O₃"], ans: 2, exp: "ব্যাখ্যা: জারণ সংখ্যা বৃদ্ধি পেলে আম্লিক ধর্ম বৃদ্ধি পায়। অক্সাইডগুলিতে নাইট্রোজেনের জারণ সংখ্যা যথাক্রমে +1, +2, +3, +4 এবং +5 হওয়ায় এটিই আম্লিকতার সঠিক ক্রম।" }
+]
+},
+12: {
+name: 'Set 12', icon: '🧪', topic: 'Semester Special - II',
+questions: [
+{ q: "১. NO₃⁻ এর বলয় পরীক্ষায় বাদামি বলয় উৎপন্ন হওয়ার জন্য দায়ী-", opts: ["FeSO₄·NO₂", "[Fe(H₂O)₅(NO₂)]²⁺", "[Fe(H₂O)₅(NO)]²⁺", "[Fe(H₂O)₅(NO₂)]SO₄"], ans: 2, exp: "ব্যাখ্যা: নাইট্রেট মূলকের বলয় পরীক্ষায় উৎপন্ন বাদামি বলয়টি হলো পেন্টাঅ্যাকোয়ানাইট্রোসিলআয়রন (II) সালফেট কমপ্লেক্স যার ক্যাটায়নিক রূপটি হলো [Fe(H₂O)₅(NO)]²⁺।" },
+{ q: "২. সাদা ফসফরাস ও গাঢ় H₂SO₄ -কে উত্তপ্ত করলে পাওয়া যায়-", opts: ["H₃PO₄", "H₃PO₃", "HPO₃", "H₄P₂O₇"], ans: 0, exp: "ব্যাখ্যা: গাঢ় সালফিউরিক অ্যাসিড সাদা ফসফরাসকে জারিত করে অর্থোফসফরিক অ্যাসিড (H₃PO₄) উৎপন্ন করে।" },
+{ q: "৩. হোমস্ সিগন্যালে ব্যবহৃত হয়—", opts: ["CaCO₃, Ca₃P₂", "Ca₃(PO₄)₂, CaI₂", "CaI₂, P₄", "Ca₃P₂, CaC₂"], ans: 3, exp: "ব্যাখ্যা: ক্যালশিয়াম কার্বাইড এবং ক্যালশিয়াম ফসফাইডের মিশ্রণ হোমস্ সিগন্যালে ব্যবহৃত হয়। জল লাগলে এরা যথাক্রমে দাহ্য অ্যাসিটিলিন ও ফসফিন গ্যাস তৈরি করে।" },
+{ q: "৪. নীচের অ্যাসিডগুলির মধ্যে কোল্টি তিন ধরনের লবণ উৎপন্ন করতে পারে?", opts: ["H₃PO₂", "H₃PO₃", "H₃PO₄", "HPO₃"], ans: 2, exp: "ব্যাখ্যা: অর্থোফসফরিক অ্যাসিড (H₃PO₄) একটি ত্রি-ক্ষারীয় অ্যাসিড (৩টি P-OH বন্ধন থাকে)। তাই এটি ধাপে ধাপে তিনটি ভিন্ন লবণ গঠন করতে পারে।" },
+{ q: "৫. P₄O₁₀ যৌগে সেতুবন্ধনকারী O-এর সংখ্যা-", opts: ["6", "2", "4", "5"], ans: 0, exp: "ব্যাখ্যা: ফসফরাস পেন্টক্সাইডের খাঁচার মতো গঠনে ৪টি ফসফরাস পরমাণু পরস্পর ৬টি অক্সিজেন সেতুর (P-O-P) সাহায্যে যুক্ত থাকে।" },
+{ q: "৬. অক্সিজেন ও পটাশিয়ামের দহনে উৎপন্ন অক্সাইডটির সংকেত কী?", opts: ["K₂O", "K₂O₂", "KO₂", "K₄O₂"], ans: 2, exp: "ব্যাখ্যা: পটাশিয়াম অক্সিজেনে দগ্ধ হয়ে পটাশিয়াম সুপারঅক্সাইড (KO₂) গঠন করে।" },
+{ q: "৭. প্রদত্ত কোন্ যৌগটির বন্ধন-কোণ 90° -এর কাছাকাছি?", opts: ["NH₃", "H₂S", "H₂O", "CH₄"], ans: 1, exp: "ব্যাখ্যা: সালফারের তড়িৎ-ঋণাত্মকতা অক্সিজেন অপেক্ষা কম হওয়ায় H₂S-এ বন্ধন-জোড় ইলেকট্রনে বিকর্ষণ কমে এবং বন্ধন কোণ প্রায় 90° এর কাছাকাছি হয়।" },
+{ q: "৮. একটি গ্যাস বিজারণ দ্বারা ফুলের বর্ণকে বিরঞ্জিত করে এবং অন্য একটি গ্যাস জারণ দ্বারা ফুলের বর্ণকে বিরঞ্জিত করে, গ্যাস দুটি হল-", opts: ["CO এবং Cl₂", "NH₃ এবং SO₃", "H₂S এবং Br₂", "SO₂ এবং Cl₂"], ans: 3, exp: "ব্যাখ্যা: সালফার ডাইঅক্সাইড (SO₂) জলীয় দ্রবণে বিজারক হিসেবে কাজ করে অস্থায়ী বিরঞ্জন ঘটায়, অন্যদিকে ক্লোরিন (Cl₂) জারণের মাধ্যমে স্থায়ী বিরঞ্জন ঘটায়।" },
+{ q: "৯. প্রদত্ত কোন্ যৌগটিতে O-O বন্ধন বর্তমান?", opts: ["H₂S₂O₃", "H₂S₂O₆", "H₂S₂O₇", "H₂S₂O₈"], ans: 3, exp: "ব্যাখ্যা: পারক্সোডাইসালফিউরিক অ্যাসিড বা মার্শালের অ্যাসিডে (H₂S₂O₈) একটি পারক্সো লিংকেজ বা O-O বন্ধন উপস্থিত থাকে।" },
+{ q: "১০. প্রদত্ত কোন্ যৌগটি জারক ও বিজারক উভয়রূপে কাজ করে?", opts: ["H₂O", "CO₂", "SO₂", "NH₃"], ans: 2, exp: "ব্যাখ্যা: সালফার ডাইঅক্সাইডে (SO₂) সালফারের জারণ অবস্থা +4, যা একটি মধ্যবর্তী অবস্থা। ফলে এটি জারিত হয়ে +6 বা বিজারিত হয়ে নিম্ন জারণ অবস্থায় যেতে পারে।" },
+{ q: "১১. কোল্টিতে S-S দ্বি-বন্ধন আছে?", opts: ["Na₂S₂O₈", "Na₂S₂O₃", "H₃BO₃", "Na₂S₂O₆"], ans: 1, exp: "ব্যাখ্যা: সোডিয়াম থায়োসালফেটের (Na₂S₂O₃) গঠনে একটি কেন্দ্রীয় সালফার পরমাণু অপর একটি সালফার পরমাণুর সাথে দ্বি-বন্ধন (S=S) দ্বারা যুক্ত থাকে।" },
+{ q: "১২. নীচের কোন্ যৌগ-জোড়টি সালফারের পারক্সোঅ্যাসিড?", opts: ["H₂S₂O₈ এবং H₂SO₅", "H₂SO₅ এবং H₂S₂O₇", "H₂S₂O₈ এবং H₂S₂O₇", "H₂S₂O₆ এবং H₂S₂O₇"], ans: 0, exp: "ব্যাখ্যা: মার্শালের অ্যাসিড (H₂S₂O₈) এবং ক্যারোর অ্যাসিড (H₂SO₅) উভয়েই পারক্সো লিংকেজ ধারণ করে, তাই এগুলি পারক্সোঅ্যাসিড।" },
+{ q: "১৩. প্রদত্ত গ্যাসগুলির মধ্যে কোন্টি গন্ধযুক্ত কিন্তু বর্ণহীন?", opts: ["NO₂", "SO₂", "N₂", "Cl₂"], ans: 1, exp: "ব্যাখ্যা: সালফার ডাইঅক্সাইড (SO₂) গ্যাস বর্ণহীন হলেও এর পোড়া গন্ধকের মতো অত্যন্ত ঝাঁজালো গন্ধ রয়েছে।" },
+{ q: "১৪. প্রদত্ত কোল্টিতে S-O-S বন্ধন আছে?", opts: ["ক্যারোর অ্যাসিড", "পাইরোসালফিউরিক অ্যাসিড", "ডাইথায়োনিক অ্যাসিড", "পারক্সোডাইসালফিউরিক অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: পাইরোসালফিউরিক অ্যাসিড বা ওলিয়ামের (H₂S₂O₇) আণবিক গঠনে একটি S-O-S অক্সিজেন সেতু বর্তমান থাকে।" },
+{ q: "১৫. নীচের হাইড্রাইডগুলির বন্ধন-কোণের সঠিক ক্রমটি হল-", opts: ["H₂O > H₂S > H₂Se > H₂Te", "H₂S > H₂Te > H₂Se > H₂O", "H₂S > H₂Se > H₂Te > H₂O", "H₂O < H₂S < H₂Se < H₂Te"], ans: 0, exp: "ব্যাখ্যা: কেন্দ্রীয় পরমাণুর তড়িৎ-ঋণাত্মকতা হ্রাসের সাথে বন্ধন জোড়ের বিকর্ষণ হ্রাস পায়, যার ফলে বন্ধন কোণ ক্রমশ কমে যায়।" }
+]
+},
+13: {
+name: 'Set 13', icon: '🔥', topic: 'Semester Special - III',
+questions: [
+{ q: "১. নীচের কোল্টির অস্তিত্ব নেই?", opts: ["SF₆", "TeF₆", "SeF₆", "OF₆"], ans: 3, exp: "ব্যাখ্যা: অক্সিজেনের যোজ্যতা কক্ষে কোনো ফাঁকা d-অর্বিট্যাল নেই, তাই এটি অষ্টক প্রসারিত করে 6 সমযোজ্যতা দেখাতে পারে না। ফলে OF₆ গঠিত হয় না।" },
+{ q: "২. কমলা বর্ণের কঠিন পদার্থ X-কে উত্তপ্ত করলে বর্ণহীন গ্যাস Y, Mg-এর সঙ্গে বিক্রিয়া করে যে সাদা কঠিন পদার্থ উৎপন্ন করে তা হল-", opts: ["Mg₃N₂", "Mg₂O₃", "MgCl₂", "Mg(NO₃)₂"], ans: 0, exp: "ব্যাখ্যা: কমলা বর্ণের অ্যামোনিয়াম ডাইক্রোমেটকে উত্তপ্ত করলে বর্ণহীন নাইট্রোজেন গ্যাস (Y) পাওয়া যায়। ম্যাগনেশিয়াম নাইট্রোজেনের সঙ্গে বিক্রিয়া করে সাদা রঙের ম্যাগনেশিয়াম নাইট্রাইড (Mg₃N₂) উৎপন্ন করে।" },
+{ q: "৩. টেট্রাহ্যালাইডে গ্রুপ-16 মৌলগুলির সংকরায়ণ অবস্থা-", opts: ["sp³", "sp³d", "sp³d²", "sp²"], ans: 1, exp: "ব্যাখ্যা: গ্রুপ-16 এর টেট্রাহ্যালাইডগুলিতে (যেমন SF₄) কেন্দ্রীয় পরমাণুতে 4টি বন্ড পেয়ার এবং 1টি লোন পেয়ার থাকে। মোট 5টি জোড় থাকায় সংকরায়ণ অবস্থা sp³d হয়।" },
+{ q: "৪. কোন্ হ্যালোজেন মৌলটির ইলেকট্রন-গ্রহণ এনথ্যালপি সবচেয়ে ঋণাত্মক?", opts: ["F", "Cl", "Br", "I"], ans: 1, exp: "ব্যাখ্যা: ফ্লোরিনের আকার অত্যন্ত ছোট হওয়ায় এর 2p উপকক্ষে ইলেকট্রন-ঘনত্ব খুব বেশি থাকে। আগত ইলেকট্রন তীব্র বিকর্ষণ অনুভব করে, তাই ক্লোরিনের ইলেকট্রন গ্রহণ এনথ্যালপি ফ্লোরিন অপেক্ষা অধিক ঋণাত্মক হয়।" },
+{ q: "৫. বিজারিত হওয়ার প্রবণতার সঠিক ক্রমটি হল-", opts: ["F > Cl > Br > I", "I > Br > Cl > F", "F > I > Cl > Br", "Cl > Br > I > F"], ans: 0, exp: "ব্যাখ্যা: হ্যালোজেনগুলির জারণ ক্ষমতা হ্রাসের ক্রম হলো F₂ > Cl₂ > Br₂ > I₂। যার জারণ ক্ষমতা যত বেশি, তার অন্যের কাছ থেকে ইলেকট্রন নিয়ে নিজে বিজারিত হওয়ার প্রবণতা তত বেশি।" },
+{ q: "৬. F₂ জলের সঙ্গে বিক্রিয়ায় উৎপন্ন করে-", opts: ["HF এবং O₂", "HF এবং O₃", "HF এবং OF₂", "HF, O₂ এবং O₃"], ans: 3, exp: "ব্যাখ্যা: ফ্লোরিন তীব্র জারক পদার্থ হওয়ায় এটি জলের সাথে বিক্রিয়া করে জলকে জারিত করে অক্সিজেন (O₂) এবং ওজোন (O₃) উৎপন্ন করে এবং নিজে হাইড্রোফ্লুরিক অ্যাসিড গঠন করে।" },
+{ q: "৭. হ্যালোজেন অ্যাসিডগুলির স্থায়িত্বের ক্রম হল-", opts: ["HF > HCl > HBr > HI", "HF < HCl < HBr < HI", "HF > HBr > HCl > HI", "HBr > HCl > HF > HI"], ans: 0, exp: "ব্যাখ্যা: ফ্লোরিন থেকে আয়োডিন পর্যন্ত হ্যালোজেন পরমাণুর আকার ক্রমশ বৃদ্ধি পায়, ফলে E-H বন্ধন দৈর্ঘ্য বৃদ্ধি পায় এবং বন্ধন বিয়োজন শক্তি হ্রাস পায়। তাই তাপীয় স্থায়িত্ব কমে যায়।" },
+{ q: "৮. ICl₂⁻ আয়নে আয়োডিনের সংকরায়িত অবস্থা হল—", opts: ["sp³d", "sp³d²", "sp³", "sp²"], ans: 0, exp: "ব্যাখ্যা: ICl₂⁻ আয়নে আয়োডিনের যোজ্যতা কক্ষে 2টি বন্ড পেয়ার এবং 3টি লোন পেয়ার থাকে। মোট 5টি জোড় থাকায় এর সংকরায়ণ sp³d হয় এবং এটি সরলরৈখিক গঠন লাভ করে।" },
+{ q: "৯. প্রদত্ত কোন্ ইন্টারহ্যালোজেন যৌগটির অস্তিত্ব নেই?", opts: ["IF₅", "ClF₃", "BrCl", "ICl₄"], ans: 3, exp: "ব্যাখ্যা: আন্তঃহ্যালোজেন যৌগগুলি সাধারণত XX'ₙ সংকেতবিশিষ্ট হয় যেখানে n সর্বদা একটি বিজোড় সংখ্যা। আয়োডিন পরমাণুর যোজ্যতা কক্ষে বিজোড় সংখ্যক ইলেকট্রন 4টি হতে পারে না, তাই ICl₄ এর অস্তিত্ব নেই।" },
+{ q: "১০. আয়োডিন দ্রবণকে বিবর্ণ করতে যে জলীয় দ্রবণটি মিশিয়ে ঝাঁকানো হয় সেটি হল-", opts: ["H₂O₂", "সোডিয়াম সালফাইড", "সোডিয়াম থায়োসালফেট", "সোডিয়াম সালফেট"], ans: 2, exp: "ব্যাখ্যা: আয়োডিনের বাদামি দ্রবণে সোডিয়াম থায়োসালফেট যোগ করলে এটি আয়োডিনকে বিজারিত করে বর্ণহীন সোডিয়াম আয়োডাইড এবং সোডিয়াম টেট্রাথায়োনেট উৎপন্ন করে।" },
+{ q: "১১. হ্যালোজেন অ্যাসিডের বিজারণ ক্ষমতার ক্রম হল-", opts: ["HI > HBr > HCl > HF", "HF > HCl > HBr > HI", "HF > HBr > HI > HCl", "HBr > HCl > HI > HF"], ans: 0, exp: "ব্যাখ্যা: হ্যালোজেন পরমাণুর আকার বৃদ্ধির সাথে বন্ধন-বিয়োজন এনথ্যালপি কমে যায়, ফলে প্রোটন/হাইড্রোজেন দান করার প্রবণতা বা বিজারণ ক্ষমতা ক্রমশ বৃদ্ধি পায়।" },
+{ q: "১২. পরাচুম্বকীয় পদার্থটি হল-", opts: ["Cl₂O", "ClO₂", "Cl₂O₆", "Cl₂O₇"], ans: 1, exp: "ব্যাখ্যা: ClO₂ যৌগে ক্লোরিন ও অক্সিজেনের মোট ইলেকট্রন সংখ্যা বিজোড় (33টি)। এতে একটি অযুগ্ম ইলেকট্রন উপস্থিত থাকায় এটি পরাচৌম্বকীয় (Paramagnetic) আচরণ প্রদর্শন করে।" },
+{ q: "১৩. কোন্ অ্যানায়নটি জারণ-বিজারণ উভয় ধর্মই দেখায়?", opts: ["Cr₂O₇²⁻", "NO₃⁻", "OCl⁻", "S²⁻"], ans: 2, exp: "ব্যাখ্যা: হাইপোক্লোরাইট (OCl⁻) আয়নে ক্লোরিনের জারণ সংখ্যা +1, যা একটি মধ্যবর্তী অবস্থা। এটি জারিত হয়ে উচ্চতর জারণ অবস্থায় এবং বিজারিত হয়ে -1 জারণ অবস্থায় যেতে পারে।" },
+{ q: "১৪. গাঢ় HNO₃ -এর সঙ্গে আয়োডিনের বিক্রিয়ায় উৎপন্ন হয়—", opts: ["HI", "HIO₃", "HIO₄", "HOI"], ans: 1, exp: "ব্যাখ্যা: গাঢ় নাইট্রিক অ্যাসিড একটি শক্তিশালী জারক যা আয়োডিনকে জারিত করে আয়োডিক অ্যাসিড (HIO₃) এবং নাইট্রোজেন ডাইঅক্সাইড গ্যাস উৎপন্ন করে।" },
+{ q: "১৫. 4ClO₃⁻ → 3ClO₄⁻ + Cl⁻ প্রদত্ত বিক্রিয়াটি কোন্ ধরনের বিক্রিয়া?", opts: ["জারণ বিক্রিয়া", "বিজারণ বিক্রিয়া", "অসমঞ্জস বিক্রিয়া", "বিয়োজন বিক্রিয়া"], ans: 2, exp: "ব্যাখ্যা: এই বিক্রিয়ায় ক্লোরেট আয়নে ক্লোরিনের জারণ অবস্থা (+5) বৃদ্ধি পেয়ে +7 এবং হ্রাস পেয়ে -1 হয়। একই মৌলের একসাথে জারণ ও বিজারণ ঘটলে তাকে অসমঞ্জস বা ডিসপ্রোপরসনেশন বিক্রিয়া বলে।" }
+]
+},
+14: {
+name: 'Set 14', icon: '☁️', topic: 'Competitive & Advanced - I',
+questions: [
+{ q: "১. কার্বন ডাইসালফাইডে ব্রোমিনের বর্ণ-", opts: ["সবুজ", "কমলা", "হলুদ", "লাল"], ans: 3, exp: "ব্যাখ্যা: বিভিন্ন জৈব দ্রাবকে হ্যালোজেন দ্রবীভূত হয়ে রঙিন দ্রবণ তৈরি করে। ব্রোমিন কার্বন ডাইসালফাইডে দ্রবীভূত হলে গাঢ় লাল বা বাদামি লাল বর্ণ ধারণ করে।" },
+{ q: "২. ClO₃⁻ আয়নটির গঠন-", opts: ["চতুস্তলকীয়", "পঞ্চকোণীয় দ্বি-পিরামিডীয়", "পিরামিডীয়", "সমতলীয় ত্রিভুজাকার"], ans: 2, exp: "ব্যাখ্যা: ClO₃⁻ আয়নে ক্লোরিন পরমাণুর সংকরায়ণ sp³ এবং এতে 1টি লোন-পেয়ার ও 3টি বন্ড-পেয়ার উপস্থিত থাকে। তাই VSEPR তত্ত্ব অনুযায়ী এর আকৃতি পিরামিডীয় হয়।" },
+{ q: "৩. Xe -এর কোন্ যৌগটি সম্ভব নয়?", opts: ["XeO₃", "XeCl₄", "XeF₄", "XeO₂F₂"], ans: 1, exp: "ব্যাখ্যা: জেননের সাথে শুধুমাত্র অত্যধিক তড়িৎ-ঋণাত্মক মৌল ফ্লোরিন এবং অক্সিজেন যৌগ গঠন করতে পারে। ক্লোরিন জেননকে জারিত করতে পারে না, তাই XeCl₄ গঠিত হয় না।" },
+{ q: "৪. XeO₃ -এর গঠন হল-", opts: ["সরলরৈখিক", "পিরামিডাকার", "সামতলিক বর্গাকার", "T-আকৃতির"], ans: 1, exp: "ব্যাখ্যা: XeO₃ অণুতে কেন্দ্রীয় Xe পরমাণুর সংকরায়ণ sp³ এবং এতে 1টি লোন-পেয়ার উপস্থিত থাকে। তাই এর জ্যামিতিক আকৃতি অ্যামোনিয়ার মতো পিরামিডাকার হয়।" },
+{ q: "৫. SbF₅ এর সঙ্গে XeF₄ এর বিক্রিয়ায় যুত যৌগ উৎপন্ন হয়। যুত যৌগটির ক্যাটায়ন এবং অ্যানায়নের জ্যামিতিক আকৃতি হল যথাক্রমে-", opts: ["বর্গ সমতলীয়, ত্রিকোণীয় দ্বি-পিরামিডীয়", "T-আকৃতিবিশিষ্ট, অষ্টতলকীয়", "বর্গাকার পিরামিডীয়, অষ্টতলকীয়", "বর্গ সমতলীয়, অষ্টতলকীয়"], ans: 1, exp: "ব্যাখ্যা: বিক্রিয়াটিতে [XeF₃]⁺[SbF₆]⁻ গঠিত হয়। [XeF₃]⁺ আয়নের আকৃতি T-আকৃতিবিশিষ্ট এবং [SbF₆]⁻ আয়নের আকৃতি অষ্টতলকীয়।" },
+{ q: "৬. প্রদত্ত কোন্টি XeF₆ এর আর্দ্রবিশ্লেষণে কখনোই তৈরি হবে না?", opts: ["Xe", "XeOF₄", "HF", "XeO₃"], ans: 0, exp: "ব্যাখ্যা: XeF₆ এর আর্দ্রবিশ্লেষণে XeO₃ (সম্পূর্ণ) এবং XeOF₄ (আংশিক) ও HF তৈরি হয়। জেনন (Xe) গ্যাস এই বিক্রিয়ায় উৎপন্ন হয় না।" },
+{ q: "৭. XeF₄ জলীয় দ্রবণে আর্দ্রবিশ্লেষিত হয়ে উৎপন্ন করে-", opts: ["XeO₃", "XeOF₄", "XeOF₂", "XeO₂"], ans: 0, exp: "ব্যাখ্যা: XeF₄ জলের সাথে তীব্রভাবে বিক্রিয়া করে জেনন গ্যাস, অক্সিজেন এবং জেনন ট্রাইঅক্সাইড (XeO₃) উৎপন্ন করে।" },
+{ q: "৮. সমুদ্রে ডুবুরিরা শ্বাসকার্য চালাতে ব্যবহার করে-", opts: ["O₂ + Ne", "O₂ + He", "O₂ + Kr", "O₂ + Xe"], ans: 1, exp: "ব্যাখ্যা: উচ্চ চাপে রক্তে হিলিয়ামের দ্রাব্যতা অত্যন্ত কম হওয়ায় ডিকম্প্রেশন সিকনেস (বেন্ডস) এড়াতে নাইট্রোজেনের পরিবর্তে হিলিয়াম ও অক্সিজেনের মিশ্রণ ব্যবহার করা হয়।" },
+{ q: "৯. একটি বর্ণহীন উদ্‌দায়ী সোডিয়াম লবণে লঘু অ্যাসিড যোগ করলে বর্ণহীন গ্যাস উৎপন্ন হয়। বর্ণহীন গ্যাসটি অ্যাসিডযুক্ত ডাইক্রোমেট দ্রবণের মধ্য দিয়ে চালনা করলে দ্রবণটি সবুজ বর্ণ ধারণ করে। সোডিয়াম লবণটি হল-", opts: ["Na₂SO₃", "Na₂S₂O₃", "Na₂S", "Na₂S₄O₆"], ans: 0, exp: "ব্যাখ্যা: সোডিয়াম সালফাইট লবণে অ্যাসিড দিলে SO₂ গ্যাস নির্গত হয়। বিজারক SO₂ কমলা রঙের পটাশিয়াম ডাইক্রোমেটকে জারিত করে সবুজ বর্ণের ক্রোমিক সালফেটে পরিণত করে।" },
+{ q: "১০. H₄P₂O₇, H₄P₂O₆ এবং H₄P₂O₅ অণুগুলিতে P-এর জারণ অবস্থা হল যথাক্রমে-", opts: ["+5, +4 এবং +3", "+5, +5 এবং +3", "+3, +4 এবং +5", "+7, +4 এবং +7"], ans: 0, exp: "ব্যাখ্যা: যৌগে পরমাণুর জারণ সংখ্যা গণনা করলে পাইরোফসফরিক অ্যাসিডে +5, হাইপোফসফরিক অ্যাসিডে +4 এবং পাইরোফসফরাস অ্যাসিডে +3 পাওয়া যায়।" },
+{ q: "১১. যে দ্রবণটি সর্বোচ্চ স্ফুটনাঙ্কের অ্যাজিওট্রোপ গঠন করে সেটি হল-", opts: ["জল ও নাইট্রিক অ্যাসিড", "ইথানল ও জল", "অ্যাসিটোন ও কার্বন ডাইসালফাইড", "হেপটেন ও অক্টেন"], ans: 0, exp: "ব্যাখ্যা: জল এবং নাইট্রিক অ্যাসিডের মিশ্রণ রাউল্টের সূত্র থেকে বৃহৎ ঋণাত্মক বিচ্যুতি প্রদর্শন করে, তাই এটি সর্বোচ্চ স্ফুটনাঙ্কের অ্যাজিওট্রোপ গঠন করে।" },
+{ q: "১২. সিলভার নাইট্রেট দ্রবণের সঙ্গে ফসফরাস অ্যাসিডের বিক্রিয়ায় উৎপন্ন হয়-", opts: ["সিলভার ফসফেট", "ধাতব সিলভার", "ফসফরিক অ্যাসিড", "সিলভার ফসফাইড"], ans: 1, exp: "ব্যাখ্যা: ফসফরাস অ্যাসিড (H₃PO₃) একটি ভালো বিজারক, যা সিলভার নাইট্রেটকে বিজারিত করে কালো বর্ণের ধাতব সিলভারের অধঃক্ষেপ সৃষ্টি করে।" },
+{ q: "১৩. 2F₂ + 2H₂O → 4HF + O₂ বিক্রিয়ার ক্ষেত্রে কোন্ বিবৃতিটি সত্য নয়?", opts: ["O₂ অপেক্ষা F₂ তীব্রতর জারক ধর্মী", "O=O বন্ধন অপেক্ষা F-F বন্ধন দুর্বলতর", "H-O বন্ধন অপেক্ষা H-F বন্ধন অধিকতর শক্তিশালী", "O অপেক্ষা F-এর তড়িৎ-ঋণাত্মকতা নিম্নতর"], ans: 3, exp: "ব্যাখ্যা: পর্যায় সারণিতে ফ্লুরিন (F) হলো সর্বোচ্চ তড়িৎ-ঋণাত্মক মৌল, তাই এটি অক্সিজেনের চেয়ে কম তড়িৎ-ঋণাত্মক হতে পারে না।" },
+{ q: "১৪. H₃PO₃ এবং H₃PO₄ এ উপস্থিত - OH মূলকের সংখ্যা-", opts: ["3 এবং 3 যথাক্রমে", "2 এবং 3 যথাক্রমে", "3 এবং 4 যথাক্রমে", "1 এবং 3 যথাক্রমে"], ans: 1, exp: "ব্যাখ্যা: ফসফরাস অ্যাসিডে (H₃PO₃) দুটি P-OH বন্ধন থাকে। অন্যদিকে অর্থোফসফরিক অ্যাসিডে (H₃PO₄) তিনটি P-OH বন্ধন থাকে।" },
+{ q: "১৫. নীচের হ্যালোজেন হাইড্রাসিডগুলির আম্লিক শক্তির সঠিক ক্রম হল-", opts: ["HF > HCl > HBr > HI", "HF < HCl < HBr < HI", "HI < HCl > HBr > HI", "HF > HCl < HBr > HI"], ans: 1, exp: "ব্যাখ্যা: হ্যালোজেন পরমাণুর আকার বাড়ার সাথে সাথে H-X বন্ধন ক্রমশ দুর্বল হয়। ফলে জলীয় দ্রবণে প্রোটন দেওয়ার প্রবণতা বা আম্লিক শক্তি ক্রমশ বৃদ্ধি পায়।" }
+]
+},
+15: {
+name: 'Set 15', icon: '🧠', topic: 'HOTS (Higher Order Thinking Skills) & True/False',
+questions: [
+{ q: "১. গ্যাসীয় দশায় (gas phase) SN1 বিক্রিয়া অতি বিরল কেন?", opts: ["গ্যাসীয় অণুগুলি খুব দ্রুত ছোটাছুটি করে", "গ্যাসীয় দশায় দ্রাবক অনুপস্থিত থাকায় আয়নগুলিকে সলভেশন এর মাধ্যমে স্থিতিশীল করার সুযোগ থাকে না", "গ্যাসীয় দশায় কার্বন-হ্যালোজেন বন্ধন অতি শক্তিশালী হয়", "গ্যাসীয় দশায় নিউক্লিওফাইল কাজ করে না"], ans: 1, exp: "ব্যাখ্যা: SN1 বিক্রিয়ায় কার্বোক্যাটায়ন ও হ্যালাইড আয়ন তৈরি হয়, যা পোলার দ্রাবক দ্বারা সলভেশন শক্তি পেয়ে স্থিতিশীল হয়। গ্যাসে এই সুবিধা থাকে না।" },
+{ q: "২. (CH₃)₃CCl এবং (CD₃)₃CCl এর মধ্যে কোল্টির ক্ষারীয় আর্দ্রবিশ্লেষণ (SN1) দ্রুত ঘটে?", opts: ["(CH₃)₃CCl", "(CD₃)₃CCl", "উভয়েই সমান", "কোনোটিই আর্দ্রবিশ্লেষিত হয় না"], ans: 0, exp: "ব্যাখ্যা: C-H বন্ধনের হাইপারকনজুগেশন ক্ষমতা C-D বন্ধন অপেক্ষা বেশি শক্তিশালী। তাই (CH₃)₃CCl থেকে উৎপন্ন কার্বোক্যাটায়ন বেশি স্থিতিশীল হয়।" },
+{ q: "৩. (S)-2-ক্লোরোবিউটেন থেকে (S)-2-আয়োডোবিউটেন কীভাবে প্রস্তুত করবে?", opts: ["একধাপে NaI/Acetone দিয়ে", "দুটি SN2 বিক্রিয়ার মাধ্যমে (যেমন প্রথমে OTs তৈরি করে তারপর I⁻ দিয়ে)", "SN1 বিক্রিয়ার মাধ্যমে", "মুক্তমূলক বিক্রিয়ার মাধ্যমে"], ans: 1, exp: "ব্যাখ্যা: দুটি SN2 ধাপ প্রয়োগ করলে দুবার ইনভারশন হয়ে আবার মূল কনফিগারেশন S ফিরে পাওয়া যায় (Net retention)।" },
+{ q: "৪. NaI-এর উপস্থিতিতে CH₃Cl-এর আর্দ্রবিশ্লেষণ দ্রুততার সঙ্গে ঘটে কেন?", opts: ["I⁻ আয়ন দ্রাবক হিসেবে কাজ করে", "I⁻ আয়ন একটি ভালো নিউক্লিওফাইল এবং ভালো লিভিং গ্রুপ উভয় হিসেবেই কাজ করে", "I⁻ আয়ন কার্বোক্যাটায়নকে ধ্বংস করে", "I⁻ আয়ন জলের পোলারিটি কমায়"], ans: 1, exp: "ব্যাখ্যা: প্রথমে I⁻ আয়ন CH₃Cl-কে আক্রমণ করে দ্রুত CH₃I বানায়। এরপর CH₃I-কে জল সহজেই আর্দ্রবিশ্লেষিত করতে পারে।" },
+{ q: "৫. CH₃OCH₂Cl যৌগটি SN1 এবং SN2 উভয় বিক্রিয়ায় অত্যন্ত সক্রিয় কেন?", opts: ["এটি একটি 3° হ্যালাইড", "এর SN1 এ উৎপন্ন কার্বোক্যাটায়নটি অক্সিজেনের নিঃসঙ্গ জোড় দ্বারা রেজোনেন্সে স্থিতিশীল এবং 1° হওয়ায় স্টেরিক বাধাও কম", "ক্লোরিনের আকার বড় হওয়ায়", "মিথাইল গ্রুপের ইনডাক্টিভ ইফেক্টের জন্য"], ans: 1, exp: "ব্যাখ্যা: কার্বোক্যাটায়নটি রেজোনেন্সে খুব স্থায়ী, তাই SN1 দেয়। আবার 1° হ্যালাইড হওয়ায় স্টেরিক হিনড্রেন্স কম, তাই SN2 ও দ্রুত দেয়।" },
+{ q: "৬. তাপমাত্রা বৃদ্ধি E2 বিক্রিয়ার সহায়ক- কারণ কী?", opts: ["E2 বিক্রিয়ায় বিক্রিয়াজাত কণার সংখ্যা বাড়ে, তাই এনট্রপি ধনাত্মক হয়", "E2 বিক্রিয়া তাপমোচী", "কার্বোক্যাটায়ন সহজে তৈরি হয়", "ক্ষারকের শক্তি কমে যায়"], ans: 0, exp: "ব্যাখ্যা: ΔS ধনাত্মক হলে তাপমাত্রা বাড়ালে ΔG বেশি ঋণাত্মক হয়, ফলে অপনয়ন বিক্রিয়াটি শক্তির দিক থেকে বেশি স্বতঃস্ফূর্ত হয়।" },
+{ q: "৭. ট্রান্স-2-ব্রোমোবিউট-2-ইনের ডিহাইড্রোব্রোমিনেশন সিস-আইসোমারের চেয়ে দ্রুত ঘটে কেন?", opts: ["ট্রান্স-এ স্টেরিক বাধা বেশি", "ট্রান্স-আইসোমারে H এবং Br বিপরীত দিকে থাকায় অ্যান্টি-অপনয়ন শক্তির দিক থেকে অনুকূল হয়", "ট্রান্স-আইসোমার বেশি দ্রাব্য", "সিস্-আইসোমারে কার্বোক্যাটায়ন অস্থিতিশীল"], ans: 1, exp: "ব্যাখ্যা: E2 অপনয়নের জন্য অ্যান্টি-পেরিপ্ল্যানার অবস্থান সবচেয়ে উপযুক্ত। ট্রান্স-আইসোমারে H এবং Br বিপরীত তলে থাকায় এই শর্ত সহজেই পূরণ হয়।" },
+{ q: "৮. (True/False) ইথাইল ক্লোরাইডের C-Cl বন্ধন আংশিক দ্বি-বন্ধন চরিত্রবিশিষ্ট।", opts: ["সত্য", "মিথ্যা"], ans: 1, exp: "ব্যাখ্যা: ইথাইল ক্লোরাইডে ক্লোরিন sp³ কার্বনের সাথে যুক্ত, তাই কোনো রেজোনেন্স হয় না।" },
+{ q: "৯. (True/False) সায়ানাইড আয়ন (CN⁻) একটি অ্যাম্বিডেন্ট নিউক্লিওফাইল।", opts: ["সত্য", "মিথ্যা"], ans: 0, exp: "ব্যাখ্যা: সায়ানাইড আয়নের কার্বন এবং নাইট্রোজেন উভয় প্রান্তেই নিউক্লিওফিলিক কেন্দ্র থাকে।" },
+{ q: "১০. (True/False) প্যারা-ডাইক্লোরোবেঞ্জিনের গলনাঙ্ক অর্থো বা মেটার চেয়ে বেশি।", opts: ["সত্য", "মিথ্যা"], ans: 0, exp: "ব্যাখ্যা: প্যারা-আইসোমারটির প্রতিসম গঠনের কারণে এটি কেলাস জালকে খুব ভালোভাবে খাপ খায়, ফলে এর গলনাঙ্ক বেশি হয়।" },
+{ q: "১১. (True/False) ক্লোরোফর্ম আলো ও বাতাসের উপস্থিতিতে বিষাক্ত ফসজিন গ্যাস তৈরি করে।", opts: ["সত্য", "মিথ্যা"], ans: 0, exp: "ব্যাখ্যা: ক্লোরোফর্ম বায়ুর অক্সিজেনের সাথে আলোতে জারিত হয়ে কার্বনিল ক্লোরাইড বা ফসজিন (COCl₂) গ্যাস তৈরি করে।" },
+{ q: "১২. (True/False) ফ্রেয়ন-12 এর রাসায়নিক সংকেত CF₂Cl₂।", opts: ["সত্য", "মিথ্যা"], ans: 0, exp: "ব্যাখ্যা: ফ্রেয়ন-12 হলো ডাইক্লোরোডাইফ্লুরোমিথেন। যার সংকেত CF₂Cl₂।" },
+{ q: "১৩. (True/False) DDT পরিবেশের জন্য ক্ষতিকর কারণ এটি নন-বায়োডিগ্রেডেবল।", opts: ["সত্য", "মিথ্যা"], ans: 0, exp: "ব্যাখ্যা: DDT পরিবেশে সহজে বিয়োজিত হয় না এবং প্রাণীদের চর্বিতে জমে গিয়ে বায়োম্যাগনিফিকেশন ঘটায়।" },
+{ q: "১৪. পোলার প্রোটিক দ্রাবকে হ্যালাইড আয়নগুলির নিউক্লিওফিলিসিটির ক্রম কী?", opts: ["I⁻ > Br⁻ > Cl⁻ > F⁻", "F⁻ > Cl⁻ > Br⁻ > I⁻", "Cl⁻ > I⁻ > F⁻ > Br⁻", "কোনো ক্রম নেই"], ans: 0, exp: "ব্যাখ্যা: পোলার প্রোটিক দ্রাবকে বড় আয়ন I⁻ কম সলভেটেড হয় তাই এটি সবচেয়ে শক্তিশালী নিউক্লিওফাইল।" },
+{ q: "১৫. অপনয়ন বিক্রিয়ায় লিভিং গ্রুপ খুব খারাপ (যেমন F⁻) হলে কোন্ নিয়মটি প্রযুক্ত হয়?", opts: ["সেটজেফ নিয়ম", "হফম্যান নিয়ম", "মারকনিকফ নিয়ম", "হান্সডিকার নিয়ম"], ans: 1, exp: "ব্যাখ্যা: লিভিং গ্রুপ খারাপ হলে ট্রানজিশন স্টেটে কার্বানায়ন চরিত্র বৃদ্ধি পায়, ফলে কম প্রতিস্থাপিত অ্যালকিন (হফম্যান প্রোডাক্ট) মুখ্য হয়।" }
+]
+}
+};
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+function getGlobalUsers() {
+const data = localStorage.getItem("testBazarGlobalUsers");
+return data ? JSON.parse(data) : {};
+}
+function getAttemptsData() {
+const data = localStorage.getItem("testBazarAttemptsChem3U3_v1");
+return data ? JSON.parse(data) : {};
+}
+function getAttemptCount(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+return attempts[key] || 0;
+}
+function incrementAttempt(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+attempts[key] = (attempts[key] || 0) + 1;
+localStorage.setItem("testBazarAttemptsChem3U3_v1", JSON.stringify(attempts));
+return attempts[key];
+}
+window.onload = () => { renderHub(); };
+function renderHub() {
+const grid = document.getElementById("setGrid");
+grid.innerHTML = "";
+for(let id in ALL_SETS) {
+const set = ALL_SETS[id];
+const div = document.createElement("div");
+div.className = "set-card";
+let attemptCount = 0;
+let isLocked = false;
+if (currentUser) {
+attemptCount = getAttemptCount(currentUser, id);
+isLocked = attemptCount >= MAX_ATTEMPTS;
+if (isLocked) div.classList.add("locked");
+}
+div.innerHTML = `
+<div class="icon">${set.icon}</div>
+<div class="set-num">${set.name}</div>
+<div class="set-title">${set.topic}</div>
+<div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+`;
+div.onclick = () => {
+if (isLocked) { alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return; }
+handleSetClick(id);
+};
+grid.appendChild(div);
+}
+}
+function handleSetClick(setId) {
+activeSetId = setId;
+if (!currentUser) {
+document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+document.getElementById("loginOverlay").classList.add("active");
+document.getElementById("loginUsername").value = "";
+document.getElementById("loginPassword").value = "";
+document.getElementById("loginError").style.display = "none";
+} else { startQuiz(setId); }
+}
+function doLogin() {
+const u = document.getElementById("loginUsername").value.trim();
+const p = document.getElementById("loginPassword").value.trim();
+const err = document.getElementById("loginError");
+const GLOBAL_USERS = getGlobalUsers();
+if(!u || !p) { err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!"; err.style.display = "block"; return; }
+if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+let attempts = getAttemptCount(u, activeSetId);
+if (attempts >= MAX_ATTEMPTS) {
+err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+err.style.display = "block";
+return;
+}
+currentUser = u;
+document.getElementById("loginOverlay").classList.remove("active");
+document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+document.getElementById("userDisplay").classList.remove("hidden");
+renderHub();
+startQuiz(activeSetId);
+} else {
+err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+err.style.display = "block";
+}
+}
+function closeLogin() { document.getElementById("loginOverlay").classList.remove("active"); }
+function goToHub() {
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("hubPage").style.display = "block";
+document.getElementById("timerBox").classList.add("hidden");
+clearInterval(timerInterval);
+renderHub();
+}
+function startQuiz(setId) {
+incrementAttempt(currentUser, setId);
+questions = ALL_SETS[setId].questions;
+currentQIndex = 0; score = 0; wrongAnswers = 0; userAnswers = {}; isReviewMode = false; timeLeft = TIME_LIMIT;
+document.getElementById("hubPage").style.display = "none";
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+document.getElementById("timerBox").classList.remove("hidden");
+document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+startTimer();
+loadQuestion();
+}
+function loadQuestion() {
+const qData = questions[currentQIndex];
+document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+document.getElementById("qText").innerText = qData.q;
+const progress = ((currentQIndex) / questions.length) * 100;
+document.getElementById("progressFill").style.width = `${progress}%`;
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+const optsBox = document.getElementById("qOpts");
+optsBox.innerHTML = "";
+document.getElementById("explanation").classList.remove("show");
+document.getElementById("nextBtn").disabled = true;
+document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+qData.opts.forEach((optText, idx) => {
+const btn = document.createElement("button");
+btn.className = "opt";
+btn.innerHTML = `<div class="opt-circle">${LABELS[idx]}</div> <div class="opt-text">${optText}</div>`;
+if (isReviewMode) {
+btn.classList.add("disabled");
+if (idx === qData.ans) btn.classList.add("correct");
+else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+} else {
+btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+}
+optsBox.appendChild(btn);
+});
+if (isReviewMode) {
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+if (currentQIndex === questions.length - 1) { document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন"; }
+}
+}
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+allBtns.forEach(b => b.classList.add("disabled"));
+userAnswers[currentQIndex] = selectedIdx;
+if (selectedIdx === correctIdx) { btn.classList.add("correct"); score++; }
+else { btn.classList.add("wrong"); allBtns[correctIdx].classList.add("correct"); wrongAnswers++; }
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+}
+function nextQ() {
+if (isReviewMode && currentQIndex === questions.length - 1) {
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show"); return;
+}
+if (!isReviewMode && currentQIndex === questions.length - 1) { finishQuiz(); return; }
+currentQIndex++; loadQuestion();
+}
+function startTimer() {
+clearInterval(timerInterval);
+const tBox = document.getElementById("timerBox");
+tBox.classList.remove("danger");
+timerInterval = setInterval(() => {
+if (timeLeft <= 0) { clearInterval(timerInterval); finishQuiz(); return; }
+timeLeft--;
+const m = Math.floor(timeLeft / 60); const s = timeLeft % 60;
+document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+if (timeLeft < 60) tBox.classList.add("danger");
+}, 1000);
+}
+function finishQuiz() {
+clearInterval(timerInterval);
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("timerBox").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show");
+const total = questions.length; const skipped = total - (score + wrongAnswers);
+const percent = Math.round((score / total) * 100);
+document.getElementById("finalScore").innerText = `${percent}%`;
+document.getElementById("rbCorrect").innerText = score;
+document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+const gradeEl = document.getElementById("resultGrade");
+if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+function restartQuiz() {
+if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return;
+}
+startQuiz(activeSetId);
+}
+function showReview() {
+isReviewMode = true; currentQIndex = 0;
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+loadQuestion();
+}
+</script>
+</body>
+</html>
+
+
+
