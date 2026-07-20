@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Chemistry 3rd Sem | Unit 5</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main);}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; }
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header class="top-bar">
+<div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+<div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+<div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+<div class="main">
+
+<!-- LOGIN MODAL -->
+<div class="login-overlay" id="loginOverlay">
+<div class="login-modal">
+<h2>লগইন করুন</h2>
+<p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+<div class="login-set-name" id="loginSetName">📚 Set 1</div>
+<div class="input-group">
+<label>ইউজারনেম</label>
+<input type="text" id="loginUsername" placeholder="Username">
+</div>
+<div class="input-group">
+<label>পাসওয়ার্ড</label>
+<input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+</div>
+<button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+<button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+<div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+</div>
+</div>
+
+<!-- HUB PAGE -->
+<div id="hubPage">
+<div class="hub-header">
+<h1>রসায়ন 3rd Sem Unit 5:<br>জীব-অণুসমূহ (Biomolecules)</h1>
+<p>মোট ১২০টি প্রশ্ন সম্বলিত ৮টি সেট (১-৭, ১৫)। Test শুরু করতে সেটে ক্লিক করুন।</p>
+</div>
+<div class="set-grid" id="setGrid"></div>
+<div style="text-align: center; margin-top: 30px;">
+<button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+</div>
+</div>
+
+<!-- QUIZ AREA -->
+<div id="testArea" class="hidden">
+<div class="quiz-info">
+<div class="info-item">🎓 <strong>Chemistry</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+<div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+</div>
+<div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="q-card">
+<div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+<div class="q-text" id="qText">Question Text</div>
+<div class="opts" id="qOpts"></div>
+<div class="explanation" id="explanation"><p id="explanationText"></p></div>
+<div class="nav-row">
+<div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+<button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+</div>
+</div>
+</div>
+
+<!-- RESULT AREA -->
+<div class="result-wrap" id="resultWrap">
+<div class="result-icon" id="resultIcon">🏆</div>
+<div class="result-score en-font" id="finalScore">100%</div>
+<div class="result-total">স্কোর</div>
+<div class="result-grade" id="resultGrade">অসাধারণ!</div>
+<div class="result-bars">
+<div class="result-bar">
+<div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+<div class="rb-label">সঠিক</div>
+</div>
+<div class="result-bar">
+<div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+<div class="rb-label">ভুল/স্কিপ</div>
+</div>
+</div>
+<div class="attempt-info-box" id="attemptInfo"></div>
+<div class="action-btns">
+<button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+<button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+<button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+</div>
+</div>
+
+</div>
+
+<script>
+const MAX_ATTEMPTS = 10;
+const TIME_LIMIT = 10 * 60;
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+1: {
+name: 'Set 1', icon: '🍞', topic: 'কার্বোহাইড্রেট (শ্রেণিবিভাগ, মনোস্যাকারাইড ও গঠন)',
+questions: [
+{ q: "১. নীচের যৌগগুলির মধ্যে কোনটি কার্বোহাইড্রেট নয়?", opts: ["C<sub>6</sub>H<sub>12</sub>O<sub>6</sub> (গ্লুকোজ)", "C<sub>12</sub>H<sub>22</sub>O<sub>11</sub> (সুক্রোজ)", "C<sub>5</sub>H<sub>10</sub>O<sub>5</sub> (রাইবোজ)", "C<sub>2</sub>H<sub>4</sub>O<sub>2</sub> (অ্যাসিটিক অ্যাসিড)"], ans: 3, exp: "ব্যাখ্যা: কার্বোহাইড্রেটগুলির সাধারণ সংকেত C<sub>x</sub>(H<sub>2</sub>O)<sub>y</sub> মেনে চললেও, অ্যাসিটিক অ্যাসিড (CH<sub>3</sub>COOH বা C<sub>2</sub>H<sub>4</sub>O<sub>2</sub>) এই সংকেত মেনে চলা সত্ত্বেও এটি কার্বোহাইড্রেট নয়, এটি একটি কার্বক্সিলিক অ্যাসিড।" },
+{ q: "২. নীচেরগুলির মধ্যে কোনটি শর্করা (sugar) নয়?", opts: ["মলটোজ", "গ্যালাকটোজ", "সুক্রোজ", "সেলুলোজ"], ans: 3, exp: "ব্যাখ্যা: স্বাদহীন এবং জলে অদ্রাব্য কার্বোহাইড্রেটগুলিকে নন্‌-সুগার বা অশর্করা বলা হয়। পলিস্যাকারাইড যেমন স্টার্চ, সেলুলোজ, গ্লাইকোজেন ইত্যাদি হলো নন্‌-সুগারের উদাহরণ।" },
+{ q: "৩. মলিস বিকারক (Molisch's reagent) দ্বারা শনাক্তকরণ পরীক্ষায় উৎপন্ন বলয়ের বর্ণ কীরূপ হয়?", opts: ["বেগুনি", "সবুজ", "কমলা", "লাল"], ans: 0, exp: "ব্যাখ্যা: কার্বোহাইড্রেটের জলীয় দ্রবণে মলিস বিকারক (অ্যালকোহলীয় &alpha;-ন্যাপথল) ও গাঢ় H<sub>2</sub>SO<sub>4</sub> যোগ করলে দুই তরলের সংযোগস্থলে একটি বেগুনি (Purple) বর্ণের বলয় সৃষ্টি হয়, যা কার্বোহাইড্রেট শনাক্তকরণে ব্যবহৃত হয়।" },
+{ q: "৪. কিটোহেক্সোজের (যেমন- ফ্রুক্টোজ) মুক্ত-শৃঙ্খল গঠনের ভিত্তিতে D-কনফিগারেশনবিশিষ্ট আলোকীয় সমাবয়বের সংখ্যা কয়টি?", opts: ["4টি", "8টি", "16টি", "32টি"], ans: 0, exp: "ব্যাখ্যা: কিটোহেক্সোজে 3টি অপ্রতিসম (কাইরাল) কার্বন পরমাণু থাকে। তাই মোট আলোকীয় সমাবয়বের সংখ্যা = 2<sup>3</sup> = 8টি। এর মধ্যে অর্ধেক অর্থাৎ 4টি হলো D-কনফিগারেশনযুক্ত এবং বাকি 4টি হলো L-কনফিগারেশনযুক্ত।" },
+{ q: "৫. গ্লুকোজ ও ফ্রুক্টোজ পরস্পরের কী ধরনের সমাবয়ব?", opts: ["ডায়াস্টিরিওআইসোমার", "এপিমার", "কার্যকরীমূলকঘটিত আইসোমার", "এনানসিওমার"], ans: 2, exp: "ব্যাখ্যা: গ্লুকোজ এবং ফ্রুক্টোজ উভয়েরই আণবিক সংকেত C<sub>6</sub>H<sub>12</sub>O<sub>6</sub>। কিন্তু গ্লুকোজে অ্যালডিহাইড (-CHO) গ্রুপ এবং ফ্রুক্টোজে কিটোন (>C=O) গ্রুপ থাকে। তাই এরা পরস্পরের ফাংশনাল আইসোমার।" },
+{ q: "৬. D-গ্লুকোজ ও D-ম্যানোজ হলো পরস্পরের-", opts: ["অ্যানোমার", "এপিমার", "এনানসিওমার", "ডায়াস্টিরিওমার"], ans: 1, exp: "ব্যাখ্যা: যে ডায়াস্টিরিওমারগুলির কনফিগারেশনের পার্থক্য কেবলমাত্র একটি নির্দিষ্ট কাইরাল কার্বনে থাকে, তাদের এপিমার বলে। D-গ্লুকোজ এবং D-ম্যানোজের কনফিগারেশনের পার্থক্য কেবলমাত্র 2 নং কার্বনে (C-2) থাকে, তাই এরা C-2 এপিমার।" },
+{ q: "৭. গ্লুকোজের Br<sub>2</sub>/H<sub>2</sub>O (ব্রোমিন জল) দ্বারা জারণে কী উৎপন্ন হয়?", opts: ["গ্লুকারিক অ্যাসিড", "গ্লুকোনিক অ্যাসিড", "n-ভ্যালেরিক অ্যাসিড", "স্যাকারিক অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: ব্রোমিন জলের মতো মৃদু জারক দ্রব্য দ্বারা জারিত হয়ে গ্লুকোজের 1-নং কার্বনে থাকা অ্যালডিহাইড গ্রুপটি কার্বক্সিলিক অ্যাসিডে জারিত হয় এবং 6 কার্বনবিশিষ্ট গ্লুকোনিক অ্যাসিড উৎপন্ন করে।" },
+{ q: "৮. গ্লুকোজের প্রতি মোল সম্পূর্ণ অ্যাসিটাইলেশনের জন্য প্রয়োজনীয় অ্যাসিটিক অ্যানহাইড্রাইডের (CH<sub>3</sub>CO)<sub>2</sub>O মোল সংখ্যা কত?", opts: ["3", "4", "5", "6"], ans: 2, exp: "ব্যাখ্যা: গ্লুকোজ অণুতে মোট 5টি হাইড্রক্সিল (-OH) গ্রুপ থাকে। প্রতিটি -OH গ্রুপ একটি করে অ্যাসিটাইল গ্রুপ দ্বারা প্রতিস্থাপিত হয়ে গ্লুকোজ পেন্টাঅ্যাসিটেট তৈরি করে। তাই 1 মোল গ্লুকোজের জন্য 5 মোল অ্যাসিটিক অ্যানহাইড্রাইড প্রয়োজন।" },
+{ q: "৯. &alpha;-D(+) গ্লুকোজ ও &beta;-D(+) গ্লুকোজ পরস্পরের-", opts: ["এনানসিওমার", "কনফরমার", "এপিমার", "অ্যানোমার"], ans: 3, exp: "ব্যাখ্যা: গ্লুকোজের সাইক্লিক হেমিঅ্যাসিট্যাল গঠনের ফলে C-1 কার্বনটি নতুন কাইরাল কার্বনে পরিণত হয়। কেবলমাত্র C-1 কার্বনে কনফিগারেশনের পার্থক্যযুক্ত এই &alpha; এবং &beta; সমাবয়বগুলিকে অ্যানোমার বলে।" },
+{ q: "১০. মিউটারোটেশন প্রদর্শন করে-", opts: ["অ্যালডোহেক্সোজ", "কিটোপেন্টোজ", "কিটোহেক্সোজ", "এগুলির সবকটিই"], ans: 3, exp: "ব্যাখ্যা: যেসব সুগার জলীয় দ্রবণে মুক্ত-শৃঙ্খল গঠনের মাধ্যমে একটি অ্যানোমার থেকে অপর অ্যানোমারে রূপান্তরিত হতে পারে এবং সাম্যাবস্থায় একটি নির্দিষ্ট আপেক্ষিক আবর্তন দেখায়, তারাই মিউটারোটেশন প্রদর্শন করে। সমস্ত বিজারক সুগারই এটি দেখায়।" },
+{ q: "১১. গ্লুকোজ টোলেন্স বিকারকের সঙ্গে সিলভার মিরর (রৌপ্য দর্পণ) গঠন করে কারণ এতে আছে-", opts: ["অ্যাসিডিক গ্রুপ", "অ্যালডিহাইড গ্রুপ", "প্রাইমারি অ্যালকোহল", "&alpha;-হাইড্রক্সি কিটো গ্রুপ"], ans: 1, exp: "ব্যাখ্যা: গ্লুকোজের মুক্ত-শৃঙ্খল গঠনে একটি অ্যালডিহাইড (-CHO) গ্রুপ থাকে, যা টোলেন্স বিকারককে (অ্যামোনিয়াকাল সিলভার নাইট্রেট) বিজারিত করে ধাতব সিলভারের অধঃক্ষেপ (সিলভার মিরর) সৃষ্টি করে।" },
+{ q: "১২. D-গ্লুকোজ ও D-ফ্রুক্টোজের প্রাকৃতিক আলোকীয় আবর্তন যথাক্রমে কীরূপ?", opts: ["(+) ও (-)", "(+) ও (+)", "(-) ও (+)", "(-) ও (-)"], ans: 0, exp: "ব্যাখ্যা: প্রাকৃতিক D-গ্লুকোজ দক্ষিণাবর্তী (dextrorotatory) অর্থাৎ (+) আবর্তন দেখায় বলে একে ডেক্সট্রোজ বলা হয়। অন্যদিকে প্রাকৃতিক D-ফ্রুক্টোজ বামাবর্তী (laevorotatory) অর্থাৎ (-) আবর্তন দেখায় বলে একে লেভ্যুলোজ বলা হয়।" },
+{ q: "১৩. গ্লুকোজকে লঘু ক্ষার দ্রবণসহ সামান্য উত্তপ্ত করলে এটি যে মিশ্রণটি উৎপন্ন করে তা হল-", opts: ["গ্লুকোজ ও ম্যানোজ", "গ্লুকোজ ও ফ্রুক্টোজ", "ম্যানোজ ও ফ্রুক্টোজ", "গ্লুকোজ, ম্যানোজ ও ফ্রুক্টোজ"], ans: 3, exp: "ব্যাখ্যা: ক্ষারীয় মাধ্যমে গ্লুকোজ, ফ্রুক্টোজ বা ম্যানোজ যে-কোনো একটি যৌগ নিয়ে বিক্রিয়া ঘটালে সর্বদা ওই 3টি যৌগের মিশ্রণ উৎপন্ন হয়। এটি 'Lobry de Bruyn-van Ekenstein rearrangement' নামে পরিচিত।" },
+{ q: "১৪. গ্লুকোজের বদ্ধশৃঙ্খল (Cyclic) গঠনাকৃতিতে কোনটি অ্যানোমেরিক কার্বন?", opts: ["C-1", "C-3", "C-4", "C-2"], ans: 0, exp: "ব্যাখ্যা: অ্যালডোজের (যেমন গ্লুকোজ) ক্ষেত্রে 1-নং কার্বনটি এবং কিটোজের (যেমন ফ্রুক্টোজ) ক্ষেত্রে 2-নং কার্বনটি হেমিঅ্যাসিট্যাল/হেমিকিট্যাল গঠনের সময় নতুন কাইরাল সেন্টারে পরিণত হয়। একেই অ্যানোমেরিক কার্বন বলে।" },
+{ q: "১৫. HI ও লাল ফসফরাস দ্বারা দীর্ঘক্ষণ উত্তপ্ত করলে গ্লুকোজের বিজারণে কী উৎপন্ন হয়?", opts: ["n-হেপ্টেন", "n-হেক্সেন", "আইসোহেক্সেন", "সাইক্লোহেক্সেন"], ans: 1, exp: "ব্যাখ্যা: এই বিক্রিয়াটি প্রমাণ করে যে গ্লুকোজের 6টি কার্বন পরমাণু কোনো শাখাহীন একটি সরল রৈখিক শৃঙ্খলে পরস্পরের সাথে যুক্ত রয়েছে।" }
+]
+},
+2: {
+name: 'Set 2', icon: '🍯', topic: 'কার্বোহাইড্রেট (ডাইস্যাকারাইড, পলিস্যাকারাইড ও বিক্রিয়া)',
+questions: [
+{ q: "১. ডাইস্যাকারাইড মধ্যস্থ মনোস্যাকারাইডের বিজারক গ্রুপগুলি গ্লাইকোসাইডিক বন্ধন গঠনে যুক্ত থাকলে, তাদের অ-বিজারক সুগার বলে। নীচের কোন ডাইস্যাকারাইডটি একটি অ-বিজারক সুগার?", opts: ["ল্যাকটোজ", "মলটোজ", "সুক্রোজ", "সেলোবায়োজ"], ans: 2, exp: "ব্যাখ্যা: সুক্রোজে &alpha;-D-গ্লুকোজের C-1 (বিজারক কার্বন) এবং &beta;-D-ফ্রুক্টোজের C-2 (বিজারক কার্বন)-এর মধ্যে গ্লাইকোসাইডিক বন্ধন থাকে। ফলে কোনো মুক্ত বিজারক গ্রুপ না থাকায় এটি একটি অ-বিজারক সুগার।" },
+{ q: "২. সুক্রোজের আর্দ্রবিশ্লেষণে উৎপন্ন হয়-", opts: ["&alpha;-D-গ্লুকোজ + &beta;-D-গ্লুকোজ", "&alpha;-D-গ্লুকোজ + &beta;-D-ফ্রুক্টোজ", "&alpha;-D-ফ্রুক্টোজ + &beta;-D-ফ্রুক্টোজ", "&beta;-D-গ্লুকোজ + &alpha;-D-ফ্রুক্টোজ"], ans: 1, exp: "ব্যাখ্যা: সুক্রোজ একটি ডাইস্যাকারাইড যা ডিলিউট অ্যাসিড বা ইনভারটেজ এনজাইমের উপস্থিতিতে আর্দ্রবিশ্লেষিত হয়ে সমমোলার পরিমাণ D(+)-গ্লুকোজ এবং D(-)-ফ্রুক্টোজ উৎপন্ন করে।" },
+{ q: "৩. সুক্রোজের আর্দ্রবিশ্লেষণে গ্লুকোজ ও ফ্রুক্টোজ উৎপন্ন হয় এবং দ্রবণের আপেক্ষিক আলোকীয় আবর্তনের অভিমুখের পরিবর্তন ঘটে (+66.5&deg; থেকে -19.95&deg;)। এই ঘটনাটি হল-", opts: ["মিউটারোটেশন", "পাইরোলিসিস", "ইনভারশন (Inversion)", "রেসিমাইজেশন"], ans: 2, exp: "ব্যাখ্যা: আর্দ্রবিশ্লেষণের পর উৎপন্ন মিশ্রণে ফ্রুক্টোজের বামাবর্তী আবর্তনের মান (-92.4&deg;) গ্লুকোজের দক্ষিণাবর্তী আবর্তনের মান (+52.5&deg;) অপেক্ষা বেশি হওয়ায় সম্পূর্ণ মিশ্রণটি বামাবর্তী হয়ে যায়। একে Inversion of cane sugar বলে।" },
+{ q: "৪. কোন্ ডাইস্যাকারাইডে দুটি অভিন্ন মনোস্যাকারাইড একক বর্তমান থাকে?", opts: ["মলটোজ", "ল্যাকটোজ", "সুক্রোজ", "এগুলির কোনোটিই নয়"], ans: 0, exp: "ব্যাখ্যা: মলটোজ দুটি &alpha;-D-গ্লুকোজ এককের সমন্বয়ে গঠিত। এখানে একটি গ্লুকোজের C-1 এবং অপরটির C-4-এর মধ্যে গ্লাইকোসাইডিক লিংকেজ থাকে।" },
+{ q: "৫. সেলুলোজ গঠনকারী মনোমারটি হল-", opts: ["গ্যালাকটোজ", "&alpha;-D-গ্লুকোজ", "&beta;-D-গ্লুকোজ", "ফ্রুক্টোজ"], ans: 2, exp: "ব্যাখ্যা: সেলুলোজ উদ্ভিদের কোশপ্রাচীরের প্রধান উপাদান। এটি &beta;-D-গ্লুকোজের একটি রৈখিক পলিমার, যেখানে গ্লুকোজ এককগুলি &beta;-1,4 গ্লাইকোসাইডিক লিংকেজ দ্বারা যুক্ত থাকে।" },
+{ q: "৬. স্টার্চ (Starch) মূলত দুটি পলিস্যাকারাইড অংশের মিশ্রণ। অংশদুটি কী কী?", opts: ["অ্যামাইলোজ, অ্যামাইলোপেকটিন", "সেলুলোজ, গ্লাইকোজেন", "অ্যামাইলোপেকটিন, গ্লাইকোজেন", "অ্যামাইলেজ, গ্লাইকোজেন"], ans: 0, exp: "ব্যাখ্যা: স্টার্চে 15-20% জলে দ্রাব্য অ্যামাইলোজ (রৈখিক &alpha;-1,4 লিংকেজ) এবং 80-85% জলে অদ্রাব্য অ্যামাইলোপেকটিন (শাখাযুক্ত &alpha;-1,4 এবং &alpha;-1,6 লিংকেজ) থাকে।" },
+{ q: "৭. মানবদেহে কার্বোহাইড্রেট কীরূপে সঞ্চিত থাকে?", opts: ["গ্লুকোজ", "ফ্রুক্টোজ", "গ্লাইকোজেন", "স্টার্চ"], ans: 2, exp: "ব্যাখ্যা: প্রাণীদেহে কার্বোহাইড্রেট লিভার এবং পেশিতে গ্লাইকোজেন হিসেবে সঞ্চিত থাকে। এর গঠন অ্যামাইলোপেকটিনের মতো হলেও এটি আরও বেশি শাখাযুক্ত।" },
+{ q: "৮. কোন্ ডাইস্যাকারাইডটি দুধে (Milk) প্রচুর পরিমাণে থাকে?", opts: ["ল্যাকটোজ", "মলটোজ", "সুক্রোজ", "সেলোবায়োজ"], ans: 0, exp: "ব্যাখ্যা: ল্যাকটোজকে 'মিল্ক সুগার' বলা হয়। এটি &beta;-D-গ্যালাকটোজ এবং &beta;-D-গ্লুকোজের সমন্বয়ে গঠিত একটি বিজারক ডাইস্যাকারাইড।" },
+{ q: "৯. মানবদেহের রক্তে কোনটির প্রাচুর্য সর্বাধিক থাকে?", opts: ["D-ফ্রুক্টোজ", "D-গ্লুকোজ", "ল্যাকটোজ", "সুক্রোজ"], ans: 1, exp: "ব্যাখ্যা: রক্তে কার্বোহাইড্রেট মূলত গ্লুকোজ হিসেবে পরিবাহিত হয় এবং মানবদেহের শক্তির প্রধান উৎস হিসেবে কাজ করে। একে 'ব্লাড সুগার' বলা হয়।" },
+{ q: "১০. কোন্টি বেনেডিক্ট দ্রবণকে বিজারিত করে না?", opts: ["ফ্রুক্টোজ", "ল্যাকটোজ", "সুক্রোজ", "গ্লুকোজ"], ans: 2, exp: "ব্যাখ্যা: বেনেডিক্ট দ্রবণ একটি মৃদু জারক যা বিজারক সুগার দ্বারা বিজারিত হয়। যেহেতু সুক্রোজ অ-বিজারক সুগার, তাই এটি বেনেডিক্ট বা ফেলিং দ্রবণকে বিজারিত করে না।" },
+{ q: "১১. 1 মোল গ্লুকোজ কত মোল ফিনাইল হাইড্রাজিনের (C<sub>6</sub>H<sub>5</sub>NHNH<sub>2</sub>) সঙ্গে বিক্রিয়ায় ওসাজোন গঠন করে?", opts: ["1", "2", "3", "4"], ans: 2, exp: "ব্যাখ্যা: ওসাজোন (Osazone) গঠনের বিক্রিয়ায় প্রথম ধাপে 1 মোল ফিনাইল হাইড্রাজিন যুক্ত হয়ে হাইড্রাজোন করে, দ্বিতীয় মোল C-2 কার্বনকে জারিত করে কিটোন করে এবং তৃতীয় মোল সেই কিটোনের সাথে যুক্ত হয়ে গ্লুকোসাজোন তৈরি করে।" },
+{ q: "১২. স্টার্চের জলীয় দ্রবণে আয়োডিন দ্রবণ যোগ করলে কী বর্ণ উৎপন্ন হয়?", opts: ["লাল", "নীল", "হলুদ", "সবুজ"], ans: 1, exp: "ব্যাখ্যা: স্টার্চের অ্যামাইলোজ অংশটি তার হেলিক্যাল গঠনের মধ্যে আয়োডিন অণুকে আবদ্ধ করে একটি তীব্র নীল (Blue) বর্ণের কমপ্লেক্স তৈরি করে।" },
+{ q: "১৩. গ্লুকোজের সাথে অতিরিক্ত পারআয়োডিক অ্যাসিডের (HIO<sub>4</sub>) বিক্রিয়ায় কী কী উৎপন্ন হয়?", opts: ["5 অণু ফর্মিক অ্যাসিড এবং 1 অণু ফর্ম্যালডিহাইড", "6 অণু ফর্মিক অ্যাসিড", "5 অণু ফর্ম্যালডিহাইড এবং 1 অণু ফর্মিক অ্যাসিড", "6 অণু ফর্ম্যালডিহাইড"], ans: 0, exp: "ব্যাখ্যা: পারআয়োডিক অ্যাসিড দ্বারা ক্লিভেজের ফলে গ্লুকোজের C-1 (অ্যালডিহাইড) ফর্মিক অ্যাসিডে এবং C-2 থেকে C-5 কার্বনগুলিও ফর্মিক অ্যাসিডে জারিত হয় (মোট 5 মোল)। কেবল C-6 (প্রাইমারি অ্যালকোহল) ফর্ম্যালডিহাইডে জারিত হয়।" },
+{ q: "১৪. মিউটারোটেশন দেখায় না-", opts: ["ফ্রুক্টোজ", "গ্লুকোজ", "সুক্রোজ", "মলটোজ"], ans: 2, exp: "ব্যাখ্যা: সুক্রোজ একটি অ-বিজারক সুগার হওয়ায় এটি জলীয় দ্রবণে রিং ওপেনিং করে মুক্ত অ্যালডিহাইড বা কিটোন গঠন করতে পারে না। তাই এটি মিউটারোটেশন দেখায় না।" },
+{ q: "১৫. গ্লুকোজকে NaBH<sub>4</sub> বা সোদিয়াম অ্যামালগাম দ্বারা বিজারিত করলে কী পাওয়া যায়?", opts: ["ম্যানিটল", "সরবিটল (Sorbitol)", "গ্লুকোনিক অ্যাসিড", "হেক্সেন"], ans: 1, exp: "ব্যাখ্যা: গ্লুকোজের অ্যালডিহাইড গ্রুপ বিজারক দ্বারা বিজারিত হয়ে প্রাইমারি অ্যালকোহলে পরিণত হয়, ফলে হেক্সাহাইড্রিক অ্যালকোহল ডি-সরবিটল (বা গ্লুসিটল) পাওয়া যায়।" }
+]
+},
+3: {
+name: 'Set 3', icon: '🥩', topic: 'প্রোটিন (অ্যামিনো অ্যাসিড, পেপটাইড বন্ধন ও গঠন)',
+questions: [
+{ q: "১. অ্যামিনো অ্যাসিডসমূহের উভধর্মী (Amphoteric) আচরণের কারণ কী?", opts: ["এরা অপোলার", "জুইটার আয়ন গঠন", "পেপটাইড বন্ধন", "হাইড্রোজেন বন্ধন"], ans: 1, exp: "ব্যাখ্যা: &alpha;-অ্যামিনো অ্যাসিডের অণুতে একই সাথে আম্লিক কার্বক্সিল (-COOH) গ্রুপ এবং ক্ষারকীয় অ্যামিনো (-NH<sub>2</sub>) গ্রুপ থাকে। জলীয় দ্রবণে এরা প্রোটন আদান-প্রদানের মাধ্যমে দ্বিমেরুবিশিষ্ট জুইটার আয়নে পরিণত হয়।" },
+{ q: "২. জুইটার আয়ন (Zwitter ion) সামগ্রিকভাবে কীরূপ?", opts: ["তড়িৎ প্রশম", "অ্যানায়ন", "ক্যাটায়ন", "মুক্ত-মূলক"], ans: 0, exp: "ব্যাখ্যা: জুইটার আয়নের এক প্রান্তে ধনাত্মক (-NH<sub>3</sub><sup>+</sup>) এবং অন্য প্রান্তে ঋণাত্মক (-COO<sup>-</sup>) চার্জ থাকে। তাই সামগ্রিকভাবে অণুটি তড়িৎ প্রশম (neutral) হয়।" },
+{ q: "৩. নীচের কোনটি অপরিহার্য (Essential) অ্যামিনো অ্যাসিড?", opts: ["গ্লাইসিন", "সেরিন", "আইসোলিউসিন", "টাইরোসিন"], ans: 2, exp: "ব্যাখ্যা: যে অ্যামিনো অ্যাসিডগুলি মানবদেহে সংশ্লেষিত হয় না এবং খাদ্যের মাধ্যমে গ্রহণ করা আবশ্যক, তাদের অপরিহার্য অ্যামিনো অ্যাসিড বলে। আইসোলিউসিন, ভ্যালিন, লিউসিন ইত্যাদি এর উদাহরণ।" },
+{ q: "৪. অ্যাকাইরাল (achiral) বা আলোক-নিষ্ক্রিয় অ্যামিনো অ্যাসিডটি হল-", opts: ["2-ইথাইল অ্যালানিন", "গ্লাইসিন", "সেরিন", "ট্রিপটোফান"], ans: 1, exp: "ব্যাখ্যা: গ্লাইসিনের সংকেত হলো H<sub>2</sub>N-CH<sub>2</sub>-COOH। &alpha;-কার্বনের সাথে দুটি একই পরমাণু (হাইড্রোজেন) যুক্ত থাকায় এটিতে কোনো কাইরাল কার্বন নেই, ফলে এটি আলোক-নিষ্ক্রিয়।" },
+{ q: "৫. কোন্টি একটি ক্ষারকীয় (Basic) অ্যামিনো অ্যাসিড?", opts: ["টাইরোসিন", "সেরিন", "লাইসিন", "অ্যালানিন"], ans: 2, exp: "ব্যাখ্যা: যে অ্যামিনো অ্যাসিডে কার্বক্সিল গ্রুপের চেয়ে অ্যামিনো (-NH<sub>2</sub>) গ্রুপের সংখ্যা বেশি থাকে, তারা ক্ষারকীয়। লাইসিনে দুটি অ্যামিনো গ্রুপ এবং একটি কার্বক্সিল গ্রুপ থাকে।" },
+{ q: "৬. প্রোটিন অণুতে অ্যামিনো অ্যাসিডগুলি পরস্পর যুক্ত থাকে-", opts: ["কো-অর্ডিনেট বন্ধন দ্বারা", "&alpha;-গ্লাইকোসাইডিক বন্ধন দ্বারা", "পেপটাইড বন্ধন দ্বারা", "হাইড্রোজেন বন্ধন দ্বারা"], ans: 2, exp: "ব্যাখ্যা: প্রোটিন বা পলিপেপটাইড শৃঙ্খলে একটি অ্যামিনো অ্যাসিডের কার্বক্সিল গ্রুপ এবং অপরটির অ্যামিনো গ্রুপের মধ্যে জল অপসারণের মাধ্যমে পেপটাইড বন্ধন (-CO-NH-) গঠিত হয়।" },
+{ q: "৭. পেপটাইড বন্ধন (-CO-NH-) প্রকৃতপক্ষে একটি-", opts: ["এস্টার লিংকেজ", "অ্যামাইড লিংকেজ", "ইথার লিংকেজ", "গ্লাইকোসাইডিক লিংকেজ"], ans: 1, exp: "ব্যাখ্যা: কার্বক্সিলিক অ্যাসিড এবং অ্যামিনের ঘনীভবনে তৈরি হওয়া -CO-NH- লিংকেজ রসায়নের ভাষায় অ্যামাইড লিংকেজ হিসেবে পরিচিত।" },
+{ q: "৮. হিমোগ্লোবিন হল-", opts: ["একটি এনজাইম", "একটি ভিটামিন", "একটি গ্লোবিউলার (Globular) প্রোটিন", "একটি কার্বোহাইড্রেট"], ans: 2, exp: "ব্যাখ্যা: হিমোগ্লোবিনে পলিপেপটাইড শৃঙ্খলগুলি নিজেদের চারপাশে কুণ্ডলীকৃত হয়ে একটি বর্তুলাকার বা গোলকাকার আকৃতি লাভ করে, তাই এটি গ্লোবিউলার প্রোটিন। এটি জলে দ্রাব্য।" },
+{ q: "৯. প্রোটিনের প্রাইমারি গঠনে কী প্রকাশ পায়?", opts: ["অ্যামিনো অ্যাসিডের নির্দিষ্ট ক্রমিক বিন্যাস", "&alpha;-হেলিক্স গঠন", "প্রোটিনের ত্রিমাত্রিক আকৃতি", "প্রোটোমারের সংযুক্তি"], ans: 0, exp: "ব্যাখ্যা: একটি পলিপেপটাইড শৃঙ্খলে অ্যামিনো অ্যাসিড অণুগুলি পেপটাইড বন্ধনের মাধ্যমে ঠিক কোন্ নির্দিষ্ট অনুক্রমে (sequence) পরস্পরের সাথে যুক্ত থাকে, তাকেই প্রোটিনের প্রাইমারি গঠন বলে।" },
+{ q: "১০. প্রোটিনগুলির দুইধরনের সেকেন্ডারি গঠন দেখা যায়— &alpha;-হেলিক্স এবং &beta;-প্লিটেড শিট। &alpha;-হেলিক্স স্ট্রাকচারের স্থায়িত্ব দেয়-", opts: ["পেপটাইড বন্ধন", "ভ্যান ডার ওয়ালস শক্তি", "হাইড্রোজেন বন্ধন", "ডাইপোল-ডাইপোল মিথস্ক্রিয়া"], ans: 2, exp: "ব্যাখ্যা: &alpha;-হেলিক্স গঠনে একটি পেপটাইড বন্ধনের >C=O গ্রুপের অক্সিজেনের সাথে চতুর্থ অ্যামিনো অ্যাসিডের -NH গ্রুপের হাইড্রোজেনের মধ্যে অন্তঃআণবিক হাইড্রোজেন বন্ধন তৈরি হয়ে হেলিক্সটিকে দৃঢ়তা দেয়।" },
+{ q: "১১. ফাইব্রাস (তন্তুময়) প্রোটিনসমূহে, সমান্তরাল পলিপেপটাইড শৃঙ্খলগুলিকে সংযুক্ত রাখে-", opts: ["ভ্যান ডার ওয়ালস শক্তি", "হাইড্রোজেন এবং ডাইসালফাইড বন্ধন", "ইলেকট্রোস্ট্যাটিক আকর্ষণ", "গ্লাইকোসাইডিক বন্ধন"], ans: 1, exp: "ব্যাখ্যা: ফাইব্রাস প্রোটিনে (যেমন চুল, নখ ও পশমে উপস্থিত কেরাটিন) দীর্ঘ পলিপেপটাইড শৃঙ্খলগুলি সমান্তরালভাবে থাকে এবং এরা আড়াআড়ি হাইড্রোজেন বন্ধন ও ডাইসালফাইড (-S-S-) বন্ধন দ্বারা যুক্ত থাকে।" },
+{ q: "১২. প্রোটিনের ডিনেচারেশনের (Denaturation) ফলে কোনটি অক্ষুণ্ণ থাকে?", opts: ["প্রাইমারি গঠন", "সেকেন্ডারি গঠন", "টারসিয়ারি গঠন", "কোয়াটারনারি গঠন"], ans: 0, exp: "ব্যাখ্যা: তাপ প্রয়োগ বা pH পরিবর্তনের ফলে প্রোটিনের হাইড্রোজেন বন্ধন ভেঙে যায় এবং এর সেকেন্ডারি ও টারসিয়ারি গঠন বিনষ্ট হয় (জীবজ সক্রিয়তা হারায়)। কিন্তু পেপটাইড বন্ধন ভাঙে না বলে প্রাইমারি গঠন অক্ষুণ্ণ থাকে।" },
+{ q: "১৩. প্রোটিনের শনাক্তকরণে কোন্ পরীক্ষাটি ব্যবহার করা হয় না?", opts: ["মিলনের পরীক্ষা", "বাইইউরেট পরীক্ষা", "নিনহাইড্রিন পরীক্ষা", "মলিসের পরীক্ষা"], ans: 3, exp: "ব্যাখ্যা: মলিসের পরীক্ষা কার্বোহাইড্রেটের শনাক্তকরণে ব্যবহৃত হয়। বাকি তিনটি (মিলন, বাইইউরেট ও নিনহাইড্রিন) প্রোটিন বা অ্যামিনো অ্যাসিডের জন্য ব্যবহৃত হয়।" },
+{ q: "১৪. কোন্ পরীক্ষা দ্বারা প্রোটিনে উপস্থিত পেপটাইড বন্ধন শনাক্ত করা যায়?", opts: ["মলিসের পরীক্ষা", "নিনহাইড্রিন পরীক্ষা", "বাইইউরেট (Biuret) পরীক্ষা", "ব্র্যাডির পরীক্ষা"], ans: 2, exp: "ব্যাখ্যা: বাইইউরেট টেস্টে প্রোটিনের ক্ষারীয় দ্রবণে কয়েক ফোঁটা কপার সালফেট (CuSO<sub>4</sub>) দ্রবণ যোগ করলে পেপটাইড বন্ধনের উপস্থিতির কারণে একটি বেগুনি (violet) বা গোলাপি রঙের কমপ্লেক্স তৈরি হয়।" },
+{ q: "১৫. একটি নির্দিষ্ট pH-এ অ্যামিনো অ্যাসিডের জলীয় দ্রবণে তড়িৎ চালনা করলে, অ্যামিনো অ্যাসিড কণাগুলি ক্যাথোড বা অ্যানোড কোনো দিকেই গমন করে না। এই pH-কে কী বলে?", opts: ["সমতড়িৎ বিন্দু (Isoelectric point)", "প্রশমন বিন্দু", "এন্ড পয়েন্ট", "ক্রিটিক্যাল pH"], ans: 0, exp: "ব্যাখ্যা: সমতড়িৎ বিন্দুতে অ্যামিনো অ্যাসিডগুলি মূলত জুইটার আয়নরূপে থাকে, যেখানে নিট আধান শূন্য হয়। তাই তড়িৎক্ষেত্রের প্রভাবে এরা কোনো তড়িৎদ্বারের দিকেই যায় না।" }
+]
+},
+4: {
+name: 'Set 4', icon: '💊', topic: 'এনজাইম, ভিটামিন এবং হরমোন',
+questions: [
+{ q: "১. এনজাইম বা উৎসেচকগুলি রাসায়নিকভাবে কী ধরনের পদার্থ?", opts: ["কার্বোহাইড্রেট", "লিপিড", "গ্লোবিউলার প্রোটিন", "নিউক্লিক অ্যাসিড"], ans: 2, exp: "ব্যাখ্যা: সমস্ত এনজাইমই হলো উচ্চ আণবিক ভরসম্পন্ন গ্লোবিউলার প্রোটিন, যা জীবদেহে সংঘটিত জৈব-রাসায়নিক বিক্রিয়াগুলিতে জৈব-অনুঘটক (biocatalysts) হিসেবে কাজ করে।" },
+{ q: "২. এনজাইম অনুঘটন সম্পর্কিত কোন্ উক্তিটি সঠিক নয়?", opts: ["এনজাইমগুলি মূলত প্রোটিনধর্মী", "এনজাইমের ক্রিয়া অত্যন্ত সুনির্দিষ্ট (Specific)", "মধ্যম মানের উয়তায় এনজাইমগুলির ক্রিয়াশীলতা সবচেয়ে কম", "উচ্চতর উয়তায় এনজাইমের ডিনেচারেশন ঘটে"], ans: 2, exp: "ব্যাখ্যা: এনজাইমগুলি একটি নির্দিষ্ট এবং মধ্যম তাপমাত্রায় (Optimum temperature, সাধারণত 37&deg;C বা মানবদেহের তাপমাত্রায়) সর্বাধিক ক্রিয়াশীলতা দেখায়। তাই এই উক্তিটি ভুল।" },
+{ q: "৩. কোন্ এনজাইমটি গ্লুকোজ বা ফ্রুক্টোজকে ইথাইল অ্যালকোহল ও কার্বন ডাইঅক্সাইডে রূপান্তরিত করে (সন্ধান প্রক্রিয়ায়)?", opts: ["ডায়াস্টেজ", "জাইমেজ (Zymase)", "ইনভারটেজ", "মলটেজ"], ans: 1, exp: "ব্যাখ্যা: ইস্টে উপস্থিত জাইমেজ এনজাইম গ্লুকোজ বা ফ্রুক্টোজকে ফারমেন্টেশন বা সন্ধান প্রক্রিয়ায় ইথাইল অ্যালকোহলে (C<sub>2</sub>H<sub>5</sub>OH) রূপান্তরিত করে।" },
+{ q: "৪. পেপসিন (Pepsin) এনজাইম জীবদেহে কোন্ কাজটি সম্পন্ন করে?", opts: ["প্রোটিনকে আর্দ্রবিশ্লেষিত করে পেপটাইড/অ্যামিনো অ্যাসিডে পরিণত করে", "ফ্যাটকে ফ্যাটি অ্যাসিডে পরিণত করে", "স্টার্চকে গ্লুকোজে পরিণত করে", "সুক্রোজকে ইনভার্ট সুগারে পরিণত করে"], ans: 0, exp: "ব্যাখ্যা: পেপসিন পাকস্থলীতে থাকে এবং এটি প্রোটিনকে ভেঙে প্রোটিওজ ও পেপটোনে (পেপটাইড) পরিণত করে।" },
+{ q: "৫. ভিটামিন B1-এর রাসায়নিক নাম কী?", opts: ["রাইবোফ্লাভিন", "পিরিডক্সিন", "থায়ামিন (Thiamine)", "সায়ানোকোবাল্যামিন"], ans: 2, exp: "ব্যাখ্যা: ভিটামিন B1-এর রাসায়নিক নাম থায়ামিন। এর অভাবজনিত রোগটি হলো বেরিবেরি।" },
+{ q: "৬. কোন্ ভিটামিনের ঘাটতিতে পার্নিসিয়াস অ্যানিমিয়া (pernicious anemia) বা মারাত্মক রক্তাল্পতা দেখা দেয়?", opts: ["ভিটামিন B2", "ভিটামিন B6", "ভিটামিন B1", "ভিটামিন B12"], ans: 3, exp: "ব্যাখ্যা: ভিটামিন B12 (সায়ানোকোবাল্যামিন) রক্তে লোহিত কণিকার পরিপক্কতায় সাহায্য করে। এর অভাবে আরবিসি (RBC)-এর স্বল্পতা বা পার্নিসিয়াস অ্যানিমিয়া হয়।" },
+{ q: "৭. চর্বিতে বা ফ্যাটে দ্রাব্য ভিটামিনটি হল-", opts: ["ভিটামিন B", "ভিটামিন C", "ভিটামিন K", "ভিটামিন B12"], ans: 2, exp: "ব্যাখ্যা: ভিটামিনগুলিকে তাদের দ্রাব্যতার ওপর ভিত্তি করে দুটি শ্রেণিতে ভাগ করা হয়—জলে দ্রাব্য (B, C) এবং চর্বিতে দ্রাব্য (A, D, E, K)।" },
+{ q: "৮. অ্যাসকরবিক অ্যাসিড (Ascorbic acid) রাসায়নিকভাবে একটি-", opts: ["সুগার", "এনজাইম", "প্রোটিন", "ভিটামিন"], ans: 3, exp: "ব্যাখ্যা: অ্যাসকরবিক অ্যাসিড হলো ভিটামিন C-এর রাসায়নিক নাম। এর অভাবে স্কার্ভি (মাড়ি থেকে রক্ত পড়া) রোগ হয়।" },
+{ q: "৯. ভিটামিন E-এর ঘাটতির ফলে কী ঘটে?", opts: ["বেরিবেরি", "প্রজনন ক্ষমতার লোপ", "স্কার্ভি", "রাতকানা"], ans: 1, exp: "ব্যাখ্যা: ভিটামিন E (টোকোফেরল)-এর অভাবজনিত রোগ হলো পেশির দুর্বলতা এবং প্রজনন ক্ষমতা লোপ পাওয়া বা বন্ধ্যাত্ব।" },
+{ q: "১০. রিকেট প্রতিরোধী ভিটামিন কোনটি?", opts: ["ভিটামিন B12", "ভিটামিন K", "ভিটামিন D", "ভিটামিন A"], ans: 2, exp: "ব্যাখ্যা: ভিটামিন D (ক্যালসিফেরল) হাড়ের গঠন শক্ত করে। এর অভাবে শিশুদের রিকেট এবং বড়োদের অস্টিওম্যালেসিয়া রোগ হয়।" },
+{ q: "১১. মানবদেহের রক্তে সুগারের মাত্রা নিয়ন্ত্রণে সক্রিয় ভূমিকা পালন করে কোন্ হরমোন?", opts: ["থাইরক্সিন", "অ্যাড্রেনালিন", "ইনসুলিন", "টেস্টোস্টেরন"], ans: 2, exp: "ব্যাখ্যা: প্যানক্রিয়াস (অগ্ন্যাশয়) থেকে নিঃসৃত ইনসুলিন হরমোন রক্তে অতিরিক্ত গ্লুকোজকে গ্লাইকোজেনে পরিণত করে রক্তের সুগার লেভেল নিয়ন্ত্রণ করে।" },
+{ q: "১২. ইনসুলিন রাসায়নিকভাবে কী প্রকৃতির হরমোন?", opts: ["অ্যামিনো অ্যাসিড", "প্রোটিন/পলিপেপটাইড", "স্টেরয়েড", "লিপিড"], ans: 1, exp: "ব্যাখ্যা: ইনসুলিন একটি গ্লোবিউলার প্রোটিন হরমোন, যা 51 টি অ্যামিনো অ্যাসিডের দুটি পলিপেপটাইড শৃঙ্খল দ্বারা গঠিত।" },
+{ q: "১৩. থাইরক্সিন (Thyroxine) হরমোনে কোন মৌলটি অপরিহার্য উপাদান হিসেবে উপস্থিত থাকে?", opts: ["আয়রন", "আয়োডিন", "কোবাল্ট", "ম্যাগনেশিয়াম"], ans: 1, exp: "ব্যাখ্যা: থাইরক্সিন হরমোনে আয়োডিন থাকে। থাইরয়েড গ্রন্থি থেকে নিঃসৃত এই হরমোনের অভাবে গলগণ্ড বা গয়টার রোগ হয়।" },
+{ q: "১৪. মানসিক চাপের সময় মানবদেহে কোন্ হরমোন নিঃসৃত হয় যা লিভারে গ্লাইকোজেনোলিসিসকে উদ্দীপ্ত করে?", opts: ["থাইরক্সিন", "ইনসুলিন", "অ্যাড্রেনালিন", "এস্ট্রাডাইঅল"], ans: 2, exp: "ব্যাখ্যা: অ্যাড্রেনাল মেডালা থেকে নিঃসৃত অ্যাড্রেনালিন (বা এপিনেফ্রিন) মানসিক চাপ বা বিপদের সময় নিঃসৃত হয়ে রক্তে সুগার লেভেল বাড়ায় এবং শক্তি যোগায়।" },
+{ q: "১৫. ভিটামিন A-এর রাসায়নিক নাম কী?", opts: ["রেটিনল", "পিরিডক্সিন", "থায়ামিন", "ক্যালসিফেরল"], ans: 0, exp: "ব্যাখ্যা: ভিটামিন A-এর রাসায়নিক নাম রেটিনল। এর প্রধান উৎস গাজর, মাখন, দুধ ইত্যাদি এবং এর অভাবে রাতকানা (Night blindness) ও জেরপথ্যালমিয়া রোগ হয়।" }
+]
+},
+5: {
+name: 'Set 5', icon: '🧬', topic: 'নিউক্লিক অ্যাসিড (DNA ও RNA)',
+questions: [
+{ q: "১. নিউক্লিক অ্যাসিড (Nucleic acids) মূলত কাদের পলিমার?", opts: ["নিউক্লিওসাইডসমূহ", "হেটেরোসাইক্লিক বেসসমূহ", "নিউক্লিওটাইডসমূহ", "শর্করাসমূহ"], ans: 2, exp: "ব্যাখ্যা: DNA বা RNA অণু অসংখ্য নিউক্লিওটাইড একক পরপর যুক্ত হয়ে তৈরি হয়। তাই এদের পলিনিউক্লিওটাইডও বলা হয়।" },
+{ q: "২. একটি নিউক্লিওটাইড (Nucleotide) কী কী উপাদান দিয়ে গঠিত?", opts: ["বেস-ফসফেট-সুগার", "বেস-সুগার-ফসফেট", "ফসফেট-বেস-সুগার", "সুগার-বেস-ফসফেট"], ans: 1, exp: "ব্যাখ্যা: একটি নাইট্রোজেন-ঘটিত বেস (Base) এবং পেন্টোজ সুগার যুক্ত হয়ে নিউক্লিওসাইড তৈরি করে। সেই সুগারের সাথে একটি ফসফেট গ্রুপ যুক্ত হলে নিউক্লিওটাইড তৈরি হয়। তাই ক্রমটি হলো বেস-সুগার-ফসফেট।" },
+{ q: "৩. DNA-তে উপস্থিত পেন্টোজ সুগারটি হল-", opts: ["D-রাইবোজ", "D-ফ্রুক্টোজ", "&beta;-D-2-ডিঅক্সিরাইবোজ", "&alpha;-D-গ্লুকোজ"], ans: 2, exp: "ব্যাখ্যা: DNA-এর পুরো নাম Deoxyribonucleic acid। এতে পেন্টোজ সুগার হিসেবে &beta;-D-2-ডিঅক্সিরাইবোজ উপস্থিত থাকে, যার 2-নং কার্বনে কোনো অক্সিজেন থাকে না।" },
+{ q: "৪. নীচের কোন্ ক্ষারকটি (Base) RNA-তে উপস্থিত থাকে না?", opts: ["অ্যাডিনিন", "গুয়ানিন", "থাইমিন (Thymine)", "ইউরাসিল"], ans: 2, exp: "ব্যাখ্যা: RNA-তে পিউরিন বেস হিসেবে অ্যাডেনিন (A) ও গুয়ানিন (G) এবং পিরিমিডিন বেস হিসেবে সাইটোসিন (C) ও ইউরাসিল (U) থাকে। এতে থাইমিন থাকে না।" },
+{ q: "৫. নীচের কোন্ ক্ষারকটি DNA-তে উপস্থিত থাকে না?", opts: ["অ্যাডিনিন", "সাইটোসিন", "থাইমিন", "ইউরাসিল (Uracil)"], ans: 3, exp: "ব্যাখ্যা: DNA-তে পিরিমিডিন বেস হিসেবে সাইটোসিন (C) এবং থাইমিন (T) থাকে। ইউরাসিল কেবলমাত্র RNA-তে পাওয়া যায়।" },
+{ q: "৬. ফসফোডাইএস্টার বন্ধনের সাহায্যে দুটি নিউক্লিওটাইডকে যুক্ত করে ডাইনিউক্লিওটাইড পাওয়া যায়। পেন্টোজ সুগারের কোন্ কোন্ কার্বন পরমাণুর মধ্যে এই বন্ধন থাকে?", opts: ["5' এবং 3'", "5' এবং 5'", "1' এবং 5'", "3' এবং 3'"], ans: 0, exp: "ব্যাখ্যা: পলিনিউক্লিওটাইড শৃঙ্খলে একটি নিউক্লিওটাইডের পেন্টোজ সুগারের 5' কার্বনের সাথে যুক্ত ফসফেট গ্রুপটি অপর নিউক্লিওটাইডের সুগারের 3' কার্বনের সাথে ফসফোডাইএস্টার বন্ধন তৈরি করে।" },
+{ q: "৭. DNA-এর দ্বিতন্ত্রী শৃঙ্খলে গুয়ানিন (G) কোন্ ক্ষারকের সঙ্গে হাইড্রোজেন বন্ধন তৈরি করে?", opts: ["অ্যাডিনিন (A)", "থাইমিন (T)", "সাইটোসিন (C)", "ইউরাসিল (U)"], ans: 2, exp: "ব্যাখ্যা: ওয়াটসন-ক্রিক মডেল অনুযায়ী, DNA-এর দুটি শৃঙ্খল বেস-পেয়ারিং দ্বারা যুক্ত থাকে। গুয়ানিন (G) সর্বদা তিনটি হাইড্রোজেন বন্ধনের মাধ্যমে সাইটোসিনের (C) সাথে যুক্ত থাকে। অ্যাডেনিন (A) দুটি H-বন্ধনের মাধ্যমে থাইমিনের (T) সাথে যুক্ত থাকে।" },
+{ q: "৮. DNA-এর দ্বিতন্ত্রী হেলিক্স (Double helix) গঠনে স্থায়িত্ব প্রদানে নীচের কোনটির অবদান সবচেয়ে বেশি?", opts: ["সমযোজী বন্ধন", "হাইড্রোজেন বন্ধন", "ডাইসালফাইড বন্ধন", "ভ্যান ডার ওয়ালস বল"], ans: 1, exp: "ব্যাখ্যা: দুটি পরিপূরক পলিনিউক্লিওটাইড শৃঙ্খলের নাইট্রোজেন বেসগুলির মধ্যে সৃষ্ট হাইড্রোজেন বন্ধনই DNA-এর সর্পিল দ্বিতন্ত্রী গঠনকে স্থায়িত্ব প্রদান করে।" },
+{ q: "৯. RNA-এর ক্ষেত্রে কোন্ তথ্যটি প্রযোজ্য নয়?", opts: ["এটি প্রোটিনের উৎপাদন নিয়ন্ত্রণ করে", "এটি সর্বদা ডাবল হেলিক্স গঠন-রূপে অবস্থান করে", "এটি কোশের সাইটোপ্লাজমেও থাকে", "এটি রেপ্লিকেট করে না"], ans: 1, exp: "ব্যাখ্যা: RNA সাধারণত একতন্ত্রী বা সিঙ্গেল-স্ট্র্যান্ডেড (single-stranded) হয়। কিছু ক্ষেত্রে এটি ভাঁজ হয়ে সেকেন্ডারি গঠন তৈরি করতে পারে, তবে DNA-এর মতো এটি সাধারণত ডাবল হেলিক্স নয়।" },
+{ q: "১০. নীচের কোনগুলি পিউরিন (Purine) বেস?", opts: ["অ্যাডিনিন ও গুয়ানিন", "সাইটোসিন ও থাইমিন", "ইউরাসিল ও থাইমিন", "অ্যাডিনিন ও সাইটোসিন"], ans: 0, exp: "ব্যাখ্যা: নিউক্লিক অ্যাসিডে দুই ধরনের বেস থাকে। ডাবল-রিং কাঠামোযুক্ত পিউরিন বেস হলো অ্যাডেনিন (A) এবং গুয়ানিন (G)। সিঙ্গেল-রিং কাঠামোযুক্ত পিরিমিডিন বেস হলো সাইটোসিন, থাইমিন ও ইউরাসিল।" },
+{ q: "১১. DNA-এর একটি শৃঙ্খলে ক্ষারকের ক্রম A-T-G-C-T-A হলে, পরিপূরক শৃঙ্খলটিতে ক্ষারকের ক্রম কী হবে?", opts: ["T-A-C-G-A-T", "U-A-C-G-A-U", "C-G-A-T-C-G", "T-A-C-G-U-A"], ans: 0, exp: "ব্যাখ্যা: বেস-পেয়ারিং নিয়ম অনুযায়ী, A-এর পরিপূরক T এবং G-এর পরিপূরক C। সুতরাং A-T-G-C-T-A এর বিপরীতে হবে T-A-C-G-A-T।" },
+{ q: "১২. প্রোটিন সংশ্লেষণের জন্য DNA-এর যে অংশটি ইনস্ট্রুমেন্টাল ম্যানুয়াল বা নির্দেশক হিসেবে কাজ করে, তা হল-", opts: ["রাইবোজ", "জিন (Gene)", "নিউক্লিওসাইড", "ইউরাসিল"], ans: 1, exp: "ব্যাখ্যা: জিন হলো DNA অণুর একটি নির্দিষ্ট ক্রম, যা কোনো একটি নির্দিষ্ট প্রোটিন অণু সংশ্লেষণের সাংকেতিক বার্তা বহন করে।" },
+{ q: "১৩. ক্লোরোফিল ও হিমোগ্লোবিনে ধাতব উপাদান-রূপে থাকে যথাক্রমে-", opts: ["Mg, Mn", "Mg, Fe", "Ca, Co", "Fe, Ni"], ans: 1, exp: "ব্যাখ্যা: উদ্ভিদের পাতায় থাকা ক্লোরোফিলের কেন্দ্রে ম্যাগনেশিয়াম (Mg) এবং রক্তের হিমোগ্লোবিনের পরফাইরিন রিংয়ের কেন্দ্রে আয়রন (Fe) থাকে।" },
+{ q: "১৪. ATP এবং ADP-এর মধ্যে প্রধান পার্থক্য কীসে?", opts: ["রাইবোজ এককের সংখ্যায়", "অ্যাডিনিন ক্ষারকের সংখ্যায়", "ফসফেট এককের সংখ্যায়", "নাইট্রোজেন পরমাণুর সংখ্যায়"], ans: 2, exp: "ব্যাখ্যা: ATP (Adenosine Triphosphate)-তে তিনটি ফসফেট গ্রুপ থাকে, আর ADP (Adenosine Diphosphate)-তে দুটি ফসফেট গ্রুপ থাকে।" },
+{ q: "১৫. জীবদেহে শক্তির প্রধান উৎস হিসেবে কোন অণুটি সঞ্চিত থাকে?", opts: ["ATP", "ADP", "DNA", "RNA"], ans: 0, exp: "ব্যাখ্যা: মানবদেহে শর্করা জারিত হয়ে যে শক্তি নির্গত করে তা ATP অণুতে রাসায়নিক শক্তিরূপে সঞ্চিত থাকে। কোষের শক্তির প্রয়োজনে ATP ভেঙে ADP-তে পরিণত হয় এবং প্রচুর শক্তি মুক্ত করে।" }
+]
+},
+6: {
+name: 'Set 6', icon: '🎯', topic: 'Semester Special - I (কার্বোহাইড্রেট ও প্রোটিন)',
+questions: [
+{ q: "১. নীচেরগুলির মধ্যে কোন্টি অপরিহার্য (Essential) অ্যামিনো অ্যাসিড?", opts: ["সিসটেইন", "সেরিন", "টাইরোসিন", "আইসোলিউসিন"], ans: 3, exp: "ব্যাখ্যা: যে অ্যামিনো অ্যাসিডগুলি মানবদেহে সংশ্লেষিত হতে পারে না এবং খাদ্যের মাধ্যমে গ্রহণ করা অপরিহার্য, তাদের অপরিহার্য অ্যামিনো অ্যাসিড বলে। আইসোলিউসিন, ভ্যালিন, লিউসিন ইত্যাদি এর উদাহরণ।" },
+{ q: "২. গ্লুকোজ নীচের কোন্ বিকারকটির সঙ্গে বিক্রিয়া করে না?", opts: ["অ্যাসিটিক অ্যানহাইড্রাইড", "ব্রোমিন-জল", "হাইড্রক্সিলঅ্যামিন", "সোডিয়াম বাইসালফাইট (NaHSO<sub>3</sub>)"], ans: 3, exp: "ব্যাখ্যা: গ্লুকোজের -CHO গ্রুপটি 5-নং কার্বনের -OH গ্রুপের সাথে যুক্ত হয়ে হেমিঅ্যাসিট্যাল রিং গঠন করে। মুক্ত অ্যালডিহাইড গ্রুপ না থাকায় এটি NaHSO<sub>3</sub>-এর সাথে যুত বিক্রিয়া দেয় না।" },
+{ q: "৩. DNA-এর দ্বিতন্ত্রী গঠনাকৃতিতে হেটেরোসাইক্লিক বেস সাইটোসিন (C) কোন্টির সঙ্গে হাইড্রোজেন বন্ধন গঠন করে?", opts: ["অ্যাডিনিন", "গুয়ানিন", "ইউরাসিল", "থাইমিন"], ans: 1, exp: "ব্যাখ্যা: ওয়াটসন-ক্রিক মডেল অনুযায়ী, DNA-তে সর্বদা সাইটোসিন (C) তিনটি হাইড্রোজেন বন্ধনের মাধ্যমে গুয়ানিন (G)-এর সাথে যুক্ত থাকে।" },
+{ q: "৪. নীচেরগুলির মধ্যে কোন্টি জলে দ্রাব্য ভিটামিন?", opts: ["ভিটামিন A", "ভিটামিন E", "ভিটামিন K", "ভিটামিন B<sub>1</sub>"], ans: 3, exp: "ব্যাখ্যা: ভিটামিন B-কমপ্লেক্স এবং ভিটামিন C হলো জলে দ্রবণীয়। অন্যদিকে ভিটামিন A, D, E এবং K হলো ফ্যাট বা চর্বিতে দ্রবণীয়।" },
+{ q: "৫. কোন্ জোড়টির উভয় সদস্যই টোলেন্স বিকারককে বিজারিত করে?", opts: ["গ্লুকোজ, সুক্রোজ", "গ্লুকোজ, ফ্রুক্টোজ", "সুক্রোজ, মলটোজ", "সেলুলোজ, ল্যাকটোজ"], ans: 1, exp: "ব্যাখ্যা: গ্লুকোজ ও ফ্রুক্টোজ উভয়ই বিজারক সুগার (Reducing sugar), তাই এরা উভয়েই টোলেন্স বিকারককে বিজারিত করে সিলভার মিরর উৎপন্ন করতে পারে।" },
+{ q: "৬. নীচের কোন্টি মিউটারোটেশনের ঘটনা প্রদর্শন করে না?", opts: ["D-গ্লুকোজ", "ল্যাকটোজ", "মলটোজ", "সুক্রোজ"], ans: 3, exp: "ব্যাখ্যা: সুক্রোজে গ্লুকোজ ও ফ্রুক্টোজের বিজারক গ্রুপগুলি গ্লাইকোসাইডিক বন্ধনে আবদ্ধ থাকে। মুক্ত বিজারক গ্রুপ না থাকায় এটি জলীয় দ্রবণে রিং খুলে আলফা-বিটা সাম্যাবস্থা তৈরি করতে পারে না, তাই মিউটারোটেশন দেখায় না।" },
+{ q: "৭. নীচেরগুলির মধ্যে কোন্টি জলীয় দ্রবণে জুইটার আয়ন গঠন করে?", opts: ["অ্যানিলিন", "বেঞ্জোয়িক অ্যাসিড", "গ্লাইসিন", "অ্যাসিট্যানিলাইড"], ans: 2, exp: "ব্যাখ্যা: গ্লাইসিন একটি &alpha;-অ্যামিনো অ্যাসিড। এতে একইসাথে আম্লিক (-COOH) এবং ক্ষারকীয় (-NH<sub>2</sub>) গ্রুপ থাকায় এটি প্রোটন আদানপ্রদানের মাধ্যমে জুইটার আয়নে পরিণত হয়।" },
+{ q: "৮. গ্লুকোজ ব্রোমিন জল দ্বারা জারিত হয়ে কী উৎপন্ন করে?", opts: ["টারটারিক অ্যাসিড", "গ্লুকোনিক অ্যাসিড", "স্যাকারিক অ্যাসিড", "গ্লাইকলিক অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: ব্রোমিন জল একটি মৃদু জারক যা গ্লুকোজের 1-নং কার্বনে অ্যালডিহাইড গ্রুপটিকে কার্বক্সিলিক অ্যাসিডে জারিত করে গ্লুকোনিক অ্যাসিড উৎপন্ন করে।" },
+{ q: "৯. কোন্ ক্ষারকটি RNA-তে আছে কিন্তু DNA-তে নেই?", opts: ["ইউরাসিল", "থাইমিন", "গুয়ানিন", "সাইটোসিন"], ans: 0, exp: "ব্যাখ্যা: RNA-তে থাইমিনের (T) পরিবর্তে ইউরাসিল (U) থাকে। বাকি তিনটি বেস (A, G, C) উভয়েতেই বর্তমান।" },
+{ q: "১০. মলিসের পরীক্ষা (Molisch's Test) দ্বারা কী শনাক্ত করা হয়?", opts: ["প্রোটিন", "ফ্যাট", "নিউক্লিক অ্যাসিড", "সুগার বা কার্বোহাইড্রেট"], ans: 3, exp: "ব্যাখ্যা: কার্বোহাইড্রেটের জলীয় দ্রবণে মলিস বিকারক ও গাঢ় সালফিউরিক অ্যাসিড যোগ করলে বেগুনি বলয় সৃষ্টি হয়, যা কার্বোহাইড্রেট বা সুগার শনাক্তকরণের প্রধান পরীক্ষা।" },
+{ q: "১১. প্রোটিনের অণুতে অ্যামিনো অ্যাসিডগুলি কোন্ লিংকেজ বা বন্ধন দ্বারা যুক্ত থাকে?", opts: ["-O- (ইথার বন্ধন)", "-CO-NH- (পেপটাইড বন্ধন)", "-COO- (এস্টার বন্ধন)", "গ্লাইকোসাইডিক বন্ধন"], ans: 1, exp: "ব্যাখ্যা: প্রোটিন হলো অ্যামিনো অ্যাসিডের পলিমার যেখানে একটির -COOH এবং অপরটির -NH<sub>2</sub> যুক্ত হয়ে জল অপসারণের মাধ্যমে পেপটাইড বা অ্যামাইড বন্ধন (-CO-NH-) তৈরি করে।" },
+{ q: "১২. ভিটামিন B<sub>1</sub>-এর রাসায়নিক নাম কী?", opts: ["রাইবোফ্লাভিন", "পিরিডক্সিন", "থায়ামিন", "অ্যাসকরবিক অ্যাসিড"], ans: 2, exp: "ব্যাখ্যা: ভিটামিন B<sub>1</sub>-এর রাসায়নিক নাম থায়ামিন এবং এর অভাবে বেরিবেরি রোগ হয়।" },
+{ q: "১৩. ভিটামিন E-এর ঘাটতির ফলে কী হয়?", opts: ["বেরিবেরি", "স্কার্ভি", "প্রজনন ক্ষমতার লোপ", "রিকেট"], ans: 2, exp: "ব্যাখ্যা: ভিটামিন E বা টোকোফেরলের অভাবে প্রজনন ক্ষমতা হ্রাস পায় এবং পেশির দুর্বলতা দেখা দেয়।" },
+{ q: "১৪. HI ও লাল ফসফরাস দ্বারা দীর্ঘক্ষণ উত্তপ্ত করলে গ্লুকোজের বিজারণে কী উৎপন্ন হয়?", opts: ["n-হেপ্টেন", "সরবিটল", "n-হেক্সেন", "গ্লুকারিক অ্যাসিড"], ans: 2, exp: "ব্যাখ্যা: এই তীব্র বিজারণ বিক্রিয়ায় গ্লুকোজের 6টি কার্বনযুক্ত সরল শৃঙ্খল বিজারিত হয়ে n-হেক্সেন তৈরি করে, যা প্রমাণ করে গ্লুকোজে 6টি কার্বন সরল রৈখিকভাবে যুক্ত।" },
+{ q: "১৫. এক মোল গ্লুকোজের সম্পূর্ণ অ্যাসিটাইলেশনের জন্য x মোল অ্যাসিটিক অ্যানহাইড্রাইডের প্রয়োজন। x-এর মান কত?", opts: ["3", "4", "5", "6"], ans: 2, exp: "ব্যাখ্যা: গ্লুকোজ অণুতে 5টি -OH গ্রুপ আছে। তাই এর সম্পূর্ণ অ্যাসিটাইলেশন ঘটিয়ে গ্লুকোজ পেন্টাঅ্যাসিটেট তৈরি করতে 5 মোল অ্যাসিটিক অ্যানহাইড্রাইড প্রয়োজন।" }
+]
+},
+7: {
+name: 'Set 7', icon: '📈', topic: 'Semester Special - II (গঠন ও বিক্রিয়া)',
+questions: [
+{ q: "১. D-গ্লুকোপাইরানোজের দুটি সাইক্লিক রূপকে (&alpha; এবং &beta;) কী বলা হয়?", opts: ["এপিমার", "অ্যানোমার", "এনানসিওমার", "ডায়াস্টিরিওমার"], ans: 1, exp: "ব্যাখ্যা: গ্লুকোজের সাইক্লিক গঠনে 1-নং কার্বনটি (অ্যানোমেরিক কার্বন) নতুন কাইরাল সেন্টারে পরিণত হয়। কেবল এই কার্বনে কনফিগারেশন আলাদা হলে তাদের অ্যানোমার বলে।" },
+{ q: "২. উদ্ভিদের কোশপ্রাচীরের মুখ্য গাঠনিক উপাদান কোন্টি?", opts: ["স্টার্চ", "গ্লাইকোজেন", "সেলুলোজ", "অ্যামাইলোজ"], ans: 2, exp: "ব্যাখ্যা: সেলুলোজ হলো &beta;-D-গ্লুকোজের একটি রৈখিক পলিমার, যা উদ্ভিদের কোশপ্রাচীর গঠনে মুখ্য ভূমিকা পালন করে। এটি মানুষের পাচনতন্ত্রে হজম হয় না।" },
+{ q: "৩. ইনসুলিন হরমোনটি রাসায়নিকভাবে একটি-", opts: ["ফ্যাট", "স্টেরয়েড", "প্রোটিন", "কার্বোহাইড্রেট"], ans: 2, exp: "ব্যাখ্যা: ইনসুলিন একটি গ্লোবিউলার প্রোটিন হরমোন যা 51টি অ্যামিনো অ্যাসিডের সমন্বয়ে গঠিত দুটি পেপটাইড চেইন দ্বারা তৈরি।" },
+{ q: "৪. কোন্ পলিস্যাকারাইডটিতে &alpha;-1,6-গ্লাইকোসাইডিক লিংকেজ (শাখা) বর্তমান?", opts: ["অ্যামাইলোজ", "সেলুলোজ", "অ্যামাইলোপেকটিন", "গ্লাইকোজেন ও অ্যামাইলোপেকটিন উভয়ই"], ans: 3, exp: "ব্যাখ্যা: অ্যামাইলোজ ও সেলুলোজ হলো রৈখিক পলিমার। কিন্তু স্টার্চের অ্যামাইলোপেকটিন এবং প্রাণীর গ্লাইকোজেন উভয়েতেই &alpha;-1,4 লিংকেজের পাশাপাশি &alpha;-1,6 লিংকেজের মাধ্যমে শাখা সৃষ্টি হয়।" },
+{ q: "৫. লঘু HCl দ্বারা ল্যাকটোজের আর্দ্রবিশ্লেষণে কী কী উৎপন্ন হয়?", opts: ["গ্লুকোজ ও ফ্রুক্টোজ", "গ্লুকোজ ও ম্যানোজ", "গ্লুকোজ ও গ্যালাকটোজ", "ফ্রুক্টোজ ও ম্যানোজ"], ans: 2, exp: "ব্যাখ্যা: মিল্ক সুগার বা ল্যাকটোজ হলো &beta;-D-গ্যালাকটোজ এবং &beta;-D-গ্লুকোজের সমন্বয়ে গঠিত একটি ডাইস্যাকারাইড।" },
+{ q: "৬. D-এরিথ্রোজ ও D-ম্যানোজে কাইরাল কার্বনের সংখ্যা যথাক্রমে-", opts: ["3, 5", "2, 4", "3, 4", "4, 6"], ans: 1, exp: "ব্যাখ্যা: এরিথ্রোজ একটি অ্যালডোটেট্রোজ (4 কার্বন), এর মাঝের 2টি কার্বন কাইরাল। ম্যানোজ একটি অ্যালডোহেক্সোজ (6 কার্বন), এর মাঝের 4টি কার্বন কাইরাল।" },
+{ q: "৭. রাইবোজ অণুতে ও ফ্রুক্টোজ (মুক্ত শৃঙ্খল) অণুতে কাইরাল কার্বনের সংখ্যা যথাক্রমে-", opts: ["3, 3", "4, 3", "3, 4", "4, 4"], ans: 0, exp: "ব্যাখ্যা: রাইবোজ একটি অ্যালডোপেন্টোজ, এর 3টি কাইরাল কার্বন আছে। ফ্রুক্টোজ একটি কিটোহেক্সোজ, এর 3-নং, 4-নং ও 5-নং কার্বন কাইরাল (মোট 3টি)।" },
+{ q: "৮. সেলুলোজ অণুতে গ্লুকোজ এককগুলি পরস্পরের সঙ্গে কোন্ লিংকেজ দ্বারা যুক্ত থাকে?", opts: ["&alpha;-1, 4-গ্লাইকোসাইডিক", "&beta;-1, 6-গ্লাইকোসাইডিক", "পেপটাইড", "&beta;-1, 4-গ্লাইকোসাইডিক"], ans: 3, exp: "ব্যাখ্যা: সেলুলোজ &beta;-D-গ্লুকোজের রৈখিক পলিমার যেখানে একটি গ্লুকোজের C-1 অপরটির C-4-এর সাথে &beta;-গ্লাইকোসাইডিক বন্ধনে যুক্ত থাকে।" },
+{ q: "৯. স্টার্চ প্রধানত কোন্ দুটি পলিস্যাকারাইড অংশের মিশ্রণ?", opts: ["সেলুলোজ, গ্লাইকোজেন", "অ্যামাইলোপেকটিন, গ্লাইকোজেন", "অ্যামাইলোজ, অ্যামাইলোপেকটিন", "অ্যামাইলেজ, গ্লাইকোজেন"], ans: 2, exp: "ব্যাখ্যা: স্টার্চের 15-20% জলে দ্রবণীয় অ্যামাইলোজ এবং 80-85% জলে অদ্রবণীয় অ্যামাইলোপেকটিন দিয়ে গঠিত।" },
+{ q: "১০. প্রোটিনসমূহ কোন্ প্রকারের যৌগের কনডেনসেশন পলিমার?", opts: ["&alpha;-হাইড্রক্সি অ্যাসিড", "&beta;-হাইড্রক্সি অ্যাসিড", "&alpha;-অ্যামিনো অ্যাসিড", "&beta;-অ্যামিনো অ্যাসিড"], ans: 2, exp: "ব্যাখ্যা: প্রোটিনের জলীয় আর্দ্রবিশ্লেষণ করলে শুধুমাত্র &alpha;-অ্যামিনো অ্যাসিড (L-কনফিগারেশন) পাওয়া যায়।" },
+{ q: "১১. ভিটামিন B<sub>1</sub>, B<sub>6</sub> ও B<sub>12</sub>-এর ঘাটতিজনিত রোগগুলি হল যথাক্রমে-", opts: ["খিঁচুনি, বেরিবেরি, পারনিসিয়াস অ্যানিমিয়া", "বেরিবেরি, পারনিসিয়াস অ্যানিমিয়া, খিঁচুনি", "বেরিবেরি, খিঁচুনি, পারনিসিয়াস অ্যানিমিয়া", "পারনিসিয়াস অ্যানিমিয়া, বেরিবেরি, খিঁচুনি"], ans: 2, exp: "ব্যাখ্যা: B<sub>1</sub> (থায়ামিন) এর অভাবে বেরিবেরি, B<sub>6</sub> (পিরিডক্সিন) এর অভাবে খিঁচুনি, এবং B<sub>12</sub> (সায়ানোকোবাল্যামিন) এর অভাবে পারনিসিয়াস অ্যানিমিয়া হয়।" },
+{ q: "১২. মানবদেহে পরিপাক প্রক্রিয়ায় প্রোটিন থেকে পলিপেপটাইড এবং পলিপেপটাইড থেকে অ্যামিনো অ্যাসিড উৎপাদনের জন্য প্রয়োজনীয় এনজাইম হল যথাক্রমে-", opts: ["অ্যামাইলেজ, মল্টেজ", "পেপসিন, ট্রিপসিন", "ডায়াস্টেজ, লাইপেজ", "ইনভারটেজ, জাইমেজ"], ans: 1, exp: "ব্যাখ্যা: পাকস্থলীতে পেপসিন প্রোটিনকে ভাঙে এবং অন্ত্রে ট্রিপসিন পলিপেপটাইডকে ভেঙে অ্যামিনো অ্যাসিডে পরিণত করে।" },
+{ q: "১৩. ইনভার্ট সুগার হল কোন্ দুটি সুগারের সমমোলার মিশ্রণ?", opts: ["D-গ্লুকোজ, D-গ্যালাকটোজ", "D-গ্লুকোজ, D-ফ্রুক্টোজ", "D-গ্লুকোজ, L-ফ্রুক্টোজ", "D-গ্লুকোজ, D-ম্যানোজ"], ans: 1, exp: "ব্যাখ্যা: সুক্রোজের আর্দ্রবিশ্লেষণে সমমোলার D-গ্লুকোজ এবং D-ফ্রুক্টোজ তৈরি হয়। এই মিশ্রণটিকে ইনভার্ট সুগার বলে কারণ এতে আপেক্ষিক আবর্তনের চিহ্নের ইনভারশন ঘটে।" },
+{ q: "১৪. মানবদেহের রক্তে সুগারের মাত্রা নিয়ন্ত্রণে সক্রিয় ভূমিকা পালন করে কোন্ হরমোন?", opts: ["থাইরক্সিন", "অ্যাড্রেনালিন", "ইনসুলিন", "কর্টিসল"], ans: 2, exp: "ব্যাখ্যা: প্যানক্রিয়াস থেকে নিঃসৃত ইনসুলিন রক্তে অতিরিক্ত গ্লুকোজকে গ্লাইকোজেনে পরিণত করে রক্তের সুগার নিয়ন্ত্রণ করে।" },
+{ q: "১৫. মানবদেহে শক্তির প্রধান উৎস হিসেবে শর্করা জারণের পর কোন্ অণুটি রাসায়নিক শক্তিরূপে সঞ্চিত থাকে?", opts: ["DNA", "ATP", "ADP", "RNA"], ans: 1, exp: "ব্যাখ্যা: ATP বা অ্যাডেনোসিন ট্রাইফসফেট হলো কোশের এনার্জি কারেন্সি। এর ফসফেট বন্ধন ভাঙলে প্রচুর শক্তি নির্গত হয়।" }
+]
+},
+8: {
+name: 'Set 8', icon: '🔬', topic: 'Competitive Scanner (WBJEE / JEE-MAIN / NEET)',
+questions: [
+{ q: "১. ADP এবং ATP-এর মধ্যে পার্থক্য বিদ্যমান- (WBJEE)", opts: ["রাইবোজ এককের সংখ্যায়", "ফসফেট এককের সংখ্যায়", "অ্যাডেনিন ক্ষারকের সংখ্যায়", "নাইট্রোজেন পরমাণুর সংখ্যায়"], ans: 1, exp: "ব্যাখ্যা: ATP (Adenosine Triphosphate)-তে ৩টি ফসফেট এবং ADP (Adenosine Diphosphate)-তে ২টি ফসফেট গ্রুপ থাকে।" },
+{ q: "২. রেসিমিক অ্যালানিন থেকে মোট যতগুলি সমাবয়বী রৈখিক ডাইপেপটাইড সংশ্লেষণ সম্ভব সেই সংখ্যাটি হল- (WBJEE)", opts: ["1", "2", "3", "4"], ans: 3, exp: "ব্যাখ্যা: রেসিমিক অ্যালানিন হলো R এবং S সমাবয়বের 1:1 মিশ্রণ। এরা পরস্পরের সাথে যুক্ত হয়ে 4টি ভিন্ন ডাইপেপটাইড তৈরি করতে পারে: (R,R), (R,S), (S,R) এবং (S,S)।" },
+{ q: "৩. মলটোজের গঠনাকৃতিতে কী কী কার্যকরী গ্রুপ বর্তমান? (JEE-MAIN)", opts: ["দুটি অ্যাসিট্যাল", "একটি অ্যাসিট্যাল ও একটি কিট্যাল", "একটি কিট্যাল ও একটি হেমিকিট্যাল", "একটি অ্যাসিট্যাল ও একটি হেমিঅ্যাসিট্যাল"], ans: 3, exp: "ব্যাখ্যা: মলটোজে প্রথম গ্লুকোজ এককটি C-1 কার্বনে গ্লাইকোসাইডিক বন্ধনে যুক্ত থাকায় তা অ্যাসিট্যাল গঠন লাভ করে, কিন্তু দ্বিতীয় গ্লুকোজ এককের C-1 কার্বনটি মুক্ত থাকায় তা হেমিঅ্যাসিট্যালরূপে থাকে (বিজারক কেন্দ্র)।" },
+{ q: "৪. নিম্নলিখিত কোন্ বিক্রিয়াটি দ্বারা মনোস্যাকারাইড ও ডাইস্যাকারাইড-এর মধ্যে পার্থক্য করা যায়? (JEE-MAIN)", opts: ["টোলেন্স পরীক্ষা", "সেলিওয়ান পরীক্ষা", "আয়োডিন পরীক্ষা", "বারফোড পরীক্ষা"], ans: 3, exp: "ব্যাখ্যা: বারফোড বিকারকের (কপার অ্যাসিটেট ও অ্যাসিটিক অ্যাসিড) সাথে মনোস্যাকারাইড দ্রুত (30 সেকেন্ডে) লাল অধঃক্ষেপ দেয়, কিন্তু ডাইস্যাকারাইড অনেক বেশি সময় নেয়।" },
+{ q: "৫. সুক্রোজ আর্দ্রবিশ্লেষিত হয়ে উৎপন্ন করে— (NEET)", opts: ["&alpha;-D-গ্লুকোজ + &beta;-D-গ্লুকোজ", "&alpha;-D-গ্লুকোজ + &beta;-D-ফ্রুক্টোজ", "&alpha;-D-ফ্রুক্টোজ + &beta;-D-ফ্রুক্টোজ", "&beta;-D-গ্লুকোজ + &alpha;-D-ফ্রুক্টোজ"], ans: 1, exp: "ব্যাখ্যা: ইনভারটেজ এনজাইম বা অ্যাসিডের প্রভাবে সুক্রোজ ভেঙে &alpha;-D-গ্লুকোজ এবং &beta;-D-ফ্রুক্টোজ উৎপন্ন করে।" },
+{ q: "৬. কোন্টি একটি ক্ষারকীয় অ্যামিনো অ্যাসিড? (NEET)", opts: ["টাইরোসিন", "সেরিন", "লাইসিন", "অ্যালানিন"], ans: 2, exp: "ব্যাখ্যা: লাইসিনে কার্বক্সিল (-COOH) গ্রুপের চেয়ে অ্যামিনো (-NH<sub>2</sub>) গ্রুপের সংখ্যা বেশি থাকে, তাই এটি ক্ষারকীয় প্রকৃতির।" },
+{ q: "৭. কোল্টির ঘাটতিজনিত রোগের ফলে রক্তে লোহিত কণিকার (RBC) স্বল্পতা দেখা দেয়? (NEET)", opts: ["ভিটামিন-B<sub>1</sub>", "ভিটামিন-B<sub>2</sub>", "ভিটামিন-B<sub>6</sub>", "ভিটামিন-B<sub>12</sub>"], ans: 3, exp: "ব্যাখ্যা: ভিটামিন-B<sub>12</sub> (সায়ানোকোবাল্যামিন) রক্তকণিকা পরিপক্ক করতে সাহায্য করে। এর অভাবে পার্নিসিয়াস অ্যানিমিয়া বা মারাত্মক রক্তাল্পতা রোগ হয়।" },
+{ q: "৮. একমাত্র RNA-তে উপস্থিত নিউক্লিওটাইড ক্ষারকটি হল- (AFMC)", opts: ["অ্যাডেনিন", "গুয়ানিন", "সাইটোসিন", "ইউরাসিল"], ans: 3, exp: "ব্যাখ্যা: ইউরাসিল (U) কেবলমাত্র RNA-তে থাকে, DNA-তে এর পরিবর্তে থাইমিন (T) থাকে।" },
+{ q: "৯. নিম্নোক্ত কোল্টি বাইইউরেট পরীক্ষায় সাড়া দেয় না? (AIEEE)", opts: ["প্রোটিন", "পলিপেপটাইড", "ইউরিয়া", "কার্বোহাইড্রেট"], ans: 3, exp: "ব্যাখ্যা: বাইইউরেট পরীক্ষাটি পেপটাইড বা অ্যামাইড বন্ধন (-CO-NH-) শনাক্তকরণের জন্য ব্যবহৃত হয়। কার্বোহাইড্রেটে এই বন্ধন থাকে না।" },
+{ q: "১০. সুগারের কোন্ কার্বনে -OH গ্রুপের উপস্থিতি বা অনুপস্থিতি DNA ও RNA-এর মধ্যে পার্থক্য নিরূপণ করে? (AIEEE)", opts: ["C-1", "C-2", "C-3", "C-4"], ans: 1, exp: "ব্যাখ্যা: RNA-তে রাইবোজ সুগার থাকে যার C-2 কার্বনে -OH গ্রুপ আছে। কিন্তু DNA-তে ডি-অক্সিরাইবোজ সুগার থাকে যার C-2 কার্বনে কোনো অক্সিজেন (বা -OH) থাকে না।" },
+{ q: "১১. মানবদেহে সংশ্লেষণ হয় না-", opts: ["এনজাইম", "প্রোটিন", "নিউক্লিক অ্যাসিড", "ভিটামিন"], ans: 3, exp: "ব্যাখ্যা: কয়েকটি ব্যতিক্রম ছাড়া মানবদেহ ভিটামিন সংশ্লেষ করতে পারে না, এটি খাদ্যের মাধ্যমে বাইরে থেকে গ্রহণ করতে হয়।" },
+{ q: "১২. নীচেরগুলির মধ্যে কোন্টির পার্থক্যের জন্য &alpha;-D-গ্লুকোজ ও &beta;-D-গ্লুকোজ যৌগ দুটি পরস্পরের থেকে আলাদা হয়? (NEET)", opts: ["কনফরমেশন", "-OH গ্রুপের সংখ্যা", "হেমিঅ্যাসিট্যাল বলয়ের আকার", "কনফিগারেশন"], ans: 3, exp: "ব্যাখ্যা: এরা অ্যানোমার। এদের কেবলমাত্র C-1 (অ্যানোমেরিক কার্বন)-এ -OH গ্রুপের স্থানিক বিন্যাস বা কনফিগারেশন আলাদা হয়।" },
+{ q: "১৩. এক অণু গ্লুকোজ 'x' অণু ফিনাইল হাইড্রাজিনের সঙ্গে বিক্রিয়ায় ওসাজোন গঠন করে। 'x' এর মান হল- (NEET)", opts: ["এক", "দুই", "তিন", "চার"], ans: 2, exp: "ব্যাখ্যা: গ্লুকোসাজোন তৈরিতে ৩ মোল ফিনাইল হাইড্রাজিন লাগে: ১ মোল হাইড্রাজোন করতে, ১ মোল C-2 কার্বনকে জারিত করতে, এবং ৩য় মোল জারিত কার্বনের সাথে যুক্ত হতে।" },
+{ q: "১৪. গ্লুকোজকে লঘু ক্ষার দ্রবণসহ সামান্য উত্তপ্ত করলে এটি যে মিশ্রণটি উৎপন্ন করে তা হল-", opts: ["গ্লুকোজ ও ম্যানোজ", "গ্লুকোজ ও ফ্রুক্টোজ", "ম্যানোজ ও ফ্রুক্টোজ", "গ্লুকোজ, ম্যানোজ ও ফ্রুক্টোজ"], ans: 3, exp: "ব্যাখ্যা: লঘু ক্ষারে গ্লুকোজ রাখলে এটি 'Lobry de Bruyn-van Ekenstein rearrangement' এর মাধ্যমে গ্লুকোজ, ফ্রুক্টোজ এবং ম্যানোজের সাম্যাবস্থা মিশ্রণ তৈরি করে।" },
+{ q: "১৫. নিম্নলিখিত কোল্টিন্ট মিউটারোটেশন দেখায় না? (AIPMT)", opts: ["(-) ফ্রুক্টোজ", "(+) ল্যাকটোজ", "(+) মলটোজ", "(+) সুক্রোজ"], ans: 3, exp: "ব্যাখ্যা: সুক্রোজে মুক্ত অ্যালডিহাইড বা কিটোন গ্রুপ না থাকায় এটি রিং ওপেনিং করতে পারে না, তাই মিউটারোটেশন দেখায় না।" }
+]
+},
+9: {
+name: 'Set 9', icon: '🧠', topic: 'Competitive & Advanced Level MCQs',
+questions: [
+{ q: "১. DNA ও RNA অণুতে সুগার অণুর যে যে অবস্থানে হেটেরোসাইক্লিক বেস ও ফসফেট এস্টার বন্ধন থাকে সেগুলি হল যথাক্রমে-", opts: ["C<sub>5</sub>' ও C<sub>2</sub>'", "C<sub>2</sub>' ও C<sub>5</sub>'", "C<sub>5</sub>' ও C<sub>1</sub>'", "C<sub>1</sub>' ও C<sub>5</sub>'"], ans: 3, exp: "ব্যাখ্যা: পেন্টোজ সুগারের C-1' কার্বনের সাথে নাইট্রোজেনাস বেস এবং C-5' কার্বনের সাথে ফসফেট গ্রুপ যুক্ত হয়ে নিউক্লিওটাইড গঠন করে।" },
+{ q: "২. থায়ল (-SH) গ্রুপটি উপস্থিত থাকে কোন্ অ্যামিনো অ্যাসিডে? (JEE-MAIN)", opts: ["মেথিওনিন", "সাইটোসিন", "সিসটিন", "সিসটেইনে"], ans: 3, exp: "ব্যাখ্যা: সিসটেইন (Cysteine) একটি সালফারযুক্ত অ্যামিনো অ্যাসিড যার পার্শ্বশৃঙ্খলে থায়ল বা মারক্যাপটান (-SH) গ্রুপ থাকে।" },
+{ q: "৩. নীচের হরমোনগুলির মধ্যে কোল্টিন্ট (যা মানবদেহের লিভারে গ্লাইকোজেনোলিসিস প্রক্রিয়াকে উদ্দীপ্ত করে) মানসিক চাপের সময় নিঃসৃত হয়? (AIPMT)", opts: ["থাইরক্সিন", "ইনসুলিন", "এস্ট্রাডাইঅল", "অ্যাড্রেনালিন"], ans: 3, exp: "ব্যাখ্যা: মানসিক চাপ বা বিপদের সময় অ্যাড্রেনালিন নিঃসৃত হয়, যা লিভারের গ্লাইকোজেনকে গ্লুকোজে ভেঙে রক্তে গ্লুকোজের মাত্রা বাড়ায় (ফাইট অর ফ্লাইট রেসপন্স)।" },
+{ q: "৪. প্রোটিন সংশ্লেষণের জন্য DNA-এর যে অংশটি ইনস্ট্রুমেন্টাল ম্যানুয়াল (Instrumental manual) হিসেবে কাজ করে তা হল-", opts: ["রাইবোজ", "নিউক্লিওসাইড", "ইউরাসিল", "জিন (Gene)"], ans: 3, exp: "ব্যাখ্যা: জিন হলো DNA-র নির্দিষ্ট বেস-সিকোয়েন্স যা একটি নির্দিষ্ট প্রোটিন তৈরির সংকেত বা ব্লু-প্রিন্ট বহন করে।" },
+{ q: "৫. DNA-তে বিভিন্ন নাইট্রোজেন বেসগুলির মধ্যে লিংকেজ হল-", opts: ["পেপটাইড লিংকেজ", "ফসফেট লিংকেজ", "গ্লাইকোসাইডিক লিংকেজ", "H-বন্ধন"], ans: 3, exp: "ব্যাখ্যা: DNA-এর দুটি শৃঙ্খল একে অপরের সাথে বেস-পেয়ারিং নিয়মে (A=T এবং G≡C) হাইড্রোজেন বন্ধনের মাধ্যমে যুক্ত থাকে।" },
+{ q: "৬. মলটোজের গঠনগত এককগুলি হল— (AIIMS)", opts: ["&alpha;-D-গ্লুকোজ ও &beta;-D-গ্লুকোজ", "&alpha;-D-গ্লুকোজ ও &beta;-D-ফ্রুক্টোজ", "&alpha;-D-গ্লুকোজ ও &beta;-D-গ্যালাকটোজ", "&alpha;-D-গ্লুকোজ ও &alpha;-D-গ্লুকোজ"], ans: 3, exp: "ব্যাখ্যা: মলটোজ দুটি &alpha;-D-গ্লুকোজ এককের C-1 এবং C-4 গ্লাইকোসাইডিক লিংকেজের মাধ্যমে গঠিত হয়।" },
+{ q: "৭. নীচেরগুলির মধ্যে কোন্‌ন্টির নাম 'টোকোফেরল'?", opts: ["ভিটামিন K", "ভিটামিন H", "ভিটামিন D", "ভিটামিন E"], ans: 3, exp: "ব্যাখ্যা: অ্যান্টিস্টেরিলিটি বা প্রজনন সহায়ক ভিটামিন E-এর রাসায়নিক নাম হলো টোকোফেরল।" },
+{ q: "৮. সালোকসংশ্লেষ প্রক্রিয়ায় 1 অণু গ্লুকোজ উৎপাদনের জন্য অংশগ্রহণকারী ATP অণুর সংখ্যা- (JEE-MAIN)", opts: ["38", "10", "8", "18"], ans: 3, exp: "ব্যাখ্যা: কেলভিন চক্রে 1 অণু গ্লুকোজ তৈরি করতে 6 অণু CO<sub>2</sub> বিজারিত হয়, যার জন্য 18 অণু ATP এবং 12 অণু NADPH প্রয়োজন হয়।" },
+{ q: "৯. কোল্টিতে সেলুলোজ দ্রবীভূত হয়? (Gujrat CET)", opts: ["জৈব দ্রাবক", "জল", "এগুলির কোনোটিই নয়", "অ্যামোনিয়াক্যাল কিউপ্রিক হাইড্রক্সাইড দ্রবণ"], ans: 3, exp: "ব্যাখ্যা: সেলুলোজ সাধারণ দ্রাবকে অদ্রাব্য হলেও এটি Schweizer's reagent বা অ্যামোনিয়াক্যাল কিউপ্রিক হাইড্রক্সাইড দ্রবণে দ্রবীভূত হয়।" },
+{ q: "১০. RNA ও DNA সংক্রান্ত সঠিক তথ্যটি হল-", opts: ["RNA-তে সুগার অংশটি অ্যারাবিনোজ এবং DNA-তে 2'-ডি-অক্সিরাইবোজ", "RNA-তে সুগার অ্যারাবিনোজ এবং DNA-তে রাইবোজ", "RNA-তে 2'-ডি-অক্সিরাইবোজ এবং DNA-তে অ্যারাবিনোজ", "RNA-তে সুগার অংশটি হল রাইবোজ এবং DNA-তে সুগার অংশটি হল 2'-ডি-অক্সিরাইবোজ"], ans: 3, exp: "ব্যাখ্যা: RNA (Ribonucleic acid)-তে রাইবোজ এবং DNA (Deoxyribonucleic acid)-তে 2-নং কার্বনে অক্সিজেন বিহীন ডি-অক্সিরাইবোজ সুগার থাকে।" },
+{ q: "১১. গ্লুকোজকে HI সহযোগে দীর্ঘক্ষণব্যাপী উত্তপ্ত করলে উৎপন্ন হয়— (AIIMS)", opts: ["হেক্সানোয়িক অ্যাসিড", "1-হেক্সিন", "6-আয়োডোহেক্সান্যাল", "n-হেক্সেন"], ans: 3, exp: "ব্যাখ্যা: তীব্র বিজারক লাল P ও গাঢ় HI গ্লুকোজের সবকটি -OH ও -CHO গ্রুপকে বিজারিত করে 6 কার্বনযুক্ত অ্যালকেন (n-হেক্সেন) তৈরি করে।" },
+{ q: "১২. আণবিক প্রজনন বিদ্যার (molecular genetics) কেন্দ্রীয় সিদ্ধান্ত (Central Dogma) অনুসারে জেনেটিক বার্তার প্রবাহ হয়- (NEET)", opts: ["DNA &rarr; RNA &rarr; কার্বোহাইড্রেট", "অ্যামিনো অ্যাসিড &rarr; প্রোটিন &rarr; DNA", "DNA &rarr; কার্বোহাইড্রেট &rarr; প্রোটিন", "DNA &rarr; RNA &rarr; প্রোটিন"], ans: 3, exp: "ব্যাখ্যা: ক্রিকের সেন্ট্রাল ডগমা অনুসারে, বংশগতির সংকেত DNA থেকে ট্রান্সক্রিপশনের মাধ্যমে RNA-তে যায় এবং RNA থেকে ট্রান্সলেশনের মাধ্যমে প্রোটিন সংশ্লেষিত হয়।" },
+{ q: "১৩. মলটোজ লঘু HCl-এর সঙ্গে বিক্রিয়ায় (আর্দ্রবিশ্লেষণে) উৎপন্ন করে- (JEE-MAIN)", opts: ["D-গ্লুকোজ ও D-ফ্রুক্টোজ", "D-ফ্রুক্টোজ", "D-গ্যালাকটোজ", "D-গ্লুকোজ"], ans: 3, exp: "ব্যাখ্যা: মলটোজ কেবল দুটি &alpha;-D-গ্লুকোজ অণু দিয়ে গঠিত। তাই এর সম্পূর্ণ আর্দ্রবিশ্লেষণে কেবল D-গ্লুকোজই পাওয়া যায়।" },
+{ q: "১৪. অ্যামাইলোজ ও অ্যামাইলোপেকটিনের পার্থক্য হল- (NEET)", opts: ["গ্লুকোজ ও গ্যালাকটোজ দ্বারা অ্যামাইলোজ গঠিত হয়", "অ্যামাইলোপেকটিনে 1 &rarr; 4 &alpha;-লিংকেজ ও 1 &rarr; 6 &beta;-লিংকেজ রয়েছে", "অ্যামাইলোজে 1 &rarr; 4 &alpha;-লিংকেজ ও 1 &rarr; 6 &beta;-লিংকেজ আছে", "অ্যামাইলোপেকটিনে 1 &rarr; 4 &alpha;-লিংকেজ ও 1 &rarr; 6 &alpha;-লিংকেজ রয়েছে"], ans: 3, exp: "ব্যাখ্যা: অ্যামাইলোজ শাখাহীন রৈখিক পলিমার (কেবল 1 &rarr; 4 &alpha;-লিংকেজ)। কিন্তু অ্যামাইলোপেকটিনে 1 &rarr; 4 রৈখিক লিংকেজের পাশাপাশি 1 &rarr; 6 &alpha;-লিংকেজ দিয়ে শাখা তৈরি হয়।" },
+{ q: "১৫. যে সমস্ত এনজাইম ফসফেট স্থানান্তর প্রক্রিয়ায় ATP ব্যবহার করে তাদের ক্ষেত্রে কোফ্যাক্টর-রূপে কোন্ ক্ষারীয় মৃত্তিকা ধাতুটির প্রয়োজন হয়? (NEET)", opts: ["Be", "Ca", "Sr", "Mg"], ans: 3, exp: "ব্যাখ্যা: কাইনেজ এনজাইমগুলো, যারা ATP থেকে ফসফেট গ্রুপ ট্রান্সফার করে, তাদের সক্রিয়তার জন্য ম্যাগনেশিয়াম (Mg<sup>2+</sup>) আয়ন অত্যাবশ্যকীয় কোফ্যাক্টর হিসেবে কাজ করে।" }
+]
+},
+10: {
+name: 'Set 10', icon: '💡', topic: 'Concept Check & HOTS',
+questions: [
+{ q: "১. ফ্রুক্টোজের অণুতে কোনো মুক্ত অ্যালডিহাইড গ্রুপ না থাকা সত্ত্বেও এটি ফেলিং দ্রবণকে বিজারিত করে। এর কারণ কী?", opts: ["ফ্রুক্টোজ একটি তীব্র বিজারক", "ফ্রুক্টোজের কিটোন গ্রুপ জারক দ্রব্যকে বিজারিত করে", "কিটোন গ্রুপটি সরাসরি ফেলিং দ্রবণ দ্বারা জারিত হয়", "ক্ষারীয় মাধ্যমে &alpha;-হাইড্রক্সিকিটোনের অণুগুলি পুনর্বিন্যাসিত হয়ে &alpha;-হাইড্রক্সিঅ্যালডিহাইডে রূপান্তরিত হয়"], ans: 3, exp: "ব্যাখ্যা: ফেলিং দ্রবণ ক্ষারীয়। ক্ষারীয় মাধ্যমে ফ্রুক্টোজ (Lobry de Bruyn-van Ekenstein rearrangement-এর মাধ্যমে) গ্লুকোজ ও ম্যানোজে রূপান্তরিত হয়, যার অ্যালডিহাইড গ্রুপ ফেলিংকে বিজারিত করে।" },
+{ q: "২. সুক্রোজের জলীয় দ্রবণ দক্ষিণাবর্তী (+66.5&deg;), কিন্তু লঘু HCl দ্বারা আর্দ্রবিশ্লেষিত দ্রবণটি বামাবর্তী হয়। কেন?", opts: ["সুক্রোজের গঠন পরিবর্তিত হয়", "আর্দ্রবিশ্লেষণে উৎপন্ন গ্লুকোজ বামাবর্তী", "আর্দ্রবিশ্লেষণে উৎপন্ন ফ্রুক্টোজের বামাবর্তী আবর্তনের মান গ্লুকোজের দক্ষিণাবর্তী আবর্তনের চেয়ে বেশি", "গ্লুকোজ ও ফ্রুক্টোজ উভয়েই বামাবর্তী হয়ে যায়"], ans: 2, exp: "ব্যাখ্যা: আর্দ্রবিশ্লেষণে D-গ্লুকোজ (+52.5&deg;) এবং D-ফ্রুক্টোজ (-92.4&deg;) তৈরি হয়। ফ্রুক্টোজের বামাবর্তী আবর্তনের মান বেশি হওয়ায় সামগ্রিক মিশ্রণটি বামাবর্তী হয় (Inversion of sugar)।" },
+{ q: "৩. প্রোটিনের ডিনেচারেশনের (Denaturation) ফলে কোন্ গঠনটি অপরিবর্তিত থাকে?", opts: ["সেকেন্ডারি গঠন", "টারসিয়ারি গঠন", "কোয়াটারনারি গঠন", "প্রাইমারি গঠন"], ans: 3, exp: "ব্যাখ্যা: তাপ বা pH পরিবর্তনে প্রোটিনের হাইড্রোজেন বা ডাইসালফাইড বন্ড ভেঙে 2&deg;, 3&deg; এবং 4&deg; গঠন নষ্ট হয়, কিন্তু পেপটাইড বন্ড ভাঙে না বলে প্রাইমারি গঠন (অ্যামিনো অ্যাসিডের সিকোয়েন্স) অক্ষুণ্ণ থাকে।" },
+{ q: "৪. গ্লাইকোসাইডগুলি আম্লিক দ্রবণে আর্দ্রবিশ্লেষিত হয়, কারণ গ্লাইকোসাইডগুলি হলো-", opts: ["হেমিঅ্যাসিট্যাল", "ইথার", "এস্টার", "অ্যাসিট্যাল শ্রেণির যৌগ"], ans: 3, exp: "ব্যাখ্যা: গ্লাইকোসাইডিক বন্ড একটি অ্যাসিট্যাল লিংকেজ, যা ক্ষারে স্থিতিশীল হলেও অ্যাসিড মাধ্যমে আর্দ্রবিশ্লেষিত হয়ে যায়।" },
+{ q: "৫. মলটোজ ও ল্যাকটোজ উভয়েই বিজারক সুগার। এর প্রধান কারণ কী?", opts: ["এদের মধ্যে গ্লুকোজ থাকে", "এরা জলে দ্রবণীয়", "এরা ডাইস্যাকারাইড", "একটি মনোস্যাকারাইড এককের বিজারক কেন্দ্র (হেমিঅ্যাসিট্যাল গ্রুপ) মুক্ত থাকে"], ans: 3, exp: "ব্যাখ্যা: এদের একটি সুগার এককের C-1 (বা অ্যানোমেরিক) কার্বনটি গ্লাইকোসাইডিক বন্ড গঠনে অংশ নেয় না, তাই তা রিং খুলে বিজারক হিসেবে কাজ করতে পারে।" },
+{ q: "৬. একটি ডাইস্যাকারাইড P আর্দ্রবিশ্লেষণে দুটি মনোস্যাকারাইড Q ও R দেয়। P টোলেন্স বিকারককে বিজারিত করে এবং মিউটারোটেশন দেখায়। Q ও R উভয়েই ফেলিং দ্রবণ বিজারিত করে ও ওসাজোন গঠন করে। তবে Q ও R দ্বারা গঠিত ওসাজোন দুটি ভিন্ন হয়। P, Q ও R কী কী?", opts: ["P=সুক্রোজ, Q=গ্লুকোজ, R=ফ্রুক্টোজ", "P=মলটোজ, Q=গ্লুকোজ, R=গ্যালাকটোজ", "P=ল্যাকটোজ, Q=গ্লুকোজ, R=ফ্রুক্টোজ", "P=ল্যাকটোজ, Q=গ্লুকোজ, R=গ্যালাকটোজ"], ans: 3, exp: "ব্যাখ্যা: P বিজারক ও মিউটারোটেশন দেখায়, তাই সুক্রোজ নয়। Q ও R ভিন্ন ওসাজোন দেয়, তাই মলটোজ নয় (মলটোজ দিলে দুটিই গ্লুকোজ হতো)। ল্যাকটোজ থেকে গ্লুকোজ ও গ্যালাকটোজ পাওয়া যায়, যাদের C-4 এপিমার হওয়ায় তারা ভিন্ন ওসাজোন তৈরি করে।" },
+{ q: "৭. D-গ্লুকোজের HNO<sub>3</sub> দ্বারা জারণে যে ডাইকার্বক্সিলিক অ্যাসিডটি (গ্লুকারিক অ্যাসিড) পাওয়া যায়, সেটি আর কোন্ অ্যালডোহেক্সোজের জারণে উৎপন্ন হয়?", opts: ["D-ম্যানোজ", "D-গ্যালাকটোজ", "D-ফ্রুক্টোজ", "L-গুলোজ"], ans: 3, exp: "ব্যাখ্যা: গ্লুকোজের গঠনকে 180&deg; ঘোরালে তা L-গুলোজের গঠনে পরিণত হয়। যেহেতু গ্লুকারিক অ্যাসিডের দুই প্রান্তেই -COOH থাকে, তাই D-গ্লুকোজ এবং L-গুলোজ উভয় থেকেই একই গ্লুকারিক অ্যাসিড তৈরি হয়।" },
+{ q: "৮. নিনহাইড্রিন পরীক্ষায় প্রোলিন এবং হাইড্রক্সিপ্রোলিন ছাড়া অন্যান্য সমস্ত &alpha;-অ্যামিনো অ্যাসিডগুলি কী বর্ণ ধারণ করে?", opts: ["লাল", "হলুদ", "সবুজ", "নীলাভ-বেগুনি"], ans: 3, exp: "ব্যাখ্যা: প্রোলিন ও হাইড্রক্সিপ্রোলিন ছাড়া সমস্ত &alpha;-অ্যামিনো অ্যাসিড নিনহাইড্রিন বিকারকের সাথে বিক্রিয়া করে একটি কমপ্লেক্স তৈরি করে যার বর্ণ নীলাভ-বেগুনি বা রুহিমানস পার্পল (Ruhemann's purple)।" },
+{ q: "৯. DNA-এর দুটি নমুনা A এবং B-এর গলনাঙ্ক (Melting Temperature) যথাক্রমে 340K এবং 350K। এই তথ্য থেকে এদের বেস-পেয়ার সম্পর্কে কী সিদ্ধান্ত নেওয়া যায়?", opts: ["A নমুনায় C-G বেস-পেয়ার বেশি", "B নমুনায় A-T বেস-পেয়ার বেশি", "উভয় নমুনায় বেস-পেয়ার সমান", "B নমুনায় C-G বেস-পেয়ার বেশি"], ans: 3, exp: "ব্যাখ্যা: সাইটোসিন ও গুয়ানিনের (C-G) মধ্যে ৩টি হাইড্রোজেন বন্ড থাকে, আর A-T এর মধ্যে ২টি। তাই যে DNA-তে C-G বেশি থাকে, তার বন্ড ভাঙতে বেশি তাপ লাগে এবং তার গলনাঙ্ক বেশি হয়।" },
+{ q: "১০. কোন্ এস্টারটির ব্যুভোঁ-ব্লাঙ্ক (Bouveault-Blanc) বিজারণের ফলে উৎপন্ন অ্যালকোহল দুটি আয়োডোফর্ম পরীক্ষায় সাড়া দেয়?", opts: ["ইথাইল ইথানোয়েট", "প্রোপাইল ইথানোয়েট", "মিথাইল প্রোপানোয়েট", "আইসোপ্রোপাইল ইথানোয়েট"], ans: 3, exp: "ব্যাখ্যা: আইসোপ্রোপাইল ইথানোয়েটের বিজারণে ইথানল এবং 2-প্রোপানল বা আইসোপ্রোপাইল অ্যালকোহল উৎপন্ন হয়। এই দুটি অ্যালকোহলেই CH<sub>3</sub>-CH(OH)- গ্রুপ থাকায় উভয়েই আয়োডোফর্ম বিক্রিয়া দেয়।" },
+{ q: "১১. গ্লুকোজ পেন্টাঅ্যাসিটেট হাইড্রক্সিল অ্যামিনের সাথে বিক্রিয়া করে অক্সিম গঠন করে না কেন?", opts: ["এটি ক্ষারীয় প্রকৃতির", "এটি অ্যালডিহাইড", "এতে মুক্ত -CHO বা হেমিঅ্যাসিট্যাল -OH গ্রুপ থাকে না", "এটি এস্টার"], ans: 2, exp: "ব্যাখ্যা: পেন্টাঅ্যাসিটেট গঠনে C-1 এর হেমিঅ্যাসিট্যাল -OH গ্রুপটিও অ্যাসিটাইলেটেড হয়ে যায়। ফলে রিং ভেঙে মুক্ত অ্যালডিহাইড তৈরি হতে পারে না এবং এটি হাইড্রক্সিল অ্যামিনের সাথে বিক্রিয়াও করে না।" },
+{ q: "১২. সেলুলোজের সম্পূর্ণ আর্দ্রবিশ্লেষণে উৎপন্ন হয়-", opts: ["&alpha;-D-গ্লুকোজ", "D-ফ্রুক্টোজ", "D-গ্যালাকটোজ", "D-গ্লুকোজ"], ans: 3, exp: "ব্যাখ্যা: সেলুলোজ হলো &beta;-D-গ্লুকোজের পলিমার। তাই তীব্র অ্যাসিড সহযোগে এর সম্পূর্ণ আর্দ্রবিশ্লেষণ করলে শুধুমাত্র D-গ্লুকোজ পাওয়া যায়।" },
+{ q: "১৩. কোন্ হরমোনটি স্টেরয়েড প্রকৃতির নয়?", opts: ["টেস্টোস্টেরন", "প্রোজেস্টেরন", "কর্টিসল", "ইনসুলিন"], ans: 3, exp: "ব্যাখ্যা: টেস্টোস্টেরন, প্রোজেস্টেরন এবং কর্টিসল হলো লিপিড জাতীয় স্টেরয়েড হরমোন। কিন্তু ইনসুলিন হলো একটি পেপটাইড বা প্রোটিন হরমোন।" },
+{ q: "১৪. মানবদেহে শক্তির প্রধান উৎস ATP (Adenosine Triphosphate) কোন প্রকারের অণু?", opts: ["নিউক্লিওসাইড", "প্রোটিন", "অ্যামিনো অ্যাসিড", "নিউক্লিওটাইড"], ans: 3, exp: "ব্যাখ্যা: ATP-তে অ্যাডেনিন (বেস), রাইবোজ (সুগার) এবং তিনটি ফসফেট গ্রুপ থাকে। বেস+সুগার+ফসফেট মিলে নিউক্লিওটাইড তৈরি করে।" },
+{ q: "১৫. একটি মেল (Male) এবং একটি ফিমেল (Female) সেক্স হরমোন হল যথাক্রমে-", opts: ["প্রোজেস্টেরন, টেস্টোস্টেরন", "কর্টিসল, প্রোজেস্টেরন", "টেস্টোস্টেরন, কর্টিসল", "টেস্টোস্টেরন, প্রোজেস্টেরন"], ans: 3, exp: "ব্যাখ্যা: টেস্টোস্টেরন হলো পুরুষদের প্রধান সেক্স হরমোন (অ্যান্ড্রোজেন) এবং প্রোজেস্টেরন/এস্ট্রোজেন হলো মহিলাদের প্রধান সেক্স হরমোন।" }
+]
+},
+11: {
+name: 'Set 11', icon: '💊', topic: 'ভিটামিন, এনজাইম ও নিউক্লিক অ্যাসিড (Basic Concepts)',
+questions: [
+{ q: "১. কোন্ ভিটামিনের অভাবে ঠোঁটের কোণে ঘা বা চেলোসিস (Cheilosis) রোগ হয়?", opts: ["ভিটামিন B<sub>1</sub>", "ভিটামিন B<sub>2</sub>", "ভিটামিন B<sub>6</sub>", "ভিটামিন B<sub>12</sub>"], ans: 1, exp: "ব্যাখ্যা: ভিটামিন B<sub>2</sub>-এর রাসায়নিক নাম রাইবোফ্লাভিন। এর অভাবে ঠোঁটের কোণে ও জিভে ঘা হওয়া বা চেলোসিস রোগ দেখা দেয়।" },
+{ q: "২. কোন্ ভিটামিনের অভাবে শিশুদের রিকেট এবং বড়োদের অস্টিওম্যালেসিয়া রোগ হয়?", opts: ["ভিটামিন A", "ভিটামিন C", "ভিটামিন D", "ভিটামিন K"], ans: 2, exp: "ব্যাখ্যা: ভিটামিন D (ক্যালসিফেরল) হাড় ও দাঁতের গঠন মজবুত করে। এর অভাবে হাড় দুর্বল হয়ে রিকেট বা অস্টিওম্যালেসিয়া রোগ হয়।" },
+{ q: "৩. স্কার্ভি (মাড়ি থেকে রক্ত পড়া) রোগ হয় কোন্ ভিটামিনের অভাবে?", opts: ["অ্যাসকরবিক অ্যাসিড", "রেটিনল", "থায়ামিন", "টোকোফেরল"], ans: 0, exp: "ব্যাখ্যা: ভিটামিন C-এর রাসায়নিক নাম অ্যাসকরবিক অ্যাসিড। এটি কোলাজেন প্রোটিন সংশ্লেষে সাহায্য করে এবং এর অভাবে স্কার্ভি রোগ হয়।" },
+{ q: "৪. রাতকানা (Night blindness) রোগটি প্রতিরোধ করে কোন্ ভিটামিন?", opts: ["ভিটামিন K", "ভিটামিন E", "ভিটামিন C", "ভিটামিন A"], ans: 3, exp: "ব্যাখ্যা: ভিটামিন A (রেটিনল) চোখের রেটিনার রড কোশ গঠনে সাহায্য করে। এর অভাবে রাতকানা ও জেরপথ্যালমিয়া রোগ হয়।" },
+{ q: "৫. একটি নিউক্লিওসাইড (Nucleoside) কী কী উপাদান দ্বারা গঠিত?", opts: ["পেন্টোজ সুগার + ফসফেট গ্রুপ", "পেন্টোজ সুগার + নাইট্রোজেন বেস", "নাইট্রোজেন বেস + ফসফেট গ্রুপ", "পেন্টোজ সুগার + নাইট্রোজেন বেস + ফসফেট গ্রুপ"], ans: 1, exp: "ব্যাখ্যা: নিউক্লিক অ্যাসিডের গঠনে শুধুমাত্র পেন্টোজ সুগার এবং নাইট্রোজেন-ঘটিত হেটেরোসাইক্লিক বেস পরস্পরের সাথে যুক্ত হয়ে নিউক্লিওসাইড তৈরি করে। এতে ফসফেট গ্রুপ থাকে না।" },
+{ q: "৬. প্রোটিন থেকে &alpha;-অ্যামিনো অ্যাসিডে রূপান্তরকরণে কোন্ এনজাইমটি কাজ করে?", opts: ["ট্রিপসিন বা পেপসিন", "ইনভারটেজ", "জাইমেজ", "ডায়াস্টেজ"], ans: 0, exp: "ব্যাখ্যা: পাকস্থলীতে পেপসিন এবং অন্ত্রে ট্রিপসিন এনজাইম প্রোটিনকে আর্দ্রবিশ্লেষিত করে পেপটোন, পলিপেপটাইড এবং শেষে &alpha;-অ্যামিনো অ্যাসিডে পরিণত করে।" },
+{ q: "৭. সুক্রোজ থেকে গ্লুকোজ ও ফ্রুক্টোজ রূপান্তরে কোন্ এনজাইম কাজ করে?", opts: ["মলটেজ", "ইনভারটেজ", "জাইমেজ", "ল্যাকটেজ"], ans: 1, exp: "ব্যাখ্যা: ইনভারটেজ এনজাইমের উপস্থিতিতে সুক্রোজ আর্দ্রবিশ্লেষিত হয়ে সমমোলার পরিমাণ গ্লুকোজ এবং ফ্রুক্টোজ (ইনভার্ট সুগার) উৎপন্ন করে।" },
+{ q: "৮. স্টার্চকে আর্দ্রবিশ্লেষিত করে মলটোজে রূপান্তরিত করে কোন্ এনজাইম?", opts: ["অ্যামাইলেজ বা ডায়াস্টেজ", "সেলুলেজ", "পেপসিন", "লাইপেজ"], ans: 0, exp: "ব্যাখ্যা: ডায়াস্টেজ বা অ্যামাইলেজ এনজাইম স্টার্চের গ্লাইকোসাইডিক বন্ধনগুলিকে ভেঙে তাকে ডাইস্যাকারাইড মলটোজে রূপান্তরিত করে।" },
+{ q: "৯. সমতড়িৎ-বিন্দুতে (Isoelectric point) অ্যামিনো অ্যাসিড অণুগুলি কোন্ রূপে থাকে?", opts: ["ক্যাটায়ন-রূপে", "অ্যানায়ন-রূপে", "জুইটার আয়ন-রূপে", "নিউট্রাল অণু-রূপে"], ans: 2, exp: "ব্যাখ্যা: সমতড়িৎ-বিন্দুতে অ্যামিনো অ্যাসিডের নিট আধান শূন্য হয় এবং এটি তড়িৎ-প্রশম জুইটার আয়ন (H<sub>3</sub>N<sup>+</sup>-CHR-COO<sup>-</sup>) রূপে অবস্থান করে।" },
+{ q: "১০. গ্লুকোজের ফিশার অভিক্ষেপ সংকেতে C-2, C-3, C-4 ও C-5 এ -OH গ্রুপের অবস্থান যথাক্রমে কীরূপ?", opts: ["ডান, ডান, বাম, ডান", "ডান, বাম, ডান, ডান", "বাম, ডান, বাম, ডান", "ডান, বাম, বাম, ডান"], ans: 1, exp: "ব্যাখ্যা: D-গ্লুকোজের ফিশার সংকেতে শুধুমাত্র 3-নং কার্বনে -OH গ্রুপটি বামদিকে থাকে, বাকি সব কাইরাল কার্বনে (C-2, C-4, C-5) -OH গ্রুপ ডানদিকে থাকে।" },
+{ q: "১১. &alpha;-অ্যামিনো অ্যাসিডগুলি জুইটার আয়ন-রূপে অবস্থান করায় এদের গলনাঙ্ক কেমন হয়?", opts: ["অত্যন্ত কম হয়", "এরা সাধারণ উয়তায় তরল হয়", "উচ্চমানের হয়", "এরা সহজে ঊর্ধ্বপাতিত হয়"], ans: 2, exp: "ব্যাখ্যা: জুইটার আয়নে ধনাত্মক ও ঋণাত্মক উভয় মেরু থাকায় এদের মধ্যে তীব্র স্থির-তাড়িতিক আকর্ষণ বল কাজ করে। ফলে এরা দৃঢ় কেলাসাকার কঠিন পদার্থ গঠন করে এবং এদের গলনাঙ্ক খুব বেশি হয়।" },
+{ q: "১২. ভিটামিন B<sub>12</sub> সম্পর্কে কোন্ তথ্যটি সঠিক?", opts: ["এটি উদ্ভিদজাত খাদ্যে প্রচুর পাওয়া যায়", "এটি উদ্ভিদজাত খাদ্যে লব্ধ নয় (পাওয়া যায় না)", "এটি চর্বিতে দ্রাব্য একটি ভিটামিন", "এর অভাবে স্কার্ভি রোগ হয়"], ans: 1, exp: "ব্যাখ্যা: ভিটামিন B<sub>12</sub> (সায়ানোকোবাল্যামিন) মূলত প্রাণীজ প্রোটিন, মাংস, লিভার, ডিম ও দুধে পাওয়া যায়। উদ্ভিজ্জ খাদ্যে এটি সাধারণত থাকে না।" },
+{ q: "১৩. DNA-এর গঠনে থাইমিন (T) অ্যাডেনিনের (A) সঙ্গে কয়টি H-বন্ধন গঠন করে?", opts: ["১টি", "২টি", "৩টি", "৪টি"], ans: 1, exp: "ব্যাখ্যা: ওয়াটসন-ক্রিক মডেল অনুযায়ী, বেস-পেয়ারিংয়ের সময় অ্যাডেনিন এবং থাইমিন সর্বদা ২ টি হাইড্রোজেন বন্ধনের মাধ্যমে পরস্পরের সাথে যুক্ত থাকে (A=T)।" },
+{ q: "১৪. গুয়ানিন (G) সাইটোসিনের (C) সঙ্গে কয়টি H-বন্ধন গঠন করে?", opts: ["১টি", "২টি", "৩টি", "৪টি"], ans: 2, exp: "ব্যাখ্যা: DNA-এর দ্বিতন্ত্রী শৃঙ্খলে গুয়ানিন এবং সাইটোসিনের মধ্যে ৩ টি হাইড্রোজেন বন্ধন গঠিত হয় (G≡C)। ফলে G-C পেয়ার A-T পেয়ার অপেক্ষা বেশি শক্তিশালী।" },
+{ q: "১৫. একটি ডাইস্যাকারাইড আম্লিক দ্রবণে আর্দ্রবিশ্লেষিত হয়ে দুটি হেক্সোজ (Q ও R) দেয়, উভয়েই দক্ষিণাবর্তী কিন্তু ভিন্ন ওসাজোন গঠন করে। ডাইস্যাকারাইডটি কী?", opts: ["সুক্রোজ", "মলটোজ", "ল্যাকটোজ", "সেলুলোজ"], ans: 2, exp: "ব্যাখ্যা: সুক্রোজ হলে উৎপন্ন ফ্রুক্টোজ বামাবর্তী হতো। মলটোজ হলে দুটি গ্লুকোজ অণু তৈরি হতো যা একই ওসাজোন দিত। ল্যাকটোজ থেকে গ্লুকোজ ও গ্যালাকটোজ উৎপন্ন হয়, যারা C-4 এপিমার হওয়ায় আলাদা ওসাজোন দেয়।" }
+]
+},
+12: {
+name: 'Set 12', icon: '🧬', topic: 'প্রোটিন, এনজাইম ও নিউক্লিক অ্যাসিড (Structural Details)',
+questions: [
+{ q: "১. ওসাজোন গঠনকালে মনোস্যাকারাইড অণুর কোন্ কোন্ কার্বনের রূপান্তর ঘটে?", opts: ["C-1 ও C-4", "C-1 ও C-2", "C-2 ও C-3", "C-5 ও C-6"], ans: 1, exp: "ব্যাখ্যা: ফিনাইল হাইড্রাজিনের সাথে বিক্রিয়ায় কেবল 1-নং এবং 2-নং কার্বন পরমাণু অংশগ্রহণ করে ওসাজোন গঠন করে। বাকি কার্বন শৃঙ্খল অপরিবর্তিত থাকে।" },
+{ q: "২. একটি ট্রাইপেপটাইড অণুতে কয়টি পেপটাইড বন্ধন থাকে?", opts: ["১টি", "২টি", "৩টি", "৪টি"], ans: 1, exp: "ব্যাখ্যা: তিনটি অ্যামিনো অ্যাসিড অণু ঘনীভূত হয়ে ট্রাইপেপটাইড গঠন করে, যার মধ্যে দুটি পেপটাইড বা অ্যামাইড (-CO-NH-) লিংকেজ থাকে।" },
+{ q: "৩. DNA গঠনকারী নিউক্লিওটাইডের আর্দ্রবিশ্লেষণে পিরিমিডিন বেসরূপে কী উৎপন্ন হতে পারে না?", opts: ["থাইমিন", "সাইটোসিন", "ইউরাসিল", "অ্যাডেনিন"], ans: 2, exp: "ব্যাখ্যা: DNA-তে পিরিমিডিন বেস হিসেবে সাইটোসিন এবং থাইমিন থাকে। ইউরাসিল কেবলমাত্র RNA-তে থাকে, তাই DNA-এর আর্দ্রবিশ্লেষণে এটি উৎপন্ন হতে পারে না। (অ্যাডেনিন পিউরিন বেস)।" },
+{ q: "৪. এনজাইমগুলি কোন্ তাপমাত্রায় সর্বাধিক সক্রিয়তা প্রদর্শন করে?", opts: ["0&deg;C", "100&deg;C", "মানবদেহের স্বাভাবিক তাপমাত্রায় (প্রায় 37&deg;C)", "60&deg;C"], ans: 2, exp: "ব্যাখ্যা: এনজাইম বা উৎসেচকগুলি একটি নির্দিষ্ট 'অপ্টিমাম' (optimum) তাপমাত্রা ও pH-এ সবচেয়ে ভালো কাজ করে, যা সাধারণত জীবদেহের স্বাভাবিক তাপমাত্রার কাছাকাছি হয়।" },
+{ q: "৫. ডি-অক্সিরাইবোজ সুগারের সংকেতে রাইবোজের তুলনায় কোন্ পরিবর্তনটি দেখা যায়?", opts: ["C-1 কার্বনে -OH অনুপস্থিত", "C-2 কার্বনে -OH গ্রুপের জায়গায় শুধু -H থাকে", "C-3 কার্বনে অক্সিজেন থাকে না", "C-5 কার্বনে ফসফেট যুক্ত থাকে না"], ans: 1, exp: "ব্যাখ্যা: রাইবোজ একটি পেন্টোজ সুগার যার 2-নং কার্বনে একটি -OH গ্রুপ থাকে। ডি-অক্সিরাইবোজের ক্ষেত্রে 2-নং কার্বন থেকে অক্সিজেনটি অপসারিত হয়ে কেবল হাইড্রোজেন (-H) থাকে।" },
+{ q: "৬. লোহিত রক্তকণিকায় উপস্থিত কোন্ প্রোটিন অক্সিজেন পরিবহনে সাহায্য করে?", opts: ["কোলাজেন", "মায়োসিন", "হিমোগ্লোবিন", "ফাইব্রিন"], ans: 2, exp: "ব্যাখ্যা: হিমোগ্লোবিন হলো একটি ট্রান্সপোর্ট (পরিবাহী) প্রোটিন যা ফুসফুস থেকে সারা দেহে অক্সিজেন এবং কলাকোশ থেকে ফুসফুসে কার্বন ডাইঅক্সাইড পরিবহন করে।" },
+{ q: "৭. কোন্ অ্যামিনো অ্যাসিডটি আলোক-নিষ্ক্রিয় (Achiral)?", opts: ["অ্যালানিন", "ভ্যালিন", "গ্লাইসিন", "লিউসিন"], ans: 2, exp: "ব্যাখ্যা: গ্লাইসিনের সংকেত H<sub>2</sub>N-CH<sub>2</sub>-COOH। &alpha;-কার্বনের সাথে দুটি একই হাইড্রোজেন পরমাণু যুক্ত থাকায় এটিতে কোনো অপ্রতিসম (কাইরাল) কার্বন নেই।" },
+{ q: "৮. প্রোটিন অণুর সেকেন্ডারি গঠনের প্রধান দুটি রূপ কী কী?", opts: ["প্রাইমারি ও টারসিয়ারি", "গ্লোবিউলার ও ফাইব্রাস", "&alpha;-হেলিক্স এবং &beta;-প্লিটেড শিট", "প্রোটোমার ও অলিগোমার"], ans: 2, exp: "ব্যাখ্যা: পলিপেপটাইড শৃঙ্খল হাইড্রোজেন বন্ধনের মাধ্যমে ভাঁজ বা কুণ্ডলী পাকিয়ে সেকেন্ডারি গঠন তৈরি করে। এর প্রধান দুটি রূপ হলো &alpha;-হেলিক্স এবং &beta;-প্লিটেড শিট।" },
+{ q: "৯. তন্তুময় (Fibrous) প্রোটিনের একটি উদাহরণ দাও যা চুলে ও নখে থাকে-", opts: ["অ্যালবুমিন", "কেরাটিন", "ইনসুলিন", "গ্লোবিউলিন"], ans: 1, exp: "ব্যাখ্যা: চুল, নখ, পশুর শিং বা উলে উপস্থিত অদ্রবণীয় এবং আঁশালো প্রোটিনটি হলো &alpha;-কেরাটিন।" },
+{ q: "১০. রক্ত জমাট বাঁধতে সাহায্য করে কোন্ প্রোটিন?", opts: ["হিমোগ্লোবিন", "কোলাজেন", "থ্রম্বিন ও ফাইব্রিনোজেন", "মায়োসিন"], ans: 2, exp: "ব্যাখ্যা: থ্রম্বিন এবং ফাইব্রিনোজেন প্রোটিন মানবদেহে কোনো ক্ষতস্থানে রক্ত তঞ্চন বা জমাট বাঁধতে (blood clotting) গুরুত্বপূর্ণ ভূমিকা পালন করে।" },
+{ q: "১১. স্টার্চের জলীয় দ্রবণে আয়োডিন যোগ করলে কী বর্ণ উৎপন্ন হয়?", opts: ["লাল", "হলুদ", "সবুজ", "নীল"], ans: 3, exp: "ব্যাখ্যা: স্টার্চের অ্যামাইলোজ অংশটি হেলিক্যাল গঠন তৈরি করে যার মধ্যে আয়োডিন অণু আটকে গিয়ে একটি গাঢ় নীল বর্ণের কমপ্লেক্স তৈরি করে।" },
+{ q: "১২. ফ্রুক্টোজকে 'লেভ্যুলোজ' (Laevulose) বলা হয় কেন?", opts: ["এটি মিষ্টি বলে", "এর জলীয় দ্রবণ সমতল সমবর্তিত আলোকে বামদিকে ঘোরায় বলে", "এটি ফলের রসে থাকে বলে", "এটি কিটোন গ্রুপ ধারণ করে বলে"], ans: 1, exp: "ব্যাখ্যা: প্রাকৃতিক D-ফ্রুক্টোজ তীব্র বামাবর্তী (laevorotatory) আবর্তন (-92.4&deg;) দেখায়। তাই গ্লুকোজকে যেমন ডেক্সট্রোজ বলা হয়, ফ্রুক্টোজকে লেভ্যুলোজ বলা হয়।" },
+{ q: "১৩. কোন্ খনিজ মৌলটি ভিটামিন B<sub>12</sub>-এর গঠনে উপস্থিত থাকে?", opts: ["আয়রন (Fe)", "ম্যাগনেশিয়াম (Mg)", "জিংক (Zn)", "কোবাল্ট (Co)"], ans: 3, exp: "ব্যাখ্যা: ভিটামিন B<sub>12</sub>-এর রাসায়নিক নাম হলো সায়ানোকোবাল্যামিন। এর কেন্দ্রে কোঅর্ডিনেশন কমপ্লেক্স রূপে কোবাল্ট (Co) ধাতু বর্তমান থাকে।" },
+{ q: "১৪. রক্তের শর্করার (Blood Sugar) মাত্রা নিয়ন্ত্রণ করে কোন্ হরমোন?", opts: ["ইনসুলিন", "থাইরক্সিন", "অ্যাড্রেনালিন", "কর্টিসল"], ans: 0, exp: "ব্যাখ্যা: অগ্ন্যাশয় থেকে নিঃসৃত ইনসুলিন প্রোটিন হরমোন রক্তে অতিরিক্ত গ্লুকোজকে গ্লাইকোজেনে পরিণত করে রক্তের শর্করার মাত্রা নিয়ন্ত্রণ করে।" },
+{ q: "১৫. কোন্ হরমোনটিকে মানসিক চাপ বা বিপদকালীন হরমোন বলা হয়?", opts: ["এস্ট্রোজেন", "অ্যাড্রেনালিন", "টেস্টোস্টেরন", "প্রোজেস্টেরন"], ans: 1, exp: "ব্যাখ্যা: মানসিক চাপ, ভয় বা বিপদের সময় অ্যাড্রেনালিন হরমোন নিঃসৃত হয়ে লিভারে গ্লাইকোজেনকে ভেঙে দ্রুত গ্লুকোজ সরবরাহ করে এবং এনার্জি যোগায়।" }
+]
+},
+13: {
+name: 'Set 13', icon: '🧩', topic: 'কার্বোহাইড্রেট, লিপিড এবং নিউক্লিক অ্যাসিড (Applied Concept)',
+questions: [
+{ q: "১. DNA-এর দ্বিতন্ত্রী শৃঙ্খলের একটিতে বেসের ক্রম ATCGTCCA হলে অপর পরিপূরক শৃঙ্খলে বেসের ক্রম কী হবে?", opts: ["TAGCAGGT", "UAGCAGGU", "GCATAGGT", "TAGCTGGA"], ans: 0, exp: "ব্যাখ্যা: বেস পেয়ারিং নিয়ম অনুযায়ী A-এর পরিপূরক T এবং C-এর পরিপূরক G। তাই ATCGTCCA-এর বিপরীতে হবে TAGCAGGT।" },
+{ q: "২. গ্লাইসিন ও অ্যালানিনের সমন্বয়ে গঠিত একটি ডাইপেপটাইডের সংকেত Gly-Ala হলে N-প্রান্তীয় (N-terminal) অ্যামিনো অ্যাসিড কোনটি?", opts: ["গ্লাইসিন", "অ্যালানিন", "উভয়ই", "কোনোটিই নয়"], ans: 0, exp: "ব্যাখ্যা: প্রথা অনুযায়ী পেপটাইড শৃঙ্খল লেখার সময় মুক্ত অ্যামিনো গ্রুপযুক্ত (-NH<sub>2</sub>) অ্যামিনো অ্যাসিডকে (N-terminal) বামদিকে এবং মুক্ত কার্বক্সিল গ্রুপযুক্ত (-COOH) অ্যাসিডকে (C-terminal) ডানদিকে লেখা হয়।" },
+{ q: "৩. দুধের মধ্যে উপস্থিত ডাইস্যাকারাইডটির নাম কী?", opts: ["সুক্রোজ", "মলটোজ", "ল্যাকটোজ", "সেলুলোজ"], ans: 2, exp: "ব্যাখ্যা: মানুষের ও গরুর দুধে ল্যাকটোজ উপস্থিত থাকে, তাই একে মিল্ক সুগার (Milk sugar) বলা হয়।" },
+{ q: "৪. ল্যাকটোজের আর্দ্রবিশ্লেষণে কোন্ কোন্ মনোস্যাকারাইড উৎপন্ন হয়?", opts: ["D-গ্লুকোজ ও D-ফ্রুক্টোজ", "&beta;-D-গ্যালাকটোজ এবং &beta;-D-গ্লুকোজ", "দুটি &alpha;-D-গ্লুকোজ", "D-গ্লুকোজ ও D-ম্যানোজ"], ans: 1, exp: "ব্যাখ্যা: ল্যাকটোজ একটি বিজারক ডাইস্যাকারাইড যা গ্যালাকটোজ এবং গ্লুকোজের সমন্বয়ে &beta;-1,4 গ্লাইকোসাইডিক লিংকেজ দ্বারা গঠিত।" },
+{ q: "৫. মানবদেহে সঞ্চিত কার্বোহাইড্রেটটির নাম কী?", opts: ["সেলুলোজ", "স্টার্চ", "গ্লাইকোজেন", "ডেক্সট্রিন"], ans: 2, exp: "ব্যাখ্যা: প্রাণীদেহে কার্বোহাইড্রেট গ্লাইকোজেন হিসেবে লিভার এবং পেশিতে সঞ্চিত থাকে। একে প্রাণীজ স্টার্চও বলা হয়।" },
+{ q: "৬. গ্লাইকোজেনের গঠন স্টার্চের কোন্ উপাদানের মতো?", opts: ["অ্যামাইলোজ", "অ্যামাইলোপেকটিন", "সেলুলোজ", "সুক্রোজ"], ans: 1, exp: "ব্যাখ্যা: গ্লাইকোজেনের গঠন অ্যামাইলোপেকটিনের মতোই শাখাযুক্ত, তবে গ্লাইকোজেন অনেক বেশি নিবিড় শাখাযুক্ত শৃঙ্খলবিশিষ্ট হয় (প্রতি 10-14 টি গ্লুকোজ একক অন্তর শাখা থাকে)।" },
+{ q: "৭. সেলুলোজ মানুষের পরিপাকতন্ত্রে হজম হয় না কেন?", opts: ["এটি জলে অদ্রবণীয়", "এটি একটি ফাইবার", "মানুষের শরীরে সেলুলেজ এনজাইম থাকে না যা &beta;-গ্লাইকোসাইডিক লিংকেজ ভাঙতে পারে", "এটি অত্যন্ত বিষাক্ত"], ans: 2, exp: "ব্যাখ্যা: সেলুলোজ &beta;-D-গ্লুকোজের পলিমার। মানুষের পাকস্থলীতে এই &beta;-গ্লাইকোসাইডিক বন্ধন ভাঙার জন্য প্রয়োজনীয় এনজাইম (Cellulase) থাকে না, ফলে এটি হজম হয় না।" },
+{ q: "৮. প্রোটিনগুলি প্রধানত কোন্ ধরনের অ্যামিনো অ্যাসিডের পলিমার?", opts: ["D-&alpha;-অ্যামিনো অ্যাসিড", "L-&alpha;-অ্যামিনো অ্যাসিড", "L-&beta;-অ্যামিনো অ্যাসিড", "D-&gamma;-অ্যামিনো অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: প্রকৃতিতে প্রাপ্ত যে সমস্ত অ্যামিনো অ্যাসিড দিয়ে প্রোটিন গঠিত হয়, সেগুলি সবই &alpha;-অ্যামিনো অ্যাসিড এবং গ্লাইসিন ছাড়া বাকি সবগুলির কনফিগারেশন 'L' প্রকৃতির হয়।" },
+{ q: "৯. একটি আম্লিক অ্যামিনো অ্যাসিডের উদাহরণ দাও-", opts: ["লাইসিন", "গ্লাইসিন", "অ্যাসপারটিক অ্যাসিড", "আরজিনিন"], ans: 2, exp: "ব্যাখ্যা: অ্যাসপারটিক অ্যাসিড বা গ্লুটামিক অ্যাসিডের অণুতে অ্যামিনো (-NH<sub>2</sub>) গ্রুপ অপেক্ষা কার্বক্সিল (-COOH) গ্রুপের সংখ্যা বেশি থাকে, তাই এরা আম্লিক।" },
+{ q: "১০. প্রোটিনের ডিনেচারেশনের ফলে কোন্ গঠনটি অক্ষুণ্ণ থাকে?", opts: ["প্রাইমারি গঠন", "সেকেন্ডারি গঠন", "টারসিয়ারি গঠন", "কোয়াটারনারি গঠন"], ans: 0, exp: "ব্যাখ্যা: তাপ বা রাসায়নিক পদার্থ প্রয়োগে প্রোটিনের হাইড্রোজেন বা ডাইসালফাইড বন্ধনগুলি ভেঙে এর হেলিক্স খুলে যায় (সেকেন্ডারি ও টারসিয়ারি গঠন নষ্ট হয়), কিন্তু পেপটাইড বন্ধন না ভাঙায় প্রাইমারি গঠন অক্ষুণ্ণ থাকে।" },
+{ q: "১১. একটি কনজুগেটেড প্রোটিনের উদাহরণ দাও যেখানে লিপিড প্রোসথেটিক গ্রুপ হিসেবে কাজ করে-", opts: ["নিউক্লিওপ্রোটিন", "গ্লাইকোপ্রোটিন", "লাইপোপ্রোটিন", "ক্রোমোপ্রোটিন"], ans: 2, exp: "ব্যাখ্যা: যখন কোনো প্রোটিনের সাথে লিপিড (যেমন লেসিথিন) প্রোসথেটিক বা অপ্রোটিন অংশ হিসেবে যুক্ত থাকে, তখন তাকে লাইপোপ্রোটিন বলে।" },
+{ q: "১২. কোন্ ভিটামিনটি রক্ততঞ্চনে সাহায্য করে?", opts: ["ভিটামিন A", "ভিটামিন C", "ভিটামিন K", "ভিটামিন E"], ans: 2, exp: "ব্যাখ্যা: ভিটামিন K (ফাইলোকুইনোন) রক্ত জমাট বাঁধতে বা রক্তক্ষরণ (Hemorrhage) প্রতিরোধ করতে অত্যন্ত গুরুত্বপূর্ণ ভূমিকা পালন করে।" },
+{ q: "১৩. ভিটামিন A-এর রাসায়নিক নাম কী?", opts: ["থায়ামিন", "রেটিনল", "পিরিডক্সিন", "ক্যালসিফেরল"], ans: 1, exp: "ব্যাখ্যা: ভিটামিন A-এর রাসায়নিক নাম রেটিনল। এটি চর্বিতে দ্রবণীয় একটি ভিটামিন যা দৃষ্টিশক্তি ভালো রাখতে সাহায্য করে।" },
+{ q: "১৪. ডিএনএ (DNA) ফিঙ্গারপ্রিন্টিং কোথায় ব্যবহৃত হয়?", opts: ["রক্তচাপ মাপতে", "ব্যক্তির স্বকীয়তা নির্ণয়ে এবং অপরাধী শনাক্তকরণে", "প্রোটিন হজম করতে", "ভিটামিন সংশ্লেষণে"], ans: 1, exp: "ব্যাখ্যা: প্রতিটি মানুষের DNA-তে বেস-সিকোয়েন্স বা ফিঙ্গারপ্রিন্ট সম্পূর্ণ অনন্য (যমজ ছাড়া)। এটি ফরেনসিক সায়েন্সে অপরাধী শনাক্ত করতে বা পিতৃত্ব নির্ণয়ে ব্যবহৃত হয়।" },
+{ q: "১৫. মানবদেহে অপরিহার্য (Essential) অ্যামিনো অ্যাসিডের সংখ্যা কয়টি?", opts: ["৮টি", "১০টি", "১২টি", "২০টি"], ans: 1, exp: "ব্যাখ্যা: মানবদেহে ২০টি অ্যামিনো অ্যাসিডের মধ্যে ১০টি সংশ্লেষিত হয় না, এদের খাদ্যের মাধ্যমে গ্রহণ করতে হয়। এদের অপরিহার্য অ্যামিনো অ্যাসিড (যেমন- ভ্যালিন, লিউসিন) বলা হয়।" }
+]
+},
+14: {
+name: 'Set 14', icon: '🧪', topic: 'বিক্রিয়া, শনাক্তকরণ পরীক্ষা এবং কনফিগারেশন',
+questions: [
+{ q: "১. সুক্রোজের জলীয় দ্রবণ দক্ষিণাবর্তী (+66.5&deg;), কিন্তু লঘু HCl দ্বারা আর্দ্রবিশ্লেষিত দ্রবণটি বামাবর্তী (-19.95&deg;) হয়। এই ঘটনাকে কী বলে?", opts: ["মিউটারোটেশন", "রেসিমাইজেশন", "ইনভারশন (Inversion)", "গ্লাইকোলাইসিস"], ans: 2, exp: "ব্যাখ্যা: আর্দ্রবিশ্লেষণে উৎপন্ন গ্লুকোজ (+52.5&deg;) অপেক্ষা ফ্রুক্টোজের (-92.4&deg;) বামাবর্তী আবর্তনের মান বেশি হওয়ায় সামগ্রিক মিশ্রণটি বামাবর্তী হয়ে যায়। একে Inversion of cane sugar বলে।" },
+{ q: "২. গ্লুকোজকে মৃদু জারক, যেমন- ব্রোমিন জল দ্বারা জারিত করলে কী উৎপন্ন হয়?", opts: ["গ্লুকারিক অ্যাসিড", "গ্লুকোনিক অ্যাসিড", "স্যাকারিক অ্যাসিড", "টারটারিক অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: ব্রোমিন জলের মতো মৃদু জারক গ্লুকোজের 1-নং কার্বনে থাকা অ্যালডিহাইড গ্রুপটিকে কার্বক্সিলিক অ্যাসিডে জারিত করে ৬ কার্বনবিশিষ্ট গ্লুকোনিক অ্যাসিড তৈরি করে।" },
+{ q: "৩. গ্লুকোজকে গাঢ় নাইট্রিক অ্যাসিড দ্বারা জারিত করলে কী উৎপন্ন হয়?", opts: ["গ্লুকোনিক অ্যাসিড", "গ্লুকারিক অ্যাসিড (বা স্যাকারিক অ্যাসিড)", "সরবিটল", "গ্লাইকলিক অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: গাঢ় HNO<sub>3</sub> গ্লুকোজের উপরের অ্যালডিহাইড এবং নীচের প্রাইমারি অ্যালকোহল (-CH<sub>2</sub>OH) উভয় গ্রুপকেই জারিত করে ডাইকার্বক্সিলিক অ্যাসিড অর্থাৎ গ্লুকারিক অ্যাসিড উৎপন্ন করে।" },
+{ q: "৪. গ্লুকোজকে লাল ফসফরাস ও HI সহযোগে দীর্ঘক্ষণ তীব্র উত্তপ্ত করলে কী উৎপন্ন হয়?", opts: ["n-হেক্সেন", "সাইক্লোহেক্সেন", "বেনজিন", "সরবিটল"], ans: 0, exp: "ব্যাখ্যা: লাল P ও HI হলো তীব্র বিজারক, যা গ্লুকোজের সমস্ত অক্সিজেন অপসারণ করে একটি 6-কার্বনযুক্ত সরল অ্যালকেন (n-হেক্সেন) তৈরি করে, যা প্রমাণ করে গ্লুকোজে ৬টি কার্বন সরলরৈখিক শৃঙ্খলে থাকে।" },
+{ q: "৫. গ্লুকোজের সাথে হাইড্রক্সিল অ্যামিনের (NH<sub>2</sub>OH) বিক্রিয়ায় কী উৎপন্ন হয়?", opts: ["গ্লুকোজ সায়ানোহাইড্রিন", "গ্লুকোজ পেন্টাঅ্যাসিটেট", "গ্লুকোজ অক্সিম", "গ্লুকোসাজোন"], ans: 2, exp: "ব্যাখ্যা: গ্লুকোজের অ্যালডিহাইড গ্রুপ হাইড্রক্সিল অ্যামিনের সাথে ঘনীভবন বিক্রিয়া করে গ্লুকোজ অক্সিম তৈরি করে, যা এতে কার্বনিল গ্রুপের উপস্থিতি প্রমাণ করে।" },
+{ q: "৬. গ্লুকোজের সাথে হাইড্রোজেন সায়ানাইড (HCN)-এর যুত বিক্রিয়ায় কী উৎপন্ন হয়?", opts: ["গ্লুকোজ অক্সিম", "গ্লুকোজ সায়ানোহাইড্রিন", "গ্লুকোনিক অ্যাসিড", "গ্লুকারিক অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: HCN গ্লুকোজের কার্বনিল (>C=O) গ্রুপের সাথে নিউক্লিওফিলিক যুত বিক্রিয়া করে সায়ানোহাইড্রিন গঠন করে।" },
+{ q: "৭. মিউটারোটেশন ঘটার জন্য দ্রাবকের প্রকৃতি কেমন হওয়া প্রয়োজন?", opts: ["শুধুমাত্র তীব্র অ্যাসিডিক", "শুধুমাত্র তীব্র ক্ষারীয়", "নন-পোলার দ্রাবক (যেমন বেনজিন)", "অ্যাসিড ও ক্ষার উভয় প্রকার বা উভধর্মী দ্রাবক (যেমন জল)"], ans: 3, exp: "ব্যাখ্যা: মিউটারোটেশনের জন্য সুগারের বলয় ভাঙা ও গড়ার প্রয়োজন হয়, যার জন্য অ্যাসিডিক এবং বেসিক উভয় অনুঘটকেরই দরকার হয়। তাই জলীয় দ্রবণে এটি সবচেয়ে ভালো ঘটে।" },
+{ q: "৮. RNA-তে উপস্থিত পেন্টোজ সুগারটি কী?", opts: ["D-গ্লুকোজ", "D-ফ্রুক্টোজ", "D-রাইবোজ", "2-ডিঅক্সিরাইবোজ"], ans: 2, exp: "ব্যাখ্যা: RNA বা রাইবোনিউক্লিক অ্যাসিডে পেন্টোজ সুগার হিসেবে সর্বদা D-রাইবোজ বর্তমান থাকে।" },
+{ q: "৯. ATP অণুতে কয়টি ফসফেট গ্রুপ থাকে?", opts: ["১টি", "২টি", "৩টি", "৪টি"], ans: 2, exp: "ব্যাখ্যা: ATP-এর পুরো নাম অ্যাডেনোসিন ট্রাইফসফেট (Adenosine Triphosphate)। এতে তিনটি ফসফেট গ্রুপ পরস্পরের সাথে উচ্চ শক্তিসম্পন্ন ফসফোঅ্যানহাইড্রাইড বন্ধন দ্বারা যুক্ত থাকে।" },
+{ q: "১০. ক্লোরোফিলে কোন্ ধাতব আয়ন উপস্থিত থাকে?", opts: ["আয়রন (Fe)", "কপার (Cu)", "ম্যাগনেশিয়াম (Mg)", "কোবাল্ট (Co)"], ans: 2, exp: "ব্যাখ্যা: উদ্ভিদের পাতায় থাকা সবুজ রঞ্জক ক্লোরোফিলের কেন্দ্রে ম্যাগনেশিয়াম (Mg<sup>2+</sup>) আয়ন একটি পোরফাইরিন রিংয়ের সাথে কমপ্লেক্স তৈরি করে থাকে।" },
+{ q: "১১. কোন্ অ্যামিনো অ্যাসিডে পার্শ্বশৃঙ্খল হিসেবে থায়ল (-SH) গ্রুপ থাকে?", opts: ["মেথিওনিন", "সিসটেইন", "সেরিন", "টাইরোসিন"], ans: 1, exp: "ব্যাখ্যা: সিসটেইন একটি সালফার-যুক্ত অ্যামিনো অ্যাসিড, যার পার্শ্বশৃঙ্খলে একটি থায়ল বা মারক্যাপটান (-SH) গ্রুপ উপস্থিত থাকে, যা প্রোটিনে ডাইসালফাইড বন্ধন তৈরিতে অংশ নেয়।" },
+{ q: "১২. পেপটাইড বন্ধনের জ্যামিতিক কনফরমেশনে কোনটি অধিক স্থিতিশীল?", opts: ["সিস্-সমাবয়ব", "ট্রান্স-সমাবয়ব", "উভয়ই সমান স্থিতিশীল", "এটি কোনো জ্যামিতিক সমাবয়বতা দেখায় না"], ans: 1, exp: "ব্যাখ্যা: পেপটাইড বন্ধনে (-CO-NH-) রেজোনেন্সের কারণে কার্বন-নাইট্রোজেন আংশিক দ্বি-বন্ধন চরিত্র পায়। ট্রান্স-সমাবয়বে দুটি বড় R-গ্রুপ বিপরীত দিকে থাকায় স্টেরিক হিনড্রেন্স কম হয় এবং এটি অধিক স্থিতিশীল হয়।" },
+{ q: "১৩. ফিনাইলকিটোন ইউরিয়া (PKU) নামক সহজাত রোগটি কোন্ এনজাইমের অভাবে হয়?", opts: ["জাইমেজ", "পেপসিন", "ইনভারটেজ", "ফিনাইলঅ্যালানিন হাইড্রক্সিলেজ"], ans: 3, exp: "ব্যাখ্যা: এই এনজাইমের অভাবে ফিনাইলঅ্যালানিন অ্যামিনো অ্যাসিডটি টাইরোসিনে পরিণত হতে পারে না, ফলে রক্তে ফিনাইলপাইরুভেট জমে গিয়ে মানসিক প্রতিবন্ধকতার সৃষ্টি করে।" },
+{ q: "১৪. ইনসুলিন প্রোটিনে মোট কয়টি অ্যামিনো অ্যাসিড থাকে?", opts: ["51টি", "100টি", "141টি", "20টি"], ans: 0, exp: "ব্যাখ্যা: ইনসুলিন একটি ছোটো গ্লোবিউলার প্রোটিন, যা 51টি অ্যামিনো অ্যাসিডের দুটি পলিপেপটাইড শৃঙ্খল (A ও B চেইন) দ্বারা গঠিত এবং এরা ডাইসালফাইড বন্ধন দ্বারা যুক্ত থাকে।" },
+{ q: "১৫. নিউক্লিওসাইডে সুগার ও বেস-এর মধ্যে সৃষ্ট বন্ধনকে কী বলে?", opts: ["পেপটাইড লিংকেজ", "ফসফোডাইএস্টার লিংকেজ", "N-গ্লাইকোসাইডিক লিংকেজ", "O-গ্লাইকোসাইডিক লিংকেজ"], ans: 2, exp: "ব্যাখ্যা: পেন্টোজ সুগারের C-1' কার্বনের সাথে নাইট্রোজেনাস বেসের N-পরমাণুর মধ্যে জল অপসারণের মাধ্যমে যে বন্ধন তৈরি হয়, তাকে N-গ্লাইকোসাইডিক লিংকেজ বলে।" }
+]
+},
+15: {
+name: 'Set 15', icon: '🌟', topic: 'Advanced MCQs (Board & Competitive Specimen)',
+questions: [
+{ q: "১. রৈখিক অ্যামাইলোজ শৃঙ্খলে গ্লুকোজ এককগুলি কোন্ লিংকেজ দ্বারা যুক্ত?", opts: ["&alpha;-1,6-গ্লাইকোসাইডিক লিংকেজ", "&beta;-1,4-গ্লাইকোসাইডিক লিংকেজ", "&alpha;-1,4-গ্লাইকোসাইডিক লিংকেজ", "&beta;-1,6-গ্লাইকোসাইডিক লিংকেজ"], ans: 2, exp: "ব্যাখ্যা: স্টার্চের জলে দ্রবণীয় অংশ অ্যামাইলোজ হলো &alpha;-D-গ্লুকোজের একটি সরল রৈখিক পলিমার, যেখানে মনোমারগুলি C-1 ও C-4 কার্বনের মধ্যে &alpha;-গ্লাইকোসাইডিক বন্ধন দ্বারা যুক্ত থাকে।" },
+{ q: "২. অ্যামাইলোপেকটিনের শাখায় (branching point) কোন্ লিংকেজ থাকে?", opts: ["&alpha;-1,4-গ্লাইকোসাইডিক লিংকেজ", "&alpha;-1,6-গ্লাইকোসাইডিক লিংকেজ", "&beta;-1,4-গ্লাইকোসাইডিক লিংকেজ", "&beta;-1,6-গ্লাইকোসাইডিক লিংকেজ"], ans: 1, exp: "ব্যাখ্যা: অ্যামাইলোপেকটিনের রৈখিক শৃঙ্খলে &alpha;-1,4 লিংকেজ থাকলেও, যেখানে শাখা তৈরি হয় সেখানে একটি শৃঙ্খলের C-1 অপর শৃঙ্খলের C-6 কার্বনের সাথে &alpha;-1,6-গ্লাইকোসাইডিক লিংকেজ তৈরি করে।" },
+{ q: "৩. কোন্ শর্করাটি 'মিল্ক সুগার' (Milk Sugar) নামে পরিচিত?", opts: ["মলটোজ", "ল্যাকটোজ", "সুক্রোজ", "গ্লুকোজ"], ans: 1, exp: "ব্যাখ্যা: স্তন্যপায়ী প্রাণীদের দুধে ল্যাকটোজ উপস্থিত থাকে বলে একে মিল্ক সুগার বলা হয়।" },
+{ q: "৪. কোন্ শর্করাটি 'মোল্ট সুগার' (Malt sugar) নামে পরিচিত?", opts: ["গ্লাইকোজেন", "ল্যাকটোজ", "মলটোজ", "সেলুলোজ"], ans: 2, exp: "ব্যাখ্যা: স্টার্চের আংশিক আর্দ্রবিশ্লেষণে মলটোজ উৎপন্ন হয়, যা অঙ্কুরিত বার্লি বা মোল্ট (Malt)-এ পাওয়া যায়। তাই একে মোল্ট সুগার বলা হয়।" },
+{ q: "৫. কোন্ শর্করাটি 'ব্লাড সুগার' (Blood sugar) নামে পরিচিত?", opts: ["গ্লুকোজ", "ফ্রুক্টোজ", "গ্যালাকটোজ", "ল্যাকটোজ"], ans: 0, exp: "ব্যাখ্যা: মানবদেহের রক্তে গ্লুকোজ পরিবাহিত হয়ে কোষে কোষে শক্তির যোগান দেয়, তাই চিকিৎসাবিজ্ঞানে গ্লুকোজকে ব্লাড সুগার বলা হয়।" },
+{ q: "৬. কোন্ শর্করাটি 'গ্রেপ সুগার' (Grape sugar) নামে পরিচিত?", opts: ["ফ্রুক্টোজ", "সুক্রোজ", "গ্লুকোজ", "ল্যাকটোজ"], ans: 2, exp: "ব্যাখ্যা: পাকা আঙুরে (Grapes) প্রচুর পরিমাণে গ্লুকোজ থাকে, তাই একে গ্রেপ সুগারও বলা হয়।" },
+{ q: "৭. কোন্ ভিটামিনটি মানবদেহে দীর্ঘক্ষণ সঞ্চিত থাকে না এবং প্রস্রাবের মাধ্যমে বেরিয়ে যায়?", opts: ["ভিটামিন A", "ভিটামিন C", "ভিটামিন D", "ভিটামিন K"], ans: 1, exp: "ব্যাখ্যা: ভিটামিন C এবং ভিটামিন B-কমপ্লেক্স হলো জলে দ্রবণীয়। এরা মানবদেহে সঞ্চিত হয় না এবং প্রস্রাবের সাথে বেরিয়ে যায়, তাই প্রতিদিন খাদ্যের সাথে এদের গ্রহণ করা জরুরি।" },
+{ q: "৮. প্রোটিনের মিলনের পরীক্ষা (Millon's test) কোন্ অ্যামিনো অ্যাসিডের উপস্থিতির প্রমাণ দেয়?", opts: ["গ্লাইসিন", "অ্যালানিন", "টাইরোসিন", "লাইসিন"], ans: 2, exp: "ব্যাখ্যা: মিলন পরীক্ষা শুধুমাত্র ফেনলীয় গ্রুপযুক্ত প্রোটিনে সাড়া দেয়। যেহেতু টাইরোসিনই একমাত্র ফেনলীয় অ্যামিনো অ্যাসিড, তাই টাইরোসিনযুক্ত প্রোটিনগুলি এই পরীক্ষায় লাল বর্ণ ধারণ করে।" },
+{ q: "৯. বাইইউরেট পরীক্ষা (Biuret test) কী শনাক্ত করতে ব্যবহৃত হয়?", opts: ["কার্বোহাইড্রেট", "লিপিড", "পেপটাইড বন্ধন (প্রোটিন)", "নিউক্লিক অ্যাসিড"], ans: 2, exp: "ব্যাখ্যা: বাইইউরেট টেস্টে প্রোটিনের ক্ষারীয় দ্রবণে কপার সালফেট যোগ করলে পেপটাইড বন্ধন (-CO-NH-) উপস্থিত থাকার কারণে একটি বেগুনি রঙের কমপ্লেক্স তৈরি হয়।" },
+{ q: "১০. প্রোটিনের জ্যান্থোপ্রোটিক পরীক্ষায় (Xanthoproteic test) কোন্ বিকারক ব্যবহৃত হয়?", opts: ["কপার সালফেট", "মলিস বিকারক", "নিনহাইড্রিন", "গাঢ় HNO<sub>3</sub>"], ans: 3, exp: "ব্যাখ্যা: অ্যারোমেটিক বলয়যুক্ত প্রোটিনে গাঢ় নাইট্রিক অ্যাসিড যোগ করে উত্তপ্ত করলে নাইট্রেশন প্রক্রিয়ার মাধ্যমে হলুদ বর্ণের সৃষ্টি হয়। একে জ্যান্থোপ্রোটিক পরীক্ষা বলে।" },
+{ q: "১১. স্টেরয়েড হরমোনের একটি উদাহরণ দাও-", opts: ["ইনসুলিন", "থাইরক্সিন", "টেস্টোস্টেরন", "অ্যাড্রেনালিন"], ans: 2, exp: "ব্যাখ্যা: পুরুষদের সেক্স হরমোন টেস্টোস্টেরন এবং মহিলাদের এস্ট্রোজেন ও প্রোজেস্টেরন হলো কোলেস্টেরল-সঞ্জাত লিপিড বা স্টেরয়েড হরমোন। ইনসুলিন প্রোটিনধর্মী এবং অ্যাড্রেনালিন অ্যামিনধর্মী।" },
+{ q: "১২. প্রোটিন অণুর সেকেন্ডারি গঠনে &alpha;-হেলিক্স গঠনটি ডান-হাতি (right-handed) না বাঁ-হাতি (left-handed) হয়?", opts: ["সর্বদা বাঁ-হাতি", "সর্বদা ডান-হাতি", "কোনো নির্দিষ্ট দিক নেই", "এটি হেলিক্স নয়"], ans: 1, exp: "ব্যাখ্যা: প্রকৃতিতে প্রাপ্ত প্রোটিনগুলির &alpha;-হেলিক্স গঠন সর্বদা দক্ষিণাবর্তী বা ডান-হাতি (right-handed) স্ক্রুর মতো পাকানো থাকে।" },
+{ q: "১৩. হিমোগ্লোবিন প্রোটিনের কোয়াটারনারি গঠনে কয়টি পলিপেপটাইড শৃঙ্খল থাকে?", opts: ["১টি", "২টি", "৩টি", "৪টি"], ans: 3, exp: "ব্যাখ্যা: হিমোগ্লোবিন ৪টি সাবইউনিট বা পলিপেপটাইড শৃঙ্খল (দুটি অভিন্ন &alpha;-শৃঙ্খল এবং দুটি অভিন্ন &beta;-শৃঙ্খল) দ্বারা গঠিত একটি কোয়াটারনারি প্রোটিন।" },
+{ q: "১৪. কোন্ এনজাইমটি লোহিত রক্তকণিকার (RBC) মধ্যে থেকে রক্তে কার্বন ডাইঅক্সাইড পরিবহনে সাহায্য করে?", opts: ["জাইমেজ", "পেপসিন", "কার্বনিক অ্যানহাইড্রেজ", "ট্রিপসিন"], ans: 2, exp: "ব্যাখ্যা: কার্বনিক অ্যানহাইড্রেজ হলো একটি এন্ডোএনজাইম বা ইন্ট্রাসেলুলার এনজাইম, যা লোহিত রক্তকণিকার ভেতরে কাজ করে এবং CO<sub>2</sub> ও H<sub>2</sub>O থেকে H<sub>2</sub>CO<sub>3</sub> তৈরি তরান্বিত করে।" },
+{ q: "১৫. কোন্ প্রকারের RNA প্রোটিন সংশ্লেষণে নির্দিষ্ট অ্যামিনো অ্যাসিডকে রাইবোজোমে বহন করে নিয়ে আসে?", opts: ["m-RNA", "t-RNA", "r-RNA", "DNA"], ans: 1, exp: "ব্যাখ্যা: প্রোটিন সংশ্লেষণের সময় ট্রান্সফার RNA বা t-RNA সাইটোপ্লাজম থেকে নির্দিষ্ট অ্যামিনো অ্যাসিডগুলিকে প্রোটিন তৈরির কারখানা রাইবোজোমে বহন করে নিয়ে আসে।" }
+]
+}
+};
+
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+function getGlobalUsers() {
+const data = localStorage.getItem("testBazarGlobalUsers");
+return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+const data = localStorage.getItem("testBazarAttemptsChem3U5_v1");
+return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+attempts[key] = (attempts[key] || 0) + 1;
+localStorage.setItem("testBazarAttemptsChem3U5_v1", JSON.stringify(attempts));
+return attempts[key];
+}
+
+window.onload = () => { renderHub(); };
+
+function renderHub() {
+const grid = document.getElementById("setGrid");
+grid.innerHTML = "";
+for(let id in ALL_SETS) {
+const set = ALL_SETS[id];
+const div = document.createElement("div");
+div.className = "set-card";
+let attemptCount = 0;
+let isLocked = false;
+
+if (currentUser) {
+attemptCount = getAttemptCount(currentUser, id);
+isLocked = attemptCount >= MAX_ATTEMPTS;
+if (isLocked) div.classList.add("locked");
+}
+
+div.innerHTML = `
+<div class="icon">${set.icon}</div>
+<div class="set-num">${set.name}</div>
+<div class="set-title">${set.topic}</div>
+<div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+`;
+
+div.onclick = () => {
+if (isLocked) { alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return; }
+handleSetClick(id);
+};
+grid.appendChild(div);
+}
+}
+
+function handleSetClick(setId) {
+activeSetId = setId;
+if (!currentUser) {
+document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+document.getElementById("loginOverlay").classList.add("active");
+document.getElementById("loginUsername").value = "";
+document.getElementById("loginPassword").value = "";
+document.getElementById("loginError").style.display = "none";
+} else { startQuiz(setId); }
+}
+
+function doLogin() {
+const u = document.getElementById("loginUsername").value.trim();
+const p = document.getElementById("loginPassword").value.trim();
+const err = document.getElementById("loginError");
+const GLOBAL_USERS = getGlobalUsers();
+
+if(!u || !p) { err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!"; err.style.display = "block"; return; }
+if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+let attempts = getAttemptCount(u, activeSetId);
+if (attempts >= MAX_ATTEMPTS) {
+err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+err.style.display = "block";
+return;
+}
+currentUser = u;
+document.getElementById("loginOverlay").classList.remove("active");
+document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+document.getElementById("userDisplay").classList.remove("hidden");
+renderHub();
+startQuiz(activeSetId);
+} else {
+err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+err.style.display = "block";
+}
+}
+
+function closeLogin() { document.getElementById("loginOverlay").classList.remove("active"); }
+
+function goToHub() {
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("hubPage").style.display = "block";
+document.getElementById("timerBox").classList.add("hidden");
+clearInterval(timerInterval);
+renderHub();
+}
+
+function startQuiz(setId) {
+incrementAttempt(currentUser, setId);
+questions = ALL_SETS[setId].questions;
+currentQIndex = 0; score = 0; wrongAnswers = 0; userAnswers = {}; isReviewMode = false; timeLeft = TIME_LIMIT;
+document.getElementById("hubPage").style.display = "none";
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+document.getElementById("timerBox").classList.remove("hidden");
+document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+startTimer();
+loadQuestion();
+}
+
+function loadQuestion() {
+const qData = questions[currentQIndex];
+document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+document.getElementById("qText").innerHTML = qData.q;
+const progress = ((currentQIndex) / questions.length) * 100;
+document.getElementById("progressFill").style.width = `${progress}%`;
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+const optsBox = document.getElementById("qOpts");
+optsBox.innerHTML = "";
+document.getElementById("explanation").classList.remove("show");
+document.getElementById("nextBtn").disabled = true;
+document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+qData.opts.forEach((optText, idx) => {
+const btn = document.createElement("button");
+btn.className = "opt";
+btn.innerHTML = `<div class="opt-circle">${LABELS[idx]}</div> <div class="opt-text">${optText}</div>`;
+if (isReviewMode) {
+btn.classList.add("disabled");
+if (idx === qData.ans) btn.classList.add("correct");
+else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+} else {
+btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+}
+optsBox.appendChild(btn);
+});
+
+if (isReviewMode) {
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+if (currentQIndex === questions.length - 1) { document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন"; }
+}
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+allBtns.forEach(b => b.classList.add("disabled"));
+userAnswers[currentQIndex] = selectedIdx;
+if (selectedIdx === correctIdx) { btn.classList.add("correct"); score++; }
+else { btn.classList.add("wrong"); allBtns[correctIdx].classList.add("correct"); wrongAnswers++; }
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+}
+
+function nextQ() {
+if (isReviewMode && currentQIndex === questions.length - 1) {
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show"); return;
+}
+if (!isReviewMode && currentQIndex === questions.length - 1) { finishQuiz(); return; }
+currentQIndex++; loadQuestion();
+}
+
+function startTimer() {
+clearInterval(timerInterval);
+const tBox = document.getElementById("timerBox");
+tBox.classList.remove("danger");
+timerInterval = setInterval(() => {
+if (timeLeft <= 0) { clearInterval(timerInterval); finishQuiz(); return; }
+timeLeft--;
+const m = Math.floor(timeLeft / 60); const s = timeLeft % 60;
+document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+if (timeLeft < 60) tBox.classList.add("danger");
+}, 1000);
+}
+
+function finishQuiz() {
+clearInterval(timerInterval);
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("timerBox").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show");
+const total = questions.length; const skipped = total - (score + wrongAnswers);
+const percent = Math.round((score / total) * 100);
+document.getElementById("finalScore").innerText = `${percent}%`;
+document.getElementById("rbCorrect").innerText = score;
+document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+const gradeEl = document.getElementById("resultGrade");
+if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return;
+}
+startQuiz(activeSetId);
+}
+
+function showReview() {
+isReviewMode = true; currentQIndex = 0;
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+loadQuestion();
+}
+</script>
+</body>
+</html>
