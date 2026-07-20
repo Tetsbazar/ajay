@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Chemistry 3rd Sem | Unit 6</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main);}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; }
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header class="top-bar">
+<div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+<div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+<div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+<div class="main">
+
+<!-- LOGIN MODAL -->
+<div class="login-overlay" id="loginOverlay">
+<div class="login-modal">
+<h2>লগইন করুন</h2>
+<p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+<div class="login-set-name" id="loginSetName">📚 Set 1</div>
+<div class="input-group">
+<label>ইউজারনেম</label>
+<input type="text" id="loginUsername" placeholder="Username">
+</div>
+<div class="input-group">
+<label>পাসওয়ার্ড</label>
+<input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+</div>
+<button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+<button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+<div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+</div>
+</div>
+
+<!-- HUB PAGE -->
+<div id="hubPage">
+<div class="hub-header">
+<h1>রসায়ন 3rd Sem Unit 6:<br>পলিমারসমূহ (Polymers)</h1>
+<p>মোট ১২০টি প্রশ্ন সম্বলিত ৮টি সেট। Test শুরু করতে সেটে ক্লিক করুন।</p>
+</div>
+<div class="set-grid" id="setGrid"></div>
+<div style="text-align: center; margin-top: 30px;">
+<button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+</div>
+</div>
+
+<!-- QUIZ AREA -->
+<div id="testArea" class="hidden">
+<div class="quiz-info">
+<div class="info-item">🎓 <strong>Chemistry</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+<div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+</div>
+<div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="q-card">
+<div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+<div class="q-text" id="qText">Question Text</div>
+<div class="opts" id="qOpts"></div>
+<div class="explanation" id="explanation"><p id="explanationText"></p></div>
+<div class="nav-row">
+<div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+<button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+</div>
+</div>
+</div>
+
+<!-- RESULT AREA -->
+<div class="result-wrap" id="resultWrap">
+<div class="result-icon" id="resultIcon">🏆</div>
+<div class="result-score en-font" id="finalScore">100%</div>
+<div class="result-total">স্কোর</div>
+<div class="result-grade" id="resultGrade">অসাধারণ!</div>
+<div class="result-bars">
+<div class="result-bar">
+<div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+<div class="rb-label">সঠিক</div>
+</div>
+<div class="result-bar">
+<div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+<div class="rb-label">ভুল/স্কিপ</div>
+</div>
+</div>
+<div class="attempt-info-box" id="attemptInfo"></div>
+<div class="action-btns">
+<button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+<button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+<button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+</div>
+</div>
+
+</div>
+
+<script>
+const MAX_ATTEMPTS = 10;
+const TIME_LIMIT = 10 * 60;
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+1: {
+name: 'Set 1', icon: '🧬', topic: 'পলিমারের বেসিক ধারণা ও শ্রেণিবিন্যাস',
+questions: [
+{ q: "১. নীচের কোন্ পলিমারটি প্রাকৃতিক পলিমার নয়?", opts: ["স্টার্চ", "RNA", "প্রোটিন", "পলি (ভিনাইল ক্লোরাইড) বা PVC"], ans: 3, exp: "ব্যাখ্যা: স্টার্চ, RNA এবং প্রোটিন উদ্ভিদ বা প্রাণীদেহ থেকে পাওয়া যায়, তাই এরা প্রাকৃতিক পলিমার। কিন্তু পলি (ভিনাইল ক্লোরাইড) রসায়নাগারে বা কারখানায় প্রস্তুত করা হয়, তাই এটি কৃত্রিম পলিমার।" },
+{ q: "২. নীচের কোন্টি অর্ধকৃত্রিম (Semi-synthetic) পলিমার?", opts: ["পলিপ্রোপিলিন", "সেলুলোজ নাইট্রেট", "হাইড্রোজেনেটেড প্রাকৃতিক রবার", "খ ও গ উভয়েই"], ans: 3, exp: "ব্যাখ্যা: প্রকৃতিজাত পলিমারের রাসায়নিক রূপান্তরের মাধ্যমে যে পলিমার উৎপন্ন হয়, তাদের অর্ধকৃত্রিম পলিমার বলে। সেলুলোজ নাইট্রেট (গান কটন) এবং হাইড্রোজেনেটেড প্রাকৃতিক রবার এর প্রকৃষ্ট উদাহরণ।" },
+{ q: "৩. যে পলিমারকে তাপ প্রয়োগে নমনীয় এবং তাপ সরিয়ে কঠিন ও শক্ত অবস্থায় ফিরিয়ে আনা যায় তাকে কী বলে?", opts: ["ইলাস্টোমার", "থার্মোপ্লাস্টিক পলিমার", "ফাইবার", "থার্মোসেটিং পলিমার"], ans: 1, exp: "ব্যাখ্যা: থার্মোপ্লাস্টিক পলিমারগুলির অণু সাধারণত রৈখিক বা সামান্য শাখাযুক্ত দীর্ঘ শৃঙ্খলের হয়। এদের ছাঁচে ফেলে তাপ প্রয়োগ করে এবং শীতল করে কাঙ্খিত আকারের বস্তুতে বারবার রূপান্তর করা যায়।" },
+{ q: "৪. নীচের কোন্ পলিমারের আন্তরাণবিক আকর্ষণ বল সবচেয়ে কম শক্তিশালী?", opts: ["নাইলন", "টেরিলিন", "স্টাইরিন-বিউটাডাইইন রবার (SBR)", "PVC"], ans: 2, exp: "ব্যাখ্যা: SBR একটি ইলাস্টোমার বা স্থিতিস্থাপক রবার জাতীয় পলিমার। ইলাস্টোমারের শৃঙ্খলগুলির মধ্যে কেবল দুর্বল ভ্যান ডার ওয়ালস বল ক্রিয়া করে, তাই এদের আন্তরাণবিক আকর্ষণ বল প্লাস্টিক বা ফাইবারের চেয়ে অনেক কম হয়।" },
+{ q: "৫. নীচের কোন্টি নেটওয়ার্ক (Network) বা আড়াআড়ি বন্ধনযুক্ত পলিমার?", opts: ["নাইলন", "নিম্ন-ঘনত্ববিশিষ্ট পলিইথিলিন (LDPE)", "ফেনল-ফর্মালডিহাইড রেজিন (ব্যাকেলাইট)", "উচ্চ-ঘনত্ববিশিষ্ট পলিইথিলিন (HDPE)"], ans: 2, exp: "ব্যাখ্যা: থার্মোসেটিং পলিমারগুলি (যেমন ব্যাকেলাইট) আড়াআড়ি বন্ধনযুক্ত বা নেটওয়ার্ক পলিমার গঠন করে। এদের শৃঙ্খলগুলি ত্রিমাত্রিক জালকের মতো যুক্ত থাকে।" },
+{ q: "৬. পলিমারের আণবিক ভর (M&#773;) এবং পলিমারিজেশন মাত্রার (DP) মধ্যে সম্পর্ক কী?", opts: ["M&#773; = DP &times; m", "M&#773; = DP / m", "DP = M&#773; &times; m", "M&#773; = m / DP"], ans: 0, exp: "ব্যাখ্যা: কোনো পলিমারে অণুগুলির শৃঙ্খলে পুনরাবৃত্তি এককগুলির গড় সংখ্যাকে গড় পলিমারিজেশন মাত্রা (DP) বলে। এখানে 'm' হলো পুনরাবৃত্তি এককের সংকেত ভর।" },
+{ q: "৭. ইলাস্টোমার হওয়ার জন্য প্রয়োজনীয় শর্তগুলির মধ্যে কোন্টি সঠিক নয়?", opts: ["দীর্ঘ নমনীয় পলিমার শৃঙ্খল", "পলিমার শৃঙ্খলগুলির পরস্পরের মধ্যে ক্রিয়াশীল বল দুর্বল", "কাচ রূপান্তর উয়তার ওপরে স্থিতিস্থাপক হতে হবে", "পলিমার শৃঙ্খলগুলির মধ্যে উচ্চমাত্রায় আড়াআড়ি বন্ধন থাকতে হবে"], ans: 3, exp: "ব্যাখ্যা: রবার বা ইলাস্টোমারের মধ্যে সামান্য আড়াআড়ি বন্ধন (যেমন ভালকানাইজেশন) স্থিতিস্থাপকতার জন্য প্রয়োজন, কিন্তু উচ্চমাত্রায় আড়াআড়ি বন্ধন থাকলে তা স্থিতিস্থাপকতা হারিয়ে থার্মোসেটিং প্লাস্টিকের মতো শক্ত হয়ে যায়।" },
+{ q: "৮. নীচের কোন্ পলিমারটি শাখাযুক্ত (Branched) পলিমার?", opts: ["নিম্ন-ঘনত্ববিশিষ্ট পলিইথিলিন (LDPE)", "উচ্চ-ঘনত্ববিশিষ্ট পলিইথিলিন (HDPE)", "পলিস্টাইরিন", "নাইলন 6"], ans: 0, exp: "ব্যাখ্যা: LDPE এর আণবিক শৃঙ্খলে শাখা থাকে, ফলে এরা ঘনসন্নিবিষ্ট হতে পারে না। এর জন্যই এর ঘনত্ব ও গলনাঙ্ক কম হয়।" },
+{ q: "৯. সেলুলোজ জ্যানথেট (Cellulose xanthate) কী ধরনের পলিমার?", opts: ["কৃত্রিম", "প্রাকৃতিক", "অর্ধকৃত্রিম", "কোনোটিই নয়"], ans: 2, exp: "ব্যাখ্যা: প্রাকৃতিক সেলুলোজের রাসায়নিক পরিবর্তনের মাধ্যমে এটি তৈরি হয়, তাই এটি একটি অর্ধকৃত্রিম (semi-synthetic) পলিমার।" },
+{ q: "১০. ফাইবার জাতীয় পলিমারে আন্তরাণবিক আকর্ষণ বল কীরূপ হয়?", opts: ["অত্যন্ত দুর্বল ভ্যান ডার ওয়ালস বল", "শক্তিশালী হাইড্রোজেন বন্ধন বা ডাইপোল মিথস্ক্রিয়া", "সমযোজী আড়াআড়ি বন্ধন", "তড়িৎযোজী বন্ধন"], ans: 1, exp: "ব্যাখ্যা: ফাইবারের আণবিক শৃঙ্খলগুলি রৈখিক হয় এবং হাইড্রোজেন বন্ধনের মতো শক্তিশালী আন্তরাণবিক বলের সাহায্যে দৃঢ়ভাবে আবদ্ধ থাকে, যার ফলে এদের টান-শক্তি অত্যন্ত বেশি হয়।" },
+{ q: "১১. নীচের কোন্টি রৈখিক পলিমার (Linear polymer) নয়?", opts: ["নাইলন", "পলিএস্টার", "মেলামাইন-ফর্মালডিহাইড রেজিন", "উচ্চ-ঘনত্ববিশিষ্ট পলিইথিলিন (HDPE)"], ans: 2, exp: "ব্যাখ্যা: মেলামাইন-ফর্মালডিহাইড একটি থার্মোসেটিং পলিমার এবং এটি আড়াআড়ি বন্ধনযুক্ত ত্রিমাত্রিক নেটওয়ার্ক পলিমার, রৈখিক পলিমার নয়।" },
+{ q: "১২. পলিমার দ্রবণের সান্দ্রতা সাধারণ দ্রবণের তুলনায়-", opts: ["অনেক কম হয়", "সমান হয়", "উচ্চমানের হয়", "উয়তার ওপর নির্ভর করে না"], ans: 2, exp: "ব্যাখ্যা: পলিমার অণুর আকার দ্রাবক অণু অপেক্ষা বহুগুণ বড়ো হওয়ায় পলিমার ও দ্রাবক অণুর মধ্যে উচ্চ ঘর্ষণজনিত বল কাজ করে, যা দ্রবণের প্রবাহ-হারকে কমিয়ে দেয় এবং সান্দ্রতা বৃদ্ধি করে।" },
+{ q: "১৩. 'পলিমার' শব্দটি কোন ভাষা থেকে উদ্ভূত?", opts: ["ল্যাটিন", "জার্মান", "ফরাসি", "গ্রিক"], ans: 3, exp: "ব্যাখ্যা: 'পলিমার' শব্দটি গ্রিক শব্দ 'পলি' (poly = বহু) ও 'মেরস' (meros = খণ্ড) থেকে উৎপন্ন হয়েছে।" },
+{ q: "১৪. প্লেক্সিগ্লাস (Plexiglass) বা পারপেক্স-এর মনোমার কী?", opts: ["স্টাইরিন", "মিথাইল মিথাক্রিলেট", "ভিনাইল অ্যাসিটেট", "টেট্রাফ্লুরোইথিলিন"], ans: 1, exp: "ব্যাখ্যা: পলি (মিথাইল মিথাক্রিলেট) বা PMMA-কে বাণিজ্যিক ভাষায় প্লেক্সিগ্লাস বলা হয়।" },
+{ q: "১৫. \"সব পলিমারই ম্যাক্রোমলিকিউল, কিন্তু সব ম্যাক্রোমলিকিউল পলিমার নয়\"- এই উক্তিটি কি সঠিক?", opts: ["হ্যাঁ", "না", "শুধুমাত্র কৃত্রিম পলিমারের ক্ষেত্রে সঠিক", "শুধুমাত্র প্রাকৃতিক পলিমারের ক্ষেত্রে সঠিক"], ans: 0, exp: "ব্যাখ্যা: হীরক, সিলিকা, ক্লোরোফিল ইত্যাদি ম্যাক্রোমলিকিউল বা বৃহৎ অণু হলেও এরা নির্দিষ্ট কোনো মনোমার অণু পরপর যুক্ত হয়ে তৈরি হয়নি, তাই এরা পলিমার নয়।" }
+]
+},
+2: {
+name: 'Set 2', icon: '🔗', topic: 'পলিমারিজেশন পদ্ধতি (Addition, Condensation)',
+questions: [
+{ q: "১. যুত বা শৃঙ্খল পলিমারিজেশনের (Addition polymerisation) ক্ষেত্রে কোন্ উক্তিটি সঠিক?", opts: ["বিক্রিয়ায় উপজাতরূপে ক্ষুদ্র অণু (যেমন H<sub>2</sub>O) উৎপন্ন হয়", "মনোমার অণুগুলির সরাসরি রাসায়নিক সংযোগ ঘটে", "এটি কেবল ডাইকার্বক্সিলিক অ্যাসিডের ক্ষেত্রে ঘটে", "শৃঙ্খলের বৃদ্ধি ধাপে ধাপে আন্তরাণবিক বিক্রিয়ার মাধ্যমে হয়"], ans: 1, exp: "ব্যাখ্যা: শৃঙ্খল পলিমারিজেশনে কার্বন-কার্বন দ্বি-বন্ধনযুক্ত অসম্পৃক্ত অণুগুলি কোনো উপজাত পদার্থ ছাড়াই সরাসরি যুক্ত হয়ে পলিমার তৈরি করে।" },
+{ q: "২. ক্যাটায়নিক শৃঙ্খল পলিমারিজেশন বিক্রিয়ায় প্রারম্ভক (Initiator) রূপে কী ব্যবহার করা হয়?", opts: ["বেঞ্জোয়িল পারক্সাইড", "লুইস অ্যাসিড (যেমন- BF<sub>3</sub>, AlCl<sub>3</sub>)", "বিউটাইল লিথিয়াম", "NaNH<sub>2</sub>"], ans: 1, exp: "ব্যাখ্যা: ক্যাটায়নিক পলিমারিজেশনে BF<sub>3</sub> বা AlCl<sub>3</sub> এর মতো লুইস অ্যাসিড একটি সহ-অনুঘটকের (যেমন- জল) উপস্থিতিতে প্রারম্ভক হিসেবে কাজ করে কার্বোনিয়াম আয়ন তৈরি করে।" },
+{ q: "৩. লিভিং পলিমারিজেশন (Living Polymerisation) কোন্টিকে বলা হয়?", opts: ["মুক্ত-মূলক শৃঙ্খল পলিমারিজেশন", "অ্যানায়নিক শৃঙ্খল পলিমারিজেশন", "ক্যাটায়নিক শৃঙ্খল পলিমারিজেশন", "কনডেনসেশন পলিমারিজেশন"], ans: 1, exp: "ব্যাখ্যা: অতি বিশুদ্ধ মনোমারের অ্যানায়নিক পলিমারিজেশনে উৎপন্ন পলিমারকে 'জীবন্ত' বা living পলিমার বলে, কারণ বিক্রিয়া শেষেও এর কার্ব-অ্যানায়ন প্রান্তটি সক্রিয় থাকে এবং মনোমার পেলে আবার শৃঙ্খল বৃদ্ধি করতে পারে।" },
+{ q: "৪. জিগ্লার-ন্যাটা (Ziegler-Natta) অনুঘটক কী?", opts: ["Al(C<sub>2</sub>H<sub>5</sub>)<sub>3</sub> ও TiCl<sub>4</sub>-এর মিশ্রণ", "BF<sub>3</sub> ও জলের মিশ্রণ", "বিউটাইল লিথিয়াম", "বেঞ্জোয়িল পারক্সাইড"], ans: 0, exp: "ব্যাখ্যা: ট্রাইইথাইল অ্যালুমিনিয়াম এবং টাইটেনিয়াম টেট্রাক্লোরাইডের এই মিশ্রণটি মূলত ইথিলিন বা প্রোপিলিনকে পলিমারাইজ করে উচ্চ-ঘনত্ববিশিষ্ট (HDPE) পলিমার তৈরিতে ব্যবহৃত হয়।" },
+{ q: "৫. সংঘনন বা কনডেনসেশন (Condensation) পলিমারিজেশনের একটি বৈশিষ্ট্য হল-", opts: ["উপজাতরূপে ক্ষুদ্র অণু (যেমন- H<sub>2</sub>O, NH<sub>3</sub>) উৎপন্ন হয়", "মনোমারে কেবল একটি কার্যকরী গ্রুপ থাকলেই হয়", "বিক্রিয়াটি শৃঙ্খল বিক্রিয়ার মতো অতি দ্রুত ঘটে", "উৎপন্ন পলিমার সর্বদা ইলাস্টোমার হয়"], ans: 0, exp: "ব্যাখ্যা: এই প্রক্রিয়ায় দুই বা ততোধিক কার্যকরী গ্রুপবিশিষ্ট মনোমার ধাপে ধাপে ঘনীভবন বিক্রিয়ার মাধ্যমে যুক্ত হয় এবং জল বা অ্যামোনিয়ার মতো ক্ষুদ্র অণু অপসারিত হয় (যেমন- নাইলন, টেরিলিন তৈরি)।" },
+{ q: "৬. নীচের কোন্ মনোমারটি অ্যানায়নিক শৃঙ্খল পলিমারিজেশনের জন্য সবচেয়ে উপযুক্ত?", opts: ["প্রোপিন", "আইসোবিউটিলিন", "অ্যাক্রিলোনাইট্রাইল", "ইথিলিন"], ans: 2, exp: "ব্যাখ্যা: অ্যাক্রিলোনাইট্রাইলে (-CN) শক্তিশালী ইলেকট্রন-আকর্ষী গ্রুপ থাকে, যা বিক্রিয়ার অন্তর্বর্তী কার্ব-অ্যানায়নকে রেজোনেন্সের মাধ্যমে স্থিতিশীল করে।" },
+{ q: "৭. বিউটাইল লিথিয়াম (BuLi) কোন্ পলিমারিজেশনে ব্যবহৃত হয়?", opts: ["মুক্ত-মূলক শৃঙ্খল পলিমারিজেশনে", "ক্যাটায়নিক শৃঙ্খল পলিমারিজেশনে", "অ্যানায়নিক শৃঙ্খল পলিমারিজেশনে", "কনডেনসেশন পলিমারিজেশনে"], ans: 2, exp: "ব্যাখ্যা: বিউটাইল লিথিয়াম (BuLi) বা ক্ষার ধাতুর অ্যামাইড (যেমন NaNH<sub>2</sub>) শক্তিশালী নিউক্লিওফাইল হিসেবে কাজ করে অ্যানায়নিক পলিমারিজেশনের সূচনা করে।" },
+{ q: "৮. পলিইউরেথেন পলিমার শৃঙ্খলের মুখ্য লিংকেজটি কী?", opts: ["-NHCO-", "-COO-", "-NHCOO-", "-O-"], ans: 2, exp: "ব্যাখ্যা: ডাইআইসোসায়ানেটের (-NCO) সঙ্গে ডাইঅলের (-OH) যুত বিক্রিয়ায় পলিইউরেথেন উৎপন্ন হয় যার মূল লিংকেজ হলো -NHCOO-।" },
+{ q: "৯. রৈখিক লঘু-ঘনত্ববিশিষ্ট পলিইথিলিন (LLDPE) প্রস্তুত করতে বিশুদ্ধ ইথিলিনের সাথে কী মেশানো হয়?", opts: ["স্টাইরিন", "দীর্ঘ শৃঙ্খলযুক্ত &alpha;-অলিফিন (যেমন 1-অক্টিন)", "ভিনাইল ক্লোরাইড", "আইসোপ্রিন"], ans: 1, exp: "ব্যাখ্যা: LLDPE আসলে একটি কো-পলিমার। বিশুদ্ধ ইথিলিনের সাথে অল্প পরিমাণ 1-হেক্সিন বা 1-অক্টিনের মতো &alpha;-অলিফিন মিশিয়ে জিগ্লার-ন্যাটা অনুঘটকের উপস্থিতিতে এটি তৈরি হয়।" },
+{ q: "১০. মুক্ত-মূলক শৃঙ্খল পলিমারিজেশনের প্রারম্ভকারী পদার্থরূপে (Initiator) কী ব্যবহৃত হয়?", opts: ["BF<sub>3</sub>", "অ্যাজোবিস্-আইসোবিউটাইরোনাইট্রাইল (AIBN) বা বেঞ্জোয়িল পারক্সাইড", "NaNH<sub>2</sub>", "TiCl<sub>4</sub>"], ans: 1, exp: "ব্যাখ্যা: এই যৌগগুলো তাপ বা UV আলোর প্রভাবে সুষম বিভাজিত (Homolytic cleavage) হয়ে মুক্ত-মূলক তৈরি করে যা শৃঙ্খল পলিমারিজেশন শুরু করে।" },
+{ q: "১১. একটি পলিমারাইজেশন বিক্রিয়ায় ইথিলিন অক্সাইডের ফাংশনালিটি (Functionality) কত?", opts: ["1", "2", "3", "4"], ans: 1, exp: "ব্যাখ্যা: একটি ইথিলিন অক্সাইড অণু তার রিং ওপেনিং-এর মাধ্যমে দুই দিকে দুটি অণুর সাথে বন্ধন তৈরি করতে পারে। তাই এর ফাংশনালিটি 2।" },
+{ q: "১২. কো-পলিমার (Copolymer) এর একটি উদাহরণ দাও-", opts: ["পলিইথিলিন", "পলিভিনাইল ক্লোরাইড", "স্টাইরিন-বিউটাডাইইন রবার (SBR)", "পলিস্টাইরিন"], ans: 2, exp: "ব্যাখ্যা: যেসব পলিমার একাধিক ভিন্ন ভিন্ন মনোমার দিয়ে গঠিত, তাদের কো-পলিমার বলে। SBR-এ স্টাইরিন এবং বিউটাডাইইন নামক দুটি ভিন্ন মনোমার থাকে।" },
+{ q: "১৩. \"শৃঙ্খলের বিস্তার কার্বোনিয়াম আয়ন দ্বারা সংঘটিত হয়\" - এটি কোন্ পলিমারিজেশনের বৈশিষ্ট্য?", opts: ["মুক্ত-মূলক শৃঙ্খল পলিমারিজেশন", "অ্যানায়নিক শৃঙ্খল পলিমারিজেশন", "ক্যাটায়নিক শৃঙ্খল পলিমারিজেশন", "ঘনীভবন পলিমারিজেশন"], ans: 2, exp: "ব্যাখ্যা: ক্যাটায়নিক পলিমারিজেশনে প্রারম্ভক থেকে সৃষ্ট H+ আয়ন অসম্পৃক্ত মনোমারের সাথে যুক্ত হয়ে কার্বোনিয়াম আয়ন (কার্বোক্যাটায়ন) তৈরি করে শৃঙ্খল বিস্তার করে।" },
+{ q: "১৪. পলিঅ্যামাইড প্রস্তুতিতে কোন্ ধরনের মনোমার ব্যবহৃত হয়?", opts: ["ডাইকার্বক্সিলিক অ্যাসিড ও ডাইঅল", "ডাইকার্বক্সিলিক অ্যাসিড ও ডাইঅ্যামিন", "ফিনল ও ফর্মালডিহাইড", "দুটি ভিন্ন অ্যালকিন"], ans: 1, exp: "ব্যাখ্যা: ডাইঅ্যাসিড এবং ডাইঅ্যামিনের কনডেনসেশন বিক্রিয়ায় অ্যামাইড (-CONH-) বন্ধন সৃষ্টি হয়ে পলিঅ্যামাইড (যেমন- নাইলন 6,6) তৈরি হয়।" },
+{ q: "১৫. \"সকল ধাপ-বৃদ্ধি (step-growth) পলিমারিজেশনই কনডেনসেশন পলিমারিজেশন নয়\" - এর একটি উদাহরণ কী?", opts: ["নাইলন 6,6", "পলিইউরেথেন", "টেরিলিন", "ব্যাকেলাইট"], ans: 1, exp: "ব্যাখ্যা: পলিইউরেথেন ধাপ-বৃদ্ধি ক্রিয়াকৌশলে তৈরি হলেও এই বিক্রিয়ায় কোনো ক্ষুদ্র উপজাত অণু (জল, অ্যামোনিয়া) তৈরি হয় না। তাই এটি কনডেনসেশন পলিমার নয়, বরং এক প্রকার যুত পলিমার।" }
+]
+},
+3: {
+name: 'Set 3', icon: '🧺', topic: 'গুরুত্বপূর্ণ পলিমার (প্লাস্টিক, ফাইবার ও রেজিন)',
+questions: [
+{ q: "১. উচ্চ-ঘনত্ববিশিষ্ট পলিইথিলিন (HDPE) প্রস্তুতির শর্ত কী?", opts: ["1000-2000 atm চাপ, 350&deg;C, পারক্সাইড প্রারম্ভক", "6-7 atm চাপ, 60-70&deg;C, জিগ্লার-ন্যাটা অনুঘটক", "10 atm চাপ, 100&deg;C, লুইস অ্যাসিড", "কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: জিগ্লার-ন্যাটা অনুঘটকের উপস্থিতিতে কম চাপে ও উয়তায় ইথিলিনের কো-অর্ডিনেশন পলিমারিজেশনের মাধ্যমে রৈখিক ও উচ্চ ঘনত্বের HDPE তৈরি হয়।" },
+{ q: "২. প্লেক্সিগ্লাস (Plexiglass) বা পারপেক্স গ্লাসের বিকল্প হিসেবে ব্যবহার করা হয়। এটি আসলে কী?", opts: ["পলিঅ্যাক্রিলোনাইট্রাইল", "পলিটেট্রাফ্লুরোইথিলিন", "পলি (মিথাইল মিথাক্রিলেট) বা PMMA", "পলিস্টাইরিন"], ans: 2, exp: "ব্যাখ্যা: PMMA কাচের মতো স্বচ্ছ এবং উচ্চ আলো ট্রান্সমিট্যান্স প্রদান করে, তাই একে কাচের বিকল্প বা প্লেক্সিগ্লাস হিসেবে ব্যবহার করা হয়।" },
+{ q: "৩. নন্‌-স্টিক বাসনপত্র (Non-stick cookware) তৈরিতে কোন্ পলিমার ব্যবহার করা হয়?", opts: ["পলিভিনাইল ক্লোরাইড (PVC)", "পলিটেট্রাফ্লুরোইথিলিন (Teflon)", "পলিস্টাইরিন", "পলিপ্রোপিলিন"], ans: 1, exp: "ব্যাখ্যা: টেফলনের ঘর্ষণ গুণাঙ্ক অতি কম এবং এটি তাপ, জল ও রাসায়নিক পদার্থ প্রতিরোধী হওয়ায় এটি নন্‌-স্টিক বাসনপত্রের আবরণে ব্যবহৃত হয়।" },
+{ q: "৪. নাইলন 6,6 -এর মনোমারগুলি কী কী?", opts: ["ক্যাপ্রোল্যাকটাম", "ইথিলিন গ্লাইকল এবং টেরিথ্যালিক অ্যাসিড", "হেক্সামিথিলিন ডাইঅ্যামিন এবং অ্যাডিপিক অ্যাসিড", "ফিনল এবং ফর্মালডিহাইড"], ans: 2, exp: "ব্যাখ্যা: হেক্সামিথিলিন ডাইঅ্যামিন (6 কার্বন) এবং অ্যাডিপিক অ্যাসিড (6 কার্বন)-এর পলিকনডেনসেশনের মাধ্যমে নাইলন 6,6 তৈরি হয়।" },
+{ q: "৫. নাইলন 6 উৎপাদনে ব্যবহৃত মনোমারটি কী?", opts: ["ক্যাপ্রোল্যাকটাম", "অ্যাডিপিক অ্যাসিড", "হেক্সামিথিলিন ডাইঅ্যামিন", "থ্যালিক অ্যানহাইড্রাইড"], ans: 0, exp: "ব্যাখ্যা: ক্যাপ্রোল্যাকটামকে জলের উপস্থিতিতে উচ্চ চাপে উত্তপ্ত করলে রিং-ওপেনিং পলিমারিজেশনের মাধ্যমে নাইলন 6 উৎপন্ন হয়।" },
+{ q: "৬. গ্লিপট্যাল (Glyptal) হল একটি থার্মোসেটিং পলিএস্টার। এটি প্রস্তুত করতে গ্লিসারলের সঙ্গে নীচের কোন্টির পলিকনডেনসেশন ঘটানো হয়?", opts: ["অ্যাডিপিক অ্যাসিড", "থ্যালিক অ্যানহাইড্রাইড", "ম্যালেইক অ্যানহাইড্রাইড", "টেরিথ্যালিক অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: গ্লিসারল এবং থ্যালিক অ্যানহাইড্রাইডের পলিকনডেনসেশন বিক্রিয়ায় আড়াআড়ি বন্ধনযুক্ত গ্লিপট্যাল বা অ্যালকিড রেজিন তৈরি হয় যা রং ও বার্নিশ শিল্পে ব্যবহৃত হয়।" },
+{ q: "৭. ব্যাকেলাইট (Bakelite) প্রস্তুত করা হয় কাদের পলিকনডেনসেশনে?", opts: ["ফিনল ও ফর্মালডিহাইড", "ইউরিয়া ও ফর্মালডিহাইড", "মেলামাইন ও ফর্মালডিহাইড", "ইথিলিন গ্লাইকল ও টেরিথ্যালিক অ্যাসিড"], ans: 0, exp: "ব্যাখ্যা: অ্যাসিড বা ক্ষার অনুঘটকের উপস্থিতিতে ফিনল এবং ফর্মালডিহাইডের পলিকনডেনসেশনের ফলে প্রথমে রৈখিক নভোলাক এবং পরে তা থেকে ত্রিমাত্রিক ব্যাকেলাইট তৈরি হয়।" },
+{ q: "৮. অভঙ্গুর (non-breakable) বাসনপত্র বা কাপ-প্লেট তৈরিতে কোন্ পলিমার ব্যবহৃত হয়?", opts: ["গ্লিপট্যাল", "মেলামাইন-ফর্মালডিহাইড রেজিন", "পলিস্টাইরিন", "পলিপ্রোপিলিন"], ans: 1, exp: "ব্যাখ্যা: এটি একটি শক্ত, তাপরোধী থার্মোসেটিং রেজিন যা সাধারণত অভঙ্গুর খাওয়ার প্লেট, কাপ ইত্যাদি বানাতে ব্যবহৃত হয়।" },
+{ q: "৯. নীচের কোন্ পলিমারের অপর নাম মাইলার (Mylar) বা ড্যাক্রন (Dacron)?", opts: ["পলি (ইথিলিন টেরিথ্যালেট) বা PET", "পলি (মিথাইল মিথাক্রিলেট)", "পলিঅ্যাক্রিলোনাইট্রাইল", "নাইলন 6"], ans: 0, exp: "ব্যাখ্যা: ইথিলিন গ্লাইকল ও টেরিথ্যালিক অ্যাসিড থেকে উৎপন্ন পলিএস্টার ফাইবারকে টেরিলিন, ড্যাক্রন বা মাইলার বলা হয়।" },
+{ q: "১০. অরলন (Orlon) বা অ্যাক্রিলান প্রস্তুতিতে কোন্ মনোমার ব্যবহৃত হয়?", opts: ["ভিনাইল ক্লোরাইড", "স্টাইরিন", "অ্যাক্রিলোনাইট্রাইল", "মিথাইল মিথাক্রিলেট"], ans: 2, exp: "ব্যাখ্যা: পলিঅ্যাক্রিলোনাইট্রাইলকে (PAN) অরলন বা অ্যাক্রিলান বলা হয়। এটি কৃত্রিম উল হিসেবে সোয়েটার, মোজা ইত্যাদি বানাতে ব্যবহৃত হয়।" },
+{ q: "১১. LDPE-এর স্বচ্ছতা HDPE অপেক্ষা বেশি কেন?", opts: ["LDPE-এর শৃঙ্খল শাখান্বিত বলে কেলাসন মাত্রা কম", "LDPE-এর ঘনত্ব বেশি", "LDPE-তে আড়াআড়ি বন্ধন থাকে", "LDPE রৈখিক শৃঙ্খল দিয়ে গঠিত"], ans: 0, exp: "ব্যাখ্যা: LDPE এর শাখান্বিত শৃঙ্খলগুলি ঘনসন্নিবিষ্ট হতে পারে না, ফলে এর কেলাসন মাত্রা কম হয় (অনিয়তাকার অংশ বেশি) এবং এটি বেশি স্বচ্ছ হয়।" },
+{ q: "১২. বৈদ্যুতিক সরঞ্জাম, যেমন- ইলেকট্রিক সুইচ, রেডিও, টিভির ক্যাবিনেট তৈরিতে কোন্ পলিমার ব্যবহৃত হয়?", opts: ["পলিইথিলিন", "PVC", "ব্যাকেলাইট", "নাইলন"], ans: 2, exp: "ব্যাখ্যা: ব্যাকেলাইট একটি শক্তিশালী থার্মোসেটিং পলিমার এবং এটি তাপ ও তড়িতের উত্তম অপরিবাহী হওয়ার কারণে বৈদ্যুতিক সুইচ ও সরঞ্জাম তৈরিতে ব্যবহৃত হয়।" },
+{ q: "১৩. নাইলন 6,6 এ '6,6' সংখ্যাটি কী নির্দেশ করে?", opts: ["এটি 66 বার পলিমারাইজ হয়", "এর মনোমার দুটির প্রতিটিতে 6টি করে কার্বন পরমাণু আছে", "এটি 6টি অ্যামাইড বন্ধন তৈরি করে", "এর আণবিক ভর 6600"], ans: 1, exp: "ব্যাখ্যা: নাইলন 6,6 তৈরি হয় হেক্সামিথিলিন ডাইঅ্যামিন (6টি কার্বন) এবং অ্যাডিপিক অ্যাসিড (6টি কার্বন) থেকে। এই কার্বন সংখ্যাকেই '6,6' দ্বারা বোঝানো হয়।" },
+{ q: "১৪. পলিইথিলিনের (PE) তুলনায় পলি (ভিনাইল ক্লোরাইড) (PVC) অনেক বেশি শক্ত এবং অনমনীয় কেন?", opts: ["PVC থার্মোসেটিং পলিমার", "PVC-তে আণবিক শৃঙ্খলগুলি লন্ডন বল ও ডাইপোল-ডাইপোল বলের মাধ্যমে আবদ্ধ", "PVC-তে আড়াআড়ি বন্ধন থাকে", "PVC-এর আণবিক ভর কম"], ans: 1, exp: "ব্যাখ্যা: PVC-তে ধ্রুবীয় C-Cl বন্ধন থাকায় এর শৃঙ্খলগুলির মধ্যে শক্তিশালী ডাইপোল-ডাইপোল মিথস্ক্রিয়া কাজ করে, যা পলিইথিলিনে (অধ্রুবীয়) থাকে না। তাই PVC বেশি শক্ত হয়।" },
+{ q: "১৫. পলিস্টাইরিনের একটি উল্লেখযোগ্য ত্রুটি কী?", opts: ["এটি ছাঁচে ফেলা যায় না", "এটি অত্যন্ত ভঙ্গুর (brittle)", "এটি অস্বচ্ছ", "এটি রাসায়নিক পদার্থের সাথে দ্রুত বিক্রিয়া করে"], ans: 1, exp: "ব্যাখ্যা: পলিস্টাইরিন স্বচ্ছ, দৃঢ় এবং রাসায়নিক প্রতিরোধী হলেও এটি অত্যন্ত ভঙ্গুর হয়। এই ত্রুটি দূর করতেই এর সাথে অন্যান্য মনোমার মিশিয়ে কো-পলিমার (যেমন- SAN, ABS) তৈরি করা হয়।" }
+]
+},
+4: {
+name: 'Set 4', icon: '🚙', topic: 'রবার (Natural & Synthetic) এবং ভালকানাইজেশন',
+questions: [
+{ q: "১. প্রাকৃতিক রবার রাসায়নিকভাবে কী?", opts: ["ট্রান্স-1,4-পলিআইসোপ্রিন", "সিস্-1,4-পলিআইসোপ্রিন", "পলিক্লোরোপ্রিন", "পলিবিউটাডাইইন"], ans: 1, exp: "ব্যাখ্যা: রবার গাছ থেকে প্রাপ্ত প্রাকৃতিক রবার হলো আইসোপ্রিনের পলিমার যেখানে শৃঙ্খলটি সিস্-কনফিগারেশনে থাকে। সিস্ গঠনের জন্য শৃঙ্খলগুলি কুণ্ডলীকৃত থাকে এবং স্থিতিস্থাপকতা দেখায়।" },
+{ q: "২. গাটা-পার্চা (Gutta-percha) রাসায়নিকভাবে কী?", opts: ["সিস্-1,4-পলিআইসোপ্রিন", "পলিক্লোরোপ্রিন", "ট্রান্স-1,4-পলিআইসোপ্রিন", "স্টাইরিন-বিউটাডাইইন রবার"], ans: 2, exp: "ব্যাখ্যা: গাটা-পার্চা হলো আইসোপ্রিনের ট্রান্স-পলিমার। ট্রান্স-গঠনাকৃতির জন্য এর শৃঙ্খল প্রসারিত ও প্রতিসম হয় এবং এটি শক্ত প্লাস্টিকের মতো আচরণ করে (যেমন গল্ফ বল তৈরিতে)।" },
+{ q: "৩. রবারের ভালকানাইজেশন (Vulcanisation) প্রক্রিয়ায় কোন্ পদার্থ ব্যবহৃত হয়?", opts: ["অক্সিজেন", "নাইট্রোজেন", "মৌলিক সালফার (S) ও তাপ", "ক্লোরিন"], ans: 2, exp: "ব্যাখ্যা: চার্লস গুডইয়ার আবিষ্কৃত এই প্রক্রিয়ায় প্রাকৃতিক রবারকে মৌলিক সালফারসহ উত্তপ্ত করা হয়, ফলে রবার শক্ত ও বেশি স্থিতিস্থাপক হয়ে ওঠে।" },
+{ q: "৪. ভালকানাইজেশনের ফলে রবারের কী পরিবর্তন হয়?", opts: ["শৃঙ্খলগুলি ভেঙে যায়", "শৃঙ্খলগুলির মধ্যে সালফারের আড়াআড়ি বন্ধন সৃষ্টি হয়", "এটি থার্মোপ্লাস্টিক হয়ে যায়", "স্থিতিস্থাপকতা লোপ পায়"], ans: 1, exp: "ব্যাখ্যা: সালফারের আড়াআড়ি বন্ধন (Cross-links) আণবিক শৃঙ্খলগুলির একে অপরের ওপর পিছলে যাওয়াকে বাধা দেয়। ফলে টান সরিয়ে নিলে রবার আবার আগের আকার ফিরে পায় (উচ্চ স্থিতিস্থাপকতা)।" },
+{ q: "৫. Buna-S রবারের মনোমারগুলি কী কী?", opts: ["বিউটাডাইইন এবং অ্যাক্রিলোনাইট্রাইল", "1,3-বিউটাডাইইন এবং স্টাইরিন", "আইসোবিউটিলিন এবং আইসোপ্রিন", "ক্লোরোপ্রিন"], ans: 1, exp: "ব্যাখ্যা: Buna-S বা SBR হলো একটি কৃত্রিম রবার (ইলাস্টোমার) যা 1,3-বিউটাডাইইন এবং স্টাইরিনের কো-পলিমারাইজেশনের ফলে তৈরি হয়।" },
+{ q: "৬. Buna-N (নাইট্রাইল রবার) তৈরিতে বিউটাডাইইনের সাথে কোন্ মনোমার ব্যবহৃত হয়?", opts: ["স্টাইরিন", "ক্লোরোপ্রিন", "অ্যাক্রিলোনাইট্রাইল", "ভিনাইল ক্লোরাইড"], ans: 2, exp: "ব্যাখ্যা: Buna-N বা NBR হলো 1,3-বিউটাডাইইন এবং অ্যাক্রিলোনাইট্রাইলের কো-পলিমার। এটি তেল ও ঘর্ষণ প্রতিরোধী হয়।" },
+{ q: "৭. কোন্ রবারটি তৈলবাহী পাইপ, গ্যাসকেট এবং কনভেয়ার বেল্ট তৈরিতে ব্যাপকভাবে ব্যবহৃত হয়?", opts: ["প্রাকৃতিক রবার", "পলিইথিলিন", "নাইট্রাইল রবার (Buna-N) বা নিওপ্রিন", "বিউটাইল রবার"], ans: 2, exp: "ব্যাখ্যা: Buna-N এবং নিওপ্রিন উভয় রবারের শৃঙ্খলেই পোলার গ্রুপ (যেমন -CN বা -Cl) থাকায় এরা পেট্রোল, তেল বা জৈব দ্রাবক দ্বারা ফুলে ওঠে না (তেল-রোধী)।" },
+{ q: "৮. নিওপ্রিন (Neoprene) রবারের মনোমার কী?", opts: ["আইসোপ্রিন", "2-ক্লোরোবিউটা-1,3-ডাইইন (ক্লোরোপ্রিন)", "স্টাইরিন", "1,3-বিউটাডাইইন"], ans: 1, exp: "ব্যাখ্যা: ক্লোরোপ্রিনের মুক্ত-মূলক পলিমারিজেশনের মাধ্যমে পলিক্লোরোপ্রিন বা নিওপ্রিন রবার তৈরি করা হয়।" },
+{ q: "৯. অটোমোবাইল ও সাইকেলের ভেতরের টিউব তৈরিতে সাধারণত কোন্ রবার ব্যবহৃত হয়?", opts: ["প্রাকৃতিক রবার", "নিওপ্রিন রবার", "বিউটাইল রবার", "Buna-S"], ans: 2, exp: "ব্যাখ্যা: বিউটাইল রবার (আইসোবিউটিলিন ও আইসোপ্রিনের কো-পলিমার) গ্যাসের প্রতি দারুণভাবে অপ্রবেশ্য, তাই এটি টায়ারের টিউব বানাতে ব্যবহৃত হয়।" },
+{ q: "১০. রবারের ভালকানাইজেশনে প্রভাবক বা ত্বরক (Accelerator) হিসেবে কী ব্যবহার করা হয়?", opts: ["FeCl<sub>3</sub>", "জিঙ্ক অক্সাইড (ZnO) এবং স্টিয়ারিক অ্যাসিড", "AlCl<sub>3</sub>", "প্ল্যাটিনাম"], ans: 1, exp: "ব্যাখ্যা: ভালকানাইজেশন বিক্রিয়াকে দ্রুত করতে ত্বরক পদার্থ এবং প্রভাবক হিসেবে জিঙ্ক অক্সাইড (ZnO) ও ফ্যাটি অ্যাসিড (স্টিয়ারিক অ্যাসিড) যোগ করা হয়।" },
+{ q: "১১. ইবোনাইট (Ebonite) কী?", opts: ["কাঁচা প্রাকৃতিক রবার", "কাঁচা প্রাকৃতিক রবারকে উচ্চমাত্রায় (20-30%) সালফার দিয়ে ভালকানাইজ করে প্রাপ্ত শক্ত পদার্থ", "নিওপ্রিন রবার", "এক প্রকার থার্মোপ্লাস্টিক ফাইবার"], ans: 1, exp: "ব্যাখ্যা: অতিরিক্ত সালফার দিয়ে ভালকানাইজ করলে আড়াআড়ি বন্ধনের পরিমাণ এত বেড়ে যায় যে রবার তার স্থিতিস্থাপকতা পুরোপুরি হারিয়ে ফেলে এবং প্লাস্টিকের মতো চরম শক্ত ইবোনাইটে পরিণত হয়।" },
+{ q: "১২. প্রাকৃতিক রবারের জারণ প্রতিরোধ ক্ষমতা কম কেন?", opts: ["এটি ট্রান্স-গঠনের জন্য", "শৃঙ্খলে অলিফিনিক দ্বি-বন্ধনের উপস্থিতির কারণে", "এটি জলে দ্রাব্য বলে", "এটি অত্যন্ত শক্ত বলে"], ans: 1, exp: "ব্যাখ্যা: প্রাকৃতিক রবারের শৃঙ্খলে প্রচুর পরিমাণে কার্বন-কার্বন দ্বি-বন্ধন থাকে যা বাতাসের অক্সিজেন বা ওজোন দ্বারা খুব সহজেই জারিত হয়ে নষ্ট হয়ে যায়।" },
+{ q: "১৩. জুতোর সোল (Shoe sole) তৈরিতে কোন কৃত্রিম রবার ব্যবহৃত হয়?", opts: ["Buna-N", "Buna-S বা নিওপ্রিন", "সিলিকোন রবার", "থিওকল রবার"], ans: 1, exp: "ব্যাখ্যা: Buna-S এবং নিওপ্রিন উভয়েই উচ্চ ঘর্ষণরোধী (abrasion resistant) এবং খুব টেকসই হওয়ার কারণে গাড়ির টায়ার এবং জুতোর সোল বানাতে ব্যবহৃত হয়।" },
+{ q: "১৪. Buna-S এ 'Buna' এবং 'S' কী নির্দেশ করে?", opts: ["'Bu' = Butadiene, 'na' = Natrium (Sodium), 'S' = Styrene", "'Buna' = Butane, 'S' = Sulphur", "'Bu' = Butyl, 'na' = Natural, 'S' = Styrene", "'Buna' = Rubber, 'S' = Synthetic"], ans: 0, exp: "ব্যাখ্যা: এই কো-পলিমারটি তৈরি করতে সোডিয়ামকে (ল্যাটিন নাম Natrium) অনুঘটক হিসেবে ব্যবহার করা হতো, তাই বিউটাডাইইন ও সোডিয়াম মিলে 'Buna' এবং স্টাইরিনের জন্য 'S' শব্দটি এসেছে।" },
+{ q: "১৫. কাঁচা রবার এবং ভালকানাইজড রবারের মধ্যে দ্রাবক প্রতিরোধী ক্ষমতার পার্থক্য কী?", opts: ["কাঁচা রবার ও ভালকানাইজড রবার উভয়েই জৈব দ্রাবকে ফুলে ওঠে", "কাঁচা রবার জৈব দ্রাবকের সংস্পর্শে ফুলে ওঠে কিন্তু ভালকানাইজড রবারের ফুলে ওঠার প্রবণতা অনেক কম", "কাঁচা রবার জলে দ্রবীভূত হয়", "ভালকানাইজড রবার জৈব দ্রাবকে দ্রবীভূত হয়ে যায়"], ans: 1, exp: "ব্যাখ্যা: আড়াআড়ি বন্ধন না থাকায় কাঁচা রবারের শৃঙ্খলগুলোর মধ্যে দ্রাবক অণু সহজেই ঢুকে পড়ে তাকে ফুলিয়ে দেয়। কিন্তু ভালকানাইজড রবারে আড়াআড়ি বন্ধন দ্রাবককে প্রবেশ করতে বাধা দেয়।" }
+]
+},
+5: {
+name: 'Set 5', icon: '♻️', topic: 'জৈববিশ্লেষ্য পলিমার ও স্পেশাল MCQ',
+questions: [
+{ q: "১. নীচের কোন্ পলিমারটি জৈববিশ্লেষ্য (Biodegradable)?", opts: ["পলি (ভিনাইল ক্লোরাইড) বা PVC", "পলিস্টাইরিন", "পলিল্যাকটিক অ্যাসিড (PLA)", "টেফলন"], ans: 2, exp: "ব্যাখ্যা: পলিল্যাকটিক অ্যাসিড একটি জৈববিশ্লেষ্য পলিএস্টার, যা ল্যাকটিক অ্যাসিডের পলিকনডেনসেশনে উৎপন্ন হয় এবং এটি মাটিতে ব্যাকটেরিয়া দ্বারা সহজেই বিশ্লিষ্ট হয়।" },
+{ q: "২. PHBV-এর মনোমারগুলি কী কী?", opts: ["ইথিলিন গ্লাইকল এবং থ্যালিক অ্যানহাইড্রাইড", "3-হাইড্রক্সিবিউটানোয়িক অ্যাসিড ও 3-হাইড্রক্সিপেন্টানোয়িক অ্যাসিড", "ল্যাকটিক অ্যাসিড ও গ্লাইকোলিক অ্যাসিড", "গ্লাইসিন ও অ্যামিনোক্যাপ্রোয়িক অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: PHBV একটি বায়োডিগ্রেডেবল থার্মোপ্লাস্টিক কো-পলিমার যা এই দুটি ৩-হাইড্রক্সি অ্যাসিডের কো-পলিমারিজেশনের ফলে তৈরি হয়।" },
+{ q: "৩. নাইলন 2-নাইলন 6 কোন্ দুটি মনোমারের পলিকনডেনসেশনে উৎপন্ন হয়?", opts: ["গ্লাইসিন ও &epsilon;-অ্যামিনোক্যাপ্রোয়িক অ্যাসিড", "হেক্সামিথিলিন ডাইঅ্যামিন ও অ্যাডিপিক অ্যাসিড", "ক্যাপ্রোল্যাকটাম ও গ্লাইসিন", "ল্যাকটিক অ্যাসিড ও গ্লাইকোলিক অ্যাসিড"], ans: 0, exp: "ব্যাখ্যা: নাইলন 2-নাইলন 6 একটি জৈববিশ্লেষ্য কো-পলিঅ্যামাইড, যা এই দুটি মনোমার থেকে তৈরি হয় এবং কৃত্রিম ফাইবার বা টুথব্রাশের তন্তু প্রস্তুতিতে লাগে।" },
+{ q: "৪. ডেক্সট্রন (Dextron) বা PLGA কোন্ প্রকারের পলিমার?", opts: ["এটি একটি জৈব অবিশ্লেষ্য প্লাস্টিক", "এটি একটি থার্মোসেটিং পলিমার", "এটি একটি জৈববিশ্লেষ্য কো-পলিএস্টার", "এটি একটি কৃত্রিম রবার"], ans: 2, exp: "ব্যাখ্যা: পলি (ল্যাকটিক-কো-গ্লাইকোলিক অ্যাসিড) বা PLGA-এর বাণিজ্যিক নাম ডেক্সট্রন। এটি অস্ত্রোপচারের পর সেলাই করার সুতো তৈরিতে ব্যবহৃত বায়োডিগ্রেডেবল পলিমার।" },
+{ q: "৫. মানবদেহে নিয়ন্ত্রিত ওষুধ সরবরাহে (controlled drug delivery) ক্যাপসুল হিসেবে কোন্ পলিমার ব্যবহৃত হয়?", opts: ["পলিইথিলিন", "PHBV বা PCL", "ব্যাকেলাইট", "PVC"], ans: 1, exp: "ব্যাখ্যা: কোনো ওষুধকে PHBV বা PCL ক্যাপসুলে ভরে মানবদেহে প্রবেশ করানো হলে পলিমারটি ধীরে ধীরে বিশ্লিষ্ট হয় এবং ওষুধটি ধীরে ধীরে শরীরে মুক্ত হতে থাকে।" },
+{ q: "৬. পলিক্যাপ্রোল্যাকটোন (PCL) কী ধরনের পলিমার?", opts: ["জৈব অবিশ্লেষ্য পলিঅ্যামাইড", "জৈববিশ্লেষ্য পলিএস্টার", "থার্মোসেটিং রেজিন", "ইলাস্টোমার"], ans: 1, exp: "ব্যাখ্যা: এটি &epsilon;-ক্যাপ্রোল্যাকটোন এর রিং ওপেনিং পলিমারিজেশনে তৈরি হয়। এটি একটি বায়োডিগ্রেডেবল পলিএস্টার যা রেজিনের সাথে সংযোগী হিসেবে ব্যবহৃত হয়।" },
+{ q: "৭. পলিমারের বায়োডিগ্রেডেশনের পক্ষে সহায়ক শর্তটি কী?", opts: ["উচ্চ আণবিক ভর ও উচ্চ কেলাসন মাত্রা", "শৃঙ্খল মূলত C-C বন্ধন দ্বারা গঠিত হওয়া", "শৃঙ্খলের নমনীয়তা এবং আর্দ্রবিশ্লেষণযোগ্য (এস্টার, অ্যামাইড) বন্ধনের উপস্থিতি", "পলিমারের জল বিকর্ষী ধর্ম"], ans: 2, exp: "ব্যাখ্যা: এধরনের পলিমারের অণুগুলি মাটিতে অবস্থিত জীবাণু কর্তৃক নিঃসৃত এনজাইমের সক্রিয় কেন্দ্রগুলিতে সহজে আবদ্ধ হয়ে আর্দ্রবিশ্লেষিত হতে পারে।" },
+{ q: "৮. পলিইথিলিন, PVC ইত্যাদি কেন জৈব অবিশ্লেষ্য (Non-biodegradable)?", opts: ["কারণ এদের শৃঙ্খল মূলত শক্তিশালী C-C বন্ধন দ্বারা গঠিত", "কারণ এরা জলে অত্যন্ত দ্রাব্য", "কারণ এদের মধ্যে এস্টার বন্ধন থাকে", "কারণ এরা প্রকৃতি থেকে পাওয়া যায়"], ans: 0, exp: "ব্যাখ্যা: যুত পলিমারগুলির (যেমন- পলিইথিলিন) শৃঙ্খল অত্যন্ত শক্তিশালী C-C বন্ধন দিয়ে গঠিত এবং এরা জল বিকর্ষী হওয়ায় জীবাণু এদের বিশ্লিষ্ট করতে পারে না।" },
+{ q: "৯. ফিনাইলইথিন (স্টাইরিন)-এর পলিমারিজেশনে উৎপন্ন পলিমারটি হল-", opts: ["পলিপ্রোপিলিন", "পলিইথিলিন", "পলিস্টাইরিন", "পলিঅ্যাক্রিলোনাইট্রাইল"], ans: 2, exp: "ব্যাখ্যা: স্টাইরিনের IUPAC নাম ফিনাইলইথিন। এর যুত পলিমারিজেশনের ফলেই পলিস্টাইরিন তৈরি হয়।" },
+{ q: "১০. কোন্ পলিমারটিকে তাপ দিলে নরম হয় এবং ঠান্ডা করলে শক্ত হয় কিন্তু দ্বিতীয়বার তাপ দিলে আর নরম হয় না?", opts: ["পলিপ্রোপিলিন", "মেলামাইন-ফর্মালডিহাইড রেজিন", "নাইলন", "টেফলন"], ans: 1, exp: "ব্যাখ্যা: যে পলিমারগুলিকে একবার তাপ দিয়ে নির্দিষ্ট আকার দেওয়ার পর পুনরায় তাপ দিয়ে গলানো যায় না, তাদের থার্মোসেটিং পলিমার বলে। মেলামাইন-ফর্মালডিহাইড রেজিন এর উদাহরণ।" },
+{ q: "১১. 'Living polymer' বা জীবন্ত পলিমার নীচের কোন্ পলিমারিজেশন বিক্রিয়ায় সৃষ্টি হয়?", opts: ["অ্যানায়নিক শৃঙ্খল পলিমারিজেশন", "ক্যাটায়নিক শৃঙ্খল পলিমারিজেশন", "মুক্ত-মূলক শৃঙ্খল পলিমারিজেশন", "রিং-ওপেনিং পলিমারিজেশন"], ans: 0, exp: "ব্যাখ্যা: অতি বিশুদ্ধ মনোমারের অ্যানায়নিক পলিমারিজেশনে উৎপন্ন পলিমারের কার্ব-অ্যানায়ন প্রান্তটি বিক্রিয়া শেষেও সক্রিয় থাকে এবং নতুন মনোমার পেলেই ফের শৃঙ্খল বৃদ্ধি করতে পারে।" },
+{ q: "১২. কেভলার (Kevlar) কী ধরনের পলিমার?", opts: ["অ্যারোমেটিক পলিঅ্যামাইড", "পলিএস্টার", "যুত পলিমার", "কৃত্রিম রবার"], ans: 0, exp: "ব্যাখ্যা: কেভলার একটি শক্তিশালী সিন্থেটিক অ্যারোমেটিক পলিঅ্যামাইড ফাইবার যা স্টিলের চেয়েও অনেক বেশি শক্তিশালী এবং এটি বুলেটপ্রুফ পোশাক বা বিমানের প্যানেল তৈরিতে ব্যবহৃত হয়।" },
+{ q: "১৩. প্রাকৃতিক রেশম (Silk) বা উল রাসায়নিকভাবে কী?", opts: ["পলিস্যাকারাইড", "পলিএস্টার", "প্রোটিন বা পলিপেপটাইড", "পলিঅ্যাক্রিলেট"], ans: 2, exp: "ব্যাখ্যা: রেশম বা উল হলো প্রাণী থেকে পাওয়া ফাইবার, যা মূলত অ্যামিনো অ্যাসিডের পলিমার বা পলিপেপটাইড (প্রোটিন)।" },
+{ q: "১৪. টেরিলিনের (Terylene) মনোমারগুলি হল-", opts: ["হেক্সামিথিলিন ডাইঅ্যামিন ও অ্যাডিপিক অ্যাসিড", "ইথিলিন গ্লাইকল ও বেঞ্জিন-1, 4-ডাইকার্বক্সিলিক অ্যাসিড (টেরিথ্যালিক অ্যাসিড)", "ফিনল ও ফর্মালডিহাইড", "ইউরিয়া ও ফর্মালডিহাইড"], ans: 1, exp: "ব্যাখ্যা: ইথিলিন গ্লাইকল এবং টেরিথ্যালিক অ্যাসিডের পলিকনডেনসেশনের মাধ্যমে এই পলিএস্টারটি উৎপন্ন হয়।" },
+{ q: "১৫. ব্যাকেলাইট প্রস্তুতির ক্ষেত্রে কোন্ শর্তটি সঠিক নয়?", opts: ["অতিরিক্ত ফর্মালডিহাইড", "অতিরিক্ত ফেনল", "ক্ষার বা অ্যাসিড অনুঘটক", "উত্তপ্তীকরণ"], ans: 1, exp: "ব্যাখ্যা: অতিরিক্ত ফেনল দিয়ে বিক্রিয়া করালে রৈখিক থার্মোপ্লাস্টিক 'নভোলাক' তৈরি হয়। আর অতিরিক্ত ফর্মালডিহাইড দিয়ে উত্তপ্ত করলে ত্রিমাত্রিক নেটওয়ার্কযুক্ত থার্মোসেটিং 'ব্যাকেলাইট' তৈরি হয়।" }
+]
+},
+6: {
+name: 'Set 6', icon: '⭐', topic: 'Semester Special - I (গুরুত্বপূর্ণ পলিমার)',
+questions: [
+{ q: "১. কৃত্রিম বা সংশ্লেষিত উল (Synthetic wool) নামে কোনটি পরিচিত?", opts: ["পলিএস্টার ফাইবার", "অ্যাক্রাইলিক ফাইবার বা অরলন", "নাইলন ফাইবার", "রেয়ন"], ans: 1, exp: "ব্যাখ্যা: পলিঅ্যাক্রিলোনাইট্রাইলকে (PAN) অরলন (orlon) বা অ্যাক্রিলান বলা হয়। এটি কৃত্রিম উল হিসেবে সোয়েটার, মোজা ইত্যাদি বানাতে ব্যবহৃত হয়।" },
+{ q: "২. টেরিলিন (Terylene) পলিমারের অপর একটি বাণিজ্যিক নাম কী?", opts: ["ড্যাক্রন", "অরলন", "গ্লিপট্যাল", "রেয়ন"], ans: 0, exp: "ব্যাখ্যা: পলি (ইথিলিন টেরিথ্যালেট) বা PET-এর অন্যান্য বাণিজ্যিক নামগুলি হলো টেরিলিন, ড্যাক্রন এবং মাইলার।" },
+{ q: "৩. অপটিক্যাল লেন্স (Optical lens) বা কাচের বিকল্প হিসেবে তৈরিতে নীচের কোন্ পলিমারটি ব্যবহার করা হয়?", opts: ["পলিপ্রোপিলিন", "পলি (মিথাইল মিথাক্রিলেট) বা PMMA", "পলি (ভিনাইল ক্লোরাইড)", "পলিইথিলিন"], ans: 1, exp: "ব্যাখ্যা: PMMA কাচের মতো স্বচ্ছ এবং উচ্চ আলো ট্রান্সমিট্যান্স প্রদান করে বলে একে অপটিক্যাল লেন্স বা প্লেক্সিগ্লাস তৈরিতে ব্যবহার করা হয়।" },
+{ q: "৪. প্রাকৃতিক রেশম বা সিল্ক রাসায়নিকভাবে কী?", opts: ["পলিস্যাকারাইড", "পলিএস্টার", "প্রোটিন বা পলিপেপটাইড", "পলিঅ্যাক্রিলেট"], ans: 2, exp: "ব্যাখ্যা: উল এবং প্রাকৃতিক সিল্ক হলো প্রাকৃতিক ফাইবার, যা মূলত অ্যামিনো অ্যাসিডের পলিমার বা পলিপেপটাইড দিয়ে গঠিত।" },
+{ q: "৫. নীচের কোন্ পলিমারটিকে তাপ দিলে নরম হয় এবং ঠান্ডা করলে শক্ত হয় কিন্তু দ্বিতীয়বার তাপ দিলে আর নরম হয় না?", opts: ["পলিপ্রোপিলিন", "মেলামাইন-ফর্মালডিহাইড রেজিন", "নাইলন", "টেফলন"], ans: 1, exp: "ব্যাখ্যা: মেলামাইন-ফর্মালডিহাইড একটি থার্মোসেটিং পলিমার। একবার তাপ দিয়ে আকার প্রদান করলে আড়াআড়ি বন্ধন তৈরি হয়, ফলে একে দ্বিতীয়বার নরম করা বা গলানো যায় না।" },
+{ q: "৬. স্টাইরিন ও 1,3-বিউটাডাইইন-এর কো-পলিমার কোনটি?", opts: ["Buna-N", "নিওপ্রিন", "Buna-S (SBR)", "গ্লিপট্যাল"], ans: 2, exp: "ব্যাখ্যা: স্টাইরিন এবং 1,3-বিউটাডাইইন মনোমার থেকে যুত পলিমারিজেশনের মাধ্যমে স্টাইরিন-বিউটাডাইইন রবার (SBR) বা Buna-S তৈরি হয়।" },
+{ q: "৭. ব্যাকেলাইট প্রস্তুত করতে ফেনলের সাথে কোনটি মেশানো হয়?", opts: ["গ্লিসারল", "ইথিলিন গ্লাইকল", "ফর্মালডিহাইড", "থ্যালিক অ্যানহাইড্রাইড"], ans: 2, exp: "ব্যাখ্যা: অ্যাসিড বা ক্ষার অনুঘটকের উপস্থিতিতে ফেনল ও ফর্মালডিহাইডের পলিকনডেনসেশনের মাধ্যমে থার্মোসেটিং পলিমার ব্যাকেলাইট প্রস্তুত করা হয়।" },
+{ q: "৮. পলিমারের আণবিক ভর সম্পর্কে কোনটি সঠিক?", opts: ["পলিমারের সুনির্দিষ্ট আণবিক ভর থাকে", "পলিমারের আণবিক ভর সাধারণ যৌগের চেয়ে অনেক কম হয়", "একই পলিমারের নমুনায় সকল অণুর আণবিক ভর সমান হয়", "পলিমারের কোনো সুনির্দিষ্ট আণবিক ভর থাকে না, এটি গড় আণবিক ভর হিসেবে প্রকাশ করা হয়"], ans: 3, exp: "ব্যাখ্যা: পলিমারিজেশনের সময় সব শৃঙ্খলের পরিসমাপ্তি একসঙ্গে ঘটে না বলে অণুগুলির দৈর্ঘ্য আলাদা হয়। তাই পলিমারের ক্ষেত্রে ভর-গড় বা সংখ্যা-গড় আণবিক ভর ব্যবহৃত হয়।" },
+{ q: "৯. নাইলন 6,6-এ '6,6' সংখ্যাটি কী নির্দেশ করে?", opts: ["এটি 66 বার পলিমারাইজ হয়", "এর মনোমার দুটির প্রতিটিতে 6টি করে কার্বন পরমাণু আছে", "এর আণবিক ভর 6600", "এতে 6টি অ্যামাইড বন্ধন থাকে"], ans: 1, exp: "ব্যাখ্যা: নাইলন 6,6 তৈরি হয় হেক্সামিথিলিন ডাইঅ্যামিন (6 কার্বন) এবং অ্যাডিপিক অ্যাসিড (6 কার্বন) থেকে। এই কার্বন সংখ্যাকেই '6,6' দ্বারা বোঝানো হয়।" },
+{ q: "১০. জিগ্লার-ন্যাটা অনুঘটক (Ziegler-Natta catalyst) কী?", opts: ["ট্রাইইথাইল অ্যালুমিনিয়াম ও টাইটেনিয়াম টেট্রাক্লোরাইডের মিশ্রণ", "বিউটাইল লিথিয়াম ও ফিনাইল হাইড্রাজিনের মিশ্রণ", "বেঞ্জোয়িল পারক্সাইড", "বোরন ট্রাইফ্লুরাইড ও জলের মিশ্রণ"], ans: 0, exp: "ব্যাখ্যা: জিগ্লার-ন্যাটা অনুঘটক হলো Al(C<sub>2</sub>H<sub>5</sub>)<sub>3</sub> এবং TiCl<sub>4</sub>-এর মিশ্রণ, যা ইথিলিন বা প্রোপিলিনের কো-অর্ডিনেশন পলিমারিজেশনে (HDPE তৈরিতে) ব্যবহৃত হয়।" },
+{ q: "১১. নীচের কোল্টি কনডেনসেশন (সংঘনন) পলিমার নয়?", opts: ["নাইলন 6,6", "টেরিলিন", "টেফলন", "ব্যাকেলাইট"], ans: 2, exp: "ব্যাখ্যা: টেফলন (পলিটেট্রাফ্লুরোইথিলিন) হলো টেট্রাফ্লুরোইথিলিনের যুত বা শৃঙ্খল পলিমারিজেশনের ফলে তৈরি পলিমার। বাকিগুলো কনডেনসেশন পলিমার।" },
+{ q: "১২. কাঁচা প্রাকৃতিক রবারের প্রধান ত্রুটি কোনটি?", opts: ["এর টান-শক্তি ও ঘর্ষণ প্রতিরোধ ক্ষমতা কম", "এটি জৈব দ্রাবকের সংস্পর্শে ফুলে ওঠে", "এটি ওজোন ও অক্সিজেন দ্বারা সহজেই আক্রান্ত হয়", "ওপরের সবগুলিই"], ans: 3, exp: "ব্যাখ্যা: কাঁচা রবার নরম, আঠালো, কম টান-শক্তিসম্পন্ন এবং এতে থাকা দ্বি-বন্ধনের কারণে তা সহজেই জারিত হয়। এই ত্রুটি দূর করতেই ভালকানাইজেশন করা হয়।" },
+{ q: "১৩. মানবদেহে নিয়ন্ত্রিত ওষুধ সরবরাহে (controlled drug delivery) ক্যাপসুল হিসেবে কোন্ পলিমার ব্যবহৃত হয়?", opts: ["পলিইথিলিন", "PHBV", "ব্যাকেলাইট", "PVC"], ans: 1, exp: "ব্যাখ্যা: PHBV বা PCL হলো জৈববিশ্লেষ্য (বায়োডিগ্রেডেবল) পলিমার। ওষুধকে এই ক্যাপসুলে ভরে দিলে তা মানবদেহে ধীরে ধীরে বিশ্লিষ্ট হয় এবং ওষুধ মুক্ত করে।" },
+{ q: "১৪. কাঠের ল্যামিনেশনে কোন্ পলিমারটি ব্যবহার করা হয়?", opts: ["সিস্-পলিআইসোপ্রিন", "ফেনল-ফর্মালডিহাইড রেজিন", "মেলামাইন-ফর্মালডিহাইড রেজিন", "ইউরিয়া-ফর্মালডিহাইড রেজিন"], ans: 3, exp: "ব্যাখ্যা: ইউরিয়া-ফর্মালডিহাইড রেজিন প্লাইউড তৈরির আঠা, কাঠের ল্যামিনেশন এবং ভাঁজরোধী পোশাক তৈরিতে ব্যবহৃত হয়।" },
+{ q: "১৫. পলিঅ্যামাইড শ্রেণির একটি পলিমার হল-", opts: ["ব্যাকেলাইট", "টেরিলিন", "টেফলন", "নাইলন-6,6"], ans: 3, exp: "ব্যাখ্যা: নাইলন-6,6-এ অ্যামাইড (-CONH-) বন্ধন উপস্থিত থাকে, তাই এটি পলিঅ্যামাইড শ্রেণির পলিমার।" }
+]
+},
+7: {
+name: 'Set 7', icon: '📝', topic: 'WBCHSE Scanner (বোর্ড ও সেমিস্টার স্পেশাল)',
+questions: [
+{ q: "১. নীচের কোনটি একটি জৈব বিয়োজনক্ষম (Biodegradable) পলিমার?", opts: ["নাইলন-2-নাইলন-6", "নাইলন-6", "নাইলন-6,6", "ব্যাকেলাইট"], ans: 0, exp: "ব্যাখ্যা: নাইলন-2-নাইলন-6 হলো গ্লাইসিন এবং অ্যামিনোক্যাপ্রোয়িক অ্যাসিড থেকে তৈরি একটি জৈববিশ্লেষ্য কো-পলিঅ্যামাইড।" },
+{ q: "২. পলিটেট্রাফ্লুরোইথিলিনের বাণিজ্যিক নাম কী?", opts: ["অরলন", "ড্যাক্রন", "টেফলন", "রেয়ন"], ans: 2, exp: "ব্যাখ্যা: পলিটেট্রাফ্লুরোইথিলিন (PTFE)-এর বাণিজ্যিক নাম টেফলন। এটি নন-স্টিক বাসনপত্র তৈরিতে ব্যবহৃত হয়।" },
+{ q: "৩. প্রাকৃতিক রবারের মনোমার কোনটি?", opts: ["স্টাইরিন", "ক্লোরোপ্রিন", "আইসোপ্রিন", "বিউটাডাইইন"], ans: 2, exp: "ব্যাখ্যা: প্রাকৃতিক রবার হলো আইসোপ্রিনের (2-মিথাইল-1,3-বিউটাডাইইন) পলিমার, যেখানে শৃঙ্খলটি সিস্-কনফিগারেশনে থাকে।" },
+{ q: "৪. ড্র্যাকন (Dacron) বা টেরিলিন-এর মনোমার এককগুলি কী কী?", opts: ["ইথিলিন গ্লাইকল ও থ্যালিক অ্যাসিড", "হেক্সামিথিলিন ডাইঅ্যামিন ও অ্যাডিপিক অ্যাসিড", "ইথিলিন গ্লাইকল ও টেরিথ্যালিক অ্যাসিড", "ফেনল ও ফর্মালডিহাইড"], ans: 2, exp: "ব্যাখ্যা: ইথিলিন গ্লাইকল এবং টেরিথ্যালিক অ্যাসিডের পলিকনডেনসেশনের মাধ্যমে টেরিলিন বা ড্যাক্রন তৈরি হয়।" },
+{ q: "৫. প্রাকৃতিক রবারের ভালকানাইজেশনের ফলে এর কী পরিবর্তন হয়?", opts: ["এটি থার্মোপ্লাস্টিক হয়ে যায়", "শৃঙ্খলগুলির মধ্যে সালফারের আড়াআড়ি বন্ধন সৃষ্টি হওয়ায় স্থিতিস্থাপকতা ও টান-শক্তি বৃদ্ধি পায়", "স্থিতিস্থাপকতা লোপ পায়", "এটি সহজে জলে দ্রবীভূত হয়"], ans: 1, exp: "ব্যাখ্যা: ভালকানাইজেশন প্রক্রিয়ায় রবারের শৃঙ্খলগুলির মধ্যে আড়াআড়ি বন্ধন তৈরি হয়, যা একে আরও শক্ত, টেকসই এবং বেশি স্থিতিস্থাপক করে তোলে।" },
+{ q: "৬. নাইলন 6 এর মনোমার কোনটি?", opts: ["অ্যাডিপিক অ্যাসিড", "হেক্সামিথিলিন ডাইঅ্যামিন", "ক্যাপ্রোল্যাকটাম", "গ্লাইসিন"], ans: 2, exp: "ব্যাখ্যা: ক্যাপ্রোল্যাকটামকে উত্তপ্ত করলে রিং-ওপেনিং পলিমারিজেশনের মাধ্যমে নাইলন 6 উৎপন্ন হয়।" },
+{ q: "৭. পলি (ভিনাইল ক্লোরাইড) বা PVC এর মনোমার কী?", opts: ["স্টাইরিন", "ইথিলিন", "ক্লোরোপ্রিন", "ভিনাইল ক্লোরাইড"], ans: 3, exp: "ব্যাখ্যা: ভিনাইল ক্লোরাইডের (CH<sub>2</sub>=CHCl) যুত পলিমারিজেশনের ফলে PVC তৈরি হয়, যা পাইপ বা অন্তরক পদার্থ তৈরিতে ব্যবহৃত হয়।" },
+{ q: "৮. ইলাস্টোমার (Elastomer) জাতীয় পলিমারে শৃঙ্খলগুলি কোন বল দ্বারা যুক্ত থাকে?", opts: ["শক্তিশালী হাইড্রোজেন বন্ধন", "সমযোজী আড়াআড়ি বন্ধন", "দুর্বল ভ্যান ডার ওয়ালস বল", "আয়নীয় বন্ধন"], ans: 2, exp: "ব্যাখ্যা: ইলাস্টোমার বা রবার জাতীয় পদার্থে শৃঙ্খলগুলোর মধ্যে কেবল দুর্বল ভ্যান ডার ওয়ালস বল কাজ করে, যার ফলেই এরা সহজে প্রসারিত হতে পারে।" },
+{ q: "৯. সেলুলোজ কী ধরনের পলিমার?", opts: ["কৃত্রিম", "অর্ধকৃত্রিম", "প্রাকৃতিক", "থার্মোসেটিং"], ans: 2, exp: "ব্যাখ্যা: সেলুলোজ উদ্ভিদ জগৎ থেকে পাওয়া যায়, তাই এটি একটি প্রাকৃতিক পলিমার (&beta;-D-গ্লুকোজের পলিমার)।" },
+{ q: "১০. পলিইথিলিন প্রস্তুতিতে কোন পলিমারাইজেশন পদ্ধতি ব্যবহৃত হয়?", opts: ["যুত বা শৃঙ্খল পলিমারিজেশন", "কনডেনসেশন পলিমারিজেশন", "রিং-ওপেনিং পলিমারিজেশন", "কো-পলিমারিজেশন"], ans: 0, exp: "ব্যাখ্যা: ইথিলিন অণুগুলি যুত বা শৃঙ্খল পলিমারিজেশনের মাধ্যমে কোনো উপজাত অণু ছাড়াই পরপর যুক্ত হয়ে পলিইথিলিন তৈরি করে।" },
+{ q: "১১. কোনটি থার্মোপ্লাস্টিক পলিমার?", opts: ["ব্যাকেলাইট", "মেলামাইন রেজিন", "পলিইথিলিন", "ভালকানাইজড রবার"], ans: 2, exp: "ব্যাখ্যা: পলিইথিলিন একটি রৈখিক বা শাখাযুক্ত পলিমার যাকে বারবার তাপ দিয়ে গলানো এবং নতুন আকার দেওয়া যায়। তাই এটি থার্মোপ্লাস্টিক।" },
+{ q: "১২. নন্‌-স্টিক বাসনপত্র (Non-stick cookware) তৈরিতে কোন্ পলিমার ব্যবহার করা হয়?", opts: ["PVC", "টেফলন", "পলিস্টাইরিন", "পলিপ্রোপিলিন"], ans: 1, exp: "ব্যাখ্যা: টেফলনের (PTFE) ঘর্ষণ গুণাঙ্ক অতি কম এবং এটি তাপরোধী হওয়ার কারণে এটি নন্‌-স্টিক ফ্রাইং প্যান বা বাসনপত্রের আবরণে ব্যবহৃত হয়।" },
+{ q: "১৩. কো-পলিমার (Co-polymer) এর একটি উদাহরণ দাও-", opts: ["পলিইথিলিন", "পলিভিনাইল ক্লোরাইড", "স্টাইরিন-বিউটাডাইইন রবার (SBR)", "পলিস্টাইরিন"], ans: 2, exp: "ব্যাখ্যা: যেসব পলিমার একাধিক ভিন্ন ভিন্ন মনোমার দিয়ে গঠিত, তাদের কো-পলিমার বলে। SBR-এ স্টাইরিন এবং বিউটাডাইইন নামক দুটি ভিন্ন মনোমার থাকে।" },
+{ q: "১৪. অটোমোবাইল ও সাইকেলের ভেতরের টিউব তৈরিতে কোন্ রবার ব্যবহৃত হয়?", opts: ["প্রাকৃতিক রবার", "বিউটাইল রবার", "নিওপ্রিন", "Buna-N"], ans: 1, exp: "ব্যাখ্যা: বিউটাইল রবার গ্যাসের প্রতি দারুণভাবে অপ্রবেশ্য, তাই এটি টায়ারের টিউব বানাতে ব্যবহৃত হয়।" },
+{ q: "১৫. জুতোর সোল, তৈলবাহী পাইপ ও গ্যাসকেট তৈরিতে কোন কৃত্রিম রবার ব্যবহৃত হয়?", opts: ["নিওপ্রিন রবার", "প্রাকৃতিক রবার", "পলিইথিলিন", "সেলুলোজ"], ans: 0, exp: "ব্যাখ্যা: পলিক্লোরোপ্রিন বা নিওপ্রিন রবার অত্যন্ত ঘর্ষণরোধী এবং তেল ও রাসায়নিক প্রতিরোধী। তাই এটি জুতোর সোল বা গ্যাসকেট তৈরিতে লাগে।" }
+]
+},
+8: {
+name: 'Set 8', icon: '🧠', topic: 'NCERT Exemplar & HOTS',
+questions: [
+{ q: "১. গ্লুকোজের পলিমারগুলির মধ্যে কোন্টি প্রাণী দ্বারা সঞ্চিত হয়?", opts: ["সেলুলোজ", "অ্যামাইলোজ", "গ্লাইকোজেন", "অ্যামাইলোপেকটিন"], ans: 2, exp: "ব্যাখ্যা: গ্লাইকোজেনকে প্রাণীজ স্টার্চ বলা হয়। প্রাণীদেহে কার্বোহাইড্রেট গ্লাইকোজেন হিসেবে লিভার এবং পেশিতে সঞ্চিত থাকে।" },
+{ q: "২. নীচের কোন্টি অর্ধকৃত্রিম (semi-synthetic) পলিমার নয়?", opts: ["সেলুলোজ নাইট্রেট", "সেলুলোজ অ্যাসিটেট", "ভালকানাইজড রবার", "সিস্-পলিআইসোপ্রিন"], ans: 3, exp: "ব্যাখ্যা: সিস্-পলিআইসোপ্রিন হলো প্রাকৃতিক রবার যা সরাসরি গাছ থেকে পাওয়া যায়, তাই এটি অর্ধকৃত্রিম নয়। বাকিগুলো রাসায়নিক প্রক্রিয়ায় পরিবর্তিত অর্ধকৃত্রিম পলিমার।" },
+{ q: "৩. পলিঅ্যাক্রিলোনাইট্রাইলের (PAN) শিল্পে ব্যবহৃত নাম কোনটি?", opts: ["ড্যাক্রন", "ওরলন (অ্যাক্রিলন)", "নাইলন 6,6", "পিভিসি"], ans: 1, exp: "ব্যাখ্যা: পলিঅ্যাক্রিলোনাইট্রাইলকে বাণিজ্যিক বা শিল্পক্ষেত্রে ওরলন বা অ্যাক্রিলান বলা হয়।" },
+{ q: "৪. থার্মোসেটিং পলিমারের বৈশিষ্ট্য কোনটি?", opts: ["তাপ দিলে নমনীয় হয় এবং ঠান্ডা করলে শক্ত হয়ে যায়, ফলে পুনরায় ব্যবহার করা যায়", "ছাঁচ নির্মাণের পর গলানো যায় না ফলে পুনরায় ব্যবহার করা যায় না", "স্বল্প শাখাযুক্ত দীর্ঘ রৈখিক শৃঙ্খলবিশিষ্ট পলিমার অণু", "এর আন্তরাণবিক বল সবচেয়ে কম"], ans: 1, exp: "ব্যাখ্যা: থার্মোসেটিং পলিমারে আড়াআড়ি বা নেটওয়ার্ক বন্ধন থাকায় একবার ছাঁচে ফেললে তা স্থায়ী হয়ে যায় এবং পুনরায় গলানো যায় না।" },
+{ q: "৫. কোন্ পলিমারগুলির প্রস্তুতিতে অন্তত একটি ডাইইন (diene) মনোমার প্রয়োজন?", opts: ["টেফলন ও পলিথিন", "Buna-S এবং নিওপ্রিন", "নাইলন এবং টেরিলিন", "ব্যাকেলাইট এবং মেলামাইন"], ans: 1, exp: "ব্যাখ্যা: Buna-S তৈরিতে 1,3-বিউটাডাইইন এবং নিওপ্রিন তৈরিতে ক্লোরোপ্রিন (যা একটি ডাইইন) ব্যবহৃত হয়।" },
+{ q: "৬. নীচের কোনগুলি যুত (addition) পলিমার?", opts: ["নাইলন ও টেরিলিন", "ব্যাকেলাইট ও মেলামাইন রেজিন", "পলিক্লোরোপ্রিন, টেফলন ও ওরলন", "পলিএস্টার ও পলিকার্বনেট"], ans: 2, exp: "ব্যাখ্যা: এই পলিমারগুলি তাদের মনোমারগুলোর সরাসরি যুত বা শৃঙ্খল পলিমারিজেশনের ফলে তৈরি হয়, কোনো উপজাত ক্ষুদ্রাণু অপসারিত হয় না।" },
+{ q: "৭. কোন মনোমারগুলি থেকে জৈববিশ্লেষ্য (biodegradable) পলিমার তৈরি হয়?", opts: ["গ্লাইসিন + অ্যামিনোক্যাপ্রোয়িক অ্যাসিড", "ইথিলিন গ্লাইকল + থ্যালিক অ্যাসিড", "ক্যাপ্রোল্যাকটাম", "ফেনল + ফর্মালডিহাইড"], ans: 0, exp: "ব্যাখ্যা: গ্লাইসিন এবং অ্যামিনোক্যাপ্রোয়িক অ্যাসিড ঘনীভূত হয়ে নাইলন 2-নাইলন 6 নামক একটি জৈববিশ্লেষ্য পলিঅ্যামাইড তৈরি করে।" },
+{ q: "৮. নীচের কোনগুলি কৃত্রিম রবারের (synthetic rubber) উদাহরণ?", opts: ["সিস্-পলিআইসোপ্রিন", "পলিক্লোরোপ্রিন ও Buna-S", "পলিঅ্যাক্রিলোনাইট্রাইল", "সেলুলোজ"], ans: 1, exp: "ব্যাখ্যা: পলিক্লোরোপ্রিন (নিওপ্রিন) এবং Buna-S (SBR) ল্যাবরেটরি বা কারখানায় তৈরি কৃত্রিম রবার।" },
+{ q: "৯. কোন পলিমারগুলির মধ্যে শক্তিশালী আন্তরাণবিক বল (যেমন- হাইড্রোজেন বন্ড বা ডাইপোল-ডাইপোল) থাকে?", opts: ["প্রাকৃতিক রবার", "পলিস্টাইরিন", "নাইলন এবং পলিএস্টার", "পলিইথিলিন"], ans: 2, exp: "ব্যাখ্যা: ফাইবার জাতীয় পলিমার যেমন নাইলন (অ্যামাইড বন্ধন) এবং পলিএস্টারের শৃঙ্খলগুলোর মধ্যে শক্তিশালী হাইড্রোজেন বন্ধন বা ডাইপোল মিথস্ক্রিয়া থাকে।" },
+{ q: "১০. ভালকানাইজেশন রবারকে কী করে তোলে?", opts: ["অধিকতর নমনীয়", "অধিকতর স্থিতিস্থাপক ও শক্ত", "অজৈব দ্রাবকে দ্রাব্য", "কেলাসাকার"], ans: 1, exp: "ব্যাখ্যা: ভালকানাইজেশনের ফলে রবারের শৃঙ্খলের মাঝে সালফারের আড়াআড়ি বন্ধন তৈরি হয়, যা একে আরও শক্ত এবং বেশি স্থিতিস্থাপক করে তোলে।" },
+{ q: "১১. ফাইবার (Fibre) হিসেবে কোন্ পলিমারগুলি ব্যবহৃত হয়?", opts: ["পলিটেট্রাফ্লুরোইথেন ও পলিস্টাইরিন", "নাইলন ও টেরিলিন", "নিওপ্রিন ও রবার", "ব্যাকেলাইট ও মেলামাইন"], ans: 1, exp: "ব্যাখ্যা: নাইলন (পলিঅ্যামাইড) এবং টেরিলিন (পলিএস্টার) হলো কৃত্রিম তন্তু বা ফাইবার যা পোশাক, দড়ি, জাল ইত্যাদি তৈরিতে ব্যবহৃত হয়।" },
+{ q: "১২. নিম্ন ঘনত্বের পলিথিনের (LDPE) ক্ষেত্রে নীচের কোন্ বিবৃতিটি সঠিক নয়?", opts: ["এটি অত্যন্ত শাখাযুক্ত গঠন-কাঠামো বিশিষ্ট", "এটি নমনীয় ও অভঙ্গুর", "এটি তড়িতের সুপরিবাহী", "এটি যুত পলিমার"], ans: 2, exp: "ব্যাখ্যা: LDPE (পলিথিন) তড়িতের সুপরিবাহী নয়, বরং এটি তড়িতের একটি চমৎকার অপরিবাহী বা অন্তরক পদার্থ।" },
+{ q: "১৩. কোন্ পলিমারটিতে ভিনাইলিক মনোমার একক বর্তমান?", opts: ["নাইলন 6,6", "টেরিলিন", "অ্যাক্রিলান বা পলিস্টাইরিন", "ব্যাকেলাইট"], ans: 2, exp: "ব্যাখ্যা: অ্যাক্রিলান (অ্যাক্রিলোনাইট্রাইল) এবং পলিস্টাইরিন (স্টাইরিন)-এর মনোমারগুলো হলো ভিনাইল যৌগ (CH<sub>2</sub>=CH-Z)।" },
+{ q: "১৪. পলিইউরেথেন (Polyurethane) কোন ধরনের পলিমার?", opts: ["যুত পলিমার (Addition polymer)", "কনডেনসেশন পলিমার (Condensation polymer)", "এটি কোনো পলিমার নয়", "প্রাকৃতিক পলিমার"], ans: 0, exp: "ব্যাখ্যা: ডাইআইসোসায়ানেট এবং ডাইঅলের বিক্রিয়ায় পলিইউরেথেন তৈরি হয়। যদিও এটি ধাপ-বৃদ্ধি (step-growth) প্রক্রিয়ায় হয়, কিন্তু কোনো উপজাত ক্ষুদ্রাণু অপসারিত হয় না বলে এটি যুত পলিমারেরই অন্তর্ভুক্ত।" },
+{ q: "১৫. \"সব পলিমারই ম্যাক্রোমলিকিউল, কিন্তু সব ম্যাক্রোমলিকিউল পলিমার নয়\"- এর স্বপক্ষে ম্যাক্রোমলিকিউলের উদাহরণ কোনটি যা পলিমার নয়?", opts: ["পলিথিন", "ক্লোরোফিল বা হীরক", "নাইলন", "পিভিসি"], ans: 1, exp: "ব্যাখ্যা: ক্লোরোফিল বা হীরক বড় অণু (ম্যাক্রোমলিকিউল) হলেও এরা কোনো নির্দিষ্ট মনোমারের বারবার যুক্ত হওয়ার ফলে গঠিত হয় না, তাই এরা পলিমার নয়।" }
+]
+}
+};
+
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+function getGlobalUsers() {
+const data = localStorage.getItem("testBazarGlobalUsers");
+return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+const data = localStorage.getItem("testBazarAttemptsChem3U6_v1");
+return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+attempts[key] = (attempts[key] || 0) + 1;
+localStorage.setItem("testBazarAttemptsChem3U6_v1", JSON.stringify(attempts));
+return attempts[key];
+}
+
+window.onload = () => { renderHub(); };
+
+function renderHub() {
+const grid = document.getElementById("setGrid");
+grid.innerHTML = "";
+for(let id in ALL_SETS) {
+const set = ALL_SETS[id];
+const div = document.createElement("div");
+div.className = "set-card";
+let attemptCount = 0;
+let isLocked = false;
+
+if (currentUser) {
+attemptCount = getAttemptCount(currentUser, id);
+isLocked = attemptCount >= MAX_ATTEMPTS;
+if (isLocked) div.classList.add("locked");
+}
+
+div.innerHTML = `
+<div class="icon">${set.icon}</div>
+<div class="set-num">${set.name}</div>
+<div class="set-title">${set.topic}</div>
+<div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+`;
+
+div.onclick = () => {
+if (isLocked) { alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return; }
+handleSetClick(id);
+};
+grid.appendChild(div);
+}
+}
+
+function handleSetClick(setId) {
+activeSetId = setId;
+if (!currentUser) {
+document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+document.getElementById("loginOverlay").classList.add("active");
+document.getElementById("loginUsername").value = "";
+document.getElementById("loginPassword").value = "";
+document.getElementById("loginError").style.display = "none";
+} else { startQuiz(setId); }
+}
+
+function doLogin() {
+const u = document.getElementById("loginUsername").value.trim();
+const p = document.getElementById("loginPassword").value.trim();
+const err = document.getElementById("loginError");
+const GLOBAL_USERS = getGlobalUsers();
+
+if(!u || !p) { err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!"; err.style.display = "block"; return; }
+if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+let attempts = getAttemptCount(u, activeSetId);
+if (attempts >= MAX_ATTEMPTS) {
+err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+err.style.display = "block";
+return;
+}
+currentUser = u;
+document.getElementById("loginOverlay").classList.remove("active");
+document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+document.getElementById("userDisplay").classList.remove("hidden");
+renderHub();
+startQuiz(activeSetId);
+} else {
+err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+err.style.display = "block";
+}
+}
+
+function closeLogin() { document.getElementById("loginOverlay").classList.remove("active"); }
+
+function goToHub() {
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("hubPage").style.display = "block";
+document.getElementById("timerBox").classList.add("hidden");
+clearInterval(timerInterval);
+renderHub();
+}
+
+function startQuiz(setId) {
+incrementAttempt(currentUser, setId);
+questions = ALL_SETS[setId].questions;
+currentQIndex = 0; score = 0; wrongAnswers = 0; userAnswers = {}; isReviewMode = false; timeLeft = TIME_LIMIT;
+document.getElementById("hubPage").style.display = "none";
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+document.getElementById("timerBox").classList.remove("hidden");
+document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+startTimer();
+loadQuestion();
+}
+
+function loadQuestion() {
+const qData = questions[currentQIndex];
+document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+document.getElementById("qText").innerHTML = qData.q;
+const progress = ((currentQIndex) / questions.length) * 100;
+document.getElementById("progressFill").style.width = `${progress}%`;
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+const optsBox = document.getElementById("qOpts");
+optsBox.innerHTML = "";
+document.getElementById("explanation").classList.remove("show");
+document.getElementById("nextBtn").disabled = true;
+document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+qData.opts.forEach((optText, idx) => {
+const btn = document.createElement("button");
+btn.className = "opt";
+btn.innerHTML = `<div class="opt-circle">${LABELS[idx]}</div> <div class="opt-text">${optText}</div>`;
+if (isReviewMode) {
+btn.classList.add("disabled");
+if (idx === qData.ans) btn.classList.add("correct");
+else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+} else {
+btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+}
+optsBox.appendChild(btn);
+});
+
+if (isReviewMode) {
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+if (currentQIndex === questions.length - 1) { document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন"; }
+}
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+allBtns.forEach(b => b.classList.add("disabled"));
+userAnswers[currentQIndex] = selectedIdx;
+if (selectedIdx === correctIdx) { btn.classList.add("correct"); score++; } 
+else { btn.classList.add("wrong"); allBtns[correctIdx].classList.add("correct"); wrongAnswers++; }
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+}
+
+function nextQ() {
+if (isReviewMode && currentQIndex === questions.length - 1) {
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show"); return;
+}
+if (!isReviewMode && currentQIndex === questions.length - 1) { finishQuiz(); return; }
+currentQIndex++; loadQuestion();
+}
+
+function startTimer() {
+clearInterval(timerInterval);
+const tBox = document.getElementById("timerBox");
+tBox.classList.remove("danger");
+timerInterval = setInterval(() => {
+if (timeLeft <= 0) { clearInterval(timerInterval); finishQuiz(); return; }
+timeLeft--;
+const m = Math.floor(timeLeft / 60); const s = timeLeft % 60;
+document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+if (timeLeft < 60) tBox.classList.add("danger");
+}, 1000);
+}
+
+function finishQuiz() {
+clearInterval(timerInterval);
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("timerBox").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show");
+const total = questions.length; const skipped = total - (score + wrongAnswers);
+const percent = Math.round((score / total) * 100);
+document.getElementById("finalScore").innerText = `${percent}%`;
+document.getElementById("rbCorrect").innerText = score;
+document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+const gradeEl = document.getElementById("resultGrade");
+if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return;
+}
+startQuiz(activeSetId);
+}
+
+function showReview() {
+isReviewMode = true; currentQIndex = 0;
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+loadQuestion();
+}
+</script>
+</body>
+</html>
