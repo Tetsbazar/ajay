@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Chemistry 3rd Sem | Unit 4</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main);}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; }
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header class="top-bar">
+<div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+<div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+<div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+<div class="main">
+
+<!-- LOGIN MODAL -->
+<div class="login-overlay" id="loginOverlay">
+<div class="login-modal">
+<h2>লগইন করুন</h2>
+<p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+<div class="login-set-name" id="loginSetName">📚 Set 1</div>
+<div class="input-group">
+<label>ইউজারনেম</label>
+<input type="text" id="loginUsername" placeholder="Username">
+</div>
+<div class="input-group">
+<label>পাসওয়ার্ড</label>
+<input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+</div>
+<button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+<button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+<div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+</div>
+</div>
+
+<!-- HUB PAGE -->
+<div id="hubPage">
+<div class="hub-header">
+<h1>রসায়ন 3rd Sem Unit 4:<br>অ্যালকোহল, ফেনল এবং ইথারসমূহ</h1>
+<p>মোট ১০৫টি প্রশ্ন সম্বলিত ৭টি সেট (১-৬, ১২)। Test শুরু করতে সেটে ক্লিক করুন।</p>
+</div>
+<div class="set-grid" id="setGrid"></div>
+<div style="text-align: center; margin-top: 30px;">
+<button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+</div>
+</div>
+
+<!-- QUIZ AREA -->
+<div id="testArea" class="hidden">
+<div class="quiz-info">
+<div class="info-item">🎓 <strong>Chemistry</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+<div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+</div>
+<div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="q-card">
+<div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+<div class="q-text" id="qText">Question Text</div>
+<div class="opts" id="qOpts"></div>
+<div class="explanation" id="explanation"><p id="explanationText"></p></div>
+<div class="nav-row">
+<div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+<button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+</div>
+</div>
+</div>
+
+<!-- RESULT AREA -->
+<div class="result-wrap" id="resultWrap">
+<div class="result-icon" id="resultIcon">🏆</div>
+<div class="result-score en-font" id="finalScore">100%</div>
+<div class="result-total">স্কোর</div>
+<div class="result-grade" id="resultGrade">অসাধারণ!</div>
+<div class="result-bars">
+<div class="result-bar">
+<div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+<div class="rb-label">সঠিক</div>
+</div>
+<div class="result-bar">
+<div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+<div class="rb-label">ভুল/স্কিপ</div>
+</div>
+</div>
+<div class="attempt-info-box" id="attemptInfo"></div>
+<div class="action-btns">
+<button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+<button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+<button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+</div>
+</div>
+
+</div>
+
+<script>
+const MAX_ATTEMPTS = 10;
+const TIME_LIMIT = 10 * 60;
+const LABELS = ['ক', 'খ', 'গ', 'ঘ'];
+
+const ALL_SETS = {
+1: {
+name: 'Set 1', icon: '📚', topic: 'অ্যালকোহল, ফেনল ও ইথারের প্রাথমিক ধারণা ও গঠন',
+questions: [
+{ q: "১. নীচের কোন্ অ্যালকোহলটি একটি 2&deg; অ্যালকোহলের উদাহরণ?", opts: ["CH<sub>3</sub>-OH", "(CH<sub>3</sub>)<sub>2</sub>CH-OH", "(CH<sub>3</sub>)<sub>3</sub>C-OH", "CH<sub>3</sub>CH<sub>2</sub>OH"], ans: 1, exp: "ব্যাখ্যা: যে অ্যালকোহলে -OH গ্রুপটি একটি 2&deg; কার্বন পরমাণুর (যে কার্বন অন্য দুটি কার্বনের সাথে যুক্ত) সাথে যুক্ত থাকে, তাকে 2&deg; বা সেকেন্ডারি অ্যালকোহল বলে।" },
+{ q: "২. নীচের কোন্টি একটি 3&deg; বেঞ্জাইলিক অ্যালকোহল?", opts: ["CH<sub>2</sub>=CHCH(OH)CH<sub>3</sub>", "C<sub>6</sub>H<sub>5</sub>C(CH<sub>3</sub>)<sub>2</sub>OH", "C<sub>6</sub>H<sub>5</sub>CH<sub>2</sub>OH", "CH<sub>2</sub>=CHC(CH<sub>3</sub>)<sub>2</sub>OH"], ans: 1, exp: "ব্যাখ্যা: বেঞ্জাইলিক অ্যালকোহলে -OH গ্রুপটি বেঞ্জিন বলয়ের সাথে সরাসরি যুক্ত sp<sup>3</sup> কার্বনে থাকে। খ-অপশনে কার্বনটি বেঞ্জিন বলয় ছাড়া আরও দুটি মিথাইল গ্রুপের সাথে যুক্ত থাকায় এটি 3&deg; বেঞ্জাইলিক অ্যালকোহল।" },
+{ q: "৩. CH<sub>3</sub>-O-CH(CH<sub>3</sub>)<sub>2</sub> ইথারটির সঠিক IUPAC নাম কী?", opts: ["আইসোপ্রোপাইল মিথাইল ইথার", "টার্ট-বিউটাইল মিথাইল ইথার", "২-মিথক্সিপ্রোপেন", "২-প্রোপক্সিমিথেন"], ans: 2, exp: "ব্যাখ্যা: দীর্ঘতম কার্বন শৃঙ্খলটি তিন কার্বনের (প্রোপেন) এবং ২-নম্বর কার্বনে একটি মিথক্সি (-OCH<sub>3</sub>) গ্রুপ যুক্ত আছে, তাই এর IUPAC নাম 2-মিথক্সিপ্রোপেন।" },
+{ q: "৪. অ্যালকোহল অণুতে কার্বন-অক্সিজেন-হাইড্রোজেন (C-O-H) বন্ধন-কোণের মান কত হয়?", opts: ["১০৯&deg;২৮'", "১০৮.৯&deg;", "১২০&deg;", "১৮০&deg;"], ans: 1, exp: "ব্যাখ্যা: অক্সিজেনের দুটি নিঃসঙ্গ ইলেকট্রন-জোড়ের মধ্যে বিকর্ষণ বল বেশি হওয়ায়, অ্যালকোহলে C-O-H বন্ধন-কোণের মান (108.9&deg;) স্বাভাবিক চতুস্তলকীয় কোণ (109&deg;28') অপেক্ষা সামান্য কম হয়।" },
+{ q: "৫. অ্যালকোহল ও ফেনলসমূহ মূলত কাদের ডেরিভেটিভ বা জাতক হিসেবে বিবেচিত হয়?", opts: ["অ্যালডিহাইড", "কিটোন", "অ্যালিফ্যাটিক এবং অ্যারোমেটিক হাইড্রোকার্বন", "ইথার"], ans: 2, exp: "ব্যাখ্যা: অ্যালিফ্যাটিক এবং অ্যারোমেটিক হাইড্রোকার্বনের একটি H-পরমাণু -OH গ্রুপ দ্বারা প্রতিস্থাপিত হলে যথাক্রমে অ্যালকোহল এবং ফেনল গঠিত হয়।" },
+{ q: "৬. C<sub>6</sub>H<sub>5</sub>OCH<sub>3</sub> (অ্যানিসোল) অণুতে অক্সিজেনের সাথে যুক্ত কার্বন পরমাণুগুলির সংকরায়ণ অবস্থা কী?", opts: ["দুটি কার্বনই sp<sup>3</sup>", "বেঞ্জিন বলয়ের কার্বনটি sp<sup>2</sup> এবং মিথাইল গ্রুপের কার্বনটি sp<sup>3</sup>", "দুটি কার্বনই sp<sup>2</sup>", "বেঞ্জিন বলয়ের কার্বনটি sp<sup>3</sup> এবং মিথাইল গ্রুপের কার্বনটি sp<sup>2</sup>"], ans: 1, exp: "ব্যাখ্যা: অ্যারোমেটিক ইথার অ্যানিসোলে অক্সিজেন পরমাণুটি একদিকে বেঞ্জিন বলয়ের sp<sup>2</sup> কার্বনের সাথে এবং অন্যদিকে মিথাইল গ্রুপের sp<sup>3</sup> কার্বনের সাথে যুক্ত থাকে।" },
+{ q: "৭. বাণিজ্যে 'উড্ স্পিরিট' (wood spirit) নামে পরিচিত অ্যালকোহলটি কোনটি?", opts: ["ইথানল", "২-প্রোপানল", "মিথানল", "গ্লিসারল"], ans: 2, exp: "ব্যাখ্যা: প্রাচীনকালে কাঠের অন্তর্ধূম পাতনের (destructive distillation) মাধ্যমে মিথানল প্রস্তুত করা হতো বলে একে উড্ স্পিরিট বলা হয়।" },
+{ q: "৮. m-ক্রেসল (m-cresol)-এর সঠিক IUPAC নাম কী?", opts: ["৩-মিথাইলফেনল", "৩-ক্লোরোফেনল", "৩-মিথক্সিফেনল", "বেঞ্জিন-১,৩-ডাইঅল"], ans: 0, exp: "ব্যাখ্যা: ক্রেসল হলো মিথাইলফেনল। মেটা-অবস্থানে মিথাইল গ্রুপ থাকায় এর IUPAC নাম 3-মিথাইলফেনল।" },
+{ q: "৯. গ্লিসারল বা গ্লিসারিন অণুতে কয়টি -OH (হাইড্রক্সিল) গ্রুপ বর্তমান থাকে?", opts: ["১টি", "২টি", "৩টি", "৪টি"], ans: 2, exp: "ব্যাখ্যা: গ্লিসারল হলো একটি ট্রাইহাইড্রিক অ্যালকোহল (প্রোপেন-1,2,3-ট্রাইঅল), অর্থাৎ এতে 3টি -OH গ্রুপ থাকে।" },
+{ q: "১০. অ্যালকোহলের C-O বন্ধনের বিভাজন ঘটে কোন বিকারকের সাথে বিক্রিয়ায়?", opts: ["Na ধাতু", "PCl<sub>5</sub>", "CH<sub>3</sub>COOH", "CH<sub>3</sub>COCl"], ans: 1, exp: "ব্যাখ্যা: HX, PCl<sub>5</sub>, SOCl<sub>2</sub> ইত্যাদির সঙ্গে অ্যালকোহলের বিক্রিয়াগুলি C-O বন্ধন বিভাজনঘটিত বিক্রিয়া।" },
+{ q: "১১. অ্যালকোহলের O-H বন্ধনের বিভাজন ঘটে কোন বিকারকের সাথে বিক্রিয়ায়?", opts: ["Na ধাতু", "HCl", "PCl<sub>3</sub>", "SOCl<sub>2</sub>"], ans: 0, exp: "ব্যাখ্যা: ধাতব সোডিয়ামের সাথে বিক্রিয়ায় অ্যালকোহলের O-H বন্ধন ভেঙে হাইড্রোজেন গ্যাস নির্গত হয় এবং অ্যালকক্সাইড গঠিত হয়।" },
+{ q: "১২. ইথক্সিমিথেন ইথারটির সাধারণ নাম কী?", opts: ["ডাইমিথাইল ইথার", "ডাইইথাইল ইথার", "ইথাইল মিথাইল ইথার", "মিথাইল প্রোপাইল ইথার"], ans: 2, exp: "ব্যাখ্যা: CH<sub>3</sub>-O-CH<sub>2</sub>CH<sub>3</sub> বা ইথক্সিমিথেনে একটি ইথাইল ও একটি মিথাইল গ্রুপ থাকায় এর সাধারণ নাম ইথাইল মিথাইল ইথার।" },
+{ q: "১৩. অ্যালকোহলে উপস্থিত অক্সিজেনের সংকরায়ণ অবস্থা কী?", opts: ["sp", "sp<sup>2</sup>", "sp<sup>3</sup>", "sp<sup>3</sup>d"], ans: 2, exp: "ব্যাখ্যা: অ্যালকোহল অণুতে উপস্থিত অক্সিজেনের 4 টি sp<sup>3</sup> সংকর কক্ষকের মধ্যে 2 টি বন্ধন গঠনে অংশ নেয় এবং বাকি 2 টিতে একজোড়া করে নিঃসঙ্গ ইলেকট্রন থাকে।" },
+{ q: "১৪. 3&deg; অ্যালকোহলকে শনাক্ত করার জন্য সাধারণত কোন পরীক্ষাটি করা হয়?", opts: ["টলেন্স পরীক্ষা", "লুকাস পরীক্ষা", "ফেলিং পরীক্ষা", "ব্রোমিন-জল পরীক্ষা"], ans: 1, exp: "ব্যাখ্যা: লুকাস পরীক্ষায় 3&deg; অ্যালকোহলের ক্ষেত্রে দ্রবণ তৎক্ষণাৎ ঘোলাটে হয়ে যায়, যা দিয়ে একে শনাক্ত করা যায়।" },
+{ q: "১৫. ফেনলকে ক্লোরোফর্ম ও NaOH-এর জলীয় দ্রবণ সহযোগে উত্তপ্ত করলে প্রধানত কী উৎপন্ন হয়?", opts: ["বেঞ্জোয়িক অ্যাসিড", "০-হাইড্রক্সিবেঞ্জ্যালডিহাইড (স্যালিসাইলঅ্যালডিহাইড)", "স্যালিসাইলিক অ্যাসিড", "পিকরিক অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: ফেনলকে ক্লোরোফর্ম ও NaOH-এর জলীয় দ্রবণ সহযোগে 65-75&deg;C তাপমাত্রায় উত্তপ্ত করলে মুখ্যত ০-হাইড্রক্সিবেঞ্জ্যালডিহাইড উৎপন্ন হয়, এটি রাইমার-টিম্যান বিক্রিয়া।" }
+]
+},
+2: {
+name: 'Set 2', icon: '🧪', topic: 'অ্যালকোহল ও ফেনলের প্রস্তুতি',
+questions: [
+{ q: "১. ফর্ম্যালডিহাইড (HCHO) ছাড়া অন্য যেকোনো অ্যালডিহাইডের সাথে গ্রিগনার্ড বিকারকের (RMgX) বিক্রিয়া ঘটিয়ে আর্দ্রবিশ্লেষণ করলে কী উৎপন্ন হয়?", opts: ["1&deg; অ্যালকোহল", "2&deg; অ্যালকোহল", "3&deg; অ্যালকোহল", "ফেনল"], ans: 1, exp: "ব্যাখ্যা: ফর্ম্যালডিহাইড 1&deg; অ্যালকোহল দেয়, কিন্তু অন্যান্য অ্যালডিহাইড গ্রিগনার্ড বিকারকের সাথে বিক্রিয়ায় 2&deg; অ্যালকোহল গঠন করে।" },
+{ q: "২. কিটোনের সাথে গ্রিগনার্ড বিকারকের (RMgX) বিক্রিয়া ঘটিয়ে আর্দ্রবিশ্লেষণ করলে কী উৎপন্ন হয়?", opts: ["1&deg; অ্যালকোহল", "2&deg; অ্যালকোহল", "3&deg; অ্যালকোহল", "কার্বক্সিলিক অ্যাসিড"], ans: 2, exp: "ব্যাখ্যা: গ্রিগনার্ড বিকারক কিটোনের কার্বনিল কার্বনে আক্রমণ করে অন্তর্বর্তী যুত যৌগ গঠন করে যা আর্দ্রবিশ্লেষিত হয়ে 3&deg; অ্যালকোহল উৎপন্ন করে।" },
+{ q: "৩. প্রোপিন (CH<sub>3</sub>CH=CH<sub>2</sub>) থেকে 1-প্রোপানল (CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>OH) প্রস্তুতির জন্য সবচেয়ে উপযুক্ত পদ্ধতি কোনটি?", opts: ["হাইড্রোবোরেশন-জারণ", "অক্সিমারকিউরেশন-ডিমারকিউরেশন", "লঘু H<sub>2</sub>SO<sub>4</sub> দ্বারা হাইড্রেশন", "ওজোনোলিসিস"], ans: 0, exp: "ব্যাখ্যা: হাইড্রোবোরেশন-অক্সিডেশন পদ্ধতিতে মারকনিকফের নিয়মের বিপরীতে জলের সংযোজন ঘটে, ফলে প্রোপিন থেকে প্রান্তীয় 1&deg; অ্যালকোহল বা 1-প্রোপানল পাওয়া যায়।" },
+{ q: "৪. ডাউ পদ্ধতিতে (Dow's Process) কী থেকে ফেনল প্রস্তুত করা হয়?", opts: ["বেঞ্জিন", "ক্লোরোবেঞ্জিন", "অ্যানিলিন", "কিউমিন"], ans: 1, exp: "ব্যাখ্যা: ডাউ পদ্ধতিতে ক্লোরোবেঞ্জিনকে উচ্চ চাপ ও তাপমাত্রায় NaOH সহযোগে উত্তপ্ত করে ফেনল প্রস্তুত করা হয়।" },
+{ q: "৫. কিউমিন (Cumene) থেকে ফেনল প্রস্তুতির সময় কোন অন্তর্বর্তী যৌগটি গঠিত হয়?", opts: ["কিউমিন পারক্সাইড", "কিউমিন হাইড্রক্সাইড", "কিউমিন হাইড্রোক্লোরাইড", "কিউমিন হাইড্রোপারক্সাইড"], ans: 3, exp: "ব্যাখ্যা: কিউমিনের সাথে O<sub>2</sub>-এর বিক্রিয়ায় প্রথমে কিউমিন হাইড্রোপারক্সাইড উৎপন্ন হয়, যা পরে অ্যাসিডের উপস্থিতিতে ফেনল ও অ্যাসিটোন দেয়।" },
+{ q: "৬. ইথাইল প্রোপানোয়েট এস্টারটিকে LiAlH<sub>4</sub> দ্বারা বিজারিত করলে কী উৎপন্ন হবে?", opts: ["1-প্রোপানল এবং মিথানল", "1-প্রোপানল এবং ইথানল", "2-প্রোপানল এবং ইথানল", "বিউটানল"], ans: 1, exp: "ব্যাখ্যা: ইথাইল প্রোপানোয়েট (CH<sub>3</sub>CH<sub>2</sub>COOCH<sub>2</sub>CH<sub>3</sub>) বিজারিত হয়ে প্রোপানোয়েট অংশ থেকে 1-প্রোপানল এবং ইথাইল অংশ থেকে ইথানল উৎপন্ন করে।" },
+{ q: "৭. সোডিয়াম বেঞ্জিনসালফোনেটকে ৩৫০&deg;C তাপমাত্রায় কোন বিকারকের সাথে গলিত করলে ফেনল উৎপন্ন হয়?", opts: ["Na<sub>2</sub>CO<sub>3</sub>", "NaOH", "NaNH<sub>2</sub>", "NaHCO<sub>3</sub>"], ans: 1, exp: "ব্যাখ্যা: সোডিয়াম বেঞ্জিনসালফোনেটকে 350&deg;C তাপমাত্রায় NaOH সহযোগে উত্তপ্ত করার পর অম্লায়িত করলে ফেনল উৎপন্ন হয়।" },
+{ q: "৮. অ্যানিলিনের ডায়াজোটাইজেশনের ফলে উৎপন্ন বেঞ্জিন ডায়াজোনিয়াম ক্লোরাইড লবণকে লঘু অ্যাসিড সহযোগে উত্তপ্ত করলে কী উৎপন্ন হয়?", opts: ["বেঞ্জিন", "ক্লোরোবেঞ্জিন", "ফেনল", "অ্যানিসোল"], ans: 2, exp: "ব্যাখ্যা: ডায়াজোনিয়াম লবণকে লঘু অ্যাসিড (যেমন লঘু H<sub>2</sub>SO<sub>4</sub>) সহযোগে উত্তপ্ত করলে আর্দ্রবিশ্লেষণের মাধ্যমে ফেনল উৎপন্ন হয়।" },
+{ q: "৯. 2-মিথাইলপ্রোপিন-এ অ্যাসিড অনুঘটকের উপস্থিতিতে জলের সংযোজন (Hydration) ঘটালে প্রধানত কী উৎপন্ন হবে?", opts: ["1&deg; অ্যালকোহল", "2&deg; অ্যালকোহল", "3&deg; অ্যালকোহল", "অ্যালডিহাইড"], ans: 2, exp: "ব্যাখ্যা: অ্যাসিডের উপস্থিতিতে অ্যালকিনের জলযোজন মারকনিকফ নিয়ম অনুযায়ী ঘটে। 2-মিথাইলপ্রোপিন থেকে স্থিতিশীল 3&deg; কার্বোক্যাটায়ন তৈরি হয়, ফলে 2-মিথাইলপ্রোপান-2-অল (3&deg; অ্যালকোহল) পাওয়া যায়।" },
+{ q: "১০. প্রাইমারি (1&deg;) অ্যালকোহলকে অ্যালডিহাইডে জারিত করার জন্য সর্বোৎকৃষ্ট বিকারক কোনটি?", opts: ["আম্লিক KMnO<sub>4</sub>", "আম্লিক K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub>", "পিরিডিনিয়াম ক্লোরোক্রোমেট (PCC)", "জোনস বিকারক"], ans: 2, exp: "ব্যাখ্যা: PCC (CrO<sub>3</sub> &middot; C<sub>6</sub>H<sub>5</sub>N &middot; HCl) প্রাইমারি অ্যালকোহলকে শুধুমাত্র অ্যালডিহাইড স্তর পর্যন্ত জারিত করে, কার্বক্সিলিক অ্যাসিডে পরিণত হতে দেয় না।" },
+{ q: "১১. 3ROH + PCl<sub>3</sub> &rarr; 3RCl + A বিক্রিয়াটিতে উপজাত পদার্থ 'A' কী?", opts: ["POCl<sub>3</sub>", "H<sub>3</sub>PO<sub>4</sub>", "H<sub>3</sub>PO<sub>3</sub>", "PH<sub>3</sub>"], ans: 2, exp: "ব্যাখ্যা: অ্যালকোহলের সাথে ফসফরাস ট্রাইক্লোরাইডের (PCl<sub>3</sub>) বিক্রিয়ায় অ্যালকিল ক্লোরাইড এবং উপজাত হিসেবে ফসফরাস অ্যাসিড (H<sub>3</sub>PO<sub>3</sub>) উৎপন্ন হয়।" },
+{ q: "১২. অ্যালকোহলের নিরুদন (Dehydration) ঘটিয়ে অ্যালকিন প্রস্তুতির বিক্রিয়াটি কোন ক্রিয়াকৌশলের মাধ্যমে ঘটে?", opts: ["S<sub>N</sub>1", "S<sub>N</sub>2", "E1", "E2"], ans: 2, exp: "ব্যাখ্যা: অ্যাসিড অনুঘটকীয় অ্যালকোহলের নিরুদন একটি E1 বিক্রিয়া যা কার্বোক্যাটায়ন অন্তর্বর্তী পদার্থ গঠনের মাধ্যমে সম্পন্ন হয়।" },
+{ q: "১৩. কার্বক্সিলিক অ্যাসিড বা এস্টারকে বিজারিত করে অ্যালকোহল প্রস্তুতির জন্য তীব্র বিজারক হিসেবে কী ব্যবহার করা হয়?", opts: ["NaBH<sub>4</sub>", "LiAlH<sub>4</sub>", "H<sub>2</sub>/Ni", "Sn/HCl"], ans: 1, exp: "ব্যাখ্যা: LiAlH<sub>4</sub> (লিথিয়াম অ্যালুমিনিয়াম হাইড্রাইড) একটি শক্তিশালী বিজারক যা কার্বক্সিলিক অ্যাসিড বা এস্টারকে সহজেই প্রাইমারি অ্যালকোহলে বিজারিত করে।" },
+{ q: "১৪. 3-মিথাইলহেক্সান-3-অল প্রস্তুত করার জন্য গ্রিগনার্ড বিকারক এবং কার্বনিল যৌগের কতগুলি সম্ভাব্য জোড় (combinations) ব্যবহার করা যেতে পারে?", opts: ["১টি", "২টি", "৩টি", "৪টি"], ans: 1, exp: "ব্যাখ্যা: 3-মিথাইলহেক্সান-3-অল একটি 3&deg; অ্যালকোহল। এটি প্রস্তুত করতে বিউটান-2-ওন + ইথাইলম্যাগনেশিয়াম ব্রোমাইড অথবা পেন্টান-3-ওন + মিথাইলম্যাগনেশিয়াম ব্রোমাইড এই 2টি উপায় ব্যবহার করা যেতে পারে।" },
+{ q: "১৫. নীচের কোন যৌগটি থেকে LiAlH<sub>4</sub> দ্বারা বিজারণের ফলে ইথানল পাওয়া যায় না?", opts: ["ইথান্যাল (CH<sub>3</sub>CHO)", "ইথানোয়িক অ্যাসিড (CH<sub>3</sub>COOH)", "ইথাইল ইথানোয়েট (CH<sub>3</sub>COOC<sub>2</sub>H<sub>5</sub>)", "ডাইইথাইল ইথার (C<sub>2</sub>H<sub>5</sub>OC<sub>2</sub>H<sub>5</sub>)"], ans: 3, exp: "ব্যাখ্যা: ইথারগুলি সাধারণত LiAlH<sub>4</sub> দ্বারা বিজারিত হয় না, এটি অত্যন্ত নিষ্ক্রিয় যৌগ। অ্যালডিহাইড, অ্যাসিড এবং এস্টার বিজারিত হয়ে অ্যালকোহল দেয়।" }
+]
+},
+3: {
+name: 'Set 3', icon: '💧', topic: 'ভৌত ধর্ম এবং অম্লধর্মিতা (Physical Properties & Acidity)',
+questions: [
+{ q: "১. সম-আণবিক ভরবিশিষ্ট অ্যালকোহল ও ইথারের মধ্যে অ্যালকোহলের স্ফুটনাঙ্ক ইথার অপেক্ষা অনেক বেশি হয় কেন?", opts: ["অ্যালকোহল অধ্রুবীয়", "ইথার অণুগুলি আন্তরাণবিক হাইড্রোজেন বন্ধন তৈরি করে", "অ্যালকোহল অণুগুলি আন্তরাণবিক হাইড্রোজেন বন্ধনের মাধ্যমে সংযোজিত থাকে", "অ্যালকোহলগুলির ভ্যান ডার ওয়ালস বল বেশি"], ans: 2, exp: "ব্যাখ্যা: অ্যালকোহলের -OH গ্রুপের পোলারিটির কারণে অণুগুলি আন্তরাণবিক H-বন্ধন দ্বারা দৃঢ়ভাবে যুক্ত থাকে, যা ভাঙতে অতিরিক্ত তাপশক্তির প্রয়োজন হয়, তাই স্ফুটনাঙ্ক বেশি হয়।" },
+{ q: "২. ০-নাইট্রোফেনল এবং p-নাইট্রোফেনলের মিশ্রণকে পৃথক করার সবচেয়ে উপযুক্ত পদ্ধতি কোনটি?", opts: ["স্টিম পাতন", "কেলাসন", "বাষ্পীভবন", "ক্রোম্যাটোগ্রাফি"], ans: 0, exp: "ব্যাখ্যা: ০-নাইট্রোফেনলে অন্তঃআণবিক (intramolecular) H-বন্ধন থাকায় এটি স্টিম উদ্বায়ী (steam volatile)। কিন্তু p-নাইট্রোফেনলে আন্তরাণবিক H-বন্ধন থাকায় এর স্ফুটনাঙ্ক বেশি এবং এটি স্টিম উদ্বায়ী নয়। তাই স্টিম পাতন দ্বারা এদের পৃথক করা হয়।" },
+{ q: "৩. 1&deg;, 2&deg; এবং 3&deg; অ্যালকোহলের আম্লিকতার হ্রাসের সঠিক ক্রম কোনটি?", opts: ["1&deg; > 2&deg; > 3&deg;", "3&deg; > 2&deg; > 1&deg;", "2&deg; > 1&deg; > 3&deg;", "1&deg; > 3&deg; > 2&deg;"], ans: 0, exp: "ব্যাখ্যা: অ্যালকিল গ্রুপের +I প্রভাব কার্বনের মাধ্যমে অক্সিজেনের ওপর ইলেকট্রন ঘনত্ব বৃদ্ধি করে, ফলে O-H বন্ধন সহজে ভাঙে না। 3&deg; অ্যালকোহলে তিনটি +I গ্রুপ থাকায় আম্লিকতা সবচেয়ে কম হয়।" },
+{ q: "৪. ফেনল এবং অ্যালকোহলের মধ্যে কোনটি অধিক আম্লিক এবং কেন?", opts: ["অ্যালকোহল, কারণ অ্যালকক্সাইড আয়ন স্থিতিশীল", "ফেনল, কারণ ফেনক্সাইড আয়ন রেজোনেন্সের মাধ্যমে স্থিতিশীলতা লাভ করে", "উভয়ই সমান আম্লিক", "ফেনল, কারণ এটি অ্যারোমেটিক"], ans: 1, exp: "ব্যাখ্যা: ফেনল থেকে প্রোটন অপসারিত হয়ে যে ফেনক্সাইড আয়ন তৈরি হয়, তা বেঞ্জিন বলয়ের সাথে রেজোনেন্সের কারণে দারুণ স্থিতিশীলতা পায়, যা অ্যালকক্সাইডের ক্ষেত্রে সম্ভব নয়।" },
+{ q: "৫. পিকরিক অ্যাসিড (Picric acid) রাসায়নিকভাবে কী?", opts: ["2,4,6-ট্রাইব্রোমোফেনল", "2,4,6-ট্রাইনাইট্রোফেনল", "পেন্টাফ্লুরোফেনল", "০-নাইট্রোবেঞ্জোয়িক অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: 2,4,6-ট্রাইনাইট্রোফেনল-এ তিনটি শক্তিশালী ইলেকট্রন-আকর্ষী -NO<sub>2</sub> গ্রুপ থাকায় এটি অত্যন্ত আম্লিক হয় এবং একে পিকরিক অ্যাসিড বলা হয়।" },
+{ q: "৬. নীচের যৌগগুলির মধ্যে কোনটি সর্বাধিক আম্লিক?", opts: ["বেঞ্জাইল অ্যালকোহল", "সাইক্লোহেক্সানল", "ফেনল", "p-নাইট্রোফেনল"], ans: 3, exp: "ব্যাখ্যা: ফেনলের প্যারা অবস্থানে ইলেকট্রন-আকর্ষী -NO<sub>2</sub> গ্রুপ (যার -R এবং -I প্রভাব আছে) উপস্থিত থাকায় O-H বন্ধনের পোলারিটি বৃদ্ধি পায় এবং ফেনক্সাইড আয়ন বেশি স্থিতিশীল হয়।" },
+{ q: "৭. অ্যালকোহলের জলে দ্রাব্যতার কারণ কী?", opts: ["এর সমযোজী চরিত্র", "জলের সাথে আন্তরাণবিক হাইড্রোজেন বন্ধন গঠন", "এর কম আণবিক ভর", "এর উদ্বায়িতা"], ans: 1, exp: "ব্যাখ্যা: অ্যালকোহল অণুর -OH গ্রুপ জলের অণুর সাথে হাইড্রোজেন বন্ধন গঠন করতে পারে, তাই নিম্ন আণবিক ভরবিশিষ্ট অ্যালকোহলগুলি জলে অত্যন্ত দ্রাব্য।" },
+{ q: "৮. p-মিথক্সিফেনল, ফেনল এবং p-নাইট্রোফেনল - এই তিনটির আম্লিকতা হ্রাসের সঠিক ক্রম কোনটি?", opts: ["p-নাইট্রোফেনল > ফেনল > p-মিথক্সিফেনল", "p-মিথক্সিফেনল > ফেনল > p-নাইট্রোফেনল", "ফেনল > p-নাইট্রোফেনল > p-মিথক্সিফেনল", "p-নাইট্রোফেনল > p-মিথক্সিফেনল > ফেনল"], ans: 0, exp: "ব্যাখ্যা: ইলেকট্রন-আকর্ষী -NO<sub>2</sub> গ্রুপ আম্লিকতা বৃদ্ধি করে, অন্যদিকে ইলেকট্রন-দাতা -OCH<sub>3</sub> গ্রুপ (যাহার +R প্রভাব আছে) আম্লিকতা হ্রাস করে।" },
+{ q: "৯. সোডিয়াম ধাতুর সাথে বিক্রিয়ায় ইথানল কী গ্যাস উৎপন্ন করে?", opts: ["অক্সিজেন", "হাইড্রোজেন", "কার্বন ডাইঅক্সাইড", "মিথেন"], ans: 1, exp: "ব্যাখ্যা: অ্যালকোহলের আম্লিক হাইড্রোজেনের কারণে এটি সক্রিয় ধাতু যেমন সোডিয়ামের সাথে বিক্রিয়া করে অ্যালকক্সাইড (সোডিয়াম ইথক্সাইড) এবং হাইড্রোজেন (H<sub>2</sub>) গ্যাস উৎপন্ন করে।" },
+{ q: "১০. 1-প্রোপানল, 2-বিউটানল, 1-বিউটানল এবং 1-পেন্টানল এর স্ফুটনাঙ্কের ঊর্ধ্বক্রম কোনটি?", opts: ["1-প্রোপানল < 2-বিউটানল < 1-বিউটানল < 1-পেন্টানল", "1-প্রোপানল < 1-বিউটানল < 2-বিউটানল < 1-পেন্টানল", "1-পেন্টানল < 1-বিউটানল < 2-বিউটানল < 1-প্রোপানল", "2-বিউটানল < 1-প্রোপানল < 1-বিউটানল < 1-পেন্টানল"], ans: 0, exp: "ব্যাখ্যা: আণবিক ভর বৃদ্ধির সাথে স্ফুটনাঙ্ক বাড়ে। আবার সমাবয়বীদের মধ্যে পার্শ্বশাখা থাকলে পৃষ্ঠতলের ক্ষেত্রফল কমে, ফলে ভ্যান ডার ওয়ালস বল ও স্ফুটনাঙ্ক কমে। তাই 2-বিউটানল < 1-বিউটানল।" },
+{ q: "১১. ফেনল জলীয় NaOH দ্রবণে দ্রবীভূত হয়, কিন্তু অ্যালকোহল দ্রবীভূত হয় না কেন?", opts: ["অ্যালকোহল অধ্রুবীয়", "ফেনল অ্যালকোহল অপেক্ষা অধিক আম্লিক", "ফেনল একটি অ্যারোমেটিক যৌগ", "অ্যালকোহলের ঘনত্ব বেশি"], ans: 1, exp: "ব্যাখ্যা: ফেনলের আম্লিকতা জলের থেকে বেশি হওয়ায় এটি তীব্র ক্ষার NaOH এর সাথে বিক্রিয়া করে দ্রাব্য সোডিয়াম ফেনক্সাইড গঠন করে। কিন্তু অ্যালকোহল জলের চেয়েও কম আম্লিক হওয়ায় বিক্রিয়া করে না।" },
+{ q: "১২. মিথানল এবং ফেনলের মধ্যে কোনটি বেশি আম্লিক?", opts: ["ফেনল", "মিথানল", "উভয়ই সমান আম্লিক", "কোনোটিই আম্লিক নয়"], ans: 0, exp: "ব্যাখ্যা: ফেনক্সাইড আয়নের রেজোনেন্স স্থিতিশীলতার কারণে ফেনলের pK<sub>a</sub> মান প্রায় 10, যেখানে মিথানলের pK<sub>a</sub> 15.5। তাই ফেনল অনেক বেশি আম্লিক।" },
+{ q: "১৩. 2,6-ডাই-টার্ট-বিউটাইলফেনলের আম্লিকতা সাধারণ ফেনল অপেক্ষা অনেক কম কেন?", opts: ["টার্ট-বিউটাইল গ্রুপের ইলেকট্রন আকর্ষী ক্ষমতার জন্য", "অণুটির রেজোনেন্স নষ্ট হওয়ার জন্য", "স্টেরিক বাধার কারণে অক্সিজেনের নিঃসঙ্গ ইলেকট্রন জোড়ের ডিলোকালাইজেশন ব্যাহত হওয়ার জন্য", "অ্যারোমেটিসিটি নষ্ট হওয়ার জন্য"], ans: 2, exp: "ব্যাখ্যা: দুটি বিশাল টার্ট-বিউটাইল গ্রুপের উপস্থিতিতে -OH গ্রুপের অক্সিজেন পরমাণু বলয়ের সাথে একই তলে থাকতে পারে না, ফলে রেজোনেন্স বাধা পায় এবং আম্লিকতা কমে যায়।" },
+{ q: "১৪. কার্বন-অক্সিজেন বন্ধন দৈর্ঘ্য (C-O) ফেনলে মিথানল অপেক্ষা ছোট কেন?", opts: ["কার্বনের sp<sup>2</sup> সংকরায়ণ এবং আংশিক দ্বি-বন্ধন চরিত্রের জন্য", "ফেনলের বড় আকারের জন্য", "কার্বনের sp<sup>3</sup> সংকরায়ণের জন্য", "হাইড্রোজেন বন্ধনের জন্য"], ans: 0, exp: "ব্যাখ্যা: ফেনলে অক্সিজেন sp<sup>2</sup> কার্বনের সাথে যুক্ত এবং লোন-পেয়ার বলয়ের সাথে রেজোনেন্সে অংশ নেওয়ায় C-O বন্ধনে আংশিক দ্বি-বন্ধন চরিত্র আসে, ফলে বন্ধন-দৈর্ঘ্য ছোট হয়।" },
+{ q: "১৫. নীচের কোন যৌগটি নীল লিটমাসকে লাল করে এবং ক্ষার দ্রবণে দ্রবীভূত হয়?", opts: ["CH<sub>3</sub>CH<sub>2</sub>OH", "C<sub>6</sub>H<sub>5</sub>OCH<sub>3</sub>", "C<sub>6</sub>H<sub>5</sub>OH (ফেনল)", "CH<sub>3</sub>OCH<sub>3</sub>"], ans: 2, exp: "ব্যাখ্যা: ফেনল মৃদু আম্লিক প্রকৃতির হওয়ায় এটি নীল লিটমাসকে লাল করে এবং ক্ষার (যেমন NaOH) দ্রবণে দ্রবীভূত হয়ে লবণ তৈরি করে।" }
+]
+},
+4: {
+name: 'Set 4', icon: '⚗️', topic: 'অ্যালকোহলের রাসায়নিক বিক্রিয়া (Chemical Reactions of Alcohols)',
+questions: [
+{ q: "১. লুকাস বিকারক (Lucas Reagent) কী?", opts: ["লঘু HCl এবং অনার্দ্র ZnCl<sub>2</sub> এর মিশ্রণ", "গাঢ় HCl এবং অনার্দ্র ZnCl<sub>2</sub> এর মিশ্রণ", "গাঢ় HNO<sub>3</sub> এবং H<sub>2</sub>SO<sub>4</sub> এর মিশ্রণ", "AgNO<sub>3</sub> এবং NH<sub>4</sub>OH এর মিশ্রণ"], ans: 1, exp: "ব্যাখ্যা: 1&deg;, 2&deg; এবং 3&deg; অ্যালকোহলের মধ্যে পার্থক্য নির্ণয়ের জন্য সমতুল্যাঙ্ক পরিমাণ গাঢ় HCl এবং অনার্দ্র ZnCl<sub>2</sub>-এর মিশ্রণকে লুকাস বিকারক হিসেবে ব্যবহার করা হয়।" },
+{ q: "২. লুকাস পরীক্ষায় কোন অ্যালকোহলটি তৎক্ষণাৎ ঘোলাটে দ্রবণ তৈরি করে?", opts: ["1&deg; অ্যালকোহল", "2&deg; অ্যালকোহল", "3&deg; অ্যালকোহল", "মিথানল"], ans: 2, exp: "ব্যাখ্যা: লুকাস পরীক্ষা S<sub>N</sub>1 মেকানিজমে ঘটে। 3&deg; অ্যালকোহল থেকে সবচেয়ে স্থিতিশীল 3&deg; কার্বোক্যাটায়ন তৈরি হয় বলে এটি অতি দ্রুত বিক্রিয়া করে অদ্রাব্য অ্যালকিল ক্লোরাইড তৈরি করে যা দ্রবণকে তৎক্ষণাৎ ঘোলাটে করে।" },
+{ q: "৩. অ্যালকোহলের নিরুদন (Dehydration) ঘটিয়ে অ্যালকিন প্রস্তুত করার ক্ষেত্রে অ্যালকোহলগুলির সক্রিয়তার সঠিক ক্রম কোনটি?", opts: ["1&deg; > 2&deg; > 3&deg;", "3&deg; > 2&deg; > 1&deg;", "2&deg; > 3&deg; > 1&deg;", "1&deg; > 3&deg; > 2&deg;"], ans: 1, exp: "ব্যাখ্যা: নিরুদন বিক্রিয়াটি E1 পথে কার্বোক্যাটায়ন গঠনের মাধ্যমে ঘটে। যেহেতু কার্বোক্যাটায়নের স্থায়িত্ব 3&deg; > 2&deg; > 1&deg;, তাই নিরুদনের হারও একই ক্রম অনুসরণ করে।" },
+{ q: "৪. 573 K তাপমাত্রায় উত্তপ্ত কপার (Cu) চূর্ণের ওপর দিয়ে 2&deg; অ্যালকোহলের বাষ্প চালনা করলে কী উৎপন্ন হয়?", opts: ["অ্যালডিহাইড", "কার্বক্সিলিক অ্যাসিড", "কিটোন", "অ্যালকিন"], ans: 2, exp: "ব্যাখ্যা: উত্তপ্ত কপারের উপস্থিতিতে 1&deg; অ্যালকোহল ডিহাইড্রোজিনেশন হয়ে অ্যালডিহাইড দেয়, কিন্তু 2&deg; অ্যালকোহল কিটোন উৎপন্ন করে।" },
+{ q: "৫. উত্তপ্ত কপার (Cu, 573 K) চূর্ণের ওপর দিয়ে 3&deg; অ্যালকোহলের বাষ্প চালনা করলে কী উৎপন্ন হবে?", opts: ["কিটোন", "অ্যালকিন", "অ্যালডিহাইড", "কার্বক্সিলিক অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: 3&deg; অ্যালকোহলে &alpha;-হাইড্রোজেন না থাকায় ডিহাইড্রোজিনেশন ঘটে না, পরিবর্তে এর নিরুদন (dehydration) ঘটে এবং অ্যালকিন উৎপন্ন হয়।" },
+{ q: "৬. আয়োডোফর্ম পরীক্ষা (Iodoform test) দ্বারা নিচের কোন অ্যালকোহলটিকে শনাক্ত করা যায়?", opts: ["মিথানল", "1-প্রোপানল", "2-প্রোপানল", "1-বিউটানল"], ans: 2, exp: "ব্যাখ্যা: যে অ্যালকোহলে CH<sub>3</sub>CH(OH)- গ্রুপ বর্তমান থাকে, সেটি ক্ষারীয় আয়োডিন দ্রবণের সাথে বিক্রিয়া করে আয়োডোফর্মের (CHI<sub>3</sub>) হলুদ অধঃক্ষেপ দেয়। 2-প্রোপানলে এই গ্রুপটি আছে।" },
+{ q: "৭. 3-মিথাইলবিউটান-2-অল এর অ্যাসিড-অনুঘটকীয় নিরুদনের ফলে মুখ্য বিক্রিয়াজাত পদার্থ হিসেবে কী উৎপন্ন হয়?", opts: ["3-মিথাইলবিউট-1-ইন", "2-মিথাইলবিউট-2-ইন", "2-মিথাইলবিউট-1-ইন", "আইসোপেন্টেন"], ans: 1, exp: "ব্যাখ্যা: প্রথমে 2&deg; কার্বোক্যাটায়ন গঠিত হয়, যা 1,2-হাইড্রাইড শিফটের মাধ্যমে অধিক স্থিতিশীল 3&deg; কার্বোক্যাটায়নে পরিণত হয়। এরপর প্রোটন অপসারিত হয়ে সেটজেফ প্রোডাক্ট 2-মিথাইলবিউট-2-ইন তৈরি করে।" },
+{ q: "৮. ইথানলকে গাঢ় H<sub>2</sub>SO<sub>4</sub> সহযোগে 140&deg;C তাপমাত্রায় উত্তপ্ত করলে কী উৎপন্ন হয়?", opts: ["ইথিলিন", "ডাইইথাইল ইথার", "ইথেন", "ইথান্যাল"], ans: 1, exp: "ব্যাখ্যা: 140&deg;C তাপমাত্রায় অতিরিক্ত ইথানলের উপস্থিতিতে আন্তরাণবিক নিরুদন ঘটে এবং ডাইইথাইল ইথার উৎপন্ন হয়। 170&deg;C এ ইথিলিন তৈরি হয়।" },
+{ q: "৯. অ্যালকোহলের সাথে PCl<sub>5</sub> এর বিক্রিয়ায় উপজাত হিসেবে কোন গ্যাসটি নির্গত হয়?", opts: ["Cl<sub>2</sub>", "SO<sub>2</sub>", "HCl", "POCl<sub>3</sub>"], ans: 2, exp: "ব্যাখ্যা: R-OH + PCl<sub>5</sub> &rarr; R-Cl + POCl<sub>3</sub> + HCl বিক্রিয়ায় হাইড্রোজেন ক্লোরাইড গ্যাস এবং ফসফরাস অক্সিক্লোরাইড উৎপন্ন হয়।" },
+{ q: "১০. ভিক্টর মেয়ার (Victor Meyer) পরীক্ষায় 1&deg; অ্যালকোহল কোন বর্ণ প্রদান করে?", opts: ["নীল", "বর্ণহীন", "লাল", "সবুজ"], ans: 2, exp: "ব্যাখ্যা: ভিক্টর মেয়ার পরীক্ষায় 1&deg; অ্যালকোহল লাল বর্ণ, 2&deg; অ্যালকোহল নীল বর্ণ প্রদান করে এবং 3&deg; অ্যালকোহল বর্ণহীন থাকে।" },
+{ q: "১১. একটি জৈব যৌগ CH<sub>3</sub>MgI-এর সাথে বিক্রিয়ায় STP-তে 44.8 লিটার মিথেন (CH<sub>4</sub>) গ্যাস উৎপন্ন করে। এর থেকে কী প্রমাণিত হয়?", opts: ["যৌগটিতে দুটি সক্রিয় হাইড্রোজেন (OH গ্রুপ) আছে", "যৌগটিতে একটি সক্রিয় হাইড্রোজেন আছে", "যৌগটি একটি কিটোন", "যৌগটি একটি অ্যালকিন"], ans: 0, exp: "ব্যাখ্যা: 1 মোল -OH গ্রুপ 1 মোল (22.4 লিটার) মিথেন গ্যাস দেয়। যেহেতু 44.8 লিটার (2 মোল) গ্যাস উৎপন্ন হয়েছে, তাই যৌগটিতে 2টি -OH গ্রুপ বা সক্রিয় হাইড্রোজেন বর্তমান।" },
+{ q: "১২. ক্রোমিক অ্যাসিড পরীক্ষায় (K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> / H<sub>2</sub>SO<sub>4</sub>) 1&deg; এবং 2&deg; অ্যালকোহল জারিত হলে দ্রবণের কমলা বর্ণ কিসে পরিবর্তিত হয়?", opts: ["লাল", "নীল", "বর্ণহীন", "নীলাভ-সবুজ (Green)"], ans: 3, exp: "ব্যাখ্যা: অ্যালকোহল নিজে জারিত হয় এবং ডাইক্রোমেটকে বিজারিত করে Cr<sup>3+</sup> আয়নে পরিণত করে, যার ফলে দ্রবণের বর্ণ কমলা থেকে নীলাভ-সবুজ হয়ে যায়।" },
+{ q: "১৩. অ্যালকোহল এবং কার্বক্সিলিক অ্যাসিডের বিক্রিয়ায় এস্টার তৈরির বিক্রিয়াটিকে (Esterification) ত্বরান্বিত করার জন্য কোনটি ব্যবহার করা হয়?", opts: ["লঘু NaOH", "গাঢ় H<sub>2</sub>SO<sub>4</sub>", "LiAlH<sub>4</sub>", "শুষ্ক ইথার"], ans: 1, exp: "ব্যাখ্যা: এস্টারিফিকেশন বিক্রিয়া একটি উভমুখী বিক্রিয়া। গাঢ় H<sub>2</sub>SO<sub>4</sub> অনুঘটক ও নিরুদক হিসেবে কাজ করে উৎপন্ন জলকে শোষণ করে, ফলে বিক্রিয়াটি সম্মুখ দিকে অগ্রসর হয়।" },
+{ q: "১৪. 1-মিথাইলসাইক্লোহেক্সানলের অ্যাসিড অনুঘটকীয় নিরুদনের ফলে উৎপন্ন মুখ্য অ্যালকিনটি কী?", opts: ["1-মিথাইলসাইক্লোহেক্সেন", "1-মিথিলিনসাইক্লোহেক্সেন", "1-মিথাইলসাইক্লোহেক্সিন", "সাইক্লোহেক্সিন"], ans: 2, exp: "ব্যাখ্যা: নিরুদনের ফলে সেটজেফ নিয়ম অনুযায়ী বলয়ের ভেতরের দ্বিবন্ধন যুক্ত অধিক স্থিতিশীল 1-মিথাইলসাইক্লোহেক্সিন (Major) উৎপন্ন হয়।" },
+{ q: "১৫. ইথানল এবং মিথানলের মধ্যে পার্থক্য নির্ণয় করার জন্য কোন পরীক্ষাটি সবচেয়ে উপযুক্ত?", opts: ["লুকাস পরীক্ষা", "ফেরিক ক্লোরাইড পরীক্ষা", "আয়োডোফর্ম পরীক্ষা", "ব্রোমিন জল পরীক্ষা"], ans: 2, exp: "ব্যাখ্যা: ইথানলে CH<sub>3</sub>-CH(OH)- গ্রুপ থাকায় এটি আয়োডোফর্ম বিক্রিয়ায় হলুদ অধঃক্ষেপ দেয়, কিন্তু মিথানল এই পরীক্ষায় সাড়া দেয় না।" }
+]
+},
+5: {
+name: 'Set 5', icon: '🔬', topic: 'ফেনলের রাসায়নিক বিক্রিয়া (Chemical Reactions of Phenols)',
+questions: [
+{ q: "১. ফেনলকে ক্লোরোফর্ম ও জলীয় NaOH সহযোগে উত্তপ্ত করলে বিক্রিয়ার পর অম্লায়িত করলে কী পাওয়া যায়?", opts: ["বেঞ্জোয়িক অ্যাসিড", "স্যালিসাইলিক অ্যাসিড", "স্যালিসাইলঅ্যালডিহাইড", "পিকরিক অ্যাসিড"], ans: 2, exp: "ব্যাখ্যা: এই বিক্রিয়াটি হলো রাইমার-টিম্যান (Reimer-Tiemann) বিক্রিয়া, যেখানে ফেনল থেকে স্যালিসাইলঅ্যালডিহাইড উৎপন্ন হয়।" },
+{ q: "২. রাইমার-টিম্যান বিক্রিয়ায় আক্রমণকারী ইলেকট্রোফাইল কোনটি?", opts: ["CCl<sub>3</sub><sup>+</sup>", ":CCl<sub>2</sub> (ডাইক্লোরোকার্বিন)", "CHCl<sub>2</sub><sup>+</sup>", "CO<sub>2</sub>"], ans: 1, exp: "ব্যাখ্যা: ক্লোরোফর্ম এবং ক্ষারের বিক্রিয়ায় অন্তর্বর্তী ইলেকট্রোফাইল হিসেবে ডাইক্লোরোকার্বিন (:CCl<sub>2</sub>) উৎপন্ন হয় যা ফেনক্সাইড আয়নে আক্রমণ করে।" },
+{ q: "৩. কোলবে-স্মিট (Kolbe-Schmitt) বিক্রিয়ায় সোডিয়াম ফেনক্সাইডকে CO<sub>2</sub> সহ উত্তপ্ত করে অম্লায়িত করলে কী উৎপন্ন হয়?", opts: ["স্যালিসাইলিক অ্যাসিড", "স্যালিসাইলঅ্যালডিহাইড", "বেঞ্জোয়িক অ্যাসিড", "সিনামিক অ্যাসিড"], ans: 0, exp: "ব্যাখ্যা: সোডিয়াম ফেনক্সাইডের সাথে CO<sub>2</sub> এর 4-7 atm চাপ এবং 120&deg;C তাপমাত্রায় বিক্রিয়ার পর অম্লায়িত করলে স্যালিসাইলিক অ্যাসিড পাওয়া যায়।" },
+{ q: "৪. অ্যাসপিরিন (Aspirin) রাসায়নিকভাবে কোনটি?", opts: ["মিথাইল স্যালিসাইলেট", "স্যালিসাইলিক অ্যাসিড", "অ্যাসিটাইলস্যালিসাইলিক অ্যাসিড", "ফিনাইল স্যালিসাইলেট"], ans: 2, exp: "ব্যাখ্যা: স্যালিসাইলিক অ্যাসিডকে অ্যাসিটিক অ্যানহাইড্রাইড ও গাঢ় H<sub>2</sub>SO<sub>4</sub> দ্বারা অ্যাসিটাইলেশন করলে অ্যাসিটাইলস্যালিসাইলিক অ্যাসিড উৎপন্ন হয়, যা অ্যাসপিরিন নামে পরিচিত।" },
+{ q: "৫. ফেনলের জলীয় দ্রবণে ব্রোমিন-জল (Br<sub>2</sub>/H<sub>2</sub>O) যোগ করলে কী ঘটে?", opts: ["০-ব্রোমোফেনল উৎপন্ন হয়", "p-ব্রোমোফেনল উৎপন্ন হয়", "2,4,6-ট্রাইব্রোমোফেনলের সাদা অধঃক্ষেপ পড়ে", "কোনো বিক্রিয়া হয় না"], ans: 2, exp: "ব্যাখ্যা: ফেনলের বলয় অত্যন্ত সক্রিয় হওয়ায় পোলার দ্রাবক জলে ব্রোমিনের সাথে বিক্রিয়া করে তিনটি ব্রোমিন পরমাণু বলয়ে যুক্ত হয় এবং 2,4,6-ট্রাইব্রোমোফেনল তৈরি করে।" },
+{ q: "৬. ফেনলের সাথে কম তাপমাত্রায় (0&deg;C) অধ্রুবীয় দ্রাবক CS<sub>2</sub>-এ দ্রবীভূত ব্রোমিনের বিক্রিয়ায় কী উৎপন্ন হয়?", opts: ["2,4,6-ট্রাইব্রোমোফেনল", "শুধুমাত্র মেটা-ব্রোমোফেনল", "অর্থো- এবং প্যারা-ব্রোমোফেনলের মিশ্রণ", "বেঞ্জাইল ব্রোমাইড"], ans: 2, exp: "ব্যাখ্যা: অধ্রুবীয় দ্রাবকে ফেনলের আয়নায়ন ঘটে না, তাই বলয়ের সক্রিয়তা কম থাকে এবং মনোব্রোমিনেশন ঘটে অর্থো ও প্যারা-ব্রোমোফেনল তৈরি হয় (প্যারা-আইসোমার মুখ্য হয়)।" },
+{ q: "৭. ফেনলকে জিংক (Zn) চূর্ণের সাথে মিশিয়ে পাতিত (distillation) করলে কী উৎপন্ন হয়?", opts: ["বেঞ্জিন", "টলুইন", "সাইক্লোহেক্সানল", "অ্যানিসোল"], ans: 0, exp: "ব্যাখ্যা: ফেনলকে জিংক চূর্ণের সাথে উত্তপ্ত করলে এটি বিজারিত হয়ে বেঞ্জিনে পরিণত হয় এবং উপজাত হিসেবে ZnO তৈরি হয়।" },
+{ q: "৮. ফেনলের একটি গুরুত্বপূর্ণ শনাক্তকরণ পরীক্ষা হলো প্রশম FeCl<sub>3</sub> দ্রবণ পরীক্ষা। এই পরীক্ষায় ফেনল কী বর্ণ প্রদান করে?", opts: ["লাল", "নীল", "বেগুনি (Violet)", "সবুজ"], ans: 2, exp: "ব্যাখ্যা: ফেনলের জলীয় বা অ্যালকোহলীয় দ্রবণে কয়েক ফোঁটা প্রশম FeCl<sub>3</sub> দ্রবণ যোগ করলে একটি জটিল যৌগ গঠনের কারণে দ্রবণটি বেগুনি বর্ণ ধারণ করে।" },
+{ q: "৯. ফেনলকে ক্রোমিক অ্যাসিড (Na<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> / H<sub>2</sub>SO<sub>4</sub>) দ্বারা জারিত করলে কী উৎপন্ন হয়?", opts: ["বেঞ্জোয়িক অ্যাসিড", "p-বেঞ্জোকুইনোন", "ক্যাটেকল", "কুইনোল"], ans: 1, exp: "ব্যাখ্যা: ফেনল সহজেই জারিত হয়ে একটি কনজুগেটেড ডাইকিটোন তৈরি করে, যা p-বেঞ্জোকুইনোন নামে পরিচিত।" },
+{ q: "১০. ইলেকট্রোফিলিক অ্যারোমেটিক প্রতিস্থাপন বিক্রিয়ায় ফেনলের -OH গ্রুপটি কী রূপ নির্দেশক হিসেবে কাজ করে?", opts: ["মেটা-নির্দেশক", "অর্থো- এবং প্যারা-নির্দেশক", "বলয় নিষ্ক্রিয়কারী", "কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: অক্সিজেনের নিঃসঙ্গ ইলেকট্রন জোড় বলয়ের সাথে রেজোনেন্সে অংশ নেওয়ায় অর্থো ও প্যারা অবস্থানে ইলেকট্রন ঘনত্ব বৃদ্ধি পায়, তাই এটি অর্থো-প্যারা নির্দেশক এবং বলয় সক্রিয়কারী।" },
+{ q: "১১. বেঞ্জিন ডায়াজোনিয়াম ক্লোরাইডের সাথে ক্ষারীয় মাধ্যমে ফেনলের বিক্রিয়াকে কী বলা হয় এবং এতে কী উৎপন্ন হয়?", opts: ["রাইমার-টিম্যান বিক্রিয়া, স্যালিসাইলিক অ্যাসিড", "কাপলিং বিক্রিয়া, p-হাইড্রক্সিঅ্যাজোবেঞ্জিন", "ডাউ পদ্ধতি, বেঞ্জিন", "স্যান্ডমায়ার বিক্রিয়া, ক্লোরোবেঞ্জিন"], ans: 1, exp: "ব্যাখ্যা: মৃদু ক্ষারীয় মাধ্যমে (pH 9-10) ফেনলের সাথে ডায়াজোনিয়াম লবণের কাপলিং ঘটে কমলা-লাল বর্ণের p-হাইড্রক্সিঅ্যাজোবেঞ্জিন রঞ্জক উৎপন্ন হয়।" },
+{ q: "১২. গাঢ় HNO<sub>3</sub> এবং গাঢ় H<sub>2</sub>SO<sub>4</sub> এর মিশ্রণ দ্বারা ফেনলের সরাসরি নাইট্রেশন করে ভালো ফলনে পিকরিক অ্যাসিড পাওয়া যায় না কেন?", opts: ["ফেনল নাইট্রিক অ্যাসিড দ্বারা সহজেই জারিত হয়ে যায়", "বিক্রিয়াটি অত্যন্ত ধীর গতির", "ফেনল বলয় নিষ্ক্রিয় হয়ে যায়", "মেটা-নাইট্রোফেনল তৈরি হয়"], ans: 0, exp: "ব্যাখ্যা: ফেনল বলয় অত্যন্ত সক্রিয় হওয়ায় তীব্র জারক গাঢ় HNO<sub>3</sub> দ্বারা এটি সহজেই জারিত হয়ে যায়। তাই সরাসরি নাইট্রেশনে পিকরিক অ্যাসিডের ফলন খুব কম হয়।" },
+{ q: "১৩. ফেনলের সাথে ডায়াজোমিথেন (CH<sub>2</sub>N<sub>2</sub>) এর বিক্রিয়ায় কী উৎপন্ন হয়?", opts: ["ডাইমিথাইল ইথার", "বেঞ্জাইল অ্যালকোহল", "অ্যানিসোল (C<sub>6</sub>H<sub>5</sub>OCH<sub>3</sub>)", "টলুইন"], ans: 2, exp: "ব্যাখ্যা: ফেনলের আম্লিক হাইড্রোজেনের উপস্থিতিতে ডায়াজোমিথেনের বিক্রিয়ায় মিথিলেশন ঘটে এবং অ্যানিসোল (মিথক্সিবেঞ্জিন) উৎপন্ন হয়।" },
+{ q: "১৪. ফেনলকে কম তাপমাত্রায় (20&deg;C) গাঢ় H<sub>2</sub>SO<sub>4</sub> দ্বারা সালফোনেশন করলে প্রধানত কী উৎপন্ন হয়?", opts: ["p-ফেনলসালফোনিক অ্যাসিড", "০-ফেনলসালফোনিক অ্যাসিড", "পিকরিক অ্যাসিড", "মেটা-ফেনলসালফোনিক অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: কম তাপমাত্রায় কাইনেটিক্যালি নিয়ন্ত্রিত ০-ফেনলসালফোনিক অ্যাসিড প্রধানত উৎপন্ন হয়, কিন্তু 100&deg;C তাপমাত্রায় থার্মোডাইনামিক্যালি বেশি স্থিতিশীল p-ফেনলসালফোনিক অ্যাসিড উৎপন্ন হয়।" },
+{ q: "১৫. বিখ্যাত পলিমার 'ব্যাকেলাইট' (Bakelite) প্রস্তুতিতে ফেনলের সাথে আর কোন যৌগ ব্যবহার করা হয়?", opts: ["ফর্ম্যালডিহাইড (HCHO)", "অ্যাসিট্যালডিহাইড", "ইথানল", "বেঞ্জোয়িক অ্যাসিড"], ans: 0, exp: "ব্যাখ্যা: ফেনল এবং ফর্ম্যালডিহাইডের ঘনীভবন (condensation) পলিমারিজেশনের ফলে শক্তিশালী পলিমার ব্যাকেলাইট তৈরি হয়।" }
+]
+},
+6: {
+name: 'Set 6', icon: '⚙️', topic: 'ইথারসমূহ (Ethers: Preparation & Cleavage)',
+questions: [
+{ q: "১. উইলিয়ামসন ইথার সংশ্লেষণ বিক্রিয়াটি সাধারণত কোন ক্রিয়াকৌশলের মাধ্যমে ঘটে?", opts: ["S<sub>N</sub>1", "S<sub>N</sub>2", "E1", "E2"], ans: 1, exp: "ব্যাখ্যা: উইলিয়ামসন সংশ্লেষণে অ্যালকক্সাইড আয়ন অ্যালকিল হ্যালাইডের উপর S<sub>N</sub>2 আক্রমণ করে ইথার গঠন করে।" },
+{ q: "২. টার্ট-বিউটাইল ইথাইল ইথার প্রস্তুত করার জন্য সবচেয়ে উপযুক্ত বিকারক জোড় কোনটি?", opts: ["টার্ট-বিউটাইল ক্লোরাইড এবং সোডিয়াম ইথক্সাইড", "ইথাইল ক্লোরাইড এবং সোডিয়াম টার্ট-বিউটক্সাইড", "ইথানল এবং টার্ট-বিউটানল", "টার্ট-বিউটাইল অ্যালকোহল এবং ইথাইল ম্যাগনেশিয়াম ব্রোমাইড"], ans: 1, exp: "ব্যাখ্যা: S<sub>N</sub>2 বিক্রিয়া স্টেরিক বাধার প্রতি সংবেদনশীল। প্রাইমারি হ্যালাইড (ইথাইল ক্লোরাইড) নিলে S<sub>N</sub>2 আক্রমণ সহজে হয়। 3&deg; হ্যালাইড নিলে অপনয়ন হয়ে অ্যালকিন তৈরি হয়।" },
+{ q: "৩. ইথানলকে অতিরিক্ত গাঢ় H<sub>2</sub>SO<sub>4</sub> সহযোগে 170&deg;C এর পরিবর্তে 140&deg;C তাপমাত্রায় উত্তপ্ত করলে প্রধান বিক্রিয়াজাত পদার্থ কী হবে?", opts: ["ইথিলিন", "ইথেন", "ডাইইথাইল ইথার", "ইথান্যাল"], ans: 2, exp: "ব্যাখ্যা: 140&deg;C এ অতিরিক্ত অ্যালকোহলের উপস্থিতিতে আন্তরাণবিক নিরুদন ঘটে ইথার তৈরি হয়, আর 170&deg;C এ অন্তঃআণবিক নিরুদনে অ্যালকিন (ইথিলিন) হয়।" },
+{ q: "৪. ইথক্সিমিথেন বা ইথাইল মিথাইল ইথার (CH<sub>3</sub>-O-C<sub>2</sub>H<sub>5</sub>)-এর সাথে গাঢ় HI এর বিক্রিয়ায় (1:1 অনুপাত) কী উৎপন্ন হয়?", opts: ["মিথানল এবং ইথাইল আয়োডাইড", "ইথানল এবং মিথাইল আয়োডাইড (CH<sub>3</sub>I)", "মিথানল এবং ইথেন", "ইথানল এবং মিথেন"], ans: 1, exp: "ব্যাখ্যা: অপ্রতিসম প্রাইমারি বা সেকেন্ডারি ইথারের বিভাজন S<sub>N</sub>2 পথে ঘটে। আয়োডাইড আয়ন স্টেরিক বাধা এড়াতে ছোট অ্যালকিল গ্রুপে (মিথাইল) আক্রমণ করে মিথাইল আয়োডাইড ও ইথানল তৈরি করে।" },
+{ q: "৫. টার্ট-বিউটাইল মিথাইল ইথারের সাথে গাঢ় HI এর বিক্রিয়ায় কী উৎপন্ন হয়?", opts: ["টার্ট-বিউটাইল আয়োডাইড এবং মিথানল", "টার্ট-বিউটাইল অ্যালকোহল এবং মিথাইল আয়োডাইড", "আইসোবিউটিন এবং মিথানল", "মিথাইল আয়োডাইড এবং আইসোবিউটেন"], ans: 0, exp: "ব্যাখ্যা: ইথারে একটি 3&deg; অ্যালকিল গ্রুপ থাকলে বিভাজন S<sub>N</sub>1 পথে স্থিতিশীল 3&deg; কার্বোক্যাটায়নের মাধ্যমে ঘটে। তাই টার্ট-বিউটাইল গ্রুপ হ্যালাইডে এবং মিথাইল গ্রুপ অ্যালকোহলে পরিণত হয়।" },
+{ q: "৬. অ্যানিসোল (C<sub>6</sub>H<sub>5</sub>OCH<sub>3</sub>) এর সাথে গাঢ় HI এর বিক্রিয়ায় কী উৎপন্ন হয়?", opts: ["বেঞ্জিন এবং মিথাইল আয়োডাইড", "ফেনল এবং মিথাইল আয়োডাইড", "আয়োডোবেঞ্জিন এবং মিথানল", "আয়োডোবেঞ্জিন এবং মিথাইল আয়োডাইড"], ans: 1, exp: "ব্যাখ্যা: অ্যানিসোলে অ্যারাইল-অক্সিজেন বন্ধনে রেজোনেন্সের কারণে আংশিক দ্বি-বন্ধন চরিত্র থাকে, যা ভাঙা কঠিন। তাই অ্যালকিল-অক্সিজেন বন্ধন ভেঙে সর্বদা ফেনল এবং অ্যালকিল হ্যালাইড (CH<sub>3</sub>I) উৎপন্ন হয়।" },
+{ q: "৭. ইথারগুলি সাধারণত কোন প্রকৃতির দ্রাবক হিসেবে ব্যবহৃত হয়?", opts: ["প্রোটিক দ্রাবক", "পোলার অ্যাপ্রোটিক দ্রাবক", "নন-পোলার দ্রাবক", "তীব্র আম্লিক দ্রাবক"], ans: 1, exp: "ব্যাখ্যা: ইথারগুলি পোলার কিন্তু এদের কোনো আম্লিক প্রোটন (OH) নেই, তাই এরা পোলার অ্যাপ্রোটিক দ্রাবক (যেমন গ্রিগনার্ড বিকারক প্রস্তুতিতে ব্যবহৃত হয়)।" },
+{ q: "৮. অ্যানিসোলের ফ্রিডেল-ক্র্যাফ্টস অ্যালকাইলেশন বিক্রিয়ায় (অনার্দ্র AlCl<sub>3</sub> এবং CH<sub>3</sub>Cl) প্রধান বিক্রিয়াজাত পদার্থ কোনটি?", opts: ["2-মিথক্সিফেনল", "2-মিথক্সিটলুইন", "4-মিথক্সিটলুইন", "3-মিথক্সিটলুইন"], ans: 2, exp: "ব্যাখ্যা: -OCH<sub>3</sub> গ্রুপ অর্থো-প্যারা নির্দেশক। স্টেরিক বাধার কারণে প্যারা-আইসোমার (4-মিথক্সিটলুইন বা p-ক্রেসিল মিথাইল ইথার) মুখ্য বিক্রিয়াজাত পদার্থ হিসেবে উৎপন্ন হয়।" },
+{ q: "৯. ইথারগুলিকে দীর্ঘক্ষণ বায়ু ও আলোকের সংস্পর্শে রাখলে অত্যন্ত বিপজ্জনক কোন পদার্থটি তৈরি হয়?", opts: ["অ্যালডিহাইড", "কার্বক্সিলিক অ্যাসিড", "ইথার পারক্সাইড", "অ্যালকোহল"], ans: 2, exp: "ব্যাখ্যা: ইথার অক্সিজেনের উপস্থিতিতে স্বতঃজারণের ফলে বিস্ফোরক ইথার পারক্সাইড তৈরি করে। তাই ইথারকে রঙিন বোতলে অন্ধকারে রাখা হয়।" },
+{ q: "১০. ইথারে পারক্সাইডের উপস্থিতি দূর করার জন্য ইথারের সাথে কী যোগ করে ঝাঁকানো হয়?", opts: ["গাঢ় HNO<sub>3</sub>", "জলীয় KI বা FeSO<sub>4</sub> দ্রবণ", "NaOH", "ব্রোমিন-জল"], ans: 1, exp: "ব্যাখ্যা: KI বা FeSO<sub>4</sub> (বিজারক পদার্থ) যোগ করে ঝাঁকালে ইথারে উপস্থিত পারক্সাইড ধ্বংস হয়ে যায়।" },
+{ q: "১১. উইলিয়ামসন সংশ্লেষণ পদ্ধতিতে ডাই-টার্ট-বিউটাইল ইথার বা ডাইফিনাইল ইথার প্রস্তুত করা যায় না কেন?", opts: ["বিক্রিয়াটি অত্যন্ত তাপদায়ী", "স্টেরিক হিনড্রেন্স এবং বেঞ্জিন বলয়ের বিকর্ষণের কারণে S<sub>N</sub>2 আক্রমণ সম্ভব হয় না", "কার্বোক্যাটায়ন অস্থিতিশীল", "এরা জলে অদ্রাব্য"], ans: 1, exp: "ব্যাখ্যা: উইলিয়ামসন সংশ্লেষণ S<sub>N</sub>2 পথে ঘটে। 3&deg; হ্যালাইডে তীব্র স্টেরিক বাধা এবং অ্যারাইল হ্যালাইডে ইলেকট্রন মেঘের বিকর্ষণ ও C-X এর আংশিক দ্বিবন্ধন চরিত্রের কারণে S<sub>N</sub>2 আক্রমণ হয় না।" },
+{ q: "১২. ক্রাউন ইথার (Crown Ethers) সাধারণত কাদের সাথে কমপ্লেক্স গঠন করে?", opts: ["অ্যানায়নের সাথে", "ক্ষার ধাতুর ক্যাটায়নের সাথে (যেমন Li<sup>+</sup>, Na<sup>+</sup>, K<sup>+</sup>)", "নিষ্ক্রিয় গ্যাসের সাথে", "হ্যালোজেনের সাথে"], ans: 1, exp: "ব্যাখ্যা: ক্রাউন ইথারের গহ্বরের আকারের ওপর ভিত্তি করে এরা নির্দিষ্ট ক্ষার ধাতুর ক্যাটায়নকে আবদ্ধ করে স্থিতিশীল কমপ্লেক্স গঠন করে।" },
+{ q: "১৩. ইথার যৌগের অক্সিজেনে নিঃসঙ্গ ইলেকট্রন জোড় থাকায় এরা রাসায়নিকভাবে কেমন আচরণ করে?", opts: ["লুইস অ্যাসিড", "ব্রনস্টেড অ্যাসিড", "লুইস ক্ষারক (Base)", "বিজারক"], ans: 2, exp: "ব্যাখ্যা: ইথারের অক্সিজেন পরমাণুতে দু-জোড়া লোন-পেয়ার থাকায় এরা লুইস ক্ষারক হিসেবে কাজ করে এবং তীব্র অ্যাসিডের সাথে বিক্রিয়ায় অক্সোনিয়াম লবণ গঠন করে।" },
+{ q: "১৪. ডাইইথাইল ইথারে কার্বন-অক্সিজেন-কার্বন (C-O-C) বন্ধন কোণ প্রায় কত হয়?", opts: ["১০৯&deg;২৮'", "১১১.৭&deg;", "১২০&deg;", "১৮০&deg;"], ans: 1, exp: "ব্যাখ্যা: অ্যালকিল গ্রুপগুলির মধ্যে (দুটি ইথাইল গ্রুপ) স্টেরিক বিকর্ষণের কারণে ইথারে C-O-C বন্ধন কোণ (111.7&deg;) স্বাভাবিক চতুস্তলকীয় কোণ অপেক্ষা কিছুটা বড় হয়ে যায়।" },
+{ q: "১৫. সাধারণ ইথারের (R-O-R) ক্ষার (যেমন NaOH) দ্বারা বিভাজন না ঘটলেও, ইপক্সাইড (Epoxide/cyclic ether)-এর বিভাজন ক্ষার দ্বারা ঘটে কেন?", opts: ["ইপক্সাইড আম্লিক প্রকৃতির", "ইপক্সাইডের বলয়ের তীব্র কৌণিক পীড়ন (angle strain)-এর কারণে", "ইপক্সাইড সহজে জারিত হয়", "ইপক্সাইড জলে দ্রাব্য"], ans: 1, exp: "ব্যাখ্যা: ইপক্সাইডের 3-মেম্বার রিং-এ তীব্র কৌণিক পীড়ন থাকে। বিক্রিয়ার মাধ্যমে বলয় খুলে গিয়ে এটি পীড়ন মুক্ত হতে চায়, তাই লিভিং গ্রুপ নিকৃষ্ট হওয়া সত্ত্বেও সহজেই ক্ষার দ্বারা বিভাজিত হয়।" }
+]
+},
+7: {
+name: 'Set 7', icon: '🎯', topic: 'Semester Special - Conventional Type I',
+questions: [
+{ q: "১. অর্থো- ও প্যারা- নাইট্রোফেনলের 1:1 মিশ্রণকে পৃথক করার সবচেয়ে উপযুক্ত পদ্ধতিটি কী?", opts: ["বাষ্পীভবন", "স্টিম পাতন", "কেলাসন", "ক্রোম্যাটোগ্রাফি"], ans: 1, exp: "ব্যাখ্যা: ০-নাইট্রোফেনলে অন্তঃআণবিক হাইড্রোজেন বন্ধন থাকায় এটি স্টিম উদ্বায়ী। কিন্তু p-নাইট্রোফেনলে আন্তরাণবিক হাইড্রোজেন বন্ধন থাকায় এর স্ফুটনাঙ্ক বেশি এবং এটি স্টিম উদ্বায়ী নয়। তাই স্টিম পাতন দ্বারা এদের পৃথক করা যায়।" },
+{ q: "২. অ্যালকোহলকে গাঢ় H<sub>2</sub>SO<sub>4</sub> সহযোগে উত্তপ্ত করলে এর নিরুদন বা ডিহাইড্রেশন ঘটে। বিক্রিয়াটির প্রারম্ভিক ধাপ কোনটি?", opts: ["জল অপসারণ", "অ্যালকোহলের প্রোটনেশন", "এস্টার গঠন", "কার্বোক্যাটায়ন গঠন"], ans: 1, exp: "ব্যাখ্যা: নিরুদন বিক্রিয়াটি E1 পথে সম্পন্ন হয় যার প্রথম ধাপে অ্যালকোহলের অক্সিজেন পরমাণুর নিঃসঙ্গ ইলেকট্রন জোড় H<sup>+</sup> গ্রহণ করে প্রোটনেটেড অ্যালকোহল (অক্সোনিয়াম আয়ন) গঠন করে।" },
+{ q: "৩. C-OH বন্ধন-দৈর্ঘ্য বৃদ্ধির সঠিক ক্রমানুসার কোনটি?", opts: ["ফেনল < p-ইথক্সিফেনল < মিথানল", "ফেনল < মিথানল < p-ইথক্সিফেনল", "মিথানল < p-ইথক্সিফেনল < ফেনল", "মিথানল < ফেনল < p-ইথক্সিফেনল"], ans: 0, exp: "ব্যাখ্যা: ফেনলে অক্সিজেনের লোন পেয়ার রেজোনেন্সে অংশ নেওয়ায় আংশিক দ্বি-বন্ধন চরিত্র আসে। মিথানলে তা আসে না, তাই বন্ধন দীর্ঘ। p-ইথক্সিফেনলে +R প্রভাবের জন্য রেজোনেন্স সামান্য বাধাপ্রাপ্ত হয়, তাই এটি ফেনল ও মিথানলের মাঝে থাকে।" },
+{ q: "৪. মিথানল ঘটিত বিষক্রিয়ার মাত্রা হ্রাস করার জন্য মানবদেহে নীচের কোন্টি প্রয়োগ করা হয়?", opts: ["10% 1-প্রোপানল", "10% 2-প্রোপানল", "10% ইথানল", "10% টার্ট-বিউটাইল অ্যালকোহল"], ans: 2, exp: "ব্যাখ্যা: মিথানল শরীরে ফর্মালডিহাইড ও ফর্মিক অ্যাসিডে জারিত হয়ে বিষক্রিয়া করে। ইথানল ইনজেকশন হিসেবে দিলে তা অ্যালকোহল ডিহাইড্রোজিনেজ এনজাইমকে ব্যস্ত রাখে, ফলে মিথানল জারিত হতে পারে না এবং কিডনি দিয়ে বেরিয়ে যায়।" },
+{ q: "৫. নীচের কোন্ অ্যালকোহলটি সর্বাধিক অম্লধর্মী?", opts: ["FCH<sub>2</sub>CH<sub>2</sub>OH", "ClCH<sub>2</sub>CH<sub>2</sub>OH", "Cl<sub>2</sub>CHCH<sub>2</sub>OH", "(CH<sub>3</sub>)<sub>3</sub>COH"], ans: 2, exp: "ব্যাখ্যা: ইলেকট্রন-আকর্ষী (-I) গ্রুপ যত বেশি থাকে, O-H বন্ধনের পোলারিটি তত বাড়ে এবং অ্যালকক্সাইড আয়ন স্থিতিশীল হয়। এখানে দুটি ক্লোরিন পরমাণু থাকায় এর আম্লিকতা সবচেয়ে বেশি।" },
+{ q: "৬. নীচের জেম্-ডাইঅলগুলির মধ্যে কোন্টি স্থিতিশীল?", opts: ["CH<sub>3</sub>CH<sub>2</sub>C(OH)<sub>2</sub>CH<sub>3</sub>", "(CH<sub>3</sub>)<sub>2</sub>C(OH)<sub>2</sub>", "CH<sub>2</sub>(OH)<sub>2</sub>", "Cl<sub>3</sub>CCH(OH)<sub>2</sub>"], ans: 3, exp: "ব্যাখ্যা: সাধারণত একই কার্বনে দুটি -OH থাকলে তা অস্থিতিশীল হয়ে জল বেরিয়ে যায়। কিন্তু ক্লোরাল হাইড্রেট (Cl<sub>3</sub>CCH(OH)<sub>2</sub>)-এ থাকা তিনটি তীব্র ইলেকট্রন আকর্ষী ক্লোরিন পরমাণুর প্রভাবে এটি ব্যতিক্রমীভাবে স্থিতিশীল হয়।" },
+{ q: "৭. নীচের কোন্ বিক্রিয়াটিতে ডাইইথাইল ইথার উৎপন্ন হয় না?", opts: ["ইথানল ও গাঢ় H<sub>2</sub>SO<sub>4</sub> কে 140&deg;C এ উত্তপ্ত করলে", "সোডিয়াম ইথক্সাইড ও ইথাইল আয়োডাইডের বিক্রিয়ায়", "ইথানল ও গাঢ় H<sub>2</sub>SO<sub>4</sub> কে 170&deg;C এ উত্তপ্ত করলে", "ইথাইল আয়োডাইড ও শুষ্ক Ag<sub>2</sub>O এর বিক্রিয়ায়"], ans: 2, exp: "ব্যাখ্যা: 170&deg;C তাপমাত্রায় ইথানলের অন্তঃআণবিক নিরুদন ঘটে এবং ইথিলিন (CH<sub>2</sub>=CH<sub>2</sub>) উৎপন্ন হয়, ইথার নয়।" },
+{ q: "৮. 1-মিথাইলসাইক্লোহেক্সানলের অ্যাসিড অনুঘটকীয় নিরুদনের ফলে উৎপন্ন মুখ্য যৌগটি কী?", opts: ["1-মিথাইলসাইক্লোহেক্সেন", "1-মিথাইলসাইক্লোহেক্সিন", "1-সাইক্লোহেক্সাইলমিথানল", "1-মিথিলিনসাইক্লোহেক্সেন"], ans: 1, exp: "ব্যাখ্যা: সেটজেফ সূত্র অনুযায়ী, ডিহাইড্রেশনের ফলে অধিক প্রতিস্থাপিত তথা বলয়ের ভেতরের অধিক স্থিতিশীল অ্যালকিনটি (1-মিথাইলসাইক্লোহেক্সিন) মুখ্য প্রোডাক্ট হিসেবে উৎপন্ন হয়।" },
+{ q: "৯. কী প্রকার অ্যালকোহল লুকাস বিকারকের সঙ্গে সবচেয়ে দ্রুত বিক্রিয়া করে এবং কোন্ ক্রিয়াকৌশলের মাধ্যমে ঘটে?", opts: ["1&deg; অ্যালকোহল, S<sub>N</sub>2", "2&deg; অ্যালকোহল, S<sub>N</sub>1", "3&deg; অ্যালকোহল, S<sub>N</sub>2", "3&deg; অ্যালকোহল, S<sub>N</sub>1"], ans: 3, exp: "ব্যাখ্যা: লুকাস পরীক্ষা S<sub>N</sub>1 মেকানিজমে ঘটে। 3&deg; অ্যালকোহল সবচেয়ে স্থিতিশীল 3&deg; কার্বোক্যাটায়ন তৈরি করে বলে এটি লুকাস বিকারকের সাথে সবচেয়ে দ্রুত বিক্রিয়া করে।" },
+{ q: "১০. মিথাইলম্যাগনেশিয়াম আয়োডাইড (CH<sub>3</sub>MgI)-এর সঙ্গে কিটোনের বিক্রিয়ায় দ্রাবক হিসেবে ইথানল ব্যবহার করা যায় না কেন?", opts: ["ইথানলে CH<sub>3</sub>MgI দ্রবীভূত হয় না", "CH<sub>3</sub>MgI ইথানলের সঙ্গে বিক্রিয়ায় দ্রুত মিথেন উৎপন্ন করে", "ইথানলের সাথে বিক্রিয়ায় বিস্ফোরণ ঘটে", "ইথানল কিটোনকে বিজারিত করে"], ans: 1, exp: "ব্যাখ্যা: গ্রিগনার্ড বিকারক অত্যন্ত সক্রিয়। ইথানলে আম্লিক হাইড্রোজেন থাকায় CH<sub>3</sub>MgI তৎক্ষণাৎ তার সাথে বিক্রিয়া করে অ্যালকেন (মিথেন) উৎপন্ন করে।" },
+{ q: "১১. ফেনল নিউক্লিওফিলিক প্রতিস্থাপন বিক্রিয়ায় সহজে সাড়া দেয় না কারণ-", opts: ["ফেনলের আম্লিক প্রকৃতি", "C-OH বন্ধনের আংশিক দ্বি-বন্ধন চরিত্র", "C-C বন্ধনের আংশিক দ্বি-বন্ধন চরিত্র", "ফেনক্সাইড আয়নের অস্থিতিশীলতা"], ans: 1, exp: "ব্যাখ্যা: ফেনলে অক্সিজেনের লোন পেয়ার বেঞ্জিন বলয়ের সাথে রেজোনেন্সে অংশ নেওয়ায় C-O বন্ধনটি আংশিক দ্বি-বন্ধন চরিত্র লাভ করে এবং অত্যন্ত শক্তিশালী হয়, ফলে নিউক্লিওফাইল দ্বারা তা সহজে প্রতিস্থাপিত হয় না।" },
+{ q: "১২. CH<sub>3</sub>CH=CH-CHO-কে CH<sub>3</sub>CH=CH-CH<sub>2</sub>OH-এ পরিবর্তন করার জন্য সবচেয়ে কার্যকরী বিকারকটি হল-", opts: ["KMnO<sub>4</sub>", "H<sub>2</sub>/Pt", "NaBH<sub>4</sub>", "K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub>/H<sub>2</sub>SO<sub>4</sub>"], ans: 2, exp: "ব্যাখ্যা: সোডিয়াম বোরোহাইড্রাইড (NaBH<sub>4</sub>) একটি মৃদু বিজারক যা অ্যালডিহাইডকে অ্যালকোহলে বিজারিত করে কিন্তু অসম্পৃক্ত কার্বন-কার্বন দ্বি-বন্ধনকে (C=C) বিজারিত করতে পারে না।" },
+{ q: "১৩. নীচের কোল্টির সাহায্যে ফেনল ও বেঞ্ঝোয়িক অ্যাসিডের মধ্যে পার্থক্য করা যায়?", opts: ["NaHCO<sub>3</sub>-এর জলীয় দ্রবণ", "NaNO<sub>3</sub>-এর জলীয় দ্রবণ", "NaOH-এর জলীয় দ্রবণ", "অ্যালকোহলীয় KOH"], ans: 0, exp: "ব্যাখ্যা: বেঞ্জোয়িক অ্যাসিড কার্বনিক অ্যাসিডের চেয়ে শক্তিশালী হওয়ায় এটি NaHCO<sub>3</sub> কে বিয়োজিত করে বুদবুদ আকারে CO<sub>2</sub> গ্যাস মুক্ত করে। কিন্তু ফেনল দুর্বল অ্যাসিড হওয়ায় এই বিক্রিয়া দেয় না।" },
+{ q: "১৪. 23g সোডিয়াম মিথানল (CH<sub>3</sub>OH)-এর সঙ্গে বিক্রিয়ায় কী উৎপন্ন করে?", opts: ["1 মোল O<sub>2</sub>", "1 মোল H<sub>2</sub>", "1/2 মোল H<sub>2</sub>", "1 মোল CH<sub>4</sub>"], ans: 2, exp: "ব্যাখ্যা: 23g সোডিয়াম মানে 1 মোল Na। CH<sub>3</sub>OH + Na &rarr; CH<sub>3</sub>ONa + 1/2 H<sub>2</sub> বিক্রিয়া অনুযায়ী 1 মোল Na থেকে 1/2 মোল হাইড্রোজেন গ্যাস উৎপন্ন হয়।" },
+{ q: "১৫. স্যালিসাইলিক অ্যাসিড ও অ্যাসিটিক অ্যানহাইড্রাইডের মিশ্রণকে গাঢ় H<sub>2</sub>SO<sub>4</sub>-এর সঙ্গে উত্তপ্ত করলে কী উৎপন্ন হয়?", opts: ["স্যালল", "অ্যাসপিরিন", "অয়ল অফ উইন্টারগ্রিন", "প্যারাসিটামল"], ans: 1, exp: "ব্যাখ্যা: স্যালিসাইলিক অ্যাসিডের অ্যাসিটাইলেশনের ফলে অ্যাসিটাইল স্যালিসাইলিক অ্যাসিড বা অ্যাসপিরিন (Aspirin) তৈরি হয় যা একটি পরিচিত ব্যথানাশক ঔষধ।" }
+]
+},
+8: {
+name: 'Set 8', icon: '🔬', topic: 'Competitive & Advanced Level (JEE/NEET Scanner I)',
+questions: [
+{ q: "১. কোন্ অ্যালকোহলটি লুকাস বিকারকের সাথে অতি দ্রুত বিক্রিয়া করে? (NEET '24)", opts: ["1-বিউটানল", "2-বিউটানল", "2-মিথাইল-1-প্রোপানল", "2-মিথাইল-2-প্রোপানল"], ans: 3, exp: "ব্যাখ্যা: 2-মিথাইল-2-প্রোপানল হলো একটি 3&deg; অ্যালকোহল। এটি S<sub>N</sub>1 বিক্রিয়া পথে সর্বাধিক স্থিতিশীল 3&deg; কার্বোক্যাটায়ন তৈরি করে বলে লুকাস বিকারকের সাথে তৎক্ষণাৎ ঘোলাটে দ্রবণ দেয়।" },
+{ q: "২. অ্যানিসোল HI দ্বারা বিজারিত হয়ে কী উৎপন্ন করে? (NEET '20)", opts: ["বেঞ্জিন ও মিথানল", "ফেনল ও মিথাইল আয়োডাইড", "আয়োডোবেঞ্জিন ও মিথানল", "আয়োডোবেঞ্জিন ও মিথাইল আয়োডাইড"], ans: 1, exp: "ব্যাখ্যা: অ্যানিসোলে অ্যারাইল-অক্সিজেন বন্ধনে রেজোনেন্সের কারণে আংশিক দ্বি-বন্ধন চরিত্র থাকে যা ভাঙা কঠিন। তাই অ্যালকিল-অক্সিজেন বন্ধন ভেঙে সর্বদা ফেনল এবং মিথাইল হ্যালাইড (CH<sub>3</sub>I) উৎপন্ন হয়।" },
+{ q: "৩. 3ROH + PCl<sub>3</sub> &rarr; 3RCl + A ; ROH + PCl<sub>5</sub> &rarr; RCl + HCl + B ; প্রদত্ত বিক্রিয়া দুটিতে বিক্রিয়াজাত পদার্থ A ও B হল যথাক্রমে- (NEET '24)", opts: ["POCl<sub>3</sub>, H<sub>3</sub>PO<sub>3</sub>", "H<sub>3</sub>PO<sub>4</sub>, POCl<sub>3</sub>", "H<sub>3</sub>PO<sub>3</sub>, POCl<sub>3</sub>", "POCl<sub>3</sub>, H<sub>3</sub>PO<sub>4</sub>"], ans: 2, exp: "ব্যাখ্যা: PCl<sub>3</sub> এর সাথে অ্যালকোহলের বিক্রিয়ায় ফসফরাস অ্যাসিড (H<sub>3</sub>PO<sub>3</sub>) এবং PCl<sub>5</sub> এর সাথে বিক্রিয়ায় ফসফরাস অক্সিক্লোরাইড (POCl<sub>3</sub>) উপজাত পদার্থ হিসেবে তৈরি হয়।" },
+{ q: "৪. নীচের কোন্ বিক্রিয়াটি ইথানল উৎপন্ন করে না?", opts: ["CH<sub>3</sub>MgBr + HCHO এর পর আর্দ্রবিশ্লেষণ", "CH<sub>3</sub>CH<sub>2</sub>NH<sub>2</sub> + NaNO<sub>2</sub>/HCl", "CH<sub>3</sub>COOCH<sub>2</sub>CH<sub>3</sub> + LiAlH<sub>4</sub>", "প্রোপিনের অ্যাসিড-অনুঘটকীয় জলযোজন"], ans: 3, exp: "ব্যাখ্যা: প্রোপিনের (CH<sub>3</sub>CH=CH<sub>2</sub>) জলযোজনের ফলে মারকনিকফ নিয়মানুসারে 2-প্রোপানল (আইসোপ্রোপাইল অ্যালকোহল) তৈরি হয়, ইথানল নয়। বাকি পদ্ধতিগুলোতে ইথানল পাওয়া যায়।" },
+{ q: "৫. সোডিয়াম বেঞ্জিনসালফোনেটকে 350&deg;C তাপমাত্রায় NaOH সহযোগে উত্তপ্ত করার পর মিশ্রণটিকে অম্লায়িত করলে কী উৎপন্ন হয়?", opts: ["বেঞ্জিন", "ফেনল", "স্যালিসাইলিক অ্যাসিড", "বেঞ্জোয়িক অ্যাসিড"], ans: 1, exp: "ব্যাখ্যা: বেঞ্জিনসালফোনিক অ্যাসিডের সোডিয়াম লবণকে তীব্র ক্ষার NaOH সহ 350&deg;C-এ গলালে সোডিয়াম ফেনক্সাইড তৈরি হয়, যা লঘু অ্যাসিড দিয়ে অম্লায়িত করলে ফেনল পাওয়া যায়।" },
+{ q: "৬. ফেনলকে জিংক চূর্ণ সহযোগে পাতিত করলে উৎপন্ন হয়-", opts: ["বেঞ্জিন", "বেঞ্জ্যালডিহাইড", "টলুইন", "বেঞ্জোয়িক অ্যাসিড"], ans: 0, exp: "ব্যাখ্যা: ফেনলকে জিংক (Zn) চূর্ণের সাথে উত্তপ্ত করলে এটি বিজারিত হয়ে বেঞ্জিনে পরিণত হয় এবং উপজাত হিসেবে জিংক অক্সাইড (ZnO) তৈরি হয়।" },
+{ q: "৭. নীচের কোনটি আয়োডোফর্ম পরীক্ষা দ্বারা শনাক্ত করা যায় না?", opts: ["CH<sub>3</sub>CH<sub>2</sub>OH", "CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>OH", "CH<sub>3</sub>CH(OH)CH<sub>3</sub>", "CH<sub>3</sub>CHO"], ans: 1, exp: "ব্যাখ্যা: 1-প্রোপানলে আয়োডোফর্ম পরীক্ষার জন্য প্রয়োজনীয় CH<sub>3</sub>CH(OH)- বা CH<sub>3</sub>CO- গ্রুপটি নেই, তাই এটি এই পরীক্ষা দেয় না।" },
+{ q: "৮. 25&deg;C উয়তায় বিশুদ্ধ জলের মোলারিটি (mol&middot;L<sup>-1</sup>) হল-", opts: ["5.55", "0.55", "55.55", "55"], ans: 2, exp: "ব্যাখ্যা: 1 লিটার বা 1000 mL বিশুদ্ধ জলের ভর 1000 g (ঘনত্ব 1 g/mL ধরে)। জলের মোল সংখ্যা = 1000/18 = 55.55 mol। তাই মোলারিটি 55.55 M।" },
+{ q: "৯. প্রোপানোন ও পেন্টান-3-ওনের মধ্যে পার্থক্য করার জন্য সবচেয়ে উপযুক্ত পরীক্ষা কোনটি?", opts: ["আয়োডোফর্ম পরীক্ষা", "লুকাস পরীক্ষা", "টলেন্স বিকারক পরীক্ষা", "ব্রোমিন জল পরীক্ষা"], ans: 0, exp: "ব্যাখ্যা: প্রোপানোন (CH<sub>3</sub>COCH<sub>3</sub>) একটি মিথাইল কিটোন হওয়ায় এটি আয়োডোফর্ম বিক্রিয়ায় হলুদ অধঃক্ষেপ দেয়। কিন্তু পেন্টান-3-ওন (CH<sub>3</sub>CH<sub>2</sub>COCH<sub>2</sub>CH<sub>3</sub>) মিথাইল কিটোন না হওয়ায় এই পরীক্ষা দেয় না।" },
+{ q: "১০. উইলিয়ামসন ইথার সংশ্লেষণে ডাইইথাইল ইথার প্রস্তুত করতে কোন বিকারক জোড়টি ব্যবহৃত হয়?", opts: ["ইথানল ও H<sub>2</sub>SO<sub>4</sub>", "সোডিয়াম ইথক্সাইড ও ইথাইল ব্রোমাইড", "ইথানল ও ইথিন", "সোডিয়াম মিথক্সাইড ও প্রোপাইল ক্লোরাইড"], ans: 1, exp: "ব্যাখ্যা: সোডিয়াম ইথক্সাইডের (C<sub>2</sub>H<sub>5</sub>ONa) সাথে ইথাইল ব্রোমাইডের (C<sub>2</sub>H<sub>5</sub>Br) S<sub>N</sub>2 বিক্রিয়ায় ডাইইথাইল ইথার (C<sub>2</sub>H<sub>5</sub>OC<sub>2</sub>H<sub>5</sub>) উৎপন্ন হয়।" },
+{ q: "১১. ইথারের পারক্সাইড উপস্থিতি শনাক্ত করতে কী ব্যবহার করা হয়?", opts: ["FeCl<sub>3</sub> দ্রবণ", "KI দ্রবণ এবং স্টার্চ", "KMnO<sub>4</sub> দ্রবণ", "লুকাস বিকারক"], ans: 1, exp: "ব্যাখ্যা: ইথারে উপস্থিত পারক্সাইড পটাশিয়াম আয়োডাইড (KI) থেকে আয়োডিন (I<sub>2</sub>) মুক্ত করে, যা স্টার্চের সংস্পর্শে এসে নীল বর্ণ ধারণ করে।" },
+{ q: "১২. অ্যারোমেটিক ইথার অ্যানিসোলের নাইট্রেশন ঘটালে প্রধানত কী উৎপন্ন হয়?", opts: ["অর্থো-নাইট্রোঅ্যানিসোল", "প্যারা-নাইট্রoঅ্যানিসোল", "মেটা-নাইট্রoঅ্যানিসোল", "2,4,6-ট্রাইনাইট্রoঅ্যানিসোল"], ans: 1, exp: "ব্যাখ্যা: মিথক্সি গ্রুপ (-OCH<sub>3</sub>) অর্থো-প্যারা নির্দেশক। স্টেরিক বাধার কারণে প্যারা-অবস্থানে নাইট্রো গ্রুপের প্রবেশ বেশি অনুকূল, তাই প্যারা-নাইট্রোঅ্যানিসোল মুখ্য উৎপাদ হয়।" },
+{ q: "১৩. মিথানল এবং ইথানল-এর মধ্যে পার্থক্য করতে কোন পরীক্ষাটি ব্যবহৃত হয়?", opts: ["লুকাস পরীক্ষা", "আয়োডোফর্ম পরীক্ষা", "ভিক্টর মেয়ার পরীক্ষা", "টলেন্স বিকারক"], ans: 1, exp: "ব্যাখ্যা: ইথানলে CH<sub>3</sub>-CH(OH)- গ্রুপ থাকায় এটি ক্ষারীয় আয়োডিন দ্রবণের সাথে বিক্রিয়ায় হলুদ আয়োডোফর্ম (CHI<sub>3</sub>) তৈরি করে, যা মিথানল পারে না।" },
+{ q: "১৪. নিচের কোন অ্যালকোহলটি ভিক্টর মেয়ার পরীক্ষায় নীল বর্ণ ধারণ করে?", opts: ["1-প্রোপানল", "2-প্রোপানল", "2-মিথাইল-2-প্রোপানল", "মিথানল"], ans: 1, exp: "ব্যাখ্যা: ভিক্টর মেয়ার পরীক্ষায় 1&deg; অ্যালকোহল লাল, 2&deg; অ্যালকোহল নীল বর্ণ দেয় এবং 3&deg; অ্যালকোহল বর্ণহীন থাকে। 2-প্রোপানল একটি 2&deg; অ্যালকোহল।" },
+{ q: "১৫. ইথক্সিইথেন বা ডাইইথাইল ইথারের সাধারণ নাম কী?", opts: ["সালফিউরিক ইথার", "পেট্রোলিয়াম ইথার", "ক্লোরিক ইথার", "উড স্পিরিট"], ans: 0, exp: "ব্যাখ্যা: ডাইইথাইল ইথার ইথানল এবং গাঢ় সালফিউরিক অ্যাসিড থেকে প্রস্তুত করা হতো বলে একে প্রাচীনকালে সালফিউরিক ইথার বলা হতো (যদিও এতে সালফার থাকে না)।" }
+]
+},
+9: {
+name: 'Set 9', icon: '🧩', topic: 'Column Matching & Rearrangement of Events',
+questions: [
+{ q: "১. বামস্তম্ভের অ্যালকোহল মিশ্রণগুলির সাথে ডানস্তম্ভের শনাক্তকারী বিকারক মেলাও: i. মিথানল এবং ইথানল ii. ফেনল ও বেঞ্জাইল অ্যালকোহল iii. n-বিউটাইল অ্যালকোহল এবং টার্ট-বিউটাইল অ্যালকোহল iv. ইথানল এবং ডাইইথাইল ইথার। ডানস্তম্ভ: a. লুকাস বিকারক, b. ধাতব সোডিয়াম, c. I<sub>2</sub>/NaOH দ্রবণ, d. প্রশম FeCl<sub>3</sub> দ্রবণ।", opts: ["i-c, ii-d, iii-a, iv-b", "i-a, ii-b, iii-c, iv-d", "i-c, ii-a, iii-d, iv-b", "i-d, ii-c, iii-a, iv-b"], ans: 0, exp: "ব্যাখ্যা: ইথানল আয়োডোফর্ম (c) দেয়। ফেনল FeCl<sub>3</sub> এর সাথে বেগুনি বর্ণ (d) দেয়। টার্ট-বিউটাইল অ্যালকোহল লুকাস বিকারকে (a) দ্রুত সাড়া দেয়। ইথানল Na ধাতুর (b) সাথে বিক্রিয়া করে H<sub>2</sub> দেয় কিন্তু ইথার দেয় না।" },
+{ q: "২. বামস্তম্ভ ও ডানস্তম্ভ মেলাও: i. RMgX দ্রবীভূত হয় ii. আয়োডোফর্ম পরীক্ষায় সাড়া দেয় iii. ফেনল ও অ্যালকোহলের মধ্যে পার্থক্য নির্ণয় iv. অ্যাসিড-ক্ষার নির্দেশক। ডানস্তম্ভ: a. ফেনলফথ্যালিন, b. FeCl<sub>3</sub> দ্রবণ, c. CH<sub>3</sub>CH<sub>2</sub>OH, d. ডাইইথাইল ইথার।", opts: ["i-d, ii-c, iii-b, iv-a", "i-c, ii-d, iii-a, iv-b", "i-b, ii-a, iii-c, iv-d", "i-a, ii-b, iii-d, iv-c"], ans: 0, exp: "ব্যাখ্যা: গ্রিগনার্ড বিকারক ইথারে দ্রবীভূত হয় (d)। ইথানল আয়োডোফর্ম দেয় (c)। ফেনল FeCl<sub>3</sub> এর সাথে বেগুনি বর্ণ দেয় যা অ্যালকোহল দেয় না (b)। ফেনলফথ্যালিন একটি নির্দেশক যা ফেনল থেকে তৈরি (a)।" },
+{ q: "৩. ফেনলের বৈশিষ্ট্য সম্পর্কিত ঘটনাগুলি সাজাও: [i] ফেনল নীল লিটমাসকে লাল করে এবং ক্ষার দ্রবণে দ্রবীভূত হয়। [ii] হাইড্রোজেন পরমাণু H<sup>+</sup> রূপে সহজে মুক্ত হয়। [iii] অক্সিজেন পরমাণুর নিঃসঙ্গ ইলেকট্রন-জোড় বেঞ্জিন বলয়ের সঙ্গে রেজোনেন্সে অংশগ্রহণ করে। [iv] অক্সিজেন পরমাণু আংশিক ধনাত্মক চার্জযুক্ত হয়।", opts: ["[i] &rarr; [ii] &rarr; [iii] &rarr; [iv]", "[iii] &rarr; [iv] &rarr; [ii] &rarr; [i]", "[iv] &rarr; [iii] &rarr; [ii] &rarr; [i]", "[ii] &rarr; [iv] &rarr; [i] &rarr; [iii]"], ans: 1, exp: "ব্যাখ্যা: প্রথমে রেজোনেন্স ঘটে (iii), যার ফলে অক্সিজেনে আংশিক ধনাত্মক চার্জ আসে (iv)। এর ফলে O-H বন্ধন দুর্বল হয়ে H<sup>+</sup> মুক্ত হয় (ii), যার কারণে এটি আম্লিক ধর্ম দেখায় এবং ক্ষারে দ্রবীভূত হয় (i)।" },
+{ q: "৪. কোনো অ্যালকোহলে উপস্থিত -OH গ্রুপের সংখ্যা নির্ণয়ের পদ্ধতি সাজাও: [i] 1টি -OH গ্রুপ, -OCOCH<sub>3</sub> গ্রুপে পরিণত হওয়ার ফলে ভর বৃদ্ধি = 42। [ii] অ্যাসিটাইলেশন পদ্ধতির সাহায্যে কোনো যৌগে -OH গ্রুপের সংখ্যা নির্ণয় করা যায়। [iii] একটি অ্যালকোহল (আণবিক ভর 180) &rarr; অনুরূপ এস্টার (আণবিক ভর 390)। [iv] অ্যালকোহলটির ভর বৃদ্ধি = 210; সুতরাং, -OH গ্রুপের সংখ্যা = 210/42 = 5।", opts: ["[ii] &rarr; [iii] &rarr; [i] &rarr; [iv]", "[i] &rarr; [ii] &rarr; [iii] &rarr; [iv]", "[iii] &rarr; [i] &rarr; [iv] &rarr; [ii]", "[ii] &rarr; [iv] &rarr; [iii] &rarr; [i]"], ans: 0, exp: "ব্যাখ্যা: প্রথমে নীতির উল্লেখ (ii), তারপর বিক্রিয়া বা রূপান্তর (iii), তারপর 1টি গ্রুপের জন্য ভর বৃদ্ধির হিসাব (i), সবশেষে মোট ভর বৃদ্ধি থেকে গ্রুপের সংখ্যা নির্ণয় (iv)।" },
+{ q: "৫. বিবৃতি [A]: বেঞ্জাইল অ্যালকোহলে লুকাস বিকারক যোগ করলে দ্রবণ দ্রুত ঘোলাটে হয়। বিবৃতি [B]: প্রাইমারি অ্যালকোহলে লুকাস বিকারক যোগ করলে সাধারণ উন্নতায় দ্রবণ ঘোলাটে হয় না।", opts: ["A ও B উভয়েই সত্য, কিন্তু তারা সম্পর্কযুক্ত নয়", "A মিথ্যা, B সত্য", "A সত্য, B মিথ্যা", "A ও B উভয়েই মিথ্যা"], ans: 0, exp: "ব্যাখ্যা: বেঞ্জাইল অ্যালকোহল 1&deg; হওয়া সত্ত্বেও অত্যন্ত স্থিতিশীল বেঞ্জাইলিক কার্বোক্যাটায়ন তৈরি করে বলে এটি দ্রুত লুকাস বিক্রিয়া দেয়। সাধারণ প্রাইমারি অ্যালকোহল কার্বোক্যাটায়ন অস্থিতিশীল বলে দেয় না। দুটি আলাদা সত্য।" },
+{ q: "৬. বিবৃতি [A]: ইথানল আয়োডোফর্ম পরীক্ষায় সাড়া দেয়। বিবৃতি [B]: CH<sub>3</sub>CH(OH)- গ্রুপবিশিষ্ট অ্যালকোহলগুলিকে ক্ষারীয় মাধ্যমে আয়োডিন দ্রবণ সহযোগে উত্তপ্ত করলে হলুদ রঙের আয়োডোফর্ম উৎপন্ন হয়।", opts: ["বিবৃতি B হল A-এর সঠিক কারণ", "A সত্য কিন্তু B মিথ্যা", "বিবৃতি A ও B পরস্পর বিরোধী", "A মিথ্যা কিন্তু B সত্য"], ans: 0, exp: "ব্যাখ্যা: ইথানলে (CH<sub>3</sub>CH<sub>2</sub>OH) এই নির্দিষ্ট CH<sub>3</sub>CH(OH)- গ্রুপটি বর্তমান, তাই এটি আয়োডোফর্ম বিক্রিয়া দেয়।" },
+{ q: "৭. বিবৃতি [A]: গ্লিসারল-এর সান্দ্রতা ও স্ফুটনাঙ্ক যথেষ্ট বেশি। বিবৃতি [B]: অধিক সংখ্যক -OH গ্রুপের জন্য গ্লিসারল অণুগুলির মধ্যে আন্তরাণবিক হাইড্রোজেন বন্ধন গঠনের মাত্রা অনেক বেশি।", opts: ["বিবৃতি A ও B পরস্পর স্বাধীন", "A সত্য কিন্তু B মিথ্যা", "বিবৃতি B হল A-এর সঠিক কারণ", "A মিথ্যা কিন্তু B সত্য"], ans: 2, exp: "ব্যাখ্যা: গ্লিসারলে 3টি -OH গ্রুপ থাকায় এটি প্রভূত মাত্রায় হাইড্রোজেন বন্ড তৈরি করে অতিকায় অণুজোট তৈরি করে, ফলে এর সান্দ্রতা ও স্ফুটনাঙ্ক খুব বেশি হয়।" },
+{ q: "৮. Assertion [A]: মিথানল জল অপেক্ষা অধিক অম্লধর্মী। Reason [R]: মনোহাইড্রিক অ্যালিফ্যাটিক অ্যালকোহলগুলির মধ্যে মিথানল সবচেয়ে শক্তিশালী অ্যাসিড।", opts: ["A ও R উভয়ই সঠিক এবং R হল A-এর সঠিক ব্যাখ্যা", "A ও R উভয়ই সঠিক, কিন্তু R, A-এর সঠিক ব্যাখ্যা নয়", "A সঠিক কিন্তু R ভুল", "A ভুল কিন্তু R সঠিক"], ans: 1, exp: "ব্যাখ্যা: মিথানল জলের চেয়ে সামান্য বেশি আম্লিক এবং এটি অ্যালিফ্যাটিক অ্যালকোহলগুলির মধ্যে সবচেয়ে তীব্র অ্যাসিড। কিন্তু জলের চেয়ে বেশি আম্লিক হওয়ার প্রকৃত কারণ হলো মিথক্সাইড আয়ন হাইড্রক্সাইডের চেয়ে সহজে প্রোটন গ্রহণ করে না (সলভেশন এফেক্ট), তাই R সঠিক ব্যাখ্যা নয়।" },
+{ q: "৯. Assertion [A]: ইলেকট্রোফিলিক প্রতিস্থাপন বিক্রিয়ার ক্ষেত্রে অ্যানিসোলের সক্রিয়তা বেঞ্জিন অপেক্ষা বেশি। Reason [R]: অ্যানিসোলের ক্ষেত্রে অন্তর্বর্তী কার্বোক্যাটায়ন রেজোনেন্সের মাধ্যমে অধিক স্থিতিশীলতা লাভ করে।", opts: ["A ও R উভয়ই সঠিক এবং R হল A-এর সঠিক ব্যাখ্যা", "A ও R উভয়ই সঠিক, কিন্তু R, A-এর সঠিক ব্যাখ্যা নয়", "A সঠিক কিন্তু R ভুল", "A ভুল কিন্তু R সঠিক"], ans: 0, exp: "ব্যাখ্যা: অ্যানিসোলের মিথক্সি গ্রুপের অক্সিজেনের লোন পেয়ার রেজোনেন্সের মাধ্যমে অন্তর্বর্তী সিগমা-কমপ্লেক্সকে স্থিতিশীল করে, ফলে এটি বেঞ্জিন অপেক্ষা দ্রুত বিক্রিয়া করে।" },
+{ q: "১০. Assertion [A]: ফেনিটোলকে HI দ্বারা বিভাজিত করলে ফেনল ও ইথাইল আয়োডাইড পাওয়া যায়। Reason [R]: ফেনিটোল হল একটি মিশ্র অ্যারোমেটিক ইথার।", opts: ["A ও R উভয়ই সঠিক এবং R হল A-এর সঠিক ব্যাখ্যা", "A ও R উভয়ই সঠিক, কিন্তু R, A-এর সঠিক ব্যাখ্যা নয়", "A সঠিক কিন্তু R ভুল", "A ভুল কিন্তু R সঠিক"], ans: 1, exp: "ব্যাখ্যা: ফেনিটোল (C<sub>6</sub>H<sub>5</sub>OC<sub>2</sub>H<sub>5</sub>) মিশ্র ইথার, কিন্তু এর বিভাজনের সঠিক কারণ হলো C<sub>6</sub>H<sub>5</sub>-O বন্ধনে আংশিক দ্বি-বন্ধন চরিত্র থাকায় তা সহজে ভাঙে না, বরং O-C<sub>2</sub>H<sub>5</sub> বন্ধন ভেঙে ইথাইল আয়োডাইড হয়।" },
+{ q: "১১. Assertion [A]: ফেনলের সঙ্গে ব্রোমিন-জলের বিক্রিয়ায় ০-এবং p-ব্রোমোফেনলের মিশ্রণ উৎপন্ন হয়। Reason [R]: -OH গ্রুপটি একটি অর্থো প্যারা-নির্দেশক গ্রুপ।", opts: ["A ও R উভয়ই সঠিক এবং R হল A-এর সঠিক ব্যাখ্যা", "A ও R উভয়ই সঠিক, কিন্তু R, A-এর সঠিক ব্যাখ্যা নয়", "A সঠিক কিন্তু R ভুল", "A ভুল কিন্তু R সঠিক"], ans: 3, exp: "ব্যাখ্যা: ফেনলের সাথে ব্রোমিন জলের বিক্রিয়ায় তিনটি স্থানে ব্রোমিন যুক্ত হয়ে 2,4,6-ট্রাইব্রোমোফেনল এর সাদা অধঃক্ষেপ পড়ে। ০- এবং p-মিশ্রণ পাওয়া যায় CS<sub>2</sub> বা CHCl<sub>3</sub> এর মতো অধ্রুবীয় দ্রাবক ব্যবহার করলে।" },
+{ q: "১২. Assertion [A]: মিথাইল টারসিয়ারি বিউটাইল ইথারকে HI দ্বারা বিভাজিত করলে টারসিয়ারি বিউটাইল আয়োডাইড এবং মিথাইল অ্যালকোহল উৎপন্ন হয়। Reason [R]: অধিক স্থিতিশীলতার জন্য টারসিয়ারি বিউটাইল ক্যাটায়ন গঠিত হয় যা I<sup>-</sup> দ্বারা আক্রান্ত হয়।", opts: ["A ও R উভয়ই সঠিক এবং R হল A-এর সঠিক ব্যাখ্যা", "A ও R উভয়ই সঠিক, কিন্তু R, A-এর সঠিক ব্যাখ্যা নয়", "A সঠিক কিন্তু R ভুল", "A ভুল কিন্তু R সঠিক"], ans: 0, exp: "ব্যাখ্যা: ইথারে 3&deg; অ্যালকিল গ্রুপ থাকলে বিভাজনটি S<sub>N</sub>1 মেকানিজমে ঘটে, যেখানে স্থিতিশীল 3&deg; কার্বোক্যাটায়ন তৈরি হয়ে তাতে আয়োডাইড আয়ন যুক্ত হয়।" },
+{ q: "১৩. Assertion [A]: ০- নাইট্রোফেনল, m- এবং p-নাইট্রোফেনল অপেক্ষা জলে কম দ্রাব্য। Reason [R]: m- এবং p-নাইট্রোফেনল অণুগুলি আন্তরাণবিক হাইড্রোজেন বন্ধন গঠনের মাধ্যমে জলের সাথে সংযোজিত থাকে।", opts: ["A ও R উভয়ই সঠিক এবং R হল A-এর সঠিক ব্যাখ্যা", "A ও R উভয়ই সঠিক, কিন্তু R, A-এর সঠিক ব্যাখ্যা নয়", "A সঠিক কিন্তু R ভুল", "A ভুল কিন্তু R সঠিক"], ans: 0, exp: "ব্যাখ্যা: ০-নাইট্রোফেনলে অন্তঃআণবিক H-বন্ধন থাকায় এর -OH গ্রুপ জলের সাথে H-বন্ধন করার জন্য মুক্ত থাকে না, তাই দ্রাব্যতা কম হয়। কিন্তু m- ও p-আইসোমারে আন্তরাণবিক H-বন্ধন সম্ভব।" },
+{ q: "১৪. Assertion [A]: আয়োডোফর্ম পরীক্ষার সাহায্যে 2-পেন্টানল এবং 3-পেন্টানলের মধ্যে পার্থক্য করা যায় না। Reason [R]: 2-পেন্টানল এবং 3-পেন্টানল উভয়েই 2&deg; অ্যালকোহল।", opts: ["A ও R উভয়ই সঠিক এবং R হল A-এর সঠিক ব্যাখ্যা", "A ও R উভয়ই সঠিক, কিন্তু R, A-এর সঠিক ব্যাখ্যা নয়", "A সঠিক কিন্তু R ভুল", "A ভুল কিন্তু R সঠিক"], ans: 3, exp: "ব্যাখ্যা: 2-পেন্টানল (CH<sub>3</sub>CH(OH)-) আয়োডোফর্ম বিক্রিয়া দেয়, কিন্তু 3-পেন্টানল দেয় না। তাই এই পরীক্ষার সাহায্যে পার্থক্য করা যায়। A ভুল।" },
+{ q: "১৫. Assertion [A]: টারসিয়ারি বিউটাইল ব্রোমাইডের সঙ্গে সোডিয়াম মিথক্সাইডের বিক্রিয়া দ্বারা টারসিয়ারি বিউটাইল মিথাইল ইথার প্রস্তুত করা যায় না। Reason [R]: মিথক্সাইড আয়ন একটি শক্তিশালী নিউক্লিওফাইল ও ক্ষারক।", opts: ["A ও R উভয়ই সঠিক এবং R হল A-এর সঠিক ব্যাখ্যা", "A ও R উভয়ই সঠিক, কিন্তু R, A-এর সঠিক ব্যাখ্যা নয়", "A সঠিক কিন্তু R ভুল", "A ভুল কিন্তু R সঠিক"], ans: 0, exp: "ব্যাখ্যা: 3&deg; হ্যালাইডে স্টেরিক বাধার কারণে মিথক্সাইড আয়ন নিউক্লিওফাইল হিসেবে কাজ করতে পারে না, বরং শক্তিশালী ক্ষারক হিসেবে কাজ করে এলিমিনেশন (অপনয়ন) ঘটিয়ে অ্যালকিন তৈরি করে।" }
+]
+},
+10: {
+name: 'Set 10', icon: '🧠', topic: 'Advanced / Exemplar MCQs',
+questions: [
+{ q: "১. হ্যালোজেন অ্যাসিডের সঙ্গে বিক্রিয়ায় নীচের অ্যালকোহলগুলির সক্রিয়তার ক্রম কী রূপ হয়?", opts: ["1&deg; > 2&deg; > 3&deg;", "2&deg; > 3&deg; > 1&deg;", "3&deg; > 2&deg; > 1&deg;", "3&deg; > 1&deg; > 2&deg;"], ans: 2, exp: "ব্যাখ্যা: এই বিক্রিয়াটি কার্বোক্যাটায়ন ইন্টারমিডিয়েট গঠনের মাধ্যমে ঘটে। যেহেতু 3&deg; কার্বোক্যাটায়নের স্থায়িত্ব সবচেয়ে বেশি, তাই 3&deg; অ্যালকোহল হ্যালোজেন অ্যাসিডের সাথে সবচেয়ে দ্রুত বিক্রিয়া করে।" },
+{ q: "২. ঘরের উয়তায় গাঢ় HCl-এর সঙ্গে বিক্রিয়ায় নীচের কোন্ অ্যালকোহলটি তৎক্ষণাৎ সংশ্লিষ্ট অ্যালকিল ক্লোরাইড উৎপন্ন করবে?", opts: ["1-প্রোপানল", "2-প্রোপানল", "2-মিথাইল-1-প্রোপানল", "2-মিথাইল-2-প্রোপানল"], ans: 3, exp: "ব্যাখ্যা: 2-মিথাইল-2-প্রোপানল হলো একটি টারসিয়ারি (3&deg;) অ্যালকোহল। এটি ঘরের তাপমাত্রাতেই গাঢ় HCl-এর সাথে (লুকাস বিকারক ছাড়াই) দ্রুত বিক্রিয়া করে অ্যালকিল ক্লোরাইড উৎপন্ন করে।" },
+{ q: "৩. প্রোপানলের স্ফুটনাঙ্ক বিউটেন-এর থেকে বেশি কেন?", opts: ["প্রোপানলের আণবিক ভর বেশি", "প্রোপানলে আন্তরাণবিক H-বন্ধন গঠিত হয়", "বিউটেনে H-বন্ধন গঠিত হয়", "প্রোপানল অধ্রুবীয়"], ans: 1, exp: "ব্যাখ্যা: প্রোপানলে থাকা -OH গ্রুপ অণুগুলির মধ্যে শক্তিশালী হাইড্রোজেন বন্ধন তৈরি করে অণুজোট তৈরি করে, যা ভাঙতে অতিরিক্ত তাপশক্তির প্রয়োজন হয়। বিউটেনে কেবল দুর্বল ভ্যান ডার ওয়ালস বল থাকে।" },
+{ q: "৪. অ্যালকোহলগুলি প্রায় সম-আণবিক ভরবিশিষ্ট হাইড্রোকার্বনগুলির তুলনায় জলে অধিক দ্রাব্য- এর কারণ কী?", opts: ["অ্যালকোহল অধ্রুবীয়", "অ্যালকোহলের সান্দ্রতা বেশি", "অ্যালকোহল ও জলের অণুর মধ্যে আন্তরাণবিক হাইড্রোজেন বন্ধন গঠিত হয়", "অ্যালকোহলের বাষ্পচাপ কম"], ans: 2, exp: "ব্যাখ্যা: অ্যালকোহলের পোলার -OH গ্রুপ জলের অণুর সাথে খুব সহজেই হাইড্রোজেন বন্ধন গঠন করতে পারে, ফলে এটি জলে সহজে দ্রবীভূত হয়।" },
+{ q: "৫. CH<sub>3</sub>CH<sub>2</sub>OH থেকে CH<sub>3</sub>CH<sub>2</sub>I প্রস্তুতির জন্য কোন্ বিকারকটি ব্যবহৃত হয়?", opts: ["PCl<sub>5</sub>", "লাল P + I<sub>2</sub>", "H<sub>2</sub>SO<sub>4</sub>", "NaI / Acetone"], ans: 1, exp: "ব্যাখ্যা: অ্যালকোহলকে সরাসরি অ্যালকিল আয়োডাইডে পরিণত করতে লাল ফসফরাস এবং আয়োডিনের মিশ্রণ ব্যবহার করা হয়, যা বিক্রিয়া মাধ্যমে PI<sub>3</sub> তৈরি করে বিক্রিয়া ঘটায়।" },
+{ q: "৬. ক্লোরোবেঞ্জিনের দ্বি-মেরু ভ্রামক সাইক্লোহেক্সাইল ক্লোরাইড অপেক্ষা কম, এর প্রধান কারণ কী?", opts: ["ক্লোরিনের -I প্রভাব", "ক্লোরিনের +I প্রভাব", "স্টেরিক বাধা", "রেজোনেন্স"], ans: 3, exp: "ব্যাখ্যা: ক্লোরোবেঞ্জিনে ক্লোরিনের লোন পেয়ার বলয়ের সাথে রেজোনেন্সে অংশ নেওয়ায় C-Cl বন্ধনের ইলেকট্রন কিছুটা কার্বনের দিকে সরে আসে (+R প্রভাব), যা ক্লোরিনের -I প্রভাবকে আংশিক প্রশমিত করে। ফলে সামগ্রিক দ্বি-মেরু ভ্রামক কমে যায়।" },
+{ q: "৭. 1-প্রোপানল, বিউটান-2-অল, বিউটান-1-অল এবং পেন্টান-1-অল-এর স্ফুটনাঙ্কের ঊর্ধ্বক্রম কোন্টি?", opts: ["প্রোপান-1-অল < বিউটান-2-অল < বিউটান-1-অল < পেন্টান-1-অল", "প্রোপান-1-অল < বিউটান-1-অল < বিউটান-2-অল < পেন্টান-1-অল", "পেন্টান-1-অল < বিউটান-2-অল < বিউটান-1-অল < প্রোপান-1-অল", "পেন্টান-1-অল < বিউটান-1-অল < বিউটান-2-অল < প্রোপান-1-অল"], ans: 0, exp: "ব্যাখ্যা: কার্বন সংখ্যা বাড়লে ভর ও স্ফুটনাঙ্ক বাড়ে (প্রোপানল < বিউটানল < পেন্টানল)। বিউটানলের আইসোমারগুলির মধ্যে শাখা থাকলে (2-বিউটানল) পৃষ্ঠতলের ক্ষেত্রফল কমে যাওয়ায় স্ফুটনাঙ্ক 1-বিউটানলের চেয়ে কম হয়।" },
+{ q: "৮. RCHO-কে RCH<sub>2</sub>OH-এ রূপান্তরিত করতে নীচের কোনগুলি ব্যবহৃত হতে পারে?", opts: ["H<sub>2</sub>/Pd", "LiAlH<sub>4</sub>", "NaBH<sub>4</sub>", "সবকটি"], ans: 3, exp: "ব্যাখ্যা: অ্যালডিহাইডকে প্রাইমারি অ্যালকোহলে বিজারিত করতে হাইড্রোজেনেশন (H<sub>2</sub>/Pd) অথবা রাসায়নিক বিজারক যেমন লিথিয়াম অ্যালুমিনিয়াম হাইড্রাইড বা সোডিয়াম বোরোহাইড্রাইড সবগুলোই ব্যবহার করা যায়।" },
+{ q: "৯. প্রাইমারি অ্যালকোহলকে কেবলমাত্র অ্যালডিহাইডে জারিত করার জন্য নীচের কোন্ বিকারকটি সবচেয়ে উপযুক্ত?", opts: ["আম্লিক KMnO<sub>4</sub>", "পিরিডিনিয়াম ক্লোরোক্রোমেট (PCC)", "K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub>/H<sub>2</sub>SO<sub>4</sub>", "H<sub>2</sub>O<sub>2</sub>"], ans: 1, exp: "ব্যাখ্যা: তীব্র জারকগুলি (যেমন KMnO<sub>4</sub>) অ্যালকোহলকে সরাসরি কার্বক্সিলিক অ্যাসিডে জারিত করে। PCC একটি মৃদু জারক যা জারণকে অ্যালডিহাইড স্তরেই থামিয়ে দেয়।" },
+{ q: "১০. ফেনলের সঙ্গে ইথানলের পার্থক্য নিরূপণে নীচের কোন্ বিকারক ব্যবহার করা যায়?", opts: ["Br<sub>2</sub>/জল", "Na ধাতু", "প্রশম FeCl<sub>3</sub> দ্রবণ", "ক এবং গ উভয়েই"], ans: 3, exp: "ব্যাখ্যা: ফেনল ব্রোমিন জলের সাথে 2,4,6-ট্রাইব্রোমোফেনলের সাদা অধঃক্ষেপ দেয় এবং FeCl<sub>3</sub> এর সাথে বেগুনি বর্ণ দেয়। ইথানল এই দুটির কোনোটিই দেয় না। (Na উভয়ের সাথেই H<sub>2</sub> দেয় তাই এটি দিয়ে পার্থক্য করা যায় না)।" },
+{ q: "১১. CH<sub>3</sub>CH<sub>2</sub>OH-কে অতিরিক্ত গাঢ় H<sub>2</sub>SO<sub>4</sub> সহযোগে 140&deg;C-এ উত্তপ্ত করলে কী উৎপন্ন হয়?", opts: ["ইথিলিন", "ইথেন", "ডাইইথাইল ইথার", "অ্যাসিট্যালডিহাইড"], ans: 2, exp: "ব্যাখ্যা: 140&deg;C-এ অতিরিক্ত অ্যালকোহলের উপস্থিতিতে আন্তরাণবিক নিরুদন ঘটে ইথার তৈরি হয়।" },
+{ q: "১২. PCl<sub>5</sub> দ্বারা ফেনলকে ক্লোরোবেঞ্জিনে পরিণত করা যায় না কিন্তু পিকরিক অ্যাসিডকে পিক্রাইল ক্লোরাইডে পরিণত করা যায়, কারণ-", opts: ["-NO<sub>2</sub> গ্রুপের উপস্থিতির জন্য রেজোনেন্সের প্রভাবে বেঞ্জিন বলয়ের ইলেকট্রন ঘনত্ব হ্রাস পায়", "পিকরিক অ্যাসিড একটি অ্যালকোহল", "ফেনল গ্যাসীয়", "পিকরিক অ্যাসিডে স্টেরিক বাধা কম"], ans: 0, exp: "ব্যাখ্যা: তিনটি তীব্র ইলেকট্রন আকর্ষী -NO<sub>2</sub> গ্রুপ বেঞ্জিন রিং থেকে এত বেশি ইলেকট্রন টেনে নেয় যে ফেনক্সাইড অক্সিজেনের লোন পেয়ার রিংয়ের সাথে রেজোনেন্স করতে পারে না, ফলে C-O বন্ধনে দ্বি-বন্ধন চরিত্র থাকে না এবং তা সহজে ভাঙা যায়।" },
+{ q: "১৩. উইলিয়ামসন ইথার সংশ্লেষণ দ্বারা ডাই-টার্ট-বিউটাইল ইথার বা ডাইফিনাইল ইথার প্রস্তুত করা যায় না কেন?", opts: ["ইথারটি অত্যন্ত উদ্বায়ী", "স্টেরিক হিনড্রেন্স এবং নিউক্লিওফিলিক আক্রমণের বাধা", "এটি S<sub>N</sub>1 বিক্রিয়া", "বিকারকগুলি জলে অদ্রাব্য"], ans: 1, exp: "ব্যাখ্যা: উইলিয়ামসন সংশ্লেষণ S<sub>N</sub>2 পথে ঘটে। 3&deg; হ্যালাইডে তীব্র স্টেরিক বাধা থাকে এবং অ্যারাইল হ্যালাইডে ইলেকট্রন মেঘের বিকর্ষণের কারণে S<sub>N</sub>2 আক্রমণ সম্ভব হয় না।" },
+{ q: "১৪. ক্ষার দ্বারা সাধারণ ইথারের (R-O-R) বিভাজন না ঘটলেও ইপক্সাইড (সাইক্লিক ইথার)-এর বিভাজন ঘটে, কারণ-", opts: ["ইপক্সাইডের বলয়ে অত্যন্ত কৌণিক পীড়ন থাকে", "ইপক্সাইড আম্লিক", "সাধারণ ইথার ক্ষারে দ্রবীভূত হয়", "ইপক্সাইড ক্ষারের সাথে অধঃক্ষেপ দেয়"], ans: 0, exp: "ব্যাখ্যা: ইপক্সাইডের ৩-মেম্বার রিংয়ে তীব্র কৌণিক পীড়ন (angle strain) থাকে। রিংটি খুলে গিয়ে পীড়নমুক্ত হতে চায় বলে ক্ষারের উপস্থিতিতে লিভিং গ্রুপ নিকৃষ্ট হলেও এটি সহজে বিভাজিত হয়।" },
+{ q: "১৫. মিথানল এবং ইথানল জৈব দ্রাবক হলেও অনেক আয়নীয় যৌগের জন্য এরা যথেষ্ট ভালো দ্রাবক, কারণ-", opts: ["এদের ডাইইলেকট্রিক ধ্রুবক কম", "এরা H-বন্ধন গঠনে সক্ষম এবং ডাইইলেকট্রিক ধ্রুবক বেশি", "এরা অপোলার", "এরা আয়নীয়"], ans: 1, exp: "ব্যাখ্যা: এরা হাইড্রোজেন বন্ধন দ্বারা আয়নীয় যৌগের অ্যানায়নকে দ্রাবকায়িত করে এবং এদের উচ্চ ডাইইলেকট্রিক ধ্রুবক ক্যাটায়ন ও অ্যানায়নের মধ্যে আকর্ষণ বল হ্রাস করে তাদের দ্রবীভূত হতে সাহায্য করে।" }
+]
+},
+11: {
+name: 'Set 11', icon: '💡', topic: 'True/False & Concept Check',
+questions: [
+{ q: "১. বিবৃতি [A]: ফেনল অপেক্ষা অ্যালকোহলের প্রোটোনেশন ধীরে ঘটে। বিবৃতি [B]: আয়োডোফর্ম পরীক্ষার সাহায্যে 1-প্রোপানল এবং 2-প্রোপানল-এর মধ্যে পার্থক্য করা যায় না।", opts: ["A সত্য, B মিথ্যা", "A মিথ্যা, B সত্য", "A ও B উভয়েই মিথ্যা", "A ও B উভয়েই সত্য"], ans: 2, exp: "ব্যাখ্যা: ফেনলে অক্সিজেনের লোন পেয়ার রেজোনেন্সে থাকায় তা H<sup>+</sup> কে সহজে দেওয়া যায় না, তাই ফেনলের প্রোটনেশন অ্যালকোহল অপেক্ষা ধীরে ঘটে। 2-প্রোপানল আয়োডোফর্ম দেয় কিন্তু 1-প্রোপানল দেয় না, তাই এদের পার্থক্য করা যায়। দুটি বিবৃতিই ভুল।" },
+{ q: "২. বিবৃতি [A]: 3 টি সমাবয়বী নাইট্রোফেনলের মধ্যে ০-নাইট্রোফেনলের জলে দ্রাব্যতা সবচেয়ে কম। বিবৃতি [B]: অ্যালকোহলগুলি জল অপেক্ষা শক্তিশালী অ্যাসিড।", opts: ["A সত্য, B মিথ্যা", "A মিথ্যা, B সত্য", "A ও B উভয়েই মিথ্যা", "A ও B উভয়েই সত্য"], ans: 0, exp: "ব্যাখ্যা: ০-নাইট্রোফেনলে অন্তঃআণবিক H-বন্ধন থাকায় এটি জলের সাথে সহজে H-বন্ধন করতে পারে না, তাই দ্রাব্যতা কম। কিন্তু অ্যালকোহলগুলি জলের চেয়ে দুর্বল অ্যাসিড।" },
+{ q: "৩. বিবৃতি [A]: অ্যালকোহলের নিরুদনের জন্য গাঢ় H<sub>2</sub>SO<sub>4</sub> ব্যবহার করা হয়, কিন্তু গাঢ় HCl বা HNO<sub>3</sub> ব্যবহার করা হয় না। বিবৃতি [B]: লঘু H<sub>2</sub>SO<sub>4</sub> দ্বারা 3-ফিনাইলবিউট-1-ইন-এর হাইড্রেশনের ফলে 3-ফিনাইলবিউটান-2-অল উৎপন্ন হয়।", opts: ["A সত্য, B মিথ্যা", "A মিথ্যা, B সত্য", "A ও B উভয়েই মিথ্যা", "A ও B উভয়েই সত্য"], ans: 3, exp: "ব্যাখ্যা: HCl নিউক্লিওফাইল (Cl<sup>-</sup>) প্রদান করে প্রতিস্থাপন ঘটাতে পারে এবং HNO<sub>3</sub> তীব্র জারক হওয়ায় জারণ ঘটায়, তাই নিরুদনে এরা ব্যবহৃত হয় না। হাইড্রেশনে মারকনিকফ নিয়মানুযায়ী ২-নম্বর কার্বনে -OH যুক্ত হয়।" },
+{ q: "৪. বিবৃতি [A]: স্যালিসাইলিক অ্যাসিডের অ্যাসিটাইলেশনের ফলে স্যালল উৎপন্ন হয়। বিবৃতি [B]: p-নাইট্রোফেনল স্টিম উদ্বায়ী কিন্তু ০-নাইট্রোফেনল স্টিম উদ্বায়ী নয়।", opts: ["A সত্য, B মিথ্যা", "A মিথ্যা, B সত্য", "A ও B উভয়েই মিথ্যা", "A ও B উভয়েই সত্য"], ans: 2, exp: "ব্যাখ্যা: স্যালিসাইলিক অ্যাসিডের অ্যাসিটাইলেশনে অ্যাসপিরিন উৎপন্ন হয়। ০-নাইট্রোফেনল স্টিম উদ্বায়ী, p-নাইট্রোফেনল নয়। দুটি বিবৃতিই সম্পূর্ণ উল্টো।" },
+{ q: "৫. বিবৃতি [A]: ভিক্টর মেয়ার পরীক্ষায় লাল রং সৃষ্টি হলে বুঝতে হবে পরীক্ষণীয় অ্যালকোহলটি একটি 1&deg; অ্যালকোহল। বিবৃতি [B]: LiAlH<sub>4</sub>, NaBH<sub>4</sub> অপেক্ষা কম নির্বাচনশীল (less selective) বিজারক।", opts: ["A সত্য, B মিথ্যা", "A মিথ্যা, B সত্য", "A ও B উভয়েই মিথ্যা", "A ও B উভয়েই সত্য"], ans: 3, exp: "ব্যাখ্যা: ভিক্টর মেয়ারে 1&deg; অ্যালকোহল লাল বর্ণ দেয়। LiAlH<sub>4</sub> শক্তিশালী বিজারক যা অনেক ফাংশনাল গ্রুপকে বিজারিত করে, কিন্তু NaBH<sub>4</sub> মৃদু হওয়ায় এটি বেশি সিলেক্টিভ।" },
+{ q: "৬. বিবৃতি [A]: ইথানলকে অনার্দ্র CaCl<sub>2</sub> দ্বারা শুষ্ক করা হয়। বিবৃতি [B]: ইথানল, 2-ক্লোরোইথানল অপেক্ষা অধিক অম্লধর্মী।", opts: ["A সত্য, B মিথ্যা", "A মিথ্যা, B সত্য", "A ও B উভয়েই মিথ্যা", "A ও B উভয়েই সত্য"], ans: 2, exp: "ব্যাখ্যা: ইথানল CaCl<sub>2</sub>-এর সাথে যুত যৌগ (CaCl<sub>2</sub> &middot; 3C<sub>2</sub>H<sub>5</sub>OH) গঠন করে বলে একে দিয়ে শুষ্ক করা যায় না। ক্লোরিনের -I প্রভাবের কারণে 2-ক্লোরোইথানল ইথানলের চেয়ে বেশি অম্লধর্মী।" },
+{ q: "৭. বিবৃতি [A]: 3-হাইড্রক্সিমিথাইলফেনলের সঙ্গে ডায়াজোমিথেনের বিক্রিয়ায় -CH<sub>2</sub>OH গ্রুপটি -CH<sub>2</sub>OCH<sub>3</sub> গ্রুপে পরিণত হয়। বিবৃতি [B]: অ্যালকোহলের নিরুদন পদ্ধতি মিশ্র ইথার প্রস্তুতির জন্য উপযুক্ত নয়।", opts: ["A সত্য, B মিথ্যা", "A মিথ্যা, B সত্য", "A ও B উভয়েই মিথ্যা", "A ও B উভয়েই সত্য"], ans: 1, exp: "ব্যাখ্যা: ডায়াজোমিথেন (CH<sub>2</sub>N<sub>2</sub>) কেবলমাত্র ফিনোলিক (আম্লিক) -OH গ্রুপের সাথে বিক্রিয়া করে, অ্যালকোহলীয় -OH এর সাথে নয়। মিশ্র ইথারের জন্য অ্যালকোহল নিরুদন করলে তিন রকম ইথারের মিশ্রণ পাওয়া যায়, তাই এটি অনুপযুক্ত।" },
+{ q: "৮. ইথানল ও NaBr-এর বিক্রিয়ায় ইথাইল ব্রোমাইড উৎপন্ন হয় না, কিন্তু মিশ্রণে H<sub>2</sub>SO<sub>4</sub> যোগ করলে সহজেই ইথাইল ব্রোমাইড উৎপন্ন হয়, কারণ-", opts: ["H<sub>2</sub>SO<sub>4</sub> জারক পদার্থ", "H<sub>2</sub>SO<sub>4</sub>-এর উপস্থিতিতে -OH গ্রুপ -OH<sub>2</sub><sup>+</sup> গ্রুপে পরিণত হয় যা একটি উৎকৃষ্ট লিভিং গ্রুপ", "NaBr ক্ষার", "ইথানল বিজারিত হয়"], ans: 1, exp: "ব্যাখ্যা: OH<sup>-</sup> একটি অত্যন্ত নিকৃষ্ট লিভিং গ্রুপ হওয়ায় Br<sup>-</sup> একে প্রতিস্থাপিত করতে পারে না। কিন্তু অ্যাসিড মাধ্যমে এটি প্রোটোনেটেড হয়ে জল (H<sub>2</sub>O) হিসেবে বেরিয়ে যায়, যা খুব ভালো লিভিং গ্রুপ।" },
+{ q: "৯. মিথানল থেকে ডাইমিথাইল ইথার প্রস্তুতি অপেক্ষা, ইথানল থেকে ডাইইথাইল ইথার প্রস্তুতির ক্ষেত্রে তাপমাত্রা নিয়ন্ত্রণ করা অনেক বেশি প্রয়োজনীয় কেন?", opts: ["মিথানল উদ্বায়ী", "ইথানলের স্ফুটনাঙ্ক কম", "মিথানলের অন্তঃআণবিক নিরুদন হয়ে অ্যালকিন হওয়ার সম্ভাবনা নেই, কিন্তু ইথানলের ক্ষেত্রে উচ্চ তাপমাত্রায় ইথিলিন তৈরি হতে পারে", "মিথানল বিষাক্ত"], ans: 2, exp: "ব্যাখ্যা: মিথানলে ১টি মাত্র কার্বন থাকায় এটি অ্যালকিন (দ্বিবন্ধন) তৈরি করতে পারে না। কিন্তু ইথানলে তাপমাত্রা সামান্য বাড়লে (170&deg;C) ইথার না হয়ে ইথিলিন তৈরি হয়ে যায়।" },
+{ q: "১০. 2,6-ডাই-টার্ট-বিউটাইলফেনলের আম্লিকতা সাধারণ ফেনল অপেক্ষা অনেক কম কেন?", opts: ["টার্ট-বিউটাইল গ্রুপ ইলেকট্রন আকর্ষী", "অণুটিতে হাইড্রোজেন বন্ধন হয়", "টার্ট-বিউটাইল গ্রুপের আকার বড় হওয়ায় স্টেরিক বাধার কারণে অক্সিজেনের নিঃসঙ্গ ইলেকট্রন জোড় বলয়ের সাথে একই তলে থাকতে পারে না, ফলে রেজোনেন্স ব্যাহত হয়", "এটি অ্যারোমেটিক নয়"], ans: 2, exp: "ব্যাখ্যা: অক্সিজেনের লোন পেয়ার রেজোনেন্স করতে না পারায় এর উপর আংশিক ধনাত্মক চার্জের পরিমাণ কমে যায়, ফলে H<sup>+</sup> ত্যাগ করা কঠিন হয়ে পড়ে।" },
+{ q: "১১. ক্ষারীয় মাধ্যমে ইপক্সাইড (2,2-ডাইমিথাইলঅক্সিরেন) এর রিঙ ওপেনিং বিক্রিয়া কোন মেকানিজমে ঘটে?", opts: ["S<sub>N</sub>1", "S<sub>N</sub>2", "E1", "E2"], ans: 1, exp: "ব্যাখ্যা: ক্ষারীয় মাধ্যমে নিউক্লিওফাইল (যেমন C<sub>2</sub>H<sub>5</sub>O<sup>-</sup>) স্টেরিক বাধা এড়াতে কম প্রতিস্থাপিত (কম ভিড়যুক্ত) কার্বনে আক্রমণ করে। এটি একটি বিশুদ্ধ S<sub>N</sub>2 প্রক্রিয়া।" },
+{ q: "১২. গ্রিগনার্ড বিকারক এবং কিটোনের বিক্রিয়ায় যদি অ্যালকিল গ্রুপগুলি অনেক বড় হয় (অধিক শাখাবিশিষ্ট), তবে 3&deg; অ্যালকোহল উৎপন্ন না হয়ে কী ঘটে?", opts: ["কিটোনটি বিজারিত হয়ে 2&deg; অ্যালকোহলে পরিণত হয়", "অ্যালকেন উৎপন্ন হয়", "কিটোন জারিত হয়", "ইথার উৎপন্ন হয়"], ans: 0, exp: "ব্যাখ্যা: তীব্র স্টেরিক বাধার কারণে নিউক্লিওফিলিক আক্রমণ ঘটতে পারে না। পরিবর্তে, গ্রিগনার্ড বিকারক একটি হাইড্রাইড আয়ন স্থানান্তর করে কিটোনকে বিজারিত করে 2&deg; অ্যালকোহলে পরিণত করে।" },
+{ q: "১৩. অ্যারোমেটিক ইথারের (অ্যানিসোল) ব্রোমিনেশন ইথানোয়িক অ্যাসিড মাধ্যমে ব্রোমিন দ্বারা করা যায়, কিন্তু লুইস অ্যাসিড অনুঘটকের প্রয়োজন হয় না। কারণ কী?", opts: ["ব্রোমিন ইথানোয়িক অ্যাসিডের সাথে বিক্রিয়া করে", "মিথক্সি গ্রুপ বেঞ্জিন বলয়কে অত্যন্ত সক্রিয় করে তোলে", "মিথক্সি গ্রুপ মেটা-নির্দেশক", "ব্রোমিন শক্তিশালী বিজারক"], ans: 1, exp: "ব্যাখ্যা: অ্যানিসোলের -OCH<sub>3</sub> গ্রুপটি তার +R প্রভাবের মাধ্যমে বেঞ্জিন রিংয়ের ইলেকট্রন ঘনত্ব এত বাড়িয়ে দেয় যে, অনুঘটক (যেমন FeBr<sub>3</sub>) ছাড়াই এটি সহজে ইলেকট্রোফিলিক প্রতিস্থাপন বিক্রিয়া দেয়।" },
+{ q: "১৪. C<sub>4</sub>H<sub>10</sub>O সংকেতযুক্ত কাইরাল অ্যালকোহল কোনটি?", opts: ["1-বিউটানল", "2-মিথাইল-1-প্রোপানল", "2-বিউটানল", "2-মিথাইল-2-প্রোপানল"], ans: 2, exp: "ব্যাখ্যা: 2-বিউটানলের ২-নম্বর কার্বনটিতে চারটি ভিন্ন গ্রুপ (-H, -OH, -CH<sub>3</sub>, -CH<sub>2</sub>CH<sub>3</sub>) যুক্ত থাকায় এটি একটি কাইরাল (অপ্রতিসম) অণু।" },
+{ q: "১৫. সোডিয়াম ধাতু অ্যালকোহলের সাথে বিক্রিয়া করে, কিন্তু ইথারের সাথে করে না কেন?", opts: ["ইথার একটি গ্যাস", "সোডিয়াম ইথারের সাথে অধঃক্ষেপ দেয়", "ইথারে অক্সিজেন নেই", "ইথারে কোনো আম্লিক বা সক্রিয় হাইড্রোজেন নেই"], ans: 3, exp: "ব্যাখ্যা: অ্যালকোহলের O-H বন্ধনে হাইড্রোজেনটি আংশিক ধনাত্মক ও সক্রিয়, যা Na ধাতুর সাথে বিক্রিয়ায় H<sub>2</sub> গ্যাস দেয়। ইথারে (R-O-R) কোনো O-H বন্ধন নেই, তাই এটি সোডিয়ামের সাথে বিক্রিয়া করে না।" }
+]
+},
+12: {
+name: 'Set 12', icon: '📊', topic: 'Diagram/Chart Based & HOTS',
+questions: [
+{ q: "১. ডাইইথাইল ইথারের সঙ্গে লঘু HCl বা H<sub>2</sub>SO<sub>4</sub> এর বিক্রিয়া সাধারণ অবস্থায় হয় না, কিন্তু টার্ট-বিউটাইল ইথাইল ইথার সহজেই বিভাজিত হয়। কারণ-", opts: ["টার্ট-বিউটাইল ইথারের বিভাজন S<sub>N</sub>1 পথে স্থিতিশীল 3&deg; কার্বোক্যাটায়নের মাধ্যমে ঘটে", "এটি S<sub>N</sub>2 পথে ঘটে", "এটি ক্ষারীয় প্রকৃতির", "ডাইইথাইল ইথার আম্লিক"], ans: 0, exp: "ব্যাখ্যা: ইথারে একটি টারসিয়ারি গ্রুপ থাকলে এটি প্রোটোনেটেড হওয়ার পর খুব সহজেই ভেঙে গিয়ে অত্যন্ত স্থিতিশীল 3&deg; কার্বোক্যাটায়ন তৈরি করে, যা লঘু অ্যাসিড মাধ্যমেই সম্ভব হয়।" },
+{ q: "২. একটি যৌগে অ্যালকোহলীয় -OH গ্রুপ, কিটোন (>C=O) গ্রুপ এবং এস্টার (-COOR) গ্রুপ বর্তমান। এই যৌগের সাথে গ্রিগনার্ড বিকারক (CH<sub>3</sub>MgI) এর বিক্রিয়ায় প্রথম ধাপে কোন গ্রুপটি আক্রান্ত হয়?", opts: ["কিটোন গ্রুপ", "এস্টার গ্রুপ", "সবগুলি একসাথে", "অ্যালকোহলীয় -OH গ্রুপ (অ্যাসিড-ক্ষার বিক্রিয়া)"], ans: 3, exp: "ব্যাখ্যা: গ্রিগনার্ড বিকারক অত্যন্ত শক্তিশালী ক্ষারক। এটি কার্বনিল বা এস্টারে নিউক্লিওফিলিক আক্রমণের আগে সর্বদা আম্লিক হাইড্রোজেনের (অ্যালকোহলের -OH) সাথে বিক্রিয়া করে অ্যালকেন (এক্ষেত্রে মিথেন) উৎপন্ন করে।" },
+{ q: "৩. একটি জৈব যৌগ A (C<sub>3</sub>H<sub>8</sub>O) Cu/573K এ উত্তপ্ত করলে B দেয়। B ফেলিং দ্রবণ বিজারিত করে না কিন্তু আয়োডোফর্ম বিক্রিয়া দেয়। A হল-", opts: ["1-প্রোপানল", "2-প্রোপানল", "প্রোপানোন", "মিথানল"], ans: 1, exp: "ব্যাখ্যা: A একটি 3-কার্বন অ্যালকোহল। Cu/573K এ উত্তপ্ত করলে B তৈরি হয় যা ফেলিং বিজারিত করে না (অর্থাৎ কিটোন)। প্রোপানোন আয়োডোফর্ম দেয়। তাই A অবশ্যই একটি 2&deg; অ্যালকোহল, অর্থাৎ 2-প্রোপানল।" },
+{ q: "৪. স্যালিসাইলিক অ্যাসিড থেকে ব্যথানাশক ঔষধ অ্যাসপিরিন (Aspirin) তৈরিতে ব্যবহৃত বিকারক-", opts: ["মিথানল ও H<sub>2</sub>SO<sub>4</sub>", "ফেনল ও NaOH", "মিথাইল ক্লোরাইড ও AlCl<sub>3</sub>", "অ্যাসিটিক অ্যানহাইড্রাইড ও গাঢ় H<sub>2</sub>SO<sub>4</sub>"], ans: 3, exp: "ব্যাখ্যা: স্যালিসাইলিক অ্যাসিডের -OH গ্রুপটিকে অ্যাসিটাইলেশন করার জন্য অ্যাসিটিক অ্যানহাইড্রাইড এবং অনুঘটক হিসেবে কয়েক ফোঁটা গাঢ় H<sub>2</sub>SO<sub>4</sub> ব্যবহার করা হয়।" },
+{ q: "৫. CH<sub>3</sub>-CH=CH<sub>2</sub> থেকে CH<sub>3</sub>-CH<sub>2</sub>-CH<sub>2</sub>-OH প্রস্তুত করতে কোন্ বিকারকটি ব্যবহৃত হয়?", opts: ["B<sub>2</sub>H<sub>6</sub>, তারপর H<sub>2</sub>O<sub>2</sub>/NaOH", "H<sub>2</sub>O/H<sub>2</sub>SO<sub>4</sub>", "Hg(OAc)<sub>2</sub>/H<sub>2</sub>O, তারপর NaBH<sub>4</sub>", "KMnO<sub>4</sub>"], ans: 0, exp: "ব্যাখ্যা: প্রোপিন থেকে 1-প্রোপানল পেতে হলে মারকনিকফের বিপরীত নিয়মে জল যুক্ত করতে হবে। এর জন্য সর্বোত্তম পদ্ধতি হলো হাইড্রোবোরেশন-জারণ পদ্ধতি।" },
+{ q: "৬. 1-মিথাইলসাইক্লোহেক্সিন-এর অম্ল-অনুঘটকীয় জলযোজনের ফলে মুখ্য বিক্রিয়াজাত পদার্থ কোনটি?", opts: ["2-মিথাইলসাইক্লোহেক্সান-1-অল", "1-মিথাইলসাইক্লোহেক্সান-1-অল", "1-মিথাইলসাইক্লোহেক্সান-2-অল", "সাইক্লোহেক্সানল"], ans: 1, exp: "ব্যাখ্যা: অম্ল-অনুঘটকীয় জলযোজন মারকনিকফের নিয়ম অনুসরণ করে। দ্বিবন্ধনের যে কার্বনে হাইড্রোজেন কম (অর্থাৎ 1-মিথাইল কার্বন), সেখানেই -OH গ্রুপটি যুক্ত হয়ে 1-মিথাইলসাইক্লোহেক্সান-1-অল তৈরি করে।" },
+{ q: "৭. ফেনলকে জিঙ্ক চূর্ণের সাথে পাতিত করলে উৎপন্ন হয় বেঞ্জিন। এই বিক্রিয়াটি কী ধরনের?", opts: ["জারণ", "প্রতিস্থাপন", "যুত", "বিজারণ"], ans: 3, exp: "ব্যাখ্যা: এই বিক্রিয়ায় ফেনলের অক্সিজেন পরমাণু অপসারিত হয়ে জিংক অক্সাইড (ZnO) তৈরি করে এবং বেঞ্জিন পাওয়া যায়। অক্সিজেন অপসারণ হলো বিজারণ বিক্রিয়া।" },
+{ q: "৮. কোলবে-স্মিট বিক্রিয়ায় সোডিয়াম ফেনক্সাইড থেকে প্রধানত কী উৎপন্ন হয়?", opts: ["স্যালিসাইলঅ্যালডিহাইড", "বেঞ্জোয়িক অ্যাসিড", "ফিনাইল অ্যাসিটেট", "স্যালিসাইলিক অ্যাসিড"], ans: 3, exp: "ব্যাখ্যা: সোডিয়াম ফেনক্সাইডকে CO<sub>2</sub> এর সাথে 120&deg;C ও 4-7 atm চাপে উত্তপ্ত করে অম্লায়িত করলে ০-হাইড্রক্সিবেঞ্জোয়িক অ্যাসিড বা স্যালিসাইলিক অ্যাসিড উৎপন্ন হয়।" },
+{ q: "৯. রাইমার-টিম্যান বিক্রিয়ায় ফেনল থেকে স্যালিসাইলঅ্যালডিহাইড তৈরিতে কোন্ অন্তর্বর্তী ইলেকট্রোফাইল অংশগ্রহণ করে?", opts: ["CCl<sub>3</sub><sup>+</sup>", "CHCl<sub>2</sub><sup>+</sup>", "CHO<sup>+</sup>", ":CCl<sub>2</sub> (ডাইক্লোরোকার্বিন)"], ans: 3, exp: "ব্যাখ্যা: ক্লোরোফর্ম (CHCl<sub>3</sub>) এবং ক্ষারের (NaOH) বিক্রিয়ায় অন্তর্বর্তী পদার্থ হিসেবে ইলেকট্রন-ঘাটতিবিশিষ্ট ডাইক্লোরোকার্বিন (:CCl<sub>2</sub>) উৎপন্ন হয়, যা ইলেকট্রোফাইল হিসেবে কাজ করে।" },
+{ q: "১০. উইলিয়ামসন ইথার সংশ্লেষণে ডাইইথাইল ইথার প্রস্তুত করতে কোন বিকারকগুলি ব্যবহৃত হয়?", opts: ["ইথানল ও H<sub>2</sub>SO<sub>4</sub>", "ইথানল ও ইথিন", "সোডিয়াম মিথক্সাইড ও ইথাইল ক্লোরাইড", "সোডিয়াম ইথক্সাইড ও ইথাইল ক্লোরাইড"], ans: 3, exp: "ব্যাখ্যা: সোডিয়াম ইথক্সাইড (C<sub>2</sub>H<sub>5</sub>O<sup>-</sup>Na<sup>+</sup>) এবং ইথাইল ক্লোরাইডের (C<sub>2</sub>H<sub>5</sub>Cl) S<sub>N</sub>2 বিক্রিয়ার মাধ্যমে ডাইইথাইল ইথার প্রস্তুত করা হয়।" },
+{ q: "১১. ইথারে উপস্থিত ক্ষতিকারক পারক্সাইড উপস্থিতি শনাক্ত করতে কী ব্যবহার করা হয়?", opts: ["FeCl<sub>3</sub> দ্রবণ", "KMnO<sub>4</sub> দ্রবণ", "লুকাস বিকারক", "KI দ্রবণ এবং স্টার্চ"], ans: 3, exp: "ব্যাখ্যা: ইথার পারক্সাইড KI-কে জারিত করে আয়োডিন (I<sub>2</sub>) মুক্ত করে, যা স্টার্চ দ্রবণের সাথে মিশে তাৎক্ষণিক গাঢ় নীল বর্ণ ধারণ করে।" },
+{ q: "১২. অ্যালকোহলের অম্ল-অনুঘটকীয় ডিহাইড্রেশনে অ্যালকিন তৈরিতে ইন্টারমিডিয়েট বা অন্তর্বর্তী পদার্থ হিসেবে কী তৈরি হয়?", opts: ["কার্বানায়ন", "কার্বিন", "মুক্তমূলক", "কার্বোক্যাটায়ন"], ans: 3, exp: "ব্যাখ্যা: বিক্রিয়াটি E1 পথে ঘটে, যেখানে প্রথমে অ্যালকোহলের প্রোটোনেশন হয়ে জল বেরিয়ে যায় এবং একটি স্থিতিশীল কার্বোক্যাটায়ন তৈরি হয়। পরে প্রোটন অপসারণের মাধ্যমে অ্যালকিন হয়।" },
+{ q: "১৩. অ্যারোমেটিক ইথার অ্যানিসোলের নাইট্রেশন ঘটালে প্রধান বিক্রিয়াজাত পদার্থ হিসেবে কী উৎপন্ন হয়?", opts: ["অর্থো-নাইট্রoঅ্যানিসোল", "মেটা-নাইট্রoঅ্যানিসোল", "2,4,6-ট্রাইনাইট্রoঅ্যানিসোল", "প্যারা-নাইট্রoঅ্যানিসোল"], ans: 3, exp: "ব্যাখ্যা: মিথক্সি গ্রুপ (-OCH<sub>3</sub>) অর্থো-প্যারা নির্দেশক। তবে মিথক্সি গ্রুপের স্টেরিক বাধার কারণে ইলেকট্রোফাইল (নাইট্রো গ্রুপ) প্যারা অবস্থানে বেশি যুক্ত হয়, তাই প্যারা-আইসোমারটি মুখ্য হয়।" },
+{ q: "১৪. মিথানল এবং ইথানল-এর মধ্যে পার্থক্য করতে কোন পরীক্ষাটি ব্যবহৃত হয়?", opts: ["লুকাস পরীক্ষা", "ভিক্টর মেয়ার পরীক্ষা", "টলেন্স বিকারক", "আয়োডোফর্ম পরীক্ষা"], ans: 3, exp: "ব্যাখ্যা: ইথানল আয়োডোফর্ম বিক্রিয়া দেয় (হলুদ অধঃক্ষেপ), কিন্তু মিথানলে CH<sub>3</sub>CH(OH)- বা CH<sub>3</sub>CO- গ্রুপ না থাকায় এটি এই বিক্রিয়া দেয় না।" },
+{ q: "১৫. নিচের কোন অ্যালকোহলটি ভিক্টর মেয়ার পরীক্ষায় নীল বর্ণ ধারণ করে?", opts: ["1-প্রোপানল", "2-মিথাইল-2-প্রোপানল", "মিথানল", "2-প্রোপানল"], ans: 3, exp: "ব্যাখ্যা: ভিক্টর মেয়ার পরীক্ষায় প্রাইমারি (1&deg;) অ্যালকোহল লাল বর্ণ, সেকেন্ডারি (2&deg;) অ্যালকোহল (যেমন 2-প্রোপানল) নীল বর্ণ দেয় এবং টারসিয়ারি (3&deg;) অ্যালকোহল বর্ণহীন থাকে।" }
+]
+}
+};
+
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+function getGlobalUsers() {
+const data = localStorage.getItem("testBazarGlobalUsers");
+return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+const data = localStorage.getItem("testBazarAttemptsChem3U4_v1");
+return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+attempts[key] = (attempts[key] || 0) + 1;
+localStorage.setItem("testBazarAttemptsChem3U4_v1", JSON.stringify(attempts));
+return attempts[key];
+}
+
+window.onload = () => { renderHub(); };
+
+function renderHub() {
+const grid = document.getElementById("setGrid");
+grid.innerHTML = "";
+for(let id in ALL_SETS) {
+const set = ALL_SETS[id];
+const div = document.createElement("div");
+div.className = "set-card";
+let attemptCount = 0;
+let isLocked = false;
+
+if (currentUser) {
+attemptCount = getAttemptCount(currentUser, id);
+isLocked = attemptCount >= MAX_ATTEMPTS;
+if (isLocked) div.classList.add("locked");
+}
+
+div.innerHTML = `
+<div class="icon">${set.icon}</div>
+<div class="set-num">${set.name}</div>
+<div class="set-title">${set.topic}</div>
+<div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+`;
+
+div.onclick = () => {
+if (isLocked) { alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return; }
+handleSetClick(id);
+};
+grid.appendChild(div);
+}
+}
+
+function handleSetClick(setId) {
+activeSetId = setId;
+if (!currentUser) {
+document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+document.getElementById("loginOverlay").classList.add("active");
+document.getElementById("loginUsername").value = "";
+document.getElementById("loginPassword").value = "";
+document.getElementById("loginError").style.display = "none";
+} else { startQuiz(setId); }
+}
+
+function doLogin() {
+const u = document.getElementById("loginUsername").value.trim();
+const p = document.getElementById("loginPassword").value.trim();
+const err = document.getElementById("loginError");
+const GLOBAL_USERS = getGlobalUsers();
+
+if(!u || !p) { err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!"; err.style.display = "block"; return; }
+if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+let attempts = getAttemptCount(u, activeSetId);
+if (attempts >= MAX_ATTEMPTS) {
+err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+err.style.display = "block";
+return;
+}
+currentUser = u;
+document.getElementById("loginOverlay").classList.remove("active");
+document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+document.getElementById("userDisplay").classList.remove("hidden");
+renderHub();
+startQuiz(activeSetId);
+} else {
+err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+err.style.display = "block";
+}
+}
+
+function closeLogin() { document.getElementById("loginOverlay").classList.remove("active"); }
+
+function goToHub() {
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("hubPage").style.display = "block";
+document.getElementById("timerBox").classList.add("hidden");
+clearInterval(timerInterval);
+renderHub();
+}
+
+function startQuiz(setId) {
+incrementAttempt(currentUser, setId);
+questions = ALL_SETS[setId].questions;
+currentQIndex = 0; score = 0; wrongAnswers = 0; userAnswers = {}; isReviewMode = false; timeLeft = TIME_LIMIT;
+document.getElementById("hubPage").style.display = "none";
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+document.getElementById("timerBox").classList.remove("hidden");
+document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+startTimer();
+loadQuestion();
+}
+
+function loadQuestion() {
+const qData = questions[currentQIndex];
+document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+document.getElementById("qText").innerHTML = qData.q;
+const progress = ((currentQIndex) / questions.length) * 100;
+document.getElementById("progressFill").style.width = `${progress}%`;
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+const optsBox = document.getElementById("qOpts");
+optsBox.innerHTML = "";
+document.getElementById("explanation").classList.remove("show");
+document.getElementById("nextBtn").disabled = true;
+document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+qData.opts.forEach((optText, idx) => {
+const btn = document.createElement("button");
+btn.className = "opt";
+btn.innerHTML = `<div class="opt-circle">${LABELS[idx]}</div> <div class="opt-text">${optText}</div>`;
+if (isReviewMode) {
+btn.classList.add("disabled");
+if (idx === qData.ans) btn.classList.add("correct");
+else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+} else {
+btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+}
+optsBox.appendChild(btn);
+});
+
+if (isReviewMode) {
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+if (currentQIndex === questions.length - 1) { document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন"; }
+}
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+allBtns.forEach(b => b.classList.add("disabled"));
+userAnswers[currentQIndex] = selectedIdx;
+if (selectedIdx === correctIdx) { btn.classList.add("correct"); score++; }
+else { btn.classList.add("wrong"); allBtns[correctIdx].classList.add("correct"); wrongAnswers++; }
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+}
+
+function nextQ() {
+if (isReviewMode && currentQIndex === questions.length - 1) {
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show"); return;
+}
+if (!isReviewMode && currentQIndex === questions.length - 1) { finishQuiz(); return; }
+currentQIndex++; loadQuestion();
+}
+
+function startTimer() {
+clearInterval(timerInterval);
+const tBox = document.getElementById("timerBox");
+tBox.classList.remove("danger");
+timerInterval = setInterval(() => {
+if (timeLeft <= 0) { clearInterval(timerInterval); finishQuiz(); return; }
+timeLeft--;
+const m = Math.floor(timeLeft / 60); const s = timeLeft % 60;
+document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+if (timeLeft < 60) tBox.classList.add("danger");
+}, 1000);
+}
+
+function finishQuiz() {
+clearInterval(timerInterval);
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("timerBox").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show");
+const total = questions.length; const skipped = total - (score + wrongAnswers);
+const percent = Math.round((score / total) * 100);
+document.getElementById("finalScore").innerText = `${percent}%`;
+document.getElementById("rbCorrect").innerText = score;
+document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+const gradeEl = document.getElementById("resultGrade");
+if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return;
+}
+startQuiz(activeSetId);
+}
+
+function showReview() {
+isReviewMode = true; currentQIndex = 0;
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+loadQuestion();
+}
+</script>
+</body>
+</html>
+
+
+
