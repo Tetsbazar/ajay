@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Physics 3rd Sem | U1 C3</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main);}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; }
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header class="top-bar">
+<div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+<div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+<div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+<div class="main">
+
+<!-- LOGIN MODAL -->
+<div class="login-overlay" id="loginOverlay">
+<div class="login-modal">
+<h2>লগইন করুন</h2>
+<p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+<div class="login-set-name" id="loginSetName">📚 Set 1</div>
+<div class="input-group">
+<label>ইউজারনেম</label>
+<input type="text" id="loginUsername" placeholder="Username">
+</div>
+<div class="input-group">
+<label>পাসওয়ার্ড</label>
+<input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+</div>
+<button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+<button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+<div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+</div>
+</div>
+
+<!-- HUB PAGE -->
+<div id="hubPage">
+<div class="hub-header">
+<h1>পদার্থবিজ্ঞান 3rd Sem Unit 1:<br>অধ্যায় ৩: তড়িৎবিভব (Electric Potential)</h1>
+<p>মোট ১২০টি প্রশ্ন সম্বলিত ৮টি সেট। Test শুরু করতে সেটে ক্লিক করুন।</p>
+</div>
+<div class="set-grid" id="setGrid"></div>
+<div style="text-align: center; margin-top: 30px;">
+<button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+</div>
+</div>
+
+<!-- QUIZ AREA -->
+<div id="testArea" class="hidden">
+<div class="quiz-info">
+<div class="info-item">🎓 <strong>Physics</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+<div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+</div>
+<div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="q-card">
+<div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+<div class="q-text" id="qText">Question Text</div>
+<div class="opts" id="qOpts"></div>
+<div class="explanation" id="explanation"><p id="explanationText"></p></div>
+<div class="nav-row">
+<div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+<button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+</div>
+</div>
+</div>
+
+<!-- RESULT AREA -->
+<div class="result-wrap" id="resultWrap">
+<div class="result-icon" id="resultIcon">🏆</div>
+<div class="result-score en-font" id="finalScore">100%</div>
+<div class="result-total">স্কোর</div>
+<div class="result-grade" id="resultGrade">অসাধারণ!</div>
+<div class="result-bars">
+<div class="result-bar">
+<div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+<div class="rb-label">সঠিক</div>
+</div>
+<div class="result-bar">
+<div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+<div class="rb-label">ভুল/স্কিপ</div>
+</div>
+</div>
+<div class="attempt-info-box" id="attemptInfo"></div>
+<div class="action-btns">
+<button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+<button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+<button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+</div>
+</div>
+
+</div>
+
+<script>
+const MAX_ATTEMPTS = 10;
+const TIME_LIMIT = 10 * 60;
+const LABELS = ['(a)', '(b)', '(c)', '(d)'];
+
+const ALL_SETS = {
+1: {
+name: 'Set 1', icon: '⚡', topic: 'তড়িৎবিভবের প্রাথমিক ধারণা ও সম্পর্ক (৩.১)',
+questions: [
+{ q: "১. বিভবের মাত্রীয় সংকেত (Dimension) কী?", opts: ["[ML<sup>2</sup>T<sup>-3</sup>I<sup>-1</sup>]", "[MLT<sup>-2</sup>I<sup>-1</sup>]", "[ML<sup>2</sup>T<sup>-2</sup>I<sup>-1</sup>]", "[ML<sup>2</sup>T<sup>3</sup>I<sup>-1</sup>]"], ans: 0, exp: "ব্যাখ্যা: বিভব = কার্য / আধান। কার্যের মাত্রা [ML<sup>2</sup>T<sup>-2</sup>] এবং আধানের মাত্রা [IT]। এদের ভাগ করলে বিভবের মাত্রা [ML<sup>2</sup>T<sup>-3</sup>I<sup>-1</sup>] পাওয়া যায়।" },
+{ q: "২. 1 ভোল্ট (Volt) বিভব সমান কত স্থির-তড়িৎ একক (esu) বিভব?", opts: ["300", "1/300", "3 &times; 10<sup>9</sup>", "10<sup>8</sup>"], ans: 1, exp: "ব্যাখ্যা: 1 ভোল্ট = 1 জুল / 1 কুলম্ব = 10<sup>7</sup> আর্গ / (3 &times; 10<sup>9</sup>) ইএসইউ আধান = 1/300 স্থির-তড়িৎ একক বা esu বিভব।" },
+{ q: "৩. তড়িৎক্ষেত্র প্রাবল্য (E) এবং তড়িৎবিভবের (V) মধ্যে গাণিতিক সম্পর্কটি কী?", opts: ["E = dV/dx", "E = -dV/dx", "V = -dE/dx", "E = -dx/dV"], ans: 1, exp: "ব্যাখ্যা: তড়িৎক্ষেত্র প্রাবল্য হল তড়িৎবিভবের ঋণাত্মক নতিমাত্রার সমান (E = -dV/dx)। ঋণাত্মক চিহ্ন নির্দেশ করে যে প্রাবল্য সর্বদা উচ্চবিভব থেকে নিম্নবিভবের দিকে ক্রিয়া করে।" },
+{ q: "৪. একটি ধনাত্মক আধানে আহিত বস্তুর তড়িৎবিভব কি ঋণাত্মক হতে পারে?", opts: ["হ্যাঁ, সর্বদা", "না, কখনোই সম্ভব নয়", "হ্যাঁ, উপযুক্ত ব্যবস্থায় হতে পারে", "বিভব সবসময় শূন্য থাকে"], ans: 2, exp: "ব্যাখ্যা: একটি ধনাত্মক আধানে আহিত বস্তুকে যদি একটি উচ্চতর ঋণাত্মক আধানে আহিত ফাঁপা গোলকের অভ্যন্তরে রাখা হয়, তবে অভ্যন্তরীণ ছোট গোলকটির মোট লব্ধি তড়িৎবিভব ঋণাত্মক হতে পারে।" },
+{ q: "৫. তড়িৎক্ষেত্রে কোনো বদ্ধপথে আধানকে ঘুরিয়ে পুনরায় প্রাথমিক অবস্থানে নিয়ে এলে কৃতকার্য কত হবে?", opts: ["অসীম", "শূন্য", "1 জুল", "বলা সম্ভব নয়"], ans: 1, exp: "ব্যাখ্যা: তড়িৎক্ষেত্রের দুটি বিন্দুর মধ্যে বিভবপার্থক্য তাদের পথের ওপর নির্ভর করে না। তাই একটি বদ্ধপথে আধানকে ঘুরিয়ে আনলে মোট কৃতকার্য শূন্য হয়, যা প্রমাণ করে স্থির-তড়িৎ বল একটি সংরক্ষী বল।" },
+{ q: "৬. তড়িৎবিভব কোন্ ধরনের রাশি?", opts: ["ভেক্টর", "স্কেলার", "টেন্সর", "কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: তড়িৎবিভব হলো অসীম দূরত্ব থেকে একক ধনাত্মক আধানকে আনতে কৃতকার্যের পরিমাপ। যেহেতু কার্য একটি স্কেলার রাশি, তাই বিভবও একটি স্কেলার রাশি।" },
+{ q: "৭. 1 ভোল্ট সমান কত emu (তড়িৎচুম্বকীয় একক) বিভব?", opts: ["10<sup>8</sup> emu", "10<sup>7</sup> emu", "1/300 emu", "3 &times; 10<sup>10</sup> emu"], ans: 0, exp: "ব্যাখ্যা: বিভবের বিভিন্ন এককের সম্পর্ক অনুযায়ী, 1 ভোল্ট বিভব = 10<sup>8</sup> ইএমইউ (abvolt) বিভব।" },
+{ q: "৮. তড়িৎক্ষেত্রের কোনো বিন্দুতে প্রাবল্য শূন্য হলে সেই বিন্দুতে তড়িৎবিভব কী হবে?", opts: ["অবশ্যই শূন্য হবে", "অসীম হবে", "ধ্রুবক হবে (অশূন্য হতে পারে)", "ঋণাত্মক হবে"], ans: 2, exp: "ব্যাখ্যা: E = -dV/dx সূত্রানুযায়ী, E = 0 হলে dV/dx = 0, যার অর্থ dV = 0 বা V = ধ্রুবক। তাই প্রাবল্য শূন্য হলেও বিভব অশূন্য বা ধ্রুবক থাকতে পারে।" },
+{ q: "৯. দুটি সমপরিমাণ ও সমপ্রকৃতির বিন্দু আধানের সংযোগকারী সরলরেখার মধ্যবিন্দুতে—", opts: ["প্রাবল্য ও বিভব উভয়ই শূন্য", "প্রাবল্য অশূন্য, বিভব শূন্য", "প্রাবল্য শূন্য, বিভব অশূন্য", "কোনোটিই শূন্য নয়"], ans: 2, exp: "ব্যাখ্যা: মধ্যবিন্দুতে সমপ্রকৃতির আধানের প্রাবল্য পরস্পর বিপরীতমুখী হয়ে শূন্য হয়, কিন্তু বিভব স্কেলার রাশি হওয়ায় উভয়ের বিভব যোগ হয়ে দ্বিগুণ হয় (অশূন্য থাকে)।" },
+{ q: "১০. তড়িৎক্ষেত্রের কোনো বিন্দুতে তড়িৎবিভব শূন্য হলে ওই বিন্দুতে তড়িৎক্ষেত্র প্রাবল্য কী হবে?", opts: ["অবশ্যই শূন্য হবে", "শূন্য হতেও পারে, নাও হতে পারে", "অসীম হবে", "ঋণাত্মক হবে"], ans: 1, exp: "ব্যাখ্যা: দুটি বিপরীত প্রকৃতির সমমানের আধানের (+q ও -q) মধ্যবিন্দুতে বিভব শূন্য হয়, কিন্তু ওই একই বিন্দুতে প্রাবল্য একই অভিমুখে ক্রিয়া করায় প্রাবল্য শূন্য হয় না।" },
+{ q: "১১. কোনো স্থানে তড়িৎবিভব V = 3x + 2y<sup>2</sup>। (3,1) বিন্দুতে তড়িৎক্ষেত্র প্রাবল্যের মান কত?", opts: ["3 Vm<sup>-1</sup>", "5 Vm<sup>-1</sup>", "7 Vm<sup>-1</sup>", "0"], ans: 1, exp: "ব্যাখ্যা: Ex = -&part;V/&part;x = -3, এবং Ey = -&part;V/&part;y = -4y। (3,1) বিন্দুতে Ey = -4(1) = -4। লব্ধি প্রাবল্য |E| = &radic;((-3)<sup>2</sup> + (-4)<sup>2</sup>) = &radic;(9+16) = 5 Vm<sup>-1</sup>।" },
+{ q: "১২. তড়িৎক্ষেত্রের দিক কোন্ দিকে নির্দেশিত হয়?", opts: ["যেদিকে বিভব হ্রাসের হার সর্বনিম্ন", "যেদিকে বিভব হ্রাসের হার সর্বোচ্চ", "যেদিকে বিভব স্থির থাকে", "যেদিকে আধানের মান বাড়ে"], ans: 1, exp: "ব্যাখ্যা: E = -dV/dx সূত্র নির্দেশ করে যে, যে অভিমুখে দূরত্বের সঙ্গে বিভব হ্রাসের হার সর্বোচ্চ হবে, সেই দিকটিই হবে তড়িৎক্ষেত্রের অভিমুখ।" },
+{ q: "১৩. জুল/কুলম্ব কোন্ ভৌত রাশির একক?", opts: ["তড়িৎক্ষেত্র প্রাবল্য", "তড়িৎবিভব", "তড়িৎ স্থিতিশক্তি", "ধারকত্ব"], ans: 1, exp: "ব্যাখ্যা: 1 কুলম্ব আধানকে অসীম থেকে আনতে 1 জুল কার্য করতে হলে বিভব হয় 1 ভোল্ট। তাই 1 ভোল্ট = 1 জুল / 1 কুলম্ব।" },
+{ q: "১৪. একটি ত্রিমাত্রিক তড়িৎক্ষেত্রে প্রাবল্য এবং বিভবের সাধারণ ভেক্টর সম্পর্কটি কী?", opts: ["<strong>E</strong> = <strong>&nabla;</strong>V", "<strong>E</strong> = -<strong>&nabla;</strong>V", "<strong>V</strong> = -<strong>&nabla;</strong>E", "<strong>E</strong> = -V<strong>&nabla;</strong>"], ans: 1, exp: "ব্যাখ্যা: ত্রিমাত্রিক ভেক্টর ডিফারেনশিয়াল অপারেটর বা 'ডেল' (<strong>&nabla;</strong>) এর সাহায্যে প্রাবল্য ও বিভবের সম্পর্কটি হলো <strong>E</strong> = -<strong>&nabla;</strong>V, অর্থাৎ প্রাবল্য হলো বিভবের ঋণাত্মক গ্রেডিয়েন্ট।" },
+{ q: "১৫. দুটি বিন্দুর মধ্যে বিভবপ্রভেদ কিসের ওপর নির্ভর করে?", opts: ["বিন্দুদ্বয়ের সংযোজক পথের ওপর", "আধানের ভরের ওপর", "কেবলমাত্র বিন্দুদ্বয়ের অবস্থানের ওপর", "পথের বক্রতার ওপর"], ans: 2, exp: "ব্যাখ্যা: দুটি বিন্দুর মধ্যে তড়িৎ বিভবপ্রভেদ পথ-নিরপেক্ষ, এটি শুধুমাত্র বিন্দুদ্বয়ের প্রাথমিক ও অন্তিম অবস্থানের ওপর নির্ভর করে, কারণ স্থির তড়িৎক্ষেত্র একটি সংরক্ষী বলক্ষেত্র।" }
+]
+},
+2: {
+name: 'Set 2', icon: '🎯', topic: 'বিন্দু আধান, পরিবাহী গোলক ও দ্বিমেরুর বিভব (৩.২)',
+questions: [
+{ q: "১. একটি বিচ্ছিন্ন বিন্দু আধান থেকে r দূরত্বে তড়িৎবিভব কীভাবে পরিবর্তিত হয়?", opts: ["V &propto; r", "V &propto; 1/r<sup>2</sup>", "V &propto; 1/r", "V &propto; 1/r<sup>3</sup>"], ans: 2, exp: "ব্যাখ্যা: বিন্দু আধানের জন্য দূরত্বের সাথে তড়িৎবিভবের সম্পর্ক হলো V = q/(4&pi;&epsilon;<sub>0</sub>r)। সুতরাং, বিভব দূরত্বের (r) ব্যস্তানুপাতে (V &propto; 1/r) পরিবর্তিত হয়।" },
+{ q: "২. R ব্যাসার্ধের ফাঁপা পরিবাহী গোলককে q আধানে আহিত করা হলে, গোলকের ভেতরের যেকোনো বিন্দুতে বিভব কত হবে?", opts: ["0", "q/(4&pi;&epsilon;<sub>0</sub>R)", "q/(4&pi;&epsilon;<sub>0</sub>r)", "অসীম"], ans: 1, exp: "ব্যাখ্যা: ফাঁপা গোলকের ভেতরে তড়িৎপ্রাবল্য শূন্য হয়, ফলে বিভব সর্বত্র ধ্রুবক থাকে এবং এই ধ্রুবক বিভব গোলকের পৃষ্ঠের বিভবের (q/(4&pi;&epsilon;<sub>0</sub>R)) সমান হয়।" },
+{ q: "৩. তড়িৎ দ্বিমেরুর লম্ব সমদ্বিখণ্ডকের ওপর অবস্থিত যেকোনো বিন্দুতে তড়িৎবিভব কত হয়?", opts: ["p/(4&pi;&epsilon;<sub>0</sub>r<sup>2</sup>)", "অসীম", "শূন্য", "2p/(4&pi;&epsilon;<sub>0</sub>r<sup>2</sup>)"], ans: 2, exp: "ব্যাখ্যা: লম্ব সমদ্বিখণ্ডকের ওপর যেকোনো বিন্দু দ্বিমেরুর দুটি আধান (+q এবং -q) থেকে সমদূরত্বে থাকে। ফলে সমান ও বিপরীত বিভব পরস্পরকে প্রশমিত করে লব্ধি বিভব শূন্য করে দেয়।" },
+{ q: "৪. একটি তড়িৎ দ্বিমেরুর কেন্দ্র থেকে r দূরত্বে অক্ষীয় বিন্দুতে তড়িৎবিভব দূরত্বের সাথে কীভাবে পরিবর্তিত হয়? (যেখানে r অনেক বড়)", opts: ["V &propto; 1/r", "V &propto; 1/r<sup>2</sup>", "V &propto; 1/r<sup>3</sup>", "V &propto; r<sup>2</sup>"], ans: 1, exp: "ব্যাখ্যা: আদর্শ তড়িৎ দ্বিমেরুর ক্ষেত্রে অক্ষস্থিত বিন্দুতে বিভব V = p/(4&pi;&epsilon;<sub>0</sub>r<sup>2</sup>), অর্থাৎ দ্বিমেরুর বিভব দূরত্বের বর্গের ব্যস্তানুপাতে হ্রাস পায়।" },
+{ q: "৫. n-সংখ্যক সমান আকারের এবং একই বিভবের (V) ছোটো তরল বিন্দু মিলে একটি বড়ো তরল বিন্দু গঠন করলে, বড়ো বিন্দুর বিভব কত হবে?", opts: ["nV", "n<sup>1/3</sup>V", "n<sup>2/3</sup>V", "n<sup>2</sup>V"], ans: 2, exp: "ব্যাখ্যা: বড় বিন্দুর ব্যাসার্ধ R = n<sup>1/3</sup>r এবং মোট আধান Q = nq। তাই বড় বিন্দুর বিভব V' = Q/(4&pi;&epsilon;<sub>0</sub>R) = nq/(4&pi;&epsilon;<sub>0</sub>n<sup>1/3</sup>r) = n<sup>2/3</sup>V হয়।" },
+{ q: "৬. তড়িৎ দ্বিমেরুর যেকোনো বিন্দুতে (স্থানাঙ্ক r, &theta;) বিভবের রাশিমালা কোনটি?", opts: ["p cos&theta;/(4&pi;&epsilon;<sub>0</sub>r<sup>2</sup>)", "p sin&theta;/(4&pi;&epsilon;<sub>0</sub>r<sup>2</sup>)", "p cos&theta;/(4&pi;&epsilon;<sub>0</sub>r<sup>3</sup>)", "p/(4&pi;&epsilon;<sub>0</sub>r<sup>2</sup>)"], ans: 0, exp: "ব্যাখ্যা: তড়িৎ দ্বিমেরুর কেন্দ্র থেকে r দূরত্বে এবং &theta; কোণে আনত যেকোনো বিন্দুতে বিভবের সাধারণ সূত্র হলো V = p cos&theta;/(4&pi;&epsilon;<sub>0</sub>r<sup>2</sup>)।" },
+{ q: "৭. একটি আহিত নিরেট অপরিবাহী গোলকের কেন্দ্রে বিভব এবং পৃষ্ঠের বিভবের অনুপাত কত?", opts: ["1:1", "3:2", "2:3", "1:2"], ans: 1, exp: "ব্যাখ্যা: a ব্যাসার্ধের নিরেট অপরিবাহী গোলকের ক্ষেত্রে পৃষ্ঠের বিভব V<sub>s</sub> = q/(4&pi;&epsilon;<sub>0</sub>a) এবং কেন্দ্রে (x=0) বিভব V<sub>c</sub> = 3/2 &times; q/(4&pi;&epsilon;<sub>0</sub>a)। তাই অনুপাত 3:2 বা 1.5 গুণ হয়।" },
+{ q: "৮. 10 cm বাহুবিশিষ্ট একটি বর্গক্ষেত্রের চার কোণায় 20 esu করে ধনাত্মক আধান আছে। কেন্দ্রবিন্দুতে বিভব কত?", opts: ["0 esu", "8&radic;2 esu", "11.31 esu", "20&radic;2 esu"], ans: 2, exp: "ব্যাখ্যা: কেন্দ্র থেকে প্রতিটি কোণার দূরত্ব r = 5&radic;2 cm। কেন্দ্রে মোট বিভব V = 4 &times; (q/r) = 4 &times; (20/(5&radic;2)) = 16/&radic;2 = 8&radic;2 &approx; 11.31 esu বিভব।" },
+{ q: "৯. a ও b ব্যাসার্ধের (a < b) দুটি সমকেন্দ্রিক ধাতব গোলকের ভেতরেরটিকে ভূসংলগ্ন করে বাইরেরটিতে q আধান দিলে ভেতরের গোলকে কত আধান আবিষ্ট হবে?", opts: ["-bq/a", "-aq/b", "+aq/b", "-q"], ans: 1, exp: "ব্যাখ্যা: ভেতরের গোলকের মোট বিভব শূন্য হবে (ভূসংলগ্ন বলে)। অর্থাৎ q<sub>1</sub>/a + q/b = 0 &rArr; q<sub>1</sub> = -aq/b।" },
+{ q: "১০. একটি বিন্দু আধান থেকে r দূরত্বে প্রাবল্য E এবং বিভব V হলে, নিচের কোনটি সঠিক?", opts: ["V = E/r", "E = V/r", "V = E r<sup>2</sup>", "E = V<sup>2</sup>/r"], ans: 1, exp: "ব্যাখ্যা: বিন্দু আধানের ক্ষেত্রে V = q/(4&pi;&epsilon;<sub>0</sub>r) এবং E = q/(4&pi;&epsilon;<sub>0</sub>r<sup>2</sup>)। এদের ভাগ করলে E = V/r পাওয়া যায়।" },
+{ q: "১১. একটি 5 cm ব্যাসার্ধের ফাঁপা গোলকের পৃষ্ঠে বিভব 10 V হলে, কেন্দ্র থেকে 2 cm দূরে বিভব কত?", opts: ["4 V", "10 V", "0 V", "25 V"], ans: 1, exp: "ব্যাখ্যা: ফাঁপা আহিত পরিবাহীর অভ্যন্তরে সর্বত্র (এমনকি কেন্দ্রেও) তড়িৎবিভব ধ্রুবক থাকে এবং তা পৃষ্ঠের বিভবের সমান (10 V) হয়।" },
+{ q: "১২. তড়িৎ দ্বিমেরুর বিভব দূরত্বের সাথে কীভাবে পরিবর্তিত হয় তা কিসের ওপর নির্ভর করে?", opts: ["শুধুমাত্র মাধ্যমের ওপর", "শুধুমাত্র আধানের ওপর", "ডাইপোল ভ্রামকের মধ্যে একটি দূরত্বের একক (l) লুকিয়ে থাকার কারণে 1/r<sup>2</sup> এর সাথে", "1/r এর সাথে"], ans: 2, exp: "ব্যাখ্যা: মাত্রিক বিশ্লেষণ অনুযায়ী, দ্বিমেরু ভ্রামক p = 2ql হওয়ায় এতে দূরত্বের মাত্রা থাকে। তাই বিভবের রাশিতে 1/r এর বদলে 1/r<sup>2</sup> যুক্ত হয়ে দূরত্বের বর্গের ব্যস্তানুপাতে হ্রাস পায়।" },
+{ q: "১৩. রৈখিক আধান বণ্টনের (linear charge distribution) জন্য কোনো বিন্দুতে বিভব নির্ণয়ের সূত্রটি কিসের ওপর নির্ভর করে?", opts: ["আধানের তলমাত্রিক ঘনত্ব &sigma;", "আধানের রৈখিক ঘনত্ব &lambda;", "আধানের আয়তন ঘনত্ব &rho;", "দ্বিমেরু ভ্রামক p"], ans: 1, exp: "ব্যাখ্যা: রৈখিক আধান বণ্টনের ক্ষেত্রে তারের ক্ষুদ্র অংশের আধান dq = &lambda; dl ধরা হয় এবং মোট বিভব V = (1/4&pi;&epsilon;<sub>0</sub>)&int;(&lambda; dl/r) দ্বারা নির্ণয় করা হয়।" },
+{ q: "১৪. দুটি আধান 2 &mu;C এবং -2 &mu;C পরস্পর 6 cm ব্যবধানে আছে। আধান দুটির মধ্যবিন্দুতে বিভব কত?", opts: ["0 V", "6 &times; 10<sup>5</sup> V", "12 &times; 10<sup>5</sup> V", "অসীম"], ans: 0, exp: "ব্যাখ্যা: আধান দুটির মধ্যবিন্দুতে উভয় আধান থেকে দূরত্ব সমান (3 cm)। যেহেতু আধান দুটি সমপরিমাণ ও বিপরীত প্রকৃতির, তাই মোট বিভব V = V<sub>1</sub> + V<sub>2</sub> = k(q/r - q/r) = 0 হবে।" },
+{ q: "১৫. একটি ফাঁপা গোলকের কেন্দ্র থেকে দূরত্বের (x) সাথে বিভবের (V) পরিবর্তনের লেখচিত্রটি কেমন?", opts: ["কেন্দ্রে শূন্য থেকে শুরু হয়ে বাড়ে", "পৃষ্ঠ পর্যন্ত ধ্রুবক থাকে এবং তারপর 1/x হারে কমে", "সর্বদা ব্যস্তানুপাতিক", "সর্বদা ধ্রুবক"], ans: 1, exp: "ব্যাখ্যা: ফাঁপা গোলকের ক্ষেত্রে কেন্দ্র থেকে পৃষ্ঠ পর্যন্ত (x &le; R) বিভব ধ্রুবক থাকে। এরপর গোলকের বাইরে (x > R) বিভব 1/x হারে ক্রমশ হ্রাস পেতে থাকে।" }
+]
+},
+3: {
+name: 'Set 3', icon: '🌍', topic: 'পৃথিবীর বিভব ও সমবিভব তল (৩.৩)',
+questions: [
+{ q: "১. তড়িৎবিজ্ঞানে প্রমাণ বিভব (Reference Potential) হিসেবে কার বিভবকে শূন্য ধরা হয়?", opts: ["সূর্য", "চাঁদ", "পৃথিবী", "মহাকাশ"], ans: 2, exp: "ব্যাখ্যা: পৃথিবীর আকার বিশাল হওয়ায় এর আধান ধারণ ক্ষমতা প্রায় অসীম। সামান্য আধান দেওয়া বা নিলে এর বিভবের কোনো পরিবর্তন হয় না, তাই পৃথিবীর তড়িৎবিভবকে সর্বদা শূন্য ধরা হয়।" },
+{ q: "২. সমবিভব তল (Equipotential Surface) কাকে বলে?", opts: ["যে তলে তড়িৎক্ষেত্র শূন্য", "তড়িৎক্ষেত্রের মধ্যে যে তলের সকল বিন্দুতে বিভব সমান", "যে তলে আধান শূন্য", "যে তল পৃথিবীর সাথে যুক্ত"], ans: 1, exp: "ব্যাখ্যা: তড়িৎক্ষেত্রের মধ্যে অবস্থিত কোনো কাল্পনিক তলের প্রতিটি বিন্দুতে যদি তড়িৎবিভবের মান একই থাকে, তবে তাকে সমবিভব তল বলে।" },
+{ q: "৩. সমবিভব তলের ওপর অবস্থিত কোনো আধানকে একবিন্দু থেকে অন্য বিন্দুতে সরাতে কৃতকার্য কত?", opts: ["অসীম", "ঋণাত্মক", "ধনাত্মক", "শূন্য"], ans: 3, exp: "ব্যাখ্যা: কৃতকার্য W = q(V<sub>B</sub> - V<sub>A</sub>)। যেহেতু সমবিভব তলের যেকোনো দুটি বিন্দুর বিভব সমান (V<sub>B</sub> = V<sub>A</sub>), তাই বিভবপার্থক্য শূন্য হয় এবং কৃতকার্যও শূন্য হয়।" },
+{ q: "৪. তড়িৎ বলরেখা সমবিভব তলকে কত কোণে ছেদ করে?", opts: ["0&deg;", "45&deg;", "90&deg; (লম্বভাবে)", "180&deg;"], ans: 2, exp: "ব্যাখ্যা: সমবিভব তলে আধান সরাতে কার্য শূন্য (W = q E cos&theta; &times; dl = 0)। যেহেতু E এবং dl শূন্য নয়, তাই cos&theta; = 0 &rArr; &theta; = 90&deg;। অর্থাৎ বলরেখা সমবিভব তলকে সর্বদা লম্বভাবে ছেদ করে।" },
+{ q: "৫. দুটি সমবিভব তল কি পরস্পরকে ছেদ করতে পারে?", opts: ["হ্যাঁ, লম্বভাবে", "হ্যাঁ, যেকোনো কোণে", "না, কখনোই পারে না", "কেবলমাত্র সুষম ক্ষেত্রে পারে"], ans: 2, exp: "ব্যাখ্যা: দুটি সমবিভব তল পরস্পরকে ছেদ করলে, ছেদবিন্দুতে তড়িৎবিভবের দুটি ভিন্ন মান পাওয়া যেত, যা বাস্তবে কখনোই সম্ভব নয়।" },
+{ q: "৬. একটি বিন্দু আধান থেকে অসীম দূরত্বে সমবিভব তলের আকৃতি কেমন হয়?", opts: ["গোলকাকার", "চোঙাকৃতি", "সমতল (Plane)", "অধিবৃত্তাকার"], ans: 2, exp: "ব্যাখ্যা: একটি বিচ্ছিন্ন বিন্দু আধানের কাছাকাছি সমবিভব তলগুলি সমকেন্দ্রিক গোলক হয়, কিন্তু অসীম দূরত্বে গোলকের বক্রতা প্রায় শূন্য হয়ে যাওয়ায় তা সমতল বা সমতলীয় হিসেবে আচরণ করে।" },
+{ q: "৭. সুষম তড়িৎক্ষেত্রের সমবিভব তলগুলি কেমন হয়?", opts: ["সমকেন্দ্রিক গোলক", "পরস্পর সমান্তরাল সমতল", "পরস্পরচ্ছেদী বক্রতল", "চোঙাকৃতি"], ans: 1, exp: "ব্যাখ্যা: সুষম তড়িৎক্ষেত্রে প্রাবল্যের মান ও অভিমুখ সর্বত্র সমান। তাই এর সমবিভব তলগুলি তড়িৎ বলরেখার সাথে লম্বভাবে অবস্থিত সমান্তরাল ও সমদূরবর্তী সমতল পৃষ্ঠ হয়।" },
+{ q: "৮. কোনো আহিত পরিবাহীর পৃষ্ঠ কেমন তল হিসেবে আচরণ করে?", opts: ["সমপ্রাবল্য তল", "সমবিভব তল", "শূন্য বিভব তল", "অসীম বিভব তল"], ans: 1, exp: "ব্যাখ্যা: স্থির-তড়িৎ ব্যবস্থায় পরিবাহীর পৃষ্ঠে আধানগুলি স্থির থাকে এবং তড়িৎ বলরেখা লম্বভাবে নির্গত হয়। ফলে পরিবাহীর পৃষ্ঠের সর্বত্র বিভব সমান হয়, অর্থাৎ এটি একটি সমবিভব তল।" },
+{ q: "৯. তড়িৎ দ্বিমেরুর ক্ষেত্রে কোন্ তলটি একটি সমবিভব তল?", opts: ["অক্ষীয় তল", "লম্ব সমদ্বিখণ্ডক তল", "যেকোনো আনত তল", "সমান্তরাল তল"], ans: 1, exp: "ব্যাখ্যা: তড়িৎ দ্বিমেরুর লম্ব সমদ্বিখণ্ডক তলের ওপর অবস্থিত যেকোনো বিন্দুতে লব্ধি বিভব শূন্য হয়। যেহেতু তলের সর্বত্র বিভব সমান (শূন্য), তাই এটি একটি সমবিভব তল।" },
+{ q: "১০. শক্তিশালী তড়িৎক্ষেত্রে সমবিভব তলগুলি কেমনভাবে অবস্থান করে?", opts: ["অনেক দূরে দূরে", "এলোমেলোভাবে", "খুব কাছাকাছি বা ঘনসন্নিবিষ্ট", "পরস্পরকে ছেদ করে"], ans: 2, exp: "ব্যাখ্যা: dr = -dV/E সম্পর্ক থেকে দেখা যায়, নির্দিষ্ট বিভবপার্থক্যের জন্য E বেশি হলে dr (তলগুলির মধ্যবর্তী দূরত্ব) কম হয়। তাই শক্তিশালী ক্ষেত্রে সমবিভব তলগুলি কাছাকাছি থাকে।" },
+{ q: "১১. একটি 10 cm ব্যাসার্ধের পরিবাহী গোলকের পৃষ্ঠ বরাবর একটি 10 &mu;C আধানকে 5 cm সরাতে কৃতকার্য কত?", opts: ["50 J", "5 &times; 10<sup>-6</sup> J", "শূন্য (0 J)", "2 J"], ans: 2, exp: "ব্যাখ্যা: আহিত পরিবাহীর পৃষ্ঠ একটি সমবিভব তল। সমবিভব তলে আধান সরাতে কোনো কৃতকার্য করতে হয় না (W=0)।" },
+{ q: "১২. পৃথিবী থেকে একটি বস্তুতে ইলেকট্রন স্থানান্তরিত হলে বস্তুটির তড়িৎপ্রকৃতি ও বিভব কেমন ছিল?", opts: ["বস্তুটির বিভব ঋণাত্মক ছিল", "বস্তুটি নিস্তড়িৎ ছিল", "বস্তুটির বিভব ধনাত্মক ছিল", "বলা সম্ভব নয়"], ans: 2, exp: "ব্যাখ্যা: ইলেকট্রন সর্বদা নিম্নবিভব থেকে উচ্চবিভবের দিকে যায়। পৃথিবী (শূন্য বিভব) থেকে ইলেকট্রন বস্তুতে গেলে বুঝতে হবে বস্তুটি উচ্চতর অর্থাৎ ধনাত্মক বিভবে ছিল।" },
+{ q: "১৩. সমবিভব তলের যে-কোনো বিন্দুতে তড়িৎপ্রাবল্যের অভিমুখ কোন দিকে হয়?", opts: ["তলের স্পর্শক বরাবর", "তলের সাথে 45&deg; কোণে", "তলের ওপর অঙ্কিত অভিলম্ব বরাবর", "শূন্য হয়"], ans: 2, exp: "ব্যাখ্যা: তড়িৎ বলরেখা সমবিভব তলকে লম্বভাবে ছেদ করে। তাই সমবিভব তলের যেকোনো বিন্দুতে তড়িৎপ্রাবল্যের দিক তলের অভিলম্ব বা লম্ব বরাবর হয়।" },
+{ q: "১৪. একটি বিচ্ছিন্ন ধনাত্মক বিন্দু আধানের জন্য তড়িৎ বলরেখা ও সমবিভব তলগুলি যথাক্রমে কেমন হয়?", opts: ["সমান্তরাল রেখা ও গোলক", "ব্যাসার্ধ বরাবর বহির্মুখী রেখা ও সমকেন্দ্রিক গোলক", "অন্তর্মুখী রেখা ও সমতল", "বক্ররেখা ও চোঙ"], ans: 1, exp: "ব্যাখ্যা: ধনাত্মক আধানের বলরেখা ব্যাসার্ধ বরাবর বাইরের দিকে নির্গত হয় এবং এর চারপাশের সমবিভব তলগুলি আধানটিকে কেন্দ্র করে সমকেন্দ্রিক গোলকাকার হয়।" },
+{ q: "১৫. একটি ফাঁপা আহিত পরিবাহীর অভ্যন্তরে সমবিভব তলের বৈশিষ্ট্য কী?", opts: ["অভ্যন্তরস্থ সমগ্র আয়তনটাই একটি সমবিভব অঞ্চল", "কেন্দ্রে বিভব অসীম হয়", "কেন্দ্র থেকে দূরত্বের সাথে বিভব বাড়ে", "কোনো বিভব থাকে না"], ans: 0, exp: "ব্যাখ্যা: ফাঁপা পরিবাহীর ভেতরে সর্বত্র তড়িৎক্ষেত্র প্রাবল্য শূন্য (E=0) হয়, ফলে প্রতিটি বিন্দুর বিভব সমান থাকে। তাই পুরো ভেতরের অংশটিই একটি সমবিভব অঞ্চল।" }
+]
+},
+4: {
+name: 'Set 4', icon: '🔋', topic: 'তড়িৎ স্থিতিশক্তি (৩.৪)',
+questions: [
+{ q: "১. দুটি বিন্দু আধান q<sub>1</sub> এবং q<sub>2</sub> পরস্পর থেকে r দূরত্বে অবস্থিত হলে তাদের তড়িৎ স্থিতিশক্তির রাশিমালা কী?", opts: ["U = q<sub>1</sub>q<sub>2</sub>/(4&pi;&epsilon;<sub>0</sub>r<sup>2</sup>)", "U = q<sub>1</sub>q<sub>2</sub>/(4&pi;&epsilon;<sub>0</sub>r)", "U = q<sub>1</sub>q<sub>2</sub>r/(4&pi;&epsilon;<sub>0</sub>)", "U = q<sub>1</sub>/(4&pi;&epsilon;<sub>0</sub>r)"], ans: 1, exp: "ব্যাখ্যা: অসীম দূরত্ব থেকে q<sub>2</sub> আধানকে q<sub>1</sub> এর প্রভাবে r দূরত্বে আনতে কৃতকার্যই স্থিতিশক্তি হিসেবে সঞ্চিত হয়, যার মান U = q<sub>1</sub>q<sub>2</sub>/(4&pi;&epsilon;<sub>0</sub>r)।" },
+{ q: "২. দুটি সমপ্রকৃতির (যেমন দুটি প্রোটন) আধানকে পরস্পরের কাছাকাছি আনলে তাদের তড়িৎ স্থিতিশক্তি কী হবে?", opts: ["হ্রাস পাবে", "শূন্য হয়ে যাবে", "বৃদ্ধি পাবে", "অপরিবর্তিত থাকবে"], ans: 2, exp: "ব্যাখ্যা: সমপ্রকৃতির আধান পরস্পরকে বিকর্ষণ করে। এই বিকর্ষণ বলের বিরুদ্ধে আধানদুটিকে কাছাকাছি আনতে বাইরে থেকে কার্য করতে হয়, যা সংস্থায় স্থিতিশক্তি হিসেবে সঞ্চিত হয়ে স্থিতিশক্তি বৃদ্ধি করে।" },
+{ q: "৩. একটি ইলেকট্রনকে একটি প্রোটনের কাছে আনলে সংস্থার তড়িৎ স্থিতিশক্তি কী হবে?", opts: ["বৃদ্ধি পাবে", "হ্রাস পাবে", "একই থাকবে", "শূন্য হবে"], ans: 1, exp: "ব্যাখ্যা: বিপরীত প্রকৃতির আধান হওয়ায় তারা পরস্পরকে আকর্ষণ করে। এদের কাছাকাছি আনলে আকর্ষণ বলের দ্বারাই কার্য হয়, ফলে সংস্থার সঞ্চিত ঋণাত্মক স্থিতিশক্তি আরও ঋণাত্মক হয় অর্থাৎ স্থিতিশক্তি হ্রাস পায়।" },
+{ q: "৪. অসীম দূরত্বে অবস্থিত কোনো আধানের তড়িৎ স্থিতিশক্তি কত ধরা হয়?", opts: ["অসীম", "1 জুল", "শূন্য", "100 জুল"], ans: 2, exp: "ব্যাখ্যা: অসীম দূরত্বে তড়িৎক্ষেত্রজনিত বলের মান শূন্য ধরা হয়, তাই সেখানে আধানের কোনো তড়িৎ স্থিতিশক্তি থাকে না বা এর মান শূন্য ধরা হয়।" },
+{ q: "৫. তড়িৎবিভব (V) এবং তড়িৎ স্থিতিশক্তির (U) মধ্যে গাণিতিক সম্পর্ক কী?", opts: ["U = V/q", "U = q/V", "U = qV", "U = q<sup>2</sup>V"], ans: 2, exp: "ব্যাখ্যা: কোনো বিন্দুতে একক আধানের স্থিতিশক্তিই হলো বিভব। তাই q আধানকে V বিভবযুক্ত বিন্দুতে আনতে কৃতকার্য বা স্থিতিশক্তি U = q &times; V হয়।" },
+{ q: "৬. a বাহুবিশিষ্ট একটি সমবাহু ত্রিভুজের তিনটি শীর্ষবিন্দুতে তিনটি সমান আধান q থাকলে সংস্থাটির মোট স্থিতিশক্তি কত?", opts: ["q<sup>2</sup>/(4&pi;&epsilon;<sub>0</sub>a)", "3q<sup>2</sup>/(4&pi;&epsilon;<sub>0</sub>a)", "3q/(4&pi;&epsilon;<sub>0</sub>a)", "শূন্য"], ans: 1, exp: "ব্যাখ্যা: তিনটি আধানের জন্য তিনটি জোড়া (pairs) তৈরি হয়। প্রতি জোড়ার স্থিতিশক্তি q<sup>2</sup>/(4&pi;&epsilon;<sub>0</sub>a)। তাই মোট স্থিতিশক্তি U = 3 &times; q<sup>2</sup>/(4&pi;&epsilon;<sub>0</sub>a)।" },
+{ q: "৭. কোনো তড়িৎক্ষেত্রের মধ্যে আধানকে সরাতে তড়িৎক্ষেত্রজনিত বলের বিরুদ্ধে কৃতকার্য কিসের সমান হয়?", opts: ["গতিশক্তির হ্রাসের", "তড়িৎ স্থিতিশক্তি বৃদ্ধির", "বিভবের হ্রাসের", "প্রাবল্য বৃদ্ধির"], ans: 1, exp: "ব্যাখ্যা: তড়িৎক্ষেত্র সংরক্ষী হওয়ায়, বাহ্যিক বল দ্বারা তড়িৎবলের বিরুদ্ধে করা কাজ আধানটির মধ্যে তড়িৎ স্থিতিশক্তির বৃদ্ধি হিসেবে সঞ্চিত হয় (W = &Delta;U)।" },
+{ q: "৮. একটি বহিস্থ তড়িৎক্ষেত্রে (যেখানে বিভব V(<strong>r</strong>)), q আধানকে স্থাপন করলে আধানটির স্থিতিশক্তি কত হবে?", opts: ["qV(<strong>r</strong>)", "V(<strong>r</strong>)/q", "শূন্য", "q<sup>2</sup>V(<strong>r</strong>)"], ans: 0, exp: "ব্যাখ্যা: বহিস্থ ক্ষেত্রে অসীম থেকে আধানটিকে আনতে বহিস্থ সংস্থা দ্বারা কৃতকার্য W = qV হয়, যা আধানের স্থিতিশক্তিরূপে সঞ্চিত হয়।" },
+{ q: "৯. দুটি বিন্দু আধানের মধ্যবর্তী দূরত্ব দ্বিগুণ করলে তাদের স্থিতিশক্তি কী হবে?", opts: ["দ্বিগুণ হবে", "চারগুণ হবে", "অর্ধেক হবে", "একই থাকবে"], ans: 2, exp: "ব্যাখ্যা: স্থিতিশক্তি U &propto; 1/r। দূরত্ব r দ্বিগুণ হলে, 1/(2r) হয়ে যায়, ফলে স্থিতিশক্তি প্রাথমিক মানের অর্ধেক হয়ে যায়।" },
+{ q: "১০. n-সংখ্যক বিন্দু আধানের সংস্থা গঠন করতে মোট স্থিতিশক্তির সূত্রে কয়টি পদ (terms) থাকে?", opts: ["n", "n<sup>2</sup>", "n(n-1)/2", "2n"], ans: 2, exp: "ব্যাখ্যা: স্থিতিশক্তি নির্ণয়ের সময় প্রতি জোড়া আধানের হিসাব নেওয়া হয়। n-টি আধানের মধ্যে জোড়া তৈরি করার উপায় হলো <sup>n</sup>C<sub>2</sub> = n(n-1)/2 টি।" },
+{ q: "১১. একটি আহিত পরিবাহী গোলকের (ব্যাসার্ধ a, আধান q) মোট স্থিতিশক্তি কত?", opts: ["q<sup>2</sup>/(4&pi;&epsilon;<sub>0</sub>a)", "q<sup>2</sup>/(8&pi;&epsilon;<sub>0</sub>a)", "3q<sup>2</sup>/(20&pi;&epsilon;<sub>0</sub>a)", "শূন্য"], ans: 1, exp: "ব্যাখ্যা: পরিবাহী গোলকের ক্ষেত্রে মোট সঞ্চিত শক্তি বা স্থিতিশক্তি U = 1/2 CV<sup>2</sup> বা U = q<sup>2</sup>/(2C) থেকে আসে, যার মান q<sup>2</sup>/(8&pi;&epsilon;<sub>0</sub>a)।" },
+{ q: "১২. তড়িৎ স্থিতিশক্তি ঋণাত্মক হওয়ার অর্থ কী?", opts: ["আধান দুটি সমপ্রকৃতির", "আধান দুটি বিপরীত প্রকৃতির এবং তাদের মধ্যে আকর্ষণ বল কাজ করছে", "সংস্থাটির কোনো অস্তিত্ব নেই", "আধান দুটি স্থির আছে"], ans: 1, exp: "ব্যাখ্যা: বিপরীত প্রকৃতির আধানের গুণফল ঋণাত্মক হয়। এক্ষেত্রে আকর্ষণ বলের দ্বারা কার্য হওয়ায় স্থিতিশক্তি ঋণাত্মক হয়।" },
+{ q: "১৩. বহিস্থ ক্ষেত্রে দুটি বিন্দু আধান q<sub>1</sub> ও q<sub>2</sub> (যাদের দূরত্ব r<sub>12</sub>) এর মোট স্থিতিশক্তি কত?", opts: ["q<sub>1</sub>V<sub>1</sub> + q<sub>2</sub>V<sub>2</sub>", "q<sub>1</sub>q<sub>2</sub>/(4&pi;&epsilon;<sub>0</sub>r<sub>12</sub>)", "q<sub>1</sub>V<sub>1</sub> + q<sub>2</sub>V<sub>2</sub> + q<sub>1</sub>q<sub>2</sub>/(4&pi;&epsilon;<sub>0</sub>r<sub>12</sub>)", "শূন্য"], ans: 2, exp: "ব্যাখ্যা: বহিস্থ ক্ষেত্রের জন্য স্থিতিশক্তি (q<sub>1</sub>V<sub>1</sub> + q<sub>2</sub>V<sub>2</sub>) এবং নিজেদের মধ্যে পারস্পরিক বিকর্ষণ/আকর্ষণের জন্য স্থিতিশক্তি উভয়ের যোগফলই হলো মোট শক্তি।" },
+{ q: "১৪. দুটি আধানবিশিষ্ট একটি সংস্থাকে অসীম দূরত্বে পৃথক করে দিলে সংস্থাটির স্থিতিশক্তি কত হবে?", opts: ["সর্বাধিক", "শূন্য", "ঋণাত্মক", "বলা সম্ভব নয়"], ans: 1, exp: "ব্যাখ্যা: অসীম দূরত্বে আধানগুলির মধ্যে কোনো পারস্পরিক বল কাজ করে না। r &rarr; &infin; হলে U &propto; 1/r অনুযায়ী স্থিতিশক্তি শূন্য হয়ে যায়।" },
+{ q: "১৫. একটি বর্গক্ষেত্রের চার কোণায় q<sub>1</sub>, q<sub>2</sub>, q<sub>3</sub>, q<sub>4</sub> আধান থাকলে, মোট স্থিতিশক্তি বের করার জন্য কয়টি জোড়ার হিসেব করতে হয়?", opts: ["4", "6", "8", "2"], ans: 1, exp: "ব্যাখ্যা: 4টি বাহুর জন্য 4টি জোড়া এবং 2টি কর্ণের জন্য 2টি জোড়া—মোট <sup>4</sup>C<sub>2</sub> = 6 টি জোড়ার স্থিতিশক্তির যোগফল নিতে হয়।" }
+]
+},
+5: {
+name: 'Set 5', icon: '🚀', topic: 'আহিত বস্তুর গতিশক্তি ও ইলেকট্রন-ভোল্ট (৩.৫)',
+questions: [
+{ q: "১. স্থির অবস্থা থেকে V বিভবপ্রভেদের মধ্য দিয়ে q আধানযুক্ত বস্তু গেলে তার অর্জিত গতিশক্তি (E<sub>k</sub>) কত হবে?", opts: ["q/V", "V/q", "qV", "q<sup>2</sup>V"], ans: 2, exp: "ব্যাখ্যা: তড়িৎক্ষেত্রে আধান এক বিন্দু থেকে অন্য বিন্দুতে গেলে তার হারানো তড়িৎ স্থিতিশক্তি গতিশক্তিতে রূপান্তরিত হয়। শক্তির নিত্যতা অনুযায়ী E<sub>k</sub> = &Delta;U = qV।" },
+{ q: "২. 1 ইলেকট্রন ভোল্ট (eV) সমান কত জুল?", opts: ["1.6 &times; 10<sup>-19</sup> J", "9 &times; 10<sup>9</sup> J", "8.85 &times; 10<sup>-12</sup> J", "1.6 &times; 10<sup>-12</sup> J"], ans: 0, exp: "ব্যাখ্যা: 1 eV বলতে 1টি ইলেকট্রনকে 1 ভোল্ট বিভবপ্রভেদে ত্বরান্বিত করতে কৃতকার্য বোঝায়। W = qV = (1.6 &times; 10<sup>-19</sup> C) &times; 1 V = 1.6 &times; 10<sup>-19</sup> জুল।" },
+{ q: "৩. ইলেকট্রন ভোল্ট (eV) কিসের একক?", opts: ["আধান", "তড়িৎবিভব", "শক্তি", "ক্ষমতা"], ans: 2, exp: "ব্যাখ্যা: ইলেকট্রন ভোল্ট হলো পারমাণবিক ও নিউক্লীয় স্তরে খুব ক্ষুদ্র শক্তির পরিমাপ করার একটি বিশেষ ব্যাবহারিক একক।" },
+{ q: "৪. m ভরের এবং q আধানের একটি কণা স্থির অবস্থা থেকে V বিভবপার্থক্য অতিক্রম করলে তার অন্তিম বেগ v কত হবে?", opts: ["&radic;(qV/m)", "&radic;(2qV/m)", "2qV/m", "&radic;(qV/2m)"], ans: 1, exp: "ব্যাখ্যা: গতিশক্তি E<sub>k</sub> = 1/2 mv<sup>2</sup> = qV। এখান থেকে সমাধান করলে অন্তিম বেগ v = &radic;(2qV/m) পাওয়া যায়।" },
+{ q: "৫. 1 মেগা-ইলেকট্রন ভোল্ট (1 MeV) সমান কত eV?", opts: ["10<sup>3</sup> eV", "10<sup>6</sup> eV", "10<sup>9</sup> eV", "10<sup>12</sup> eV"], ans: 1, exp: "ব্যাখ্যা: মেগা (Mega) প্রিফিক্সের অর্থ দশ লক্ষ বা 10<sup>6</sup>। তাই 1 MeV = 10<sup>6</sup> eV।" },
+{ q: "৬. একটি প্রোটনকে 1 kV বিভবপ্রভেদের মধ্যে ত্বরান্বিত করলে এর অর্জিত গতিশক্তি কত হবে?", opts: ["1 eV", "1 keV", "1 MeV", "2 keV"], ans: 1, exp: "ব্যাখ্যা: প্রোটনের আধান 1e। তাই 1000 V বা 1 kV বিভবে ত্বরান্বিত হলে এর গতিশক্তি হবে 1e &times; 1 kV = 1 keV।" },
+{ q: "৭. একটি ইলেকট্রন ও একটি প্রোটনকে একই বিভবপার্থক্যের মধ্য দিয়ে ত্বরান্বিত করলে কার গতিশক্তি বেশি হবে?", opts: ["প্রোটন", "ইলেকট্রন", "উভয়ের গতিশক্তি সমান হবে", "ভর না জানলে বলা যাবে না"], ans: 2, exp: "ব্যাখ্যা: গতিশক্তি E<sub>k</sub> = qV। যেহেতু ইলেকট্রন ও প্রোটন উভয়েরই আধানের মান সমান (e) এবং বিভবপার্থক্য (V) সমান, তাই উভয়ের অর্জিত গতিশক্তিও সমান হবে।" },
+{ q: "৮. 1 keV সমান কত আর্গ (erg)?", opts: ["1.6 &times; 10<sup>-19</sup> আর্গ", "1.6 &times; 10<sup>-12</sup> আর্গ", "1.6 &times; 10<sup>-9</sup> আর্গ", "1.6 &times; 10<sup>-6</sup> আর্গ"], ans: 2, exp: "ব্যাখ্যা: 1 eV = 1.6 &times; 10<sup>-12</sup> আর্গ। 1 keV = 10<sup>3</sup> eV = 10<sup>3</sup> &times; 1.6 &times; 10<sup>-12</sup> = 1.6 &times; 10<sup>-9</sup> আর্গ।" },
+{ q: "৯. একটি আলফা কণা (আধান = +2e) 50 V বিভবপ্রভেদের মধ্য দিয়ে গেলে কত গতিশক্তি লাভ করবে?", opts: ["50 eV", "100 eV", "25 eV", "200 eV"], ans: 1, exp: "ব্যাখ্যা: গতিশক্তি = q &times; V = (2e) &times; 50 V = 100 eV।" },
+{ q: "১০. তড়িৎক্ষেত্রে আহিত বস্তুর গতিশক্তি বৃদ্ধির মূল কারণ কী?", opts: ["ভর বৃদ্ধি", "আধান বৃদ্ধি", "তড়িৎ স্থিতিশক্তির হ্রাস", "মহাকর্ষীয় স্থিতিশক্তির হ্রাস"], ans: 2, exp: "ব্যাখ্যা: শক্তির সংরক্ষণ সূত্রানুযায়ী, তড়িৎক্ষেত্রের বলের প্রভাবে আহিত বস্তু যত সামনে এগোয়, তার তড়িৎ স্থিতিশক্তি তত হ্রাস পায় এবং সেই সমপরিমাণ হ্রাসই গতিশক্তি হিসেবে প্রকাশ পায়।" },
+{ q: "১১. স্থির অবস্থা থেকে 180 V বিভবপার্থক্যের মধ্য দিয়ে গেলে একটি ইলেকট্রনের বেগ কত হবে? (ইলেকট্রনের ভর 9&times;10<sup>-31</sup> kg)", opts: ["8 &times; 10<sup>5</sup> m/s", "8 &times; 10<sup>6</sup> m/s", "8 &times; 10<sup>7</sup> m/s", "1.6 &times; 10<sup>6</sup> m/s"], ans: 1, exp: "ব্যাখ্যা: v = &radic;(2eV/m) = &radic;((2 &times; 1.6&times;10<sup>-19</sup> &times; 180)/(9&times;10<sup>-31</sup>)) = &radic;(64 &times; 10<sup>12</sup>) = 8 &times; 10<sup>6</sup> m/s।" },
+{ q: "১২. সমান আধানযুক্ত দুটি বস্তুর ভর m<sub>1</sub> ও m<sub>2</sub> (m<sub>1</sub> > m<sub>2</sub>)। এদেরকে সমান বিভবপার্থক্যে ত্বরান্বিত করলে অন্তিম বেগের অনুপাত v<sub>1</sub> : v<sub>2</sub> কত হবে?", opts: ["&radic;m<sub>2</sub> : &radic;m<sub>1</sub>", "&radic;m<sub>1</sub> : &radic;m<sub>2</sub>", "m<sub>2</sub> : m<sub>1</sub>", "m<sub>1</sub> : m<sub>2</sub>"], ans: 0, exp: "ব্যাখ্যা: v = &radic;(2qV/m)। q এবং V ধ্রুবক হওয়ায় v &propto; 1/&radic;m। তাই v<sub>1</sub> / v<sub>2</sub> = &radic;(m<sub>2</sub> / m<sub>1</sub>)।" },
+{ q: "১৩. E প্রাবল্যের তড়িৎক্ষেত্রে স্থির-তড়িৎ শক্তি ঘনত্ব (Energy density) এর রাশিমালা কী?", opts: ["&epsilon;<sub>0</sub>E<sup>2</sup>", "1/2&epsilon;<sub>0</sub>E<sup>2</sup>", "1/(2&epsilon;<sub>0</sub>)E<sup>2</sup>", "1/2&epsilon;<sub>0</sub>E"], ans: 1, exp: "ব্যাখ্যা: তড়িৎক্ষেত্রের একক আয়তনে সঞ্চিত শক্তি বা শক্তি ঘনত্বের রাশিমালা হলো U = 1/2 &epsilon;<sub>0</sub> E<sup>2</sup> (শূন্য মাধ্যমে &epsilon;<sub>r</sub> = 1 ধরে)।" },
+{ q: "১৪. একটি স্থির ইলেকট্রন তড়িৎক্ষেত্রের প্রভাবে চলতে শুরু করলে সেটি কোন দিকে যায়?", opts: ["উচ্চ বিভব থেকে নিম্ন বিভবের দিকে", "নিম্ন বিভব থেকে উচ্চ বিভবের দিকে", "সমবিভব তল বরাবর", "বলা সম্ভব নয়"], ans: 1, exp: "ব্যাখ্যা: ইলেকট্রন ঋণাত্মক তড়িদগ্রস্ত কণিকা। তড়িৎক্ষেত্র সর্বদা উচ্চ থেকে নিম্ন বিভবের দিকে কাজ করে, কিন্তু ইলেকট্রন ঋণাত্মক হওয়ায় সে তড়িৎক্ষেত্রের বিপরীত দিকে অর্থাৎ নিম্ন বিভব থেকে উচ্চ বিভবের দিকে আকৃষ্ট হয়।" },
+{ q: "১৫. কোনো বিন্দু আধানকে একটি বদ্ধ পথে ঘুরিয়ে আনলে গতিশক্তির কোনো পরিবর্তন হয় কি?", opts: ["হ্যাঁ, বৃদ্ধি পায়", "হ্যাঁ, হ্রাস পায়", "না, কোনো পরিবর্তন হয় না", "নির্ভর করে আধানের ওপর"], ans: 2, exp: "ব্যাখ্যা: তড়িৎক্ষেত্র সংরক্ষী হওয়ায় বদ্ধ পথে কৃতকার্য শূন্য (W=0) হয়। কার্য-শক্তি উপপাদ্য অনুযায়ী (&Delta;E<sub>k</sub> = W), কৃতকার্য শূন্য হওয়ায় গতিশক্তির কোনো লব্ধি পরিবর্তন হয় না।" }
+]
+},
+6: {
+name: 'Set 6', icon: '📝', topic: 'গাণিতিক সমস্যা (Level-I ও Level-II)',
+questions: [
+{ q: "১. পরিবাহী পৃষ্ঠ বরাবর 10 &mu;C আধানকে 10 cm সরাতে কৃতকার্য কত হবে?", opts: ["10 &times; 10<sup>-6</sup> J", "10 J", "0 J", "100 J"], ans: 2, exp: "ব্যাখ্যা: যেকোনো আহিত পরিবাহীর পৃষ্ঠ একটি সমবিভব তল। সমবিভব তলে আধানকে এক বিন্দু থেকে অন্য বিন্দুতে সরাতে কৃতকার্যের পরিমাণ সর্বদা শূন্য হয়।" },
+{ q: "২. একটি তড়িৎক্ষেত্রের দুই বিন্দুতে বিভবের পরিমাণ 400 V ও 1000 V। 3 &times; 10<sup>-8</sup> C ধনাত্মক আধানকে ওই বিন্দু দুটির একটি থেকে অপরটিতে নিয়ে যেতে কী পরিমাণ কার্য করতে হবে?", opts: ["1.8 &times; 10<sup>-6</sup> J", "18 &times; 10<sup>-6</sup> J", "0.18 &times; 10<sup>-6</sup> J", "180 &times; 10<sup>-6</sup> J"], ans: 1, exp: "ব্যাখ্যা: সম্পাদিত কার্য, W = q(V<sub>2</sub> - V<sub>1</sub>) = 3 &times; 10<sup>-8</sup> &times; (1000 - 400) = 3 &times; 10<sup>-8</sup> &times; 600 = 18 &times; 10<sup>-6</sup> J।" },
+{ q: "৩. 10 cm ব্যাসার্ধের ফাঁপা একটি গোলককে এমনভাবে আহিত করা হল যাতে এর তলে বিভব 10 V হয়। ওই গোলকের কেন্দ্রে বিভব কত?", opts: ["10 V", "5 V", "0 V", "20 V"], ans: 0, exp: "ব্যাখ্যা: ফাঁপা গোলকের ভিতরে সকল বিন্দুতে বিভব সমান থাকে এবং এটি পৃষ্ঠের বিভবের মানের সমান হয়। তাই কেন্দ্রে বিভব 10 V-ই থাকবে।" },
+{ q: "৪. একটি স্থানে বিভব V = 5 + 4x<sup>2</sup> সমীকরণ দ্বারা নির্দেশিত। x = 0.5 m বিন্দুতে অবস্থিত -2 &times; 10<sup>6</sup> C আধানটির উপর ক্রিয়াশীল বল কত হবে?", opts: ["8 &times; 10<sup>4</sup> N", "8 &times; 10<sup>8</sup> N", "8 &times; 10<sup>2</sup> N", "8 &times; 10<sup>6</sup> N"], ans: 3, exp: "ব্যাখ্যা: তড়িৎক্ষেত্র প্রাবল্য E = -dV/dx = -8x। x = 0.5 m বিন্দুতে প্রাবল্য E = -8 &times; 0.5 = -4 V/m। আধানের উপর বল F = qE = (-2 &times; 10<sup>6</sup>) &times; (-4) = 8 &times; 10<sup>6</sup> N।" },
+{ q: "৫. 64 টি পারদ বিন্দুর প্রত্যেকটি 10 V বিভবে আহিত। এরা মিলিত হয়ে একটি বড়ো পারদ বিন্দু গঠিত হয়। বড়ো বিন্দুটির বিভব কত হবে?", opts: ["10 V", "80 V", "160 V", "640 V"], ans: 2, exp: "ব্যাখ্যা: n-টি সমআকৃতির বিন্দু যুক্ত হয়ে বড়ো বিন্দু গঠন করলে বড়ো বিন্দুর বিভব V' = n<sup>2/3</sup>V হয়। এখানে n=64, তাই V' = (64)<sup>2/3</sup> &times; 10 = 16 &times; 10 = 160 V।" },
+{ q: "৬. 12 &mu;C এবং 8 &mu;C-এর দুটি ধনাত্মক আধান পরস্পর থেকে 10 cm দূরে অবস্থিত। আধান দুটিকে পরস্পরের দিকে 4 cm এগিয়ে আনতে কত কাজ করতে হবে?", opts: ["5.76 J", "576 J", "0.576 J", "57.6 J"], ans: 0, exp: "ব্যাখ্যা: প্রথমে দূরত্ব r<sub>1</sub> = 10 cm, পরে দূরত্ব r<sub>2</sub> = 10 - 4 = 6 cm। কৃতকার্য = তড়িৎ স্থিতিশক্তির পরিবর্তন = q<sub>1</sub>q<sub>2</sub>/(4&pi;&epsilon;<sub>0</sub>) &times; (1/r<sub>2</sub> - 1/r<sub>1</sub>)। মানগুলি বসালে কৃতকার্য 5.76 J পাওয়া যায়।" },
+{ q: "৭. কোনো স্থানে তড়িৎক্ষেত্র প্রাবল্য E = 50 esu/cm। এই সুষম তড়িৎক্ষেত্রে একটি -4 esu বিন্দু-আধানকে 300 esu বিভবসম্পন্ন বিন্দু থেকে 6 cm সরালে তড়িৎক্ষেত্র দ্বারা কৃতকার্য কত হবে?", opts: ["2400 erg", "600 erg", "1200 erg", "800 erg"], ans: 2, exp: "ব্যাখ্যা: আধানের ওপর বল F = qE = 4 &times; 50 = 200 dyne। তড়িৎক্ষেত্র কর্তৃক কৃতকার্য W = F &times; d = 200 &times; 6 = 1200 erg।" },
+{ q: "৮. 1 cm ব্যবধানে রাখা দুটি অনুভূমিক সমান্তরাল পাতের মধ্যে বিভবপ্রভেদ 10 V। পাত দুটির মধ্যে তড়িৎপ্রাবল্য কত হবে?", opts: ["1000 NC<sup>-1</sup>", "100 NC<sup>-1</sup>", "10 NC<sup>-1</sup>", "1100 NC<sup>-1</sup>"], ans: 0, exp: "ব্যাখ্যা: সুষম তড়িৎক্ষেত্রের জন্য প্রাবল্য E = V/d = 10 / 0.01 m = 1000 V/m বা 1000 NC<sup>-1</sup>।" },
+{ q: "৯. Q C আধানের জন্য শূন্য বা বায়ুমাধ্যমে কোনো একটি বিন্দুতে তড়িৎবিভব Q &times; 10<sup>11</sup> V। ওই বিন্দুতে তড়িৎক্ষেত্রের প্রাবল্য কত?", opts: ["4&pi;&epsilon;<sub>0</sub>Q &times; 10<sup>20</sup> Vm<sup>-1</sup>", "12&pi;&epsilon;<sub>0</sub>Q &times; 10<sup>20</sup> Vm<sup>-1</sup>", "4&pi;&epsilon;<sub>0</sub>Q &times; 10<sup>22</sup> Vm<sup>-1</sup>", "12&pi;&epsilon;<sub>0</sub>Q &times; 10<sup>22</sup> Vm<sup>-1</sup>"], ans: 2, exp: "ব্যাখ্যা: V = Q/(4&pi;&epsilon;<sub>0</sub>r) = Q &times; 10<sup>11</sup> &rArr; r = 1/(4&pi;&epsilon;<sub>0</sub> &times; 10<sup>11</sup>)। প্রাবল্য E = V/r = (Q &times; 10<sup>11</sup>)/r = 4&pi;&epsilon;<sub>0</sub>Q &times; 10<sup>22</sup> Vm<sup>-1</sup>।" },
+{ q: "১০. স্থির অবস্থা থেকে 180 V বিভবপার্থক্যের মধ্য দিয়ে গেলে একটি ইলেকট্রনের অর্জিত বেগ কত হবে? (m<sub>e</sub> = 9&times;10<sup>-31</sup> kg, e = 1.6&times;10<sup>-19</sup> C)", opts: ["8 &times; 10<sup>5</sup> m/s", "8 &times; 10<sup>7</sup> m/s", "8 &times; 10<sup>6</sup> m/s", "1.6 &times; 10<sup>6</sup> m/s"], ans: 2, exp: "ব্যাখ্যা: গতিশক্তি E<sub>k</sub> = 1/2 mv<sup>2</sup> = eV &rArr; v = &radic;(2eV/m)। মান বসালে v = &radic;((2 &times; 1.6&times;10<sup>-19</sup> &times; 180)/(9&times;10<sup>-31</sup>)) = 8 &times; 10<sup>6</sup> m/s পাওয়া যায়।" },
+{ q: "১১. একটি 10 cm ব্যাসার্ধের বৃত্তের কেন্দ্রে 10 &mu;C আধান অবস্থিত। একটি একক ধনাত্মক আধানকে বৃত্তের পরিধি বরাবর একবার প্রদক্ষিণ করতে সম্পাদিত কার্য কত হবে?", opts: ["10 &times; 10<sup>-6</sup> একক", "10 একক", "0", "অসীম"], ans: 2, exp: "ব্যাখ্যা: কেন্দ্রস্থিত আধানের জন্য বৃত্তের পরিধি একটি সমবিভব তল গঠন করে। সমবিভব তলে আধান সরাতে কোনো কাজ করতে হয় না।" },
+{ q: "১২. 10 cm বাহুবিশিষ্ট একটি বর্গক্ষেত্রের চার কোণায় 20 esu করে ধনাত্মক আধান আছে। কর্ণদ্বয়ের ছেদবিন্দুতে তড়িৎবিভব কত?", opts: ["0 esu", "8&radic;2 esu", "11.31 esu", "20&radic;2 esu"], ans: 2, exp: "ব্যাখ্যা: কেন্দ্র থেকে প্রতিটি কোণার দূরত্ব r = 5&radic;2 cm। কেন্দ্রে মোট বিভব V = 4 &times; 20/(5&radic;2) = 8&radic;2 &approx; 11.31 esu।" },
+{ q: "১৩. 10 &times; 10<sup>-2</sup> m দূরত্বে থাকা দুটি সমান্তরাল প্লেটের মধ্যে 3 &times; 10<sup>3</sup> V বিভবপ্রভেদ প্রয়োগ করা হল। ইলেকট্রনের প্রাথমিক বেগ শূন্য হলে অন্য প্লেটে আঘাত করার মুহূর্তে এর বেগ কত হবে?", opts: ["3.27 &times; 10<sup>5</sup> m/s", "3.27 &times; 10<sup>7</sup> m/s", "3.27 &times; 10<sup>6</sup> m/s", "3.27 &times; 10<sup>4</sup> m/s"], ans: 1, exp: "ব্যাখ্যা: অর্জিত গতিশক্তি 1/2 mv<sup>2</sup> = eV &rArr; v = &radic;(2eV/m)। এখানে দূরত্ব কোনো প্রভাব ফেলে না। মান বসালে বেগ 3.27 &times; 10<sup>7</sup> m/s হয়।" },
+{ q: "১৪. একটি প্রোটনকে 1 kV বিভবপ্রভেদের মধ্যে ত্বরিত করলে এর গতিশক্তি কত হবে?", opts: ["1840 keV", "1/1840 keV", "1 keV", "920 keV"], ans: 2, exp: "ব্যাখ্যা: প্রোটনের আধান ইলেকট্রনের আধানের সমান (e)। তাই 1000 V (বা 1 kV) বিভবে ত্বরিত হলে এর অর্জিত গতিশক্তি 1e &times; 1000 V = 1000 eV = 1 keV হবে।" },
+{ q: "১৫. V(x,y,z) = x<sup>2</sup>+5x-6 হলে (2,1,0) বিন্দুতে তড়িৎক্ষেত্র প্রাবল্যের মান কত হবে?", opts: ["8 N/C", "5 N/C", "9 N/C", "3 N/C"], ans: 2, exp: "ব্যাখ্যা: E = -dV/dx = -(2x+5)। x=2 বসালে E = -(2(2)+5) = -9 V/m। এর পরম মান 9 N/C।" }
+]
+},
+7: {
+name: 'Set 7', icon: '🧠', topic: 'অ্যাডভান্সড প্রশ্ন ও বিবৃতি-কারণ (HOTS)',
+questions: [
+{ q: "১. বিবৃতি (A): A ও B একই ব্যাসার্ধের দুটি পরিবাহী গোলক। A গোলকটি নিরেট ও B গোলকটি ফাঁপা। উভয় গোলককে একই বিভবে আহিত করা হলে A গোলকের আধান ও B গোলকের আধান সমান হবে। কারণ (R): উভয় গোলকের বিভব সমান।", opts: ["A ও R উভয়ই সত্য এবং R হল A-এর সঠিক ব্যাখ্যা", "A ও R উভয়ই সত্য এবং R, A-এর সঠিক ব্যাখ্যা নয়", "A সত্য কিন্তু R মিথ্যা", "A মিথ্যা কিন্তু R সত্য"], ans: 0, exp: "ব্যাখ্যা: গোলক নিরেট বা ফাঁপা যাই হোক না কেন, পরিবাহী হওয়ায় সমস্ত আধান পৃষ্ঠেই থাকে। ব্যাসার্ধ সমান হলে একই বিভবের জন্য উভয়ের আধান ধারণক্ষমতা ও গৃহীত আধান সমান হবে।" },
+{ q: "২. বিবৃতি (A): যদি কোনো স্থানে তড়িৎক্ষেত্রের মান শূন্য হয়, সেক্ষেত্রে তড়িৎবিভবের মান থাকতেও পারে। কারণ (R): তড়িৎপ্রাবল্য ও তড়িৎবিভব উভয়েই উৎস আধানের ওপর নির্ভরশীল।", opts: ["A ও R উভয়ই সত্য এবং R হল A-এর সঠিক ব্যাখ্যা", "A ও R উভয়ই সত্য এবং R, A-এর সঠিক ব্যাখ্যা নয়", "A সত্য কিন্তু R মিথ্যা", "A মিথ্যা কিন্তু R সত্য"], ans: 1, exp: "ব্যাখ্যা: ফাঁপা পরিবাহীর ভেতরে প্রাবল্য শূন্য হলেও বিভব ধ্রুবক থাকে, তাই বিবৃতি A সত্য। বিবৃতি R-ও সত্য, কিন্তু এটি A-এর ব্যাখ্যা নয়। সঠিক ব্যাখ্যা হলো E = -dV/dx; E=0 হলে V ধ্রুবক হয়।" },
+{ q: "৩. বিবৃতি (A): দুটি ভিন্ন সমবিভব তল পরস্পরকে ছেদ করে। কারণ (R): একটি সমবিভব তলের প্রতিটি বিন্দুতে বিভবের মান সমান।", opts: ["A ও R উভয়ই সত্য এবং R হল A-এর সঠিক ব্যাখ্যা", "A ও R উভয়ই সত্য এবং R, A-এর সঠিক ব্যাখ্যা নয়", "A সত্য কিন্তু R মিথ্যা", "A মিথ্যা কিন্তু R সত্য"], ans: 3, exp: "ব্যাখ্যা: দুটি সমবিভব তল কখনোই পরস্পরকে ছেদ করতে পারে না, করলে ছেদবিন্দুতে দুটি ভিন্ন বিভব মান পাওয়া যাবে। তাই বিবৃতি A মিথ্যা, তবে কারণ R সত্য।" },
+{ q: "৪. বিবৃতি (A): তড়িৎবিভব হল একটি ভেক্টর রাশি। কারণ (R): তড়িৎবিভব কৃতকার্য ও আধানের অনুপাতের সমান।", opts: ["A ও R উভয়ই সত্য এবং R হল A-এর সঠিক ব্যাখ্যা", "A ও R উভয়ই সত্য এবং R, A-এর সঠিক ব্যাখ্যা নয়", "A সত্য কিন্তু R মিথ্যা", "A মিথ্যা কিন্তু R সত্য"], ans: 3, exp: "ব্যাখ্যা: কার্য ও আধান দুটিই স্কেলার রাশি হওয়ায় তাদের অনুপাত অর্থাৎ তড়িৎবিভব একটি স্কেলার রাশি। তাই বিবৃতি A মিথ্যা।" },
+{ q: "৫. বিবৃতি (A): তড়িৎক্ষেত্রের কোনো বিন্দুতে তড়িৎবিভব শূন্য হলে ওই বিন্দুতে তড়িৎপ্রাবল্য অবশ্যই শূন্য হবে। কারণ (R): তড়িৎপ্রাবল্য = – তড়িৎবিভবের নতিমাত্রা।", opts: ["A ও R উভয়ই সত্য এবং R হল A-এর সঠিক ব্যাখ্যা", "A ও R উভয়ই সত্য এবং R, A-এর সঠিক ব্যাখ্যা নয়", "A সত্য কিন্তু R মিথ্যা", "A মিথ্যা কিন্তু R সত্য"], ans: 3, exp: "ব্যাখ্যা: তড়িৎ দ্বিমেরুর লম্ব সমদ্বিখণ্ডকে বিভব শূন্য হয় কিন্তু প্রাবল্য শূন্য হয় না। তাই তড়িৎবিভব শূন্য হলেই প্রাবল্য শূন্য হবে এমন কোনো বাধ্যবাধকতা নেই। বিবৃতি A মিথ্যা।" },
+{ q: "৬. (HOTS) 9 C আধানকে V volt বিভবপার্থক্যের মধ্য দিয়ে পাঠালে কত কার্য করতে হবে?", opts: ["Vq/2 J", "2Vq J", "9V J", "0"], ans: 2, exp: "ব্যাখ্যা: কৃতকার্য W = আধান &times; বিভবপার্থক্য = 9 &times; V জুল।" },
+{ q: "৭. (HOTS) E প্রাবল্যের তড়িৎক্ষেত্রে কোনো বিন্দু P-তে q<sub>0</sub> আধানের জন্য তড়িৎ বিভবশক্তি কত?", opts: ["-q<sub>0</sub>&int;<strong>E</strong>&middot;d<strong>r</strong>", "2q<sub>0</sub>&int;<strong>E</strong>&middot;d<strong>r</strong>", "q<sub>0</sub>&int;<strong>E</strong>&middot;d<strong>r</strong>", "0"], ans: 0, exp: "ব্যাখ্যা: বিভব V = -&int;<strong>E</strong>&middot;d<strong>r</strong> (অসীম থেকে P পর্যন্ত) এবং স্থিতিশক্তি U = q<sub>0</sub>V, তাই স্থিতিশক্তি হবে -q<sub>0</sub>&int;<strong>E</strong>&middot;d<strong>r</strong>।" },
+{ q: "৮. (HOTS) ধাতু নির্মিত দুটি সমান্তরাল পাতকে এমনভাবে রাখা হল যেন একটি পাত অন্যটির 1.5 cm উপরে থাকে। পাতদুটিকে 3000 V এবং 300 V-এ আহিত করা হল। মধ্যবর্তী বিন্দুতে তড়িৎক্ষেত্র প্রাবল্য কত?", opts: ["800 V/cm", "1800 V/cm", "1200 V/cm", "1000 V/cm"], ans: 1, exp: "ব্যাখ্যা: তড়িৎক্ষেত্র সুষম হবে। প্রাবল্য E = (V<sub>2</sub> - V<sub>1</sub>)/d = (3000 - 300)/1.5 = 2700/1.5 = 1800 V/cm।" },
+{ q: "৯. (HOTS) দুটি সমজাতীয় সমপরিমাণ আধান q-কে কোনো সমবাহু ত্রিভুজের দুটি শীর্ষবিন্দুতে রাখলে তড়িৎস্থিতিশক্তির মান দাঁড়ায় U। অপর একটি তড়িদাধান q-কে অসীম থেকে তৃতীয় শীর্ষবিন্দুতে আনতে কৃতকার্যের পরিমাণ কত হবে?", opts: ["U", "4U", "2U", "3U"], ans: 2, exp: "ব্যাখ্যা: প্রথমে দুটি আধানের জন্য স্থিতিশক্তি U = q<sup>2</sup>/(4&pi;&epsilon;<sub>0</sub>a)। তৃতীয় আধানটি আনলে মোট ৩টি জোড়া তৈরি হয়, তাই মোট স্থিতিশক্তি 3U হয়। স্থিতিশক্তির পরিবর্তন বা কৃতকার্য = 3U - U = 2U।" },
+{ q: "১০. (Diagram based) বিন্দু আধানের জন্য অসীম দূরত্বে সমবিভব তলের আকৃতি কেমন হয়?", opts: ["সামতলিক", "গোলকাকার", "উপবৃত্তাকার", "বেলনাকার"], ans: 0, exp: "ব্যাখ্যা: বিন্দু আধানের কাছাকাছি সমবিভব তলগুলি সমকেন্দ্রিক গোলক হয়, কিন্তু অসীম দূরত্বে গোলকের বক্রতা প্রায় শূন্য হয়ে যাওয়ায় তা সমতল বা সামতলিক তলে পরিণত হয়।" },
+{ q: "১১. (Diagram based) তড়িৎ বলরেখা সমবিভব তলকে কত ডিগ্রি কোণে ছেদ করে?", opts: ["0&deg;", "45&deg;", "60&deg;", "90&deg;"], ans: 3, exp: "ব্যাখ্যা: সমবিভব তলে আধান সরাতে কার্য শূন্য হয়, অর্থাৎ &int;<strong>E</strong>&middot;d<strong>l</strong> = 0 &rArr; cos&theta; = 0 &rArr; &theta; = 90&deg;। তাই বলরেখা সমবিভব তলকে সর্বদা লম্বভাবে ছেদ করে।" },
+{ q: "১২. (Case based) শূন্যস্থানে তিনটি আধান q, 2q ও 8q-কে 9 cm দীর্ঘ সরলরেখা বরাবর স্থাপন করা হল। আধানগুলিকে কীভাবে স্থাপন করলে সংস্থাটির স্থিতিশক্তি ন্যূনতম হবে?", opts: ["q থেকে 2q আধানের দূরত্ব 3.3 cm এবং 2q থেকে 8q আধানের দূরত্ব 5.7 cm", "8q, 2q আধান দুটির মধ্যবর্তী অংশে, 2q আধান থেকে 3 cm দূরে q অবস্থান করে", "q ও 8q আধান দুটির মধ্যবর্তী অংশে, q আধান থেকে 3 cm দূরে 2q অবস্থান করে", "কোনোটিই নয়"], ans: 2, exp: "ব্যাখ্যা: বৃহত্তর দুটি আধান (q ও 8q)-কে প্রান্তে রেখে ছোটো আধানটিকে (2q) মাঝে রাখলে এবং ডেরিভেটিভ করে dU/dx = 0 করলে q থেকে 2q এর দূরত্ব 3 cm পাওয়া যায়।" },
+{ q: "১৩. বিবৃতি I: তড়িৎক্ষেত্র প্রাবল্যের অভিমুখ বরাবর তড়িৎবিভবের মান হ্রাস পায়। বিবৃতি II: কোনো স্থানে তড়িৎক্ষেত্র প্রাবল্য ধ্রুবক হলে তড়িৎবিভব শূন্য হয়।", opts: ["TT", "TF", "FT", "FF"], ans: 1, exp: "ব্যাখ্যা: প্রাবল্যের দিকে বিভব সর্বদা হ্রাস পায়, তাই বিবৃতি I সত্য। কিন্তু প্রাবল্য ধ্রুবক হলে বিভব সুষম হারে কমে, শূন্য হয় না। তাই বিবৃতি II মিথ্যা।" },
+{ q: "১৪. (Case based) একটি আহিত পরিবাহী গোলকের পৃষ্ঠে তড়িৎবিভব 100V। গোলকের ভিতরে যে-কোনো বিন্দুতে স্থির তড়িৎবিভব কত হবে?", opts: ["0 V", "50 V", "100 V", "কেন্দ্র থেকে দূরত্বের উপর নির্ভরশীল"], ans: 2, exp: "ব্যাখ্যা: আহিত পরিবাহীর অভ্যন্তরে প্রাবল্য শূন্য হওয়ায় বিভব ধ্রুবক থাকে এবং পৃষ্ঠের বিভবের সমান হয়। তাই ভেতরেও বিভব 100V হবে।" },
+{ q: "১৫. বিবৃতি I: অসীম দূরত্বে অবস্থিত কোনো আধানের তড়িৎ স্থিতিশক্তি শূন্য ধরা হয়। বিবৃতি II: তড়িৎবিভব ও তড়িৎ আধানের ভাগফলই হল তড়িৎস্থিতিশক্তি।", opts: ["TT", "TF", "FT", "FF"], ans: 1, exp: "ব্যাখ্যা: অসীম দূরত্বে স্থিতিশক্তি শূন্য, এটি সত্য। কিন্তু স্থিতিশক্তি = আধান &times; বিভব (U=qV), ভাগফল নয়। তাই বিবৃতি II মিথ্যা।" }
+]
+},
+8: {
+name: 'Set 8', icon: '🏆', topic: 'কম্পিটিটিভ এক্সাম স্পেশাল (JEE/NEET)',
+questions: [
+{ q: "১. [WBJEE 2016] একটি সমবিভব তলের সঙ্গে তড়িৎ বলরেখা যে কোণ সৃষ্টি করে সেটি হল—", opts: ["0&deg;", "90&deg;", "180&deg;", "270&deg;"], ans: 1, exp: "ব্যাখ্যা: তড়িৎ বলরেখা সর্বদা সমবিভব তলকে লম্বভাবে অর্থাৎ 90&deg; কোণে ছেদ করে।" },
+{ q: "২. [WBJEE 2016] R ব্যাসার্ধের একটি ফাঁপা গোলককে Q আধানে আহিত করা হল। গোলকটির ভিতরে তড়িৎবিভব এবং প্রাবল্য হবে যথাক্রমে—", opts: ["Q/(4&pi;&epsilon;<sub>0</sub>R<sup>2</sup>) এবং Q/(4&pi;&epsilon;<sub>0</sub>R)", "Q/(4&pi;&epsilon;<sub>0</sub>R) এবং শূন্য", "শূন্য ও শূন্য", "4&pi;&epsilon;<sub>0</sub>Q/R এবং শূন্য"], ans: 1, exp: "ব্যাখ্যা: ফাঁপা গোলকের ভেতরে আধান না থাকায় প্রাবল্য সর্বদা শূন্য হয় এবং বিভব পৃষ্ঠের বিভবের (Q/(4&pi;&epsilon;<sub>0</sub>R)) সমান ও ধ্রুবক হয়।" },
+{ q: "৩. [JEE Main 2014] কোনো স্থানে তড়িৎক্ষেত্রের মান <strong>E</strong> = 30x<sup>2</sup><strong>i</strong>। মূলবিন্দুতে বিভবের মান V<sub>0</sub> এবং x = 2 m দূরত্বে বিভবের মান V<sub>A</sub> হলে, বিভবপ্রভেদ V<sub>A</sub> - V<sub>0</sub> এর মান হবে—", opts: ["120 V", "-120 V", "-80 V", "80 V"], ans: 2, exp: "ব্যাখ্যা: V<sub>A</sub> - V<sub>0</sub> = -&int;<sub>0</sub><sup>2</sup> E dx = -&int;<sub>0</sub><sup>2</sup> 30x<sup>2</sup> dx = -[10x<sup>3</sup>]<sub>0</sub><sup>2</sup> = -10(8) = -80 V।" },
+{ q: "৪. [AIPMT 2008] Q C আধানের জন্য শূন্য বা বায়ুমাধ্যমে কোনো একটি বিন্দুতে তড়িৎবিভব Q &times; 10<sup>11</sup> V। ওই বিন্দুতে তড়িৎক্ষেত্রের প্রাবল্য হল—", opts: ["4&pi;&epsilon;<sub>0</sub>Q &times; 10<sup>20</sup> Vm<sup>-1</sup>", "12&pi;&epsilon;<sub>0</sub>Q &times; 10<sup>20</sup> Vm<sup>-1</sup>", "4&pi;&epsilon;<sub>0</sub>Q &times; 10<sup>22</sup> Vm<sup>-1</sup>", "12&pi;&epsilon;<sub>0</sub>Q &times; 10<sup>22</sup> Vm<sup>-1</sup>"], ans: 2, exp: "ব্যাখ্যা: V = Q/(4&pi;&epsilon;<sub>0</sub>r) = Q &times; 10<sup>11</sup> &rArr; r = 1/(4&pi;&epsilon;<sub>0</sub> &times; 10<sup>11</sup>)। প্রাবল্য E = V/r = Q &times; 10<sup>11</sup> &times; (4&pi;&epsilon;<sub>0</sub> &times; 10<sup>11</sup>) = 4&pi;&epsilon;<sub>0</sub>Q &times; 10<sup>22</sup> Vm<sup>-1</sup>।" },
+{ q: "৫. [WBJEE 2012] চিত্রে X-Y অক্ষের মূলবিন্দু O-তে একটি +q আধান রাখা আছে। একটি Q আধানকে A(a, 0) থেকে B(0, b) বিন্দুতে AB সরলরৈখিক পথে নিয়ে যেতে কৃতকার্যের পরিমাণ কত হবে?", opts: ["(Qq/4&pi;&epsilon;<sub>0</sub>)((b-a)/2ab)", "(Qq/2&pi;&epsilon;<sub>0</sub>)((b+a)/ab)", "(Qq/4&pi;&epsilon;<sub>0</sub>)((a-b)/ab)", "0"], ans: 2, exp: "ব্যাখ্যা: A বিন্দুতে বিভব V<sub>A</sub> = q/(4&pi;&epsilon;<sub>0</sub>a), B বিন্দুতে বিভব V<sub>B</sub> = q/(4&pi;&epsilon;<sub>0</sub>b)। কৃতকার্য W = Q(V<sub>B</sub> - V<sub>A</sub>) = (Qq/4&pi;&epsilon;<sub>0</sub>)(1/b - 1/a) = (Qq/4&pi;&epsilon;<sub>0</sub>)((a-b)/ab)।" },
+{ q: "৬. [NEET 2022] কোনো একটি অঞ্চলের তড়িৎবিভব (ভোল্ট এককে) V(x,y,z) = 6xy - y + 2yz। এখন (1, 1, 0) বিন্দুতে তড়িৎক্ষেত্র (N/C এককে) হবে—", opts: ["-(6<strong>i</strong> + 9<strong>j</strong> + <strong>k</strong>)", "-(3<strong>i</strong> + 5<strong>j</strong> + 3<strong>k</strong>)", "-(6<strong>i</strong> + 5<strong>j</strong> + 2<strong>k</strong>)", "-(2<strong>i</strong> + 3<strong>j</strong> + <strong>k</strong>)"], ans: 2, exp: "ব্যাখ্যা: E<sub>x</sub> = -&part;V/&part;x = -6y, E<sub>y</sub> = -&part;V/&part;y = -(6x - 1 + 2z), E<sub>z</sub> = -&part;V/&part;z = -2y। (1,1,0) বিন্দুতে E<sub>x</sub> = -6, E<sub>y</sub> = -5, E<sub>z</sub> = -2। তাই <strong>E</strong> = -(6<strong>i</strong> + 5<strong>j</strong> + 2<strong>k</strong>)।" },
+{ q: "৭. [WBJEE 2018] a, b ও c (a < b < c) ব্যাসার্ধের তিনটি সমকেন্দ্রিক ধাতব খোলক A, B, C নেওয়া হল। এদের আধানের তলমাত্রিক ঘনত্ব যথাক্রমে +&sigma;, -&sigma;, +&sigma;। B খোলকের বিভব হবে—", opts: ["(&sigma;/&epsilon;<sub>0</sub>)(a<sup>2</sup>/b - b + c)", "(a+b+c)&sigma;/&epsilon;<sub>0</sub>", "(&sigma;/&epsilon;<sub>0</sub>)(a<sup>2</sup>/c - b<sup>2</sup>/c + c)", "0"], ans: 0, exp: "ব্যাখ্যা: B খোলকের বিভব V<sub>B</sub> = 1/(4&pi;&epsilon;<sub>0</sub>)(q<sub>A</sub>/b + q<sub>B</sub>/b + q<sub>C</sub>/c)। আধানগুলি q = &sigma; &middot; 4&pi;r<sup>2</sup> বসিয়ে সমাধান করলে (&sigma;/&epsilon;<sub>0</sub>)(a<sup>2</sup>/b - b + c) পাওয়া যায়।" },
+{ q: "৮. [IIT 1989] ত্রিমাত্রিক দেশে অবস্থিত (x, y, z) স্থানাঙ্কের যে-কোনো বিন্দুতে তড়িৎবিভব V = 4x<sup>2</sup> volt। (1 m, 0 m, 2 m) বিন্দুতে V.m<sup>-1</sup> এককে তড়িৎক্ষেত্র হবে—", opts: ["ঋণাত্মক x-অক্ষ বরাবর 8", "ধনাত্মক x-অক্ষ বরাবর 8", "ঋণাত্মক x-অক্ষ বরাবর 16", "ধনাত্মক x-অক্ষ বরাবর 16"], ans: 0, exp: "ব্যাখ্যা: প্রাবল্য E<sub>x</sub> = -dV/dx = -8x। x=1 বসালে E = -8 V/m, যা ঋণাত্মক x-অক্ষ বরাবর ক্রিয়াশীল।" },
+{ q: "৯. [JEE Main] কোনো একটি তড়িৎক্ষেত্র অঞ্চলে তড়িৎবিভব V(x) = ax - bx<sup>3</sup>। x-অক্ষের উপর কোন্ বিন্দুতে তড়িৎক্ষেত্র শূন্য হবে?", opts: ["+&radic;(a/2b), 0", "-&radic;(a/3b), 0", "&plusmn;&radic;(a/3b), 0", "&plusmn;&radic;(a/2b), 0"], ans: 2, exp: "ব্যাখ্যা: তড়িৎক্ষেত্র E = -dV/dx = -(a - 3bx<sup>2</sup>) = 0 &rArr; 3bx<sup>2</sup> = a &rArr; x = &plusmn;&radic;(a/3b)।" },
+{ q: "১০. [IIT 1998] x = x<sub>0</sub>, 3x<sub>0</sub>, 5x<sub>0</sub> ... &infin; বিন্দুগুলির প্রত্যেকটিতে +q আধান এবং x = 2x<sub>0</sub>, 4x<sub>0</sub>, 6x<sub>0</sub> ... &infin; বিন্দুগুলির প্রত্যেকটিতে -q আধান আছে (x<sub>0</sub> ধনাত্মক ধ্রুবক)। মূলবিন্দুতে বিভবের মান কত?", opts: ["(q/2x<sub>0</sub>) ln 2", "(2q/x<sub>0</sub>) ln 2", "q/(4&pi;&epsilon;<sub>0</sub>x<sub>0</sub>) ln 2", "(q ln 2)/4x<sub>0</sub>"], ans: 2, exp: "ব্যাখ্যা: V = q/(4&pi;&epsilon;<sub>0</sub>x<sub>0</sub>) (1 - 1/2 + 1/3 - 1/4 ...) = q/(4&pi;&epsilon;<sub>0</sub>x<sub>0</sub>) ln(1+1) = (q ln 2)/(4&pi;&epsilon;<sub>0</sub>x<sub>0</sub>)।" },
+{ q: "১১. [CBSE PMT 2005] চিত্রানুযায়ী, A ও B বিন্দুতে যথাক্রমে q<sub>1</sub> ও q<sub>2</sub> বিন্দু আধান আছে এবং AB=30 cm। অপর একটি আধান q<sub>3</sub>-কে A বিন্দুর সাপেক্ষে 40 cm ব্যাসার্ধের বৃত্তাকার পথে C থেকে D বিন্দুতে নিয়ে আসা হলে তড়িৎশক্তির পরিবর্তন হয় kq<sub>3</sub>/(4&pi;&epsilon;<sub>0</sub>)। k-এর মান হবে—", opts: ["6q<sub>1</sub>", "8q<sub>2</sub>", "8q<sub>1</sub>", "6q<sub>2</sub>"], ans: 1, exp: "ব্যাখ্যা: C থেকে D তে সরালে A থেকে দূরত্ব একই (40cm) থাকে, কিন্তু B থেকে দূরত্ব পরিবর্তন হয়। &Delta;U = q<sub>2</sub>q<sub>3</sub>/(4&pi;&epsilon;<sub>0</sub>)(1/10 - 1/50) = 8q<sub>2</sub>q<sub>3</sub>/(4&pi;&epsilon;<sub>0</sub> &times; 100) cm কে মিটারে নিয়ে সমাধান করলে k = 8q<sub>2</sub> আসে।" },
+{ q: "১২. [JEE 2008, IIT 2000] একটি ধাতব গোলক +Q আধানে আহিত এবং তার চারিদিকে একটি সমকেন্দ্রিক নিস্তড়িৎ গোলীয় ধাতব খোলক রাখা আছে। গোলক ও খোলকের মধ্যে বিভবপার্থক্য V। এখন খোলকটিতে -3Q আধান দেওয়া হলে বিভবপার্থক্য কত হবে?", opts: ["দ্বিগুণ", "অর্ধেক", "তিনগুণ", "অপরিবর্তনীয় (V থাকবে)"], ans: 3, exp: "ব্যাখ্যা: বাইরে খোলকে আধান দিলে খোলকের এবং ভেতরের গোলকের বিভব একই পরিমাণে হ্রাস পায়। ফলে দুটি তলের মধ্যবর্তী বিভবপার্থক্যের কোনো পরিবর্তন হয় না।" },
+{ q: "১৩. [WBJEE 2011] একটি বিন্দু আধান Q-কে কেন্দ্র করে প্রতিসমভাবে পাঁচটি সমতড়িদাধান Q, R দূরত্বে রাখা হল। কেন্দ্রীয় আধানকে অসীমে সরিয়ে নিতে কত কার্য করতে হবে?", opts: ["3Q<sup>2</sup>/(4&pi;&epsilon;<sub>0</sub>R)", "Q<sup>2</sup>/(2&pi;&epsilon;<sub>0</sub>R)", "5Q<sup>2</sup>/(4&pi;&epsilon;<sub>0</sub>R)", "Q<sup>2</sup>/(3&pi;&epsilon;<sub>0</sub>R)"], ans: 2, exp: "ব্যাখ্যা: কেন্দ্রে মোট বিভব V = 5 &times; Q/(4&pi;&epsilon;<sub>0</sub>R)। কেন্দ্রীয় Q আধানকে অসীমে নিতে কৃতকার্য = কেন্দ্রস্থ বিন্দুর বিভব &times; আধান = V &times; Q = 5Q<sup>2</sup>/(4&pi;&epsilon;<sub>0</sub>R)।" },
+{ q: "১৪. [JEE Main 2019] একটি ছোটো তড়িৎ দ্বিমেরুর দ্বিমেরু ভ্রামক 16 &times; 10<sup>-9</sup> Cm। দ্বিমেরুর কেন্দ্র থেকে 0.6 m দূরত্বে অক্ষের সঙ্গে 60&deg; কোণে আনত রেখাতে তড়িৎবিভবের মান হবে—", opts: ["200 V", "400 V", "0 V", "50 V"], ans: 0, exp: "ব্যাখ্যা: দ্বিমেরুর জন্য বিভব V = (1/4&pi;&epsilon;<sub>0</sub>) &times; (p cos&theta;/r<sup>2</sup>)। মান বসালে V = (9 &times; 10<sup>9</sup> &times; 16 &times; 10<sup>-9</sup> &times; cos 60&deg;)/(0.6)<sup>2</sup> = (144 &times; 0.5)/0.36 = 72/0.36 = 200 V।" },
+{ q: "১৫. [JEE 2000] দুটি সমান তড়িদাহিত ও সমান আয়তনের সাবান বুদ্বুদ একত্রে মিশে এদের মোট আয়তনের সমান একটি বড়ো বুদ্বুদে পরিণত হল। ছোটো বুদ্বুদ দুটির প্রত্যেকের বিভব V হলে সংযুক্ত বড়ো বুদ্বুদটির বিভব কত হবে?", opts: ["2<sup>1/3</sup>V", "2<sup>1/2</sup>V", "2<sup>2/3</sup>V", "2<sup>4/3</sup>V"], ans: 2, exp: "ব্যাখ্যা: n-টি বিন্দু বা বুদ্বুদ যুক্ত হলে বড়োটির বিভব V' = n<sup>2/3</sup>V হয়। এখানে n=2, তাই নতুন বিভব হবে 2<sup>2/3</sup>V।" }
+]
+}
+};
+
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+function getGlobalUsers() {
+const data = localStorage.getItem("testBazarGlobalUsers");
+return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+const data = localStorage.getItem("testBazarAttemptsPhys3_U1C3_v1");
+return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+attempts[key] = (attempts[key] || 0) + 1;
+localStorage.setItem("testBazarAttemptsPhys3_U1C3_v1", JSON.stringify(attempts));
+return attempts[key];
+}
+
+window.onload = () => { renderHub(); };
+
+function renderHub() {
+const grid = document.getElementById("setGrid");
+grid.innerHTML = "";
+for(let id in ALL_SETS) {
+const set = ALL_SETS[id];
+const div = document.createElement("div");
+div.className = "set-card";
+let attemptCount = 0;
+let isLocked = false;
+
+if (currentUser) {
+attemptCount = getAttemptCount(currentUser, id);
+isLocked = attemptCount >= MAX_ATTEMPTS;
+if (isLocked) div.classList.add("locked");
+}
+
+div.innerHTML = `
+<div class="icon">${set.icon}</div>
+<div class="set-num">${set.name}</div>
+<div class="set-title">${set.topic}</div>
+<div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+`;
+
+div.onclick = () => {
+if (isLocked) { alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return; }
+handleSetClick(id);
+};
+grid.appendChild(div);
+}
+}
+
+function handleSetClick(setId) {
+activeSetId = setId;
+if (!currentUser) {
+document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+document.getElementById("loginOverlay").classList.add("active");
+document.getElementById("loginUsername").value = "";
+document.getElementById("loginPassword").value = "";
+document.getElementById("loginError").style.display = "none";
+} else { startQuiz(setId); }
+}
+
+function doLogin() {
+const u = document.getElementById("loginUsername").value.trim();
+const p = document.getElementById("loginPassword").value.trim();
+const err = document.getElementById("loginError");
+const GLOBAL_USERS = getGlobalUsers();
+
+if(!u || !p) { err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!"; err.style.display = "block"; return; }
+if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+let attempts = getAttemptCount(u, activeSetId);
+if (attempts >= MAX_ATTEMPTS) {
+err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+err.style.display = "block";
+return;
+}
+currentUser = u;
+document.getElementById("loginOverlay").classList.remove("active");
+document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+document.getElementById("userDisplay").classList.remove("hidden");
+renderHub();
+startQuiz(activeSetId);
+} else {
+err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+err.style.display = "block";
+}
+}
+
+function closeLogin() { document.getElementById("loginOverlay").classList.remove("active"); }
+
+function goToHub() {
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("hubPage").style.display = "block";
+document.getElementById("timerBox").classList.add("hidden");
+clearInterval(timerInterval);
+renderHub();
+}
+
+function startQuiz(setId) {
+incrementAttempt(currentUser, setId);
+questions = ALL_SETS[setId].questions;
+currentQIndex = 0; score = 0; wrongAnswers = 0; userAnswers = {}; isReviewMode = false; timeLeft = TIME_LIMIT;
+document.getElementById("hubPage").style.display = "none";
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+document.getElementById("timerBox").classList.remove("hidden");
+document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+startTimer();
+loadQuestion();
+}
+
+function loadQuestion() {
+const qData = questions[currentQIndex];
+document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+document.getElementById("qText").innerHTML = qData.q;
+const progress = ((currentQIndex) / questions.length) * 100;
+document.getElementById("progressFill").style.width = `${progress}%`;
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+const optsBox = document.getElementById("qOpts");
+optsBox.innerHTML = "";
+document.getElementById("explanation").classList.remove("show");
+document.getElementById("nextBtn").disabled = true;
+document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+qData.opts.forEach((optText, idx) => {
+const btn = document.createElement("button");
+btn.className = "opt";
+btn.innerHTML = `<div class="opt-circle">${LABELS[idx]}</div> <div class="opt-text">${optText}</div>`;
+if (isReviewMode) {
+btn.classList.add("disabled");
+if (idx === qData.ans) btn.classList.add("correct");
+else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+} else {
+btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+}
+optsBox.appendChild(btn);
+});
+
+if (isReviewMode) {
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+if (currentQIndex === questions.length - 1) { document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন"; }
+}
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+allBtns.forEach(b => b.classList.add("disabled"));
+userAnswers[currentQIndex] = selectedIdx;
+if (selectedIdx === correctIdx) { btn.classList.add("correct"); score++; } 
+else { btn.classList.add("wrong"); allBtns[correctIdx].classList.add("correct"); wrongAnswers++; }
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+}
+
+function nextQ() {
+if (isReviewMode && currentQIndex === questions.length - 1) {
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show"); return;
+}
+if (!isReviewMode && currentQIndex === questions.length - 1) { finishQuiz(); return; }
+currentQIndex++; loadQuestion();
+}
+
+function startTimer() {
+clearInterval(timerInterval);
+const tBox = document.getElementById("timerBox");
+tBox.classList.remove("danger");
+timerInterval = setInterval(() => {
+if (timeLeft <= 0) { clearInterval(timerInterval); finishQuiz(); return; }
+timeLeft--;
+const m = Math.floor(timeLeft / 60); const s = timeLeft % 60;
+document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+if (timeLeft < 60) tBox.classList.add("danger");
+}, 1000);
+}
+
+function finishQuiz() {
+clearInterval(timerInterval);
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("timerBox").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show");
+const total = questions.length; const skipped = total - (score + wrongAnswers);
+const percent = Math.round((score / total) * 100);
+document.getElementById("finalScore").innerText = `${percent}%`;
+document.getElementById("rbCorrect").innerText = score;
+document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+const gradeEl = document.getElementById("resultGrade");
+if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return;
+}
+startQuiz(activeSetId);
+}
+
+function showReview() {
+isReviewMode = true; currentQIndex = 0;
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+loadQuestion();
+}
+</script>
+</body>
+</html>
