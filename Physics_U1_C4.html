@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Physics 3rd Sem | U1 C4</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main);}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; }
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header class="top-bar">
+<div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+<div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+<div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+<div class="main">
+
+<!-- LOGIN MODAL -->
+<div class="login-overlay" id="loginOverlay">
+<div class="login-modal">
+<h2>লগইন করুন</h2>
+<p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+<div class="login-set-name" id="loginSetName">📚 Set 1</div>
+<div class="input-group">
+<label>ইউজারনেম</label>
+<input type="text" id="loginUsername" placeholder="Username">
+</div>
+<div class="input-group">
+<label>পাসওয়ার্ড</label>
+<input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+</div>
+<button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+<button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+<div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+</div>
+</div>
+
+<!-- HUB PAGE -->
+<div id="hubPage">
+<div class="hub-header">
+<h1>পদার্থবিজ্ঞান 3rd Sem Unit 1:<br>অধ্যায় ৪: ধারক ও ধারকত্ব (Capacitor and Capacitance)</h1>
+<p>মোট ১৩৫টি প্রশ্ন সম্বলিত ৯টি সেট। Test শুরু করতে সেটে ক্লিক করুন।</p>
+</div>
+<div class="set-grid" id="setGrid"></div>
+<div style="text-align: center; margin-top: 30px;">
+<button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+</div>
+</div>
+
+<!-- QUIZ AREA -->
+<div id="testArea" class="hidden">
+<div class="quiz-info">
+<div class="info-item">🎓 <strong>Physics</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+<div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+</div>
+<div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="q-card">
+<div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+<div class="q-text" id="qText">Question Text</div>
+<div class="opts" id="qOpts"></div>
+<div class="explanation" id="explanation"><p id="explanationText"></p></div>
+<div class="nav-row">
+<div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+<button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+</div>
+</div>
+</div>
+
+<!-- RESULT AREA -->
+<div class="result-wrap" id="resultWrap">
+<div class="result-icon" id="resultIcon">🏆</div>
+<div class="result-score en-font" id="finalScore">100%</div>
+<div class="result-total">স্কোর</div>
+<div class="result-grade" id="resultGrade">অসাধারণ!</div>
+<div class="result-bars">
+<div class="result-bar">
+<div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+<div class="rb-label">সঠিক</div>
+</div>
+<div class="result-bar">
+<div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+<div class="rb-label">ভুল/স্কিপ</div>
+</div>
+</div>
+<div class="attempt-info-box" id="attemptInfo"></div>
+<div class="action-btns">
+<button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+<button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+<button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+</div>
+</div>
+
+</div>
+
+<script>
+const MAX_ATTEMPTS = 10;
+const TIME_LIMIT = 10 * 60;
+const LABELS = ['(a)', '(b)', '(c)', '(d)'];
+
+const ALL_SETS = {
+1: {
+name: 'Set 1', icon: '⚡', topic: 'পরিবাহী, অন্তরক এবং পরাবৈদ্যুতিক পদার্থ',
+questions: [
+{ q: "১. সাধারণত তাপমাত্রায় ভালো পরিবাহীতে মুক্ত ইলেকট্রন ঘনত্ব কত হয়?", opts: ["10<sup>16</sup> m<sup>-3</sup>", "10<sup>7</sup> m<sup>-3</sup>", "10<sup>28</sup> m<sup>-3</sup>", "10<sup>35</sup> m<sup>-3</sup>"], ans: 2, exp: "ব্যাখ্যা: ভালো পরিবাহীতে (যেমন তামা, রুপো) প্রচুর মুক্ত ইলেকট্রন থাকে, যার ঘনত্ব প্রায় 10<sup>28</sup> m<sup>-3</sup> হয়।" },
+{ q: "২. নিচের কোনটি অমেরুবর্তী (Non-polar) পরাবৈদ্যুতিক পদার্থের উদাহরণ?", opts: ["H<sub>2</sub>O", "NH<sub>3</sub>", "N<sub>2</sub>", "HCl"], ans: 2, exp: "ব্যাখ্যা: যেসব পদার্থের পরমাণু বা অণুতে ধনাত্মক ও ঋণাত্মক আধানের ভারকেন্দ্র একই বিন্দুতে সমাপতিত হয়, তাদের অমেরুবর্তী পদার্থ বলে। যেমন- H<sub>2</sub>, N<sub>2</sub>, O<sub>2</sub> ইত্যাদি।" },
+{ q: "৩. মেরুবর্তিতার (Polarisation) SI একক কী?", opts: ["C &middot; m<sup>-1</sup>", "C &middot; m<sup>-2</sup>", "C &middot; m", "V &middot; m"], ans: 1, exp: "ব্যাখ্যা: মেরুবর্তিতা হলো একক আয়তনের মোট দ্বিমেরু ভ্রামক। এর SI একক হলো কুলম্ব/বর্গমিটার বা C &middot; m<sup>-2</sup>।" },
+{ q: "৪. মেরুবর্তিত আধান (Polarised charge) প্রকৃতপক্ষে কীরূপ আধান?", opts: ["মুক্ত আধান", "বদ্ধ আধান", "আংশিক মুক্ত আধান", "ঋণাত্মক আধান"], ans: 1, exp: "ব্যাখ্যা: পরাবৈদ্যুতিক পদার্থের মেরুবর্তিতার ফলে পৃষ্ঠতলে যে আধানের সৃষ্টি হয়, তা পদার্থের মধ্যে একেবারেই গতিশীল হতে পারে না। তাই এদের বদ্ধ আধান (Bound charge) বলা হয়।" },
+{ q: "৫. তড়িৎক্ষেত্রে অমেরুবর্তী পদার্থ রাখলে অণুগুলির কী পরিবর্তন হয়?", opts: ["ধ্বংস হয়ে যায়", "স্থায়ী দ্বিমেরু তৈরি হয়", "আবিষ্ট দ্বিমেরু (Induced dipole) তৈরি হয়", "আধানমুক্ত হয়"], ans: 2, exp: "ব্যাখ্যা: বাহ্যিক তড়িৎক্ষেত্রে অমেরুবর্তী পদার্থের ইলেকট্রনগুলি তড়িৎক্ষেত্রের বিপরীতদিকে সামান্য সরে যায়, ফলে অণুগুলি আবিষ্ট তড়িৎ দ্বিমেরুতে পরিণত হয়।" },
+{ q: "৬. পরাবৈদ্যুতিক মেরুবর্তিতার মাত্রীয় সংকেত কী?", opts: ["[ML<sup>2</sup>T<sup>-2</sup>]", "[L<sup>-2</sup>IT]", "[M<sup>0</sup>L<sup>0</sup>T<sup>0</sup>]", "[L<sup>-3</sup>IT]"], ans: 1, exp: "ব্যাখ্যা: মেরুবর্তিতা P = p/V (দ্বিমেরু ভ্রামক / আয়তন)। মাত্রা = [LTI] / [L<sup>3</sup>] = [L<sup>-2</sup>IT]।" },
+{ q: "৭. জলের পরাবৈদ্যুতিক ধ্রুবক 80 বলতে কী বোঝায়?", opts: ["জলের তড়িৎভেদ্যতা শূন্যমাধ্যমের 80 গুণ", "শূন্যমাধ্যমের তড়িৎভেদ্যতা জলের 80 গুণ", "জলে আধান 80 গুণ বাড়ে", "জলের রোধ 80 গুণ কম"], ans: 0, exp: "ব্যাখ্যা: পরাবৈদ্যুতিক ধ্রুবক হলো মাধ্যমের তড়িৎভেদ্যতা ও শূন্যমাধ্যমের তড়িৎভেদ্যতার অনুপাত। জলের ক্ষেত্রে এটি 80 মানে জলের ভেদনযোগ্যতা শূন্যমাধ্যমের 80 গুণ।" },
+{ q: "৮. শূন্য মাধ্যমের তড়িৎ প্রবণতা (Electric susceptibility, &chi;<sub>e</sub>) কত?", opts: ["অসীম (&infin;)", "1", "0", "-1"], ans: 2, exp: "ব্যাখ্যা: তড়িৎ প্রবণতা &chi;<sub>e</sub> = &epsilon;<sub>r</sub> - 1। শূন্যমাধ্যমের ক্ষেত্রে আপেক্ষিক তড়িৎভেদ্যতা বা পরাবৈদ্যুতিক ধ্রুবক &epsilon;<sub>r</sub> = 1, তাই &chi;<sub>e</sub> = 1 - 1 = 0।" },
+{ q: "৯. তড়িৎ প্রবণতার (Electric susceptibility) মাত্রা কী?", opts: ["[ML<sup>2</sup>T<sup>-2</sup>]", "[M<sup>0</sup>L<sup>0</sup>T<sup>0</sup>] বা মাত্রাহীন", "[ML<sup>-3</sup>T]", "[M<sup>-1</sup>L<sup>-2</sup>T<sup>4</sup>I<sup>2</sup>]"], ans: 1, exp: "ব্যাখ্যা: &chi;<sub>e</sub> দুটি সমজাতীয় রাশির সম্পর্কের ধ্রুবক এবং এটি মাত্রাহীন ও এককবিহীন।" },
+{ q: "১০. ধাতব পদার্থের পরাবৈদ্যুতিক ধ্রুবকের মান কত?", opts: ["0", "1", "100", "অসীম (&infin;)"], ans: 3, exp: "ব্যাখ্যা: ধাতু তড়িতের সুপরিবাহী হওয়ায় এর ভেতরে তড়িৎ প্রাবল্য শূন্য হয় এবং দুটি বিন্দুর বিভবপ্রভেদ শূন্য হয়, যার ফলে ধাতব পদার্থের পরাবৈদ্যুতিক ধ্রুবক অসীম হয়।" },
+{ q: "১১. মেরুবর্তিতা ভেক্টর (<strong>P</strong>) এবং তড়িৎভ্রংশ ভেক্টরের (<strong>D</strong>) সম্পর্ক কোনটি?", opts: ["<strong>D</strong> = &epsilon;<sub>0</sub><strong>E</strong> + <strong>P</strong>", "<strong>D</strong> = <strong>E</strong> + &epsilon;<sub>0</sub><strong>P</strong>", "<strong>P</strong> = &epsilon;<sub>0</sub><strong>D</strong> + <strong>E</strong>", "<strong>D</strong> = &epsilon;<sub>0</sub><strong>P</strong>"], ans: 0, exp: "ব্যাখ্যা: গাউসের উপপাদ্য অনুযায়ী, পরাবৈদ্যুতিক মাধ্যমে তড়িৎভ্রংশ ভেক্টর <strong>D</strong> = &epsilon;<sub>0</sub><strong>E</strong> + <strong>P</strong> হয়, যেখানে <strong>P</strong> হলো মেরুবর্তিতা ভেক্টর।" },
+{ q: "১২. মেরুবর্তিতার মান কিসের সমান হয়?", opts: ["আধানের আয়তন ঘনত্বের", "আধানের রৈখিক ঘনত্বের", "মেরুবর্তিত আধানের তলমাত্রিক ঘনত্বের", "তড়িৎপ্রাবল্যের"], ans: 2, exp: "ব্যাখ্যা: গাণিতিকভাবে প্রমাণ করা যায় যে, পরাবৈদ্যুতিক পদার্থের মেরুবর্তিতার মান (P) তার মেরুবর্তিত আধানের তলমাত্রিক ঘনত্বের (&sigma;<sub>p</sub>) সমান হয়।" },
+{ q: "১৩. মানবদেহ তড়িতের সাপেক্ষে কীরূপ আচরণ করে?", opts: ["আদর্শ অন্তরক", "অর্ধপরিবাহী", "পরিবাহী", "পরাবিদ্যুৎ"], ans: 2, exp: "ব্যাখ্যা: মানবদেহের মধ্য দিয়ে আধান প্রবাহিত হতে পারে। তাই মানবদেহকে একটি পরিবাহী হিসেবে ধরা হয়।" },
+{ q: "১৪. অন্তরক পদার্থে (Insulator) মুক্ত ইলেকট্রনের ঘনত্ব প্রতি ঘন মিটারে প্রায় কত?", opts: ["10<sup>28</sup>", "10<sup>16</sup>", "10<sup>7</sup>", "0"], ans: 2, exp: "ব্যাখ্যা: সাধারণ তাপমাত্রায় অন্তরক পদার্থে অত্যন্ত কম সংখ্যক মুক্ত ইলেকট্রন থাকে, যার ঘনত্ব মাত্র 10<sup>7</sup> m<sup>-3</sup>।" },
+{ q: "১৫. কোন অবস্থায় কোনো পদার্থই সম্পূর্ণ অপরিবাহী নয়?", opts: ["উচ্চচাপে", "উচ্চশক্তিসম্পন্ন তড়িৎ উৎসের কাছে", "নিম্ন তাপমাত্রায়", "অন্ধকারে"], ans: 1, exp: "ব্যাখ্যা: সাধারণ অবস্থায় কুপরিবাহী হলেও, খুব উচ্চশক্তিসম্পন্ন তড়িৎক্ষেত্রের প্রভাবে ইলেকট্রন মুক্ত হয়ে পদার্থটি পরিবাহীর ন্যায় আচরণ করে।" }
+]
+},
+2: {
+name: 'Set 2', icon: '🔋', topic: 'ধারকত্বের ধারণা ও পরিবাহীর ধারকত্ব',
+questions: [
+{ q: "১. ধারকত্বের (Capacitance) SI একক কী?", opts: ["কুলম্ব", "ভোল্ট", "ফ্যারাড", "ওহম"], ans: 2, exp: "ব্যাখ্যা: ধারকত্বের SI এককের নাম ফ্যারাড (F)। 1 ফ্যারাড = 1 কুলম্ব / 1 ভোল্ট।" },
+{ q: "২. 1 ফ্যারাড সমান কত esu ধারকত্ব (স্ট্যাটফ্যারাড)?", opts: ["3 &times; 10<sup>9</sup>", "9 &times; 10<sup>11</sup>", "10<sup>6</sup>", "1/9 &times; 10<sup>11</sup>"], ans: 1, exp: "ব্যাখ্যা: 1 F = 1 C / 1 V = (3 &times; 10<sup>9</sup> esu charge) / (1/300 statV) = 9 &times; 10<sup>11</sup> esu বা স্ট্যাটফ্যারাড ধারকত্ব।" },
+{ q: "৩. ধারকত্বের মাত্রীয় সংকেত কী?", opts: ["[M<sup>-1</sup>L<sup>-2</sup>T<sup>4</sup>I<sup>2</sup>]", "[ML<sup>2</sup>T<sup>-2</sup>I<sup>-1</sup>]", "[M<sup>-1</sup>L<sup>2</sup>T<sup>4</sup>I<sup>2</sup>]", "[ML<sup>-2</sup>T<sup>3</sup>I]"], ans: 0, exp: "ব্যাখ্যা: ধারকত্ব C = q/V। আধানের মাত্রা [IT] এবং বিভবের মাত্রা [ML<sup>2</sup>T<sup>-3</sup>I<sup>-1</sup>]। ভাগ করলে [M<sup>-1</sup>L<sup>-2</sup>T<sup>4</sup>I<sup>2</sup>] পাওয়া যায়।" },
+{ q: "৪. কোনো পরিবাহীর ধারকত্ব কোন্ বিষয়ের ওপর নির্ভর করে না?", opts: ["পরিবাহীর আকৃতি", "অন্য পরিবাহীর উপস্থিতি", "পরিবাহীর উপাদান", "পরিবাহীর তলের ক্ষেত্রফল"], ans: 2, exp: "ব্যাখ্যা: ধারকত্ব পরিবাহীর আকার, আকৃতি, পৃষ্ঠের ক্ষেত্রফল, মাধ্যম এবং অন্য পরিবাহীর উপস্থিতির ওপর নির্ভর করে, কিন্তু পরিবাহীর নিজস্ব উপাদানের ওপর নির্ভর করে না।" },
+{ q: "৫. CGS পদ্ধতিতে বায়ুমাধ্যমে অবস্থিত একটি পরিবাহী গোলকের ধারকত্ব কিসের সমান হয়?", opts: ["তার ব্যাসের সমান", "তার ব্যাসার্ধের সাংখ্যমানের সমান", "অসীম", "শূন্য"], ans: 1, exp: "ব্যাখ্যা: CGS পদ্ধতিতে বায়ুমাধ্যমে গোলকের ধারকত্ব C = r। অর্থাৎ ব্যাসার্ধ সেমিতে প্রকাশ করলে ধারকত্ব সরাসরি esu এককে পাওয়া যায়।" },
+{ q: "৬. পৃথিবীর ব্যাসার্ধ 6400 km ধরলে esu এককে এর ধারকত্ব কত হবে?", opts: ["6.4 &times; 10<sup>8</sup> esu", "6400 esu", "6.4 &times; 10<sup>6</sup> esu", "711 esu"], ans: 0, exp: "ব্যাখ্যা: পৃথিবীর ব্যাসার্ধ R = 6400 km = 6.4 &times; 10<sup>8</sup> cm। CGS এককে ধারকত্ব C = r হওয়ায় ধারকত্ব হবে 6.4 &times; 10<sup>8</sup> esu।" },
+{ q: "৭. একই ব্যাসের একটি ফাঁপা গোলক ও একটি নিরেট গোলককে একই মাধ্যমে একই বিভবে আহিত করা হলে কার আধান বেশি হবে?", opts: ["ফাঁপা গোলকের", "নিরেট গোলকের", "উভয়ের আধান একই হবে", "উপাদানের ওপর নির্ভর করবে"], ans: 2, exp: "ব্যাখ্যা: একই ব্যাসের নিরেট ও ফাঁপা গোলকের পৃষ্ঠতলের ক্ষেত্রফল সমান হওয়ায় তাদের ধারকত্ব একই হয়। বিভবও এক থাকায় তাদের আধানের পরিমাণ (q=CV) সমান হবে।" },
+{ q: "৮. 1 F ধারকত্ববিশিষ্ট কোনো পরিবাহী গোলক তৈরি করা বাস্তবে সম্ভব কি?", opts: ["হ্যাঁ, খুব সহজেই", "হ্যাঁ, কেবল বায়ুমাধ্যমে", "না, এটি অসম্ভব", "বলা সম্ভব নয়"], ans: 2, exp: "ব্যাখ্যা: 1 F ধারকত্বের জন্য গোলকের ব্যাসার্ধ হতে হবে 9 &times; 10<sup>9</sup> m, যা পৃথিবীর ব্যাসার্ধের চেয়েও অনেক বড়ো। তাই বাস্তবে এমন পরিবাহী তৈরি অসম্ভব।" },
+{ q: "৯. মানবদেহের ধারকত্ব প্রায় কত ধরা হয়?", opts: ["1 F", "1 &mu;F", "25 statF", "অসীম"], ans: 2, exp: "ব্যাখ্যা: মানবদেহকে 60 kg ভরের ও জলের ঘনত্বের সমান ধরে গোলক কল্পনা করলে এর ব্যাসার্ধ প্রায় 25 cm হয়। তাই ধারকত্ব প্রায় 25 statF ধরা হয়।" },
+{ q: "১০. একটি গোলকের ধারকত্ব 1 F হলে তার ব্যাসার্ধ কত হবে?", opts: ["9 &times; 10<sup>11</sup> cm", "9 &times; 10<sup>9</sup> cm", "1 cm", "3 &times; 10<sup>9</sup> cm"], ans: 0, exp: "ব্যাখ্যা: SI পদ্ধতিতে C = 4&pi;&epsilon;<sub>0</sub> R &rArr; R = C / (4&pi;&epsilon;<sub>0</sub>) = 9 &times; 10<sup>9</sup> &times; 1 m = 9 &times; 10<sup>11</sup> cm।" },
+{ q: "১১. কোনো পরিবাহীর বিভব একক পরিমাণ বৃদ্ধি করতে কতটা আধানের প্রয়োজন হয়, তাকে কী বলে?", opts: ["তড়িৎপ্রবাহ", "রোধ", "ধারকত্ব", "বিভব"], ans: 2, exp: "ব্যাখ্যা: ধারকত্বের সংজ্ঞানুযায়ী, C = q/V। যদি V = 1 হয়, তবে C = q হয়।" },
+{ q: "১২. পরিবাহীর পৃষ্ঠের ক্ষেত্রফল বাড়ালে ধারকত্বের কী পরিবর্তন হয়?", opts: ["বৃদ্ধি পায়", "হ্রাস পায়", "অপরিবর্তিত থাকে", "শূন্য হয়"], ans: 0, exp: "ব্যাখ্যা: পৃষ্ঠের ক্ষেত্রফল যত বেশি হয়, নির্দিষ্ট পরিমাণ আধানের জন্য বিভবের মান তত কম হয়। বিভব কমলে ধারকত্ব (C=q/V) বেড়ে যায়।" },
+{ q: "১৩. দুটি পরিবাহীতে সমপরিমাণ আধান থাকলেও তাদের মধ্যে বিভবপ্রভেদ থাকতে পারে কি?", opts: ["না, কখনোই না", "হ্যাঁ, যদি তাদের ধারকত্ব ভিন্ন হয়", "হ্যাঁ, যদি তাদের ধারকত্ব সমান হয়", "হ্যাঁ, কেবল শূন্যমাধ্যমে"], ans: 1, exp: "ব্যাখ্যা: V = q/C। আধান q সমান হলেও ধারকত্ব C আলাদা হলে পরিবাহী দুটির বিভব V ভিন্ন হবে, ফলে বিভবপ্রভেদ সৃষ্টি হবে।" },
+{ q: "১৪. কোনো ধারককে যে-কোনো উচ্চমানের বিভবে আহিত করা সম্ভব হয় না কেন?", opts: ["ধারক গলে যায়", "পারিপার্শ্বিক বায়ুস্তরের অন্তরণ ক্ষমতা ভেঙে পড়ে তড়িৎক্ষরণ ঘটে", "আধান শূন্য হয়ে যায়", "ধারকত্ব অসীম হয়ে যায়"], ans: 1, exp: "ব্যাখ্যা: বিভব খুব উচ্চ হলে আশেপাশের বায়ুর অন্তরণ ক্ষমতা নষ্ট হয়ে যায় এবং ধারক থেকে বায়ুতে আধান ক্ষরিত হতে থাকে।" },
+{ q: "১৫. SI পদ্ধতিতে &epsilon;<sub>0</sub>-এর একক Farad/metre (F &middot; m<sup>-1</sup>) কীভাবে আসে?", opts: ["C = 4&pi;&epsilon;<sub>0</sub> r থেকে", "কুলম্বের সূত্র থেকে", "গাউসের সূত্র থেকে", "ওহমের সূত্র থেকে"], ans: 0, exp: "ব্যাখ্যা: ধারকত্বের সূত্র C<sub>0</sub> = 4&pi;&epsilon;<sub>0</sub> r থেকে &epsilon;<sub>0</sub> = C<sub>0</sub> / (4&pi; r)। ধারকত্বের একক Farad এবং দূরত্বের একক metre হওয়ায় &epsilon;<sub>0</sub> এর একক F &middot; m<sup>-1</sup> হয়।" }
+]
+},
+3: {
+name: 'Set 3', icon: '⚖️', topic: 'আহিত পরিবাহীর স্থিতিশক্তি ও আধান বণ্টন',
+questions: [
+{ q: "১. আহিত পরিবাহীর স্থিতিশক্তির (Potential Energy) সমীকরণ কোনটি?", opts: ["U = CV<sup>2</sup>", "U = 1/2 CV<sup>2</sup>", "U = 1/2 C<sup>2</sup>V", "U = q / 2C"], ans: 1, exp: "ব্যাখ্যা: পরিবাহীকে আহিত করতে যে মোট কার্য করতে হয় তা স্থিতিশক্তি রূপে সঞ্চিত থাকে, যার মান W = U = 1/2 CV<sup>2</sup> = q<sup>2</sup> / 2C।" },
+{ q: "২. ধারকে কী ধরনের শক্তি সঞ্চিত থাকে?", opts: ["রাসায়নিক শক্তি", "চৌম্বক শক্তি", "যান্ত্রিক শক্তি", "স্থির-তাড়িতিক স্থিতিশক্তি"], ans: 3, exp: "ব্যাখ্যা: আহিতকরণের সময় ব্যাটারি দ্বারা কৃতকার্য ধারকের মধ্যে স্থির-তাড়িতিক স্থিতিশক্তি (Electrostatic potential energy) হিসেবে সঞ্চিত থাকে।" },
+{ q: "৩. V-q লেখচিত্র দ্বারা উৎপন্ন ক্ষেত্রফল কী নির্দেশ করে?", opts: ["ধারকত্ব", "তড়িৎপ্রবাহ", "ধারকে সঞ্চিত শক্তি", "বিভব"], ans: 2, exp: "ব্যাখ্যা: V-q বা q-V লেখচিত্র একটি মূলবিন্দুগামী সরলরেখা হয়। এর তলার ক্ষেত্রফল (1/2 qV) ধারকের আহিতকরণের শক্তি বা সঞ্চিত স্থিতিশক্তি নির্দেশ করে।" },
+{ q: "৪. দুটি পরিবাহীকে তার দ্বারা যুক্ত করলে প্রতিটি পরিবাহীর আধান কিসের সমানুপাতিক হয়?", opts: ["বিভবের", "ধারকত্বের", "দূরত্বের", "তড়িৎপ্রাবল্যের"], ans: 1, exp: "ব্যাখ্যা: আধান বণ্টনের পর পরিবাহী দুটির বিভব সমান হয়। তখন q<sub>1</sub> = C<sub>1</sub>V এবং q<sub>2</sub> = C<sub>2</sub>V। অর্থাৎ q<sub>1</sub>/q<sub>2</sub> = C<sub>1</sub>/C<sub>2</sub>, আধান ধারকত্বের সমানুপাতিক হয়।" },
+{ q: "৫. বিভিন্ন বিভবযুক্ত দুটি পরিবাহীর মধ্যে আধান বণ্টনের ফলে শক্তির যে ক্ষয় হয়, তা মূলত কী রূপে বিকিরিত হয়?", opts: ["রাসায়নিক শক্তি", "যান্ত্রিক শক্তি", "তাপশক্তি ও তড়িৎচুম্বকীয় বিকিরণ", "শব্দশক্তি"], ans: 2, exp: "ব্যাখ্যা: আধান এক পরিবাহী থেকে অন্যটিতে যাওয়ার সময় সংযোগকারী তারের রোধের জন্য তাপ ઉત્પন্ন হয় এবং কিছু শক্তি তড়িৎচুম্বকীয় বিকিরণ হিসেবে নষ্ট হয়।" },
+{ q: "৬. C<sub>1</sub> ও C<sub>2</sub> ধারকত্বের দুটি পরিবাহীর প্রাথমিক বিভব যথাক্রমে V<sub>1</sub> ও V<sub>2</sub>। এদের যুক্ত করলে সাধারণ বিভব (Common potential) কত হবে?", opts: ["V = (C<sub>1</sub>V<sub>1</sub> + C<sub>2</sub>V<sub>2</sub>) / (C<sub>1</sub> + C<sub>2</sub>)", "V = (C<sub>1</sub>V<sub>2</sub> + C<sub>2</sub>V<sub>1</sub>) / (C<sub>1</sub> + C<sub>2</sub>)", "V = (V<sub>1</sub> + V<sub>2</sub>) / 2", "V = (C<sub>1</sub> + C<sub>2</sub>) / (V<sub>1</sub> + V<sub>2</sub>)"], ans: 0, exp: "ব্যাখ্যা: আধান সংরক্ষণ সূত্রানুযায়ী, মোট আধান q = q<sub>1</sub> + q<sub>2</sub> = C<sub>1</sub>V<sub>1</sub> + C<sub>2</sub>V<sub>2</sub>। আবার যুক্ত করার পর মোট ধারকত্ব C<sub>1</sub> + C<sub>2</sub>। তাই সাধারণ বিভব V = q / (C<sub>1</sub>+C<sub>2</sub>)।" },
+{ q: "৭. আধান বণ্টনের ফলে শক্তিক্ষয়ের সমীকরণ কোনটি?", opts: ["&Delta;E = 1/2 (C<sub>1</sub>+C<sub>2</sub>)(V<sub>1</sub>-V<sub>2</sub>)<sup>2</sup>", "&Delta;E = 1/2 [C<sub>1</sub>C<sub>2</sub>/(C<sub>1</sub>+C<sub>2</sub>)] (V<sub>1</sub>-V<sub>2</sub>)<sup>2</sup>", "&Delta;E = [C<sub>1</sub>C<sub>2</sub>/(C<sub>1</sub>+C<sub>2</sub>)] (V<sub>1</sub>+V<sub>2</sub>)<sup>2</sup>", "0"], ans: 1, exp: "ব্যাখ্যা: প্রাথমিক শক্তি এবং অন্তিম শক্তির পার্থক্য হিসাব করলে এই সমীকরণটি পাওয়া যায়। (V<sub>1</sub>-V<sub>2</sub>)<sup>2</sup> সর্বদা ধনাত্মক হওয়ায় সর্বদা শক্তিক্ষয় হয়।" },
+{ q: "৮. একটি ধারকের আধান 2Q করা হলে তার সঞ্চিত শক্তি কত হবে?", opts: ["2 গুণ", "অর্ধেক", "4 গুণ", "অপরিবর্তিত"], ans: 2, exp: "ব্যাখ্যা: শক্তি U = Q<sup>2</sup> / 2C। আধান 2Q হলে শক্তি (2Q)<sup>2</sup> / 2C = 4 &times; (Q<sup>2</sup> / 2C) = 4U হবে।" },
+{ q: "৯. একই আকারের 64টি জলের ফোঁটা (প্রতিটির ধারকত্ব C, বিভব V) মিলিত হয়ে বড়ো ফোঁটা তৈরি করলে বড়ো ফোঁটার সঞ্চিত শক্তি প্রতিটি ছোট ফোঁটার কত গুণ হবে?", opts: ["64", "256", "512", "1024"], ans: 3, exp: "ব্যাখ্যা: বড় ফোঁটার ব্যাসার্ধ R = 64<sup>1/3</sup>r = 4r। ধারকত্ব 4C, আধান 64q। শক্তি E' = (64q)<sup>2</sup> / 2(4C) = 1024 &times; (q<sup>2</sup> / 2C) = 1024E।" },
+{ q: "১০. একটি গোলকাকার পরিবাহীর সমস্ত আধান অন্য একটি গোলকে সম্পূর্ণভাবে স্থানান্তর করতে কী করতে হয়?", opts: ["তার দিয়ে যুক্ত করলেই হবে", "সমবিভবে আনতে হবে", "আহিত গোলককে অনাহিত ফাঁপা গোলকের অভ্যন্তরে সমকেন্দ্রিকভাবে বসিয়ে তার দিয়ে যুক্ত করতে হবে", "সম্ভব নয়"], ans: 2, exp: "ব্যাখ্যা: আধান সর্বদা পরিবাহীর বাইরের পৃষ্ঠে অবস্থান করে। তাই ভেতরের গোলককে বাইরের ফাঁপা গোলকের সাথে যুক্ত করলে ভেতরের সমস্ত আধান বাইরের পৃষ্ঠে চলে যায়।" },
+{ q: "১১. 10 &mu;F ধারকত্বের একটি ধারক 10 V বিভবে আহিত। বিভব বাড়িয়ে 20 V করা হলে স্থিতিশক্তির বৃদ্ধি কত হবে?", opts: ["15 &times; 10<sup>-4</sup> J", "5 &times; 10<sup>-4</sup> J", "10 &times; 10<sup>-4</sup> J", "20 &times; 10<sup>-4</sup> J"], ans: 0, exp: "ব্যাখ্যা: &Delta;U = 1/2 C (V<sub>2</sub><sup>2</sup> - V<sub>1</sub><sup>2</sup>) = 1/2 &times; 10 &times; 10<sup>-6</sup> &times; (400 - 100) = 5 &times; 10<sup>-6</sup> &times; 300 = 15 &times; 10<sup>-4</sup> J।" },
+{ q: "১২. একটি ধারকের পাত দুটির মধ্যে বিভবপার্থক্য 20% বাড়ানো হলে সঞ্চিত শক্তি কতটা বাড়বে?", opts: ["20%", "40%", "44%", "100%"], ans: 2, exp: "ব্যাখ্যা: U &propto; V<sup>2</sup>। বিভব 1.2V হলে নতুন শক্তি (1.2)<sup>2</sup> U = 1.44 U। বৃদ্ধি 1.44 - 1 = 0.44 বা 44%।" },
+{ q: "১৩. একটি অনাহিত ধারককে ব্যাটারির সাহায্যে আহিত করা হলে ব্যাটারি দ্বারা সরবরাহ করা শক্তির কত অংশ ধারকে সঞ্চিত হয়?", opts: ["100%", "25%", "50%", "75%"], ans: 2, exp: "ব্যাখ্যা: ব্যাটারি দ্বারা কৃতকার্য W = qV। কিন্তু ধারকে সঞ্চিত শক্তি U = 1/2 qV। অর্থাৎ অর্ধেক শক্তি সঞ্চিত হয় এবং বাকি অর্ধেক শক্তি সংযোগকারী তারে তাপ ও বিকিরণ হিসেবে অপচয় হয়।" },
+{ q: "১৪. দুটি পরিবাহীর ধারকত্ব 5 esu এবং বিভব 50 esu। একে একটি অনাহিত পরিবাহীর (আধান 0) সঙ্গে যুক্ত করলে সাধারণ বিভব 10 esu হয়। দ্বিতীয় পরিবাহীর ধারকত্ব কত?", opts: ["10 esu", "15 esu", "20 esu", "25 esu"], ans: 2, exp: "ব্যাখ্যা: সাধারণ বিভব V = (C<sub>1</sub>V<sub>1</sub> + C<sub>2</sub>V<sub>2</sub>) / (C<sub>1</sub> + C<sub>2</sub>) &rArr; 10 = (5 &times; 50 + 0) / (5 + C<sub>2</sub>) &rArr; 50 + 10C<sub>2</sub> = 250 &rArr; 10C<sub>2</sub> = 200 &rArr; C<sub>2</sub> = 20 esu।" },
+{ q: "১৫. r<sub>1</sub> ও r<sub>2</sub> ব্যাসার্ধের দুটি ধাতব গোলককে পরস্পরের সঙ্গে তার দিয়ে যুক্ত করে আধান সরবরাহ করলে, গোলক দুটিতে সঞ্চিত আধানের অনুপাত (q<sub>1</sub>/q<sub>2</sub>) কী হবে?", opts: ["r<sub>1</sub>/r<sub>2</sub>", "r<sub>2</sub>/r<sub>1</sub>", "r<sub>1</sub><sup>2</sup>/r<sub>2</sub><sup>2</sup>", "1:1"], ans: 0, exp: "ব্যাখ্যা: গোলকের ধারকত্ব তার ব্যাসার্ধের সমানুপাতিক (C &propto; r)। আধান বণ্টনের পর q<sub>1</sub>/q<sub>2</sub> = C<sub>1</sub>/C<sub>2</sub> = r<sub>1</sub>/r<sub>2</sub>।" }
+]
+},
+4: {
+name: 'Set 4', icon: '⏸️', topic: 'ধারকের নীতি ও সমান্তরাল পাত ধারক',
+questions: [
+{ q: "১. যে বিশেষ ব্যবস্থার দ্বারা তড়িদাধান সঞ্চয় করে রাখা যায় এবং পরিবাহীর ধারকত্ব বৃদ্ধি করা যায়, তাকে কী বলে?", opts: ["তড়িৎবীক্ষণ যন্ত্র", "ট্রান্সফরমার", "ধারক (Capacitor)", "জেনারেটর"], ans: 2, exp: "ব্যাখ্যা: একটি অন্তরিত পরিবাহীর কাছে একটি ভূসংলগ্ন পরিবাহী এনে তার ধারকত্ব কৃত্রিমভাবে বৃদ্ধি করার ব্যবস্থাকেই ধারক বলে।" },
+{ q: "২. সমান্তরাল পাত ধারকের ধারকত্বের সূত্র কোনটি (SI পদ্ধতিতে)?", opts: ["C = &epsilon;<sub>0</sub> A / d", "C = d / &epsilon;<sub>0</sub> A", "C = 4&pi;&epsilon;<sub>0</sub> d", "C = &epsilon;<sub>0</sub> d / A"], ans: 0, exp: "ব্যাখ্যা: সমান্তরাল পাত ধারকের ধারকত্ব পাতের ক্ষেত্রফল A এর সমানুপাতিক এবং পাতদ্বয়ের দূরত্ব d এর ব্যাস্তানুপাতিক।" },
+{ q: "৩. সমান্তরাল পাত ধারকের পাত দুটির মধ্যবর্তী স্থানে তড়িৎপ্রাবল্য E হলে, একক আয়তনে সঞ্চিত শক্তি বা শক্তি ঘনত্ব (Energy density) কত?", opts: ["1/2 &epsilon;<sub>0</sub> E", "1/2 &epsilon;<sub>0</sub> E<sup>2</sup>", "1/2 E<sup>2</sup> / &epsilon;<sub>0</sub>", "&epsilon;<sub>0</sub> E<sup>2</sup>"], ans: 1, exp: "ব্যাখ্যা: ধারকের পাত দুটির মাঝে সঞ্চিত স্থিতিশক্তিকে আয়তন দিয়ে ভাগ করলে শক্তি ঘনত্ব u = 1/2 &epsilon;<sub>0</sub> E<sup>2</sup> (শূন্যস্থানে) পাওয়া যায়।" },
+{ q: "৪. সমান্তরাল পাত ধারকের পাত দুটির মধ্যে আকর্ষণ বলের মান কত?", opts: ["q<sup>2</sup> / &epsilon;<sub>0</sub> A", "q<sup>2</sup> / 2&epsilon;<sub>0</sub> A", "q / 2&epsilon;<sub>0</sub> A", "2q<sup>2</sup> / &epsilon;<sub>0</sub> A"], ans: 1, exp: "ব্যাখ্যা: একটি পাতের জন্য অন্য পাতের স্থানে প্রাবল্য &sigma; / 2&epsilon;<sub>0</sub>। তাই আকর্ষণ বল F = qE = q &times; (q/A) / 2&epsilon;<sub>0</sub> = q<sup>2</sup> / 2&epsilon;<sub>0</sub> A।" },
+{ q: "৫. ধারকের একটি পাতে +q এবং অপর পাতে -q আধান থাকলে ধারকের আধান কত ধরা হয়?", opts: ["2q", "0", "q", "q/2"], ans: 2, exp: "ব্যাখ্যা: ধারকের মোট আধান শূন্য (+q - q = 0) হলেও, ধারকের আধান বলতে সর্বদা যে-কোনো একটি পাতের আধানের মানকেই (q) বোঝায়।" },
+{ q: "৬. n-সংখ্যক সমান্তরাল পাত দিয়ে একান্তরভাবে যুক্ত করে সমবায় গঠন করলে কয়টি ধারক গঠিত হয়?", opts: ["n সংখ্যক", "n<sup>2</sup> সংখ্যক", "(n+1) সংখ্যক", "(n-1) সংখ্যক"], ans: 3, exp: "ব্যাখ্যা: n-সংখ্যক পাতকে পরপর রাখলে প্রতি দুটি পাতের মধ্যে একটি করে ফাকা স্থান বা ধারক তৈরি হয়, তাই মোট ধারক সংখ্যা (n-1) হয়।" },
+{ q: "৭. একটি সমান্তরাল পাত ধারকের পাত দুটির মধ্যবর্তী দূরত্ব অর্ধেক করলে ধারকত্ব কী হবে?", opts: ["অর্ধেক হবে", "অপরিবর্তিত থাকবে", "দ্বিগুণ হবে", "চারগুণ হবে"], ans: 2, exp: "ব্যাখ্যা: সমান্তরাল পাত ধারকের ধারকত্ব C = &epsilon;<sub>0</sub> A / d। দূরত্ব d অর্ধেক (d/2) হলে ধারকত্ব C দ্বিগুণ হয়ে যাবে।" },
+{ q: "৮. ধারকের পরাবিদ্যুৎ হিসেবে কঠিন অন্তরক পদার্থ ব্যবহারের সুবিধা কী?", opts: ["ধারকত্ব হ্রাস পায়", "পাত দুটি পরস্পরের সংস্পর্শে আসতে পারে না", "ধারক হালকা হয়", "বিভব বৃদ্ধি পায়"], ans: 1, exp: "ব্যাখ্যা: কঠিন পরাবিদ্যুৎ পাত দুটিকে যান্ত্রিকভাবে আলাদা রাখে যাতে তারা জুড়ে না যায় এবং একইসঙ্গে উচ্চ পরাবৈদ্যুতিক ধ্রুবকের কারণে ধারকত্বও বৃদ্ধি করে।" },
+{ q: "৯. পরাবৈদ্যুতিক শক্তির (Dielectric strength) SI একক কী?", opts: ["V &middot; m", "V&middot;m<sup>-1</sup>", "C &middot; m<sup>-2</sup>", "J &middot; m<sup>-3</sup>"], ans: 1, exp: "ব্যাখ্যা: পরাবৈদ্যুতিক শক্তি হলো সর্বোচ্চ তড়িৎক্ষেত্র প্রাবল্য যা মাধ্যমটি ভাঙন ছাড়া সহ্য করতে পারে। প্রাবল্যের এককই এর একক, অর্থাৎ V/m বা V&middot;m<sup>-1</sup>।" },
+{ q: "১০. ধারকের নিকটবর্তী স্থানে কোনো ভূ-সংলগ্ন পরিবাহী আনলে ধারকটির ধারকত্ব—", opts: ["কমে যায়", "অপরিবর্তিত থাকে", "বাড়ে", "শূন্য হয়"], ans: 2, exp: "ব্যাখ্যা: ভূ-সংলগ্ন পরিবাহীর আবিষ্ট বিপরীত আধান মূল পরিবাহীর বিভব কমিয়ে দেয়। C = q/V অনুযায়ী বিভব কমলে ধারকত্ব বেড়ে যায়, এটিই ধারকের নীতি।" },
+{ q: "১১. সমান্তরাল পাত ধারককে ব্যাটারি দ্বারা আহিত করে ব্যাটারি বিচ্ছিন্ন করার পর পাত দুটির মাঝে পরাবৈদ্যুতিক ফলক রাখলে আধানের কী পরিবর্তন হয়?", opts: ["আধান বৃদ্ধি পায়", "আধান হ্রাস পায়", "আধান শূন্য হয়", "আধান অপরিবর্তিত থাকে"], ans: 3, exp: "ব্যাখ্যা: ব্যাটারি বিচ্ছিন্ন থাকায় নতুন করে আধান আসা বা যাওয়ার কোনো পথ থাকে না, তাই আধান সংরক্ষিত বা অপরিবর্তিত থাকে।" },
+{ q: "১২. ব্যাটারি বিচ্ছিন্ন অবস্থায় সমান্তরাল পাত ধারকের পাত দুটিকে দূরে সরালে কী হয়?", opts: ["বিভবপ্রভেদ হ্রাস পায়", "ধারকত্ব বৃদ্ধি পায়", "সঞ্চিত শক্তি বৃদ্ধি পায়", "আধান বৃদ্ধি পায়"], ans: 2, exp: "ব্যাখ্যা: পাত দূরে সরালে ধারকত্ব (C &propto; 1/d) কমে যায়। আধান (q) স্থির থাকায় সঞ্চিত শক্তি (U = q<sup>2</sup> / 2C) বৃদ্ধি পায়। এই অতিরিক্ত শক্তি পাত দুটিকে আকর্ষণ বলের বিরুদ্ধে সরাতে কৃতকার্য থেকে আসে।" },
+{ q: "১৩. একটি সমান্তরাল পাত বায়ু ধারকের পাতগুলির মধ্যবর্তী স্থানে অতি অল্প বেধের একটি ধাতব পাত প্রবেশ করালে ধারকটির ধারকত্ব—", opts: ["হ্রাস পাবে", "বৃদ্ধি পাবে", "একই থাকবে", "বলা সম্ভব নয়"], ans: 1, exp: "ব্যাখ্যা: t বেধের ধাতব পাত ঢোকালে কার্যকরী দূরত্ব কমে গিয়ে (d-t) হয়। দূরত্ব কমায় ধারকত্ব C = &epsilon;<sub>0</sub> A / (d-t) বৃদ্ধি পাবে।" },
+{ q: "১৪. পরাবৈদ্যুতিক ভঞ্জন (Dielectric breakdown) বলতে কী বোঝায়?", opts: ["ধারক ভেঙে যাওয়া", "খুব উচ্চ তড়িৎক্ষেত্রে অন্তরকের ইলেকট্রন বিচ্ছিন্ন হয়ে পরিবাহীর মতো আচরণ করা", "আধান শূন্য হওয়া", "বিভব শূন্য হওয়া"], ans: 1, exp: "ব্যাখ্যা: তড়িৎক্ষেত্র একটি নির্দিষ্ট সীমা (Dielectric strength) ছাড়ালে পরাবিদ্যুতের পরমাণু থেকে ইলেকট্রন ছিটকে বেরিয়ে আসে এবং তা তড়িৎ পরিবহণ শুরু করে।" },
+{ q: "১৫. সমান্তরাল পাত ধারকের পাতদ্বয়ের মধ্যে তেল (K = 2) রাখা আছে এবং সেটির ধারকত্ব C। তেল অপসারণ করলে সেটির ধারকত্ব কত হবে?", opts: ["2C", "C/2", "4C", "C/4"], ans: 1, exp: "ব্যাখ্যা: তেল থাকা অবস্থায় C = 2&epsilon;<sub>0</sub> A / d। তেল সরালে মাধ্যম বায়ু (K=1) হয়, তাই নতুন ধারকত্ব C' = &epsilon;<sub>0</sub> A / d = C/2 হবে।" }
+]
+},
+5: {
+name: 'Set 5', icon: '🌐', topic: 'মিশ্র পরাবিদ্যুৎ, গোলীয় ও চোঙাকৃতি ধারক',
+questions: [
+{ q: "১. একটি সমান্তরাল পাত ধারকের d দূরত্বের মধ্যে t বেধের K<sub>2</sub> এবং (d-t) বেধের K<sub>1</sub> পরাবিদ্যুৎ থাকলে ধারকত্ব কত হবে?", opts: ["&epsilon;<sub>0</sub>A / [(d-t)/K<sub>1</sub> + t/K<sub>2</sub>]", "&epsilon;<sub>0</sub>A / (d-t+t)", "K<sub>1</sub> K<sub>2</sub> &epsilon;<sub>0</sub> A / d", "&epsilon;<sub>0</sub> A / d(K<sub>1</sub>+K<sub>2</sub>)"], ans: 0, exp: "ব্যাখ্যা: মিশ্র পরাবিদ্যুতের ক্ষেত্রে প্রতিটি মাধ্যমের বেধকে তার পরাবৈদ্যুতিক ধ্রুবক দিয়ে ভাগ করে যোগ করতে হয়।" },
+{ q: "২. গোলীয় ধারকের বাইরের গোলকটি ভূসংলগ্ন (earthed) থাকলে ধারকত্বের সূত্র কোনটি?", opts: ["4&pi;&epsilon;<sub>0</sub> [b<sup>2</sup> / (b-a)]", "4&pi;&epsilon;<sub>0</sub> [ab / (b-a)]", "4&pi;&epsilon;<sub>0</sub> (b-a)", "4&pi;&epsilon;<sub>0</sub> [a<sup>2</sup> / (b-a)]"], ans: 1, exp: "ব্যাখ্যা: ভেতরের গোলকের ব্যাসার্ধ a এবং বাইরের ভূসংলগ্ন গোলকের ব্যাসার্ধ b হলে, বিভবপার্থক্য V = (q / 4&pi;&epsilon;<sub>0</sub>)(1/a - 1/b) থেকে ধারকত্ব C = 4&pi;&epsilon;<sub>0</sub> [ab / (b-a)] পাওয়া যায়।" },
+{ q: "৩. গোলীয় ধারকের ভেতরের গোলকটি ভূসংলগ্ন থাকলে এবং বাইরেরটি আহিত হলে ধারকত্ব কত হবে?", opts: ["4&pi;&epsilon;<sub>0</sub> [b<sup>2</sup> / (b-a)]", "4&pi;&epsilon;<sub>0</sub> [ab / (b-a)]", "4&pi;&epsilon;<sub>0</sub> a", "4&pi;&epsilon;<sub>0</sub> b"], ans: 0, exp: "ব্যাখ্যা: এই ব্যবস্থায় সংস্থাটি দুটি ধারকের সমান্তরাল সমবায় হিসেবে আচরণ করে। মোট ধারকত্ব 4&pi;&epsilon;<sub>0</sub> [ab/(b-a) + b] যা সরল করলে 4&pi;&epsilon;<sub>0</sub> [b<sup>2</sup> / (b-a)] হয়।" },
+{ q: "৪. বেলনাকার বা চোঙাকৃতি ধারকের (Cylindrical capacitor) প্রতি একক দৈর্ঘ্যে ধারকত্ব কত?", opts: ["2&pi;&epsilon;<sub>0</sub> / ln(b/a)", "4&pi;&epsilon;<sub>0</sub> / ln(b/a)", "2&pi;&epsilon;<sub>0</sub> ln(b/a)", "2&pi;&epsilon;<sub>0</sub> l / ln(b/a)"], ans: 0, exp: "ব্যাখ্যা: মোট ধারকত্ব C = 2&pi;&epsilon;<sub>0</sub> l / ln(b/a)। একক দৈর্ঘ্যে (l=1) ধারকত্ব 2&pi;&epsilon;<sub>0</sub> / ln(b/a)।" },
+{ q: "৫. গোলীয় ধারকের বাইরের গোলকের ব্যাসার্ধ অসীম (b &rarr; &infin;) হলে সেটির ধারকত্ব কী নির্দেশ করে?", opts: ["ধারকত্ব শূন্য হয়", "অসীম হয়", "বিচ্ছিন্ন গোলকের ধারকত্ব", "গোলকটি নষ্ট হয়"], ans: 2, exp: "ব্যাখ্যা: C = 4&pi;&epsilon;<sub>0</sub> [ab/(b-a)] = 4&pi;&epsilon;<sub>0</sub> [a / (1 - a/b)]। যদি b &rarr; &infin; হয়, তবে a/b &rarr; 0 এবং C = 4&pi;&epsilon;<sub>0</sub> a হয়, যা একটি একক গোলকের ধারকত্ব।" },
+{ q: "৬. সমান্তরাল পাত ধারকের মধ্যে t<sub>1</sub>, t<sub>2</sub>, ... t<sub>n</sub> বেধের বিভিন্ন পরাবিদ্যুৎ (ধ্রুবক K<sub>1</sub>, K<sub>2</sub> ... K<sub>n</sub>) থাকলে ধারকত্ব কী হয়?", opts: ["&epsilon;<sub>0</sub>A / &Sigma;(t<sub>i</sub> K<sub>i</sub>)", "&epsilon;<sub>0</sub>A / &Sigma;(t<sub>i</sub> / K<sub>i</sub>)", "&epsilon;<sub>0</sub>A &Sigma;(K<sub>i</sub> / t<sub>i</sub>)", "শূন্য"], ans: 1, exp: "ব্যাখ্যা: প্রতিটি মাধ্যমের জন্য বেধকে তার পরাবৈদ্যুতিক ধ্রুবক দিয়ে ভাগ করে যোগফল নিতে হয়।" },
+{ q: "৭. একটি গোলীয় ধারকের বক্রতা ব্যাসার্ধ a এবং b (b > a)। এদের মধ্যবর্তী মাধ্যম বায়ু হলে ধারকত্ব কিসের ওপর নির্ভর করে?", opts: ["কেবল a-এর ওপর", "কেবল b-এর ওপর", "a ও b উভয়ের ওপর", "আধানের ওপর"], ans: 2, exp: "ব্যাখ্যা: ধারকত্বের রাশিমালায় ab/(b-a) থাকে, যা প্রমাণ করে এটি অভ্যন্তরীণ এবং বাহ্যিক উভয় গোলকের ব্যাসার্ধের ওপর নির্ভরশীল।" },
+{ q: "৮. CGS পদ্ধতিতে l দৈর্ঘ্যের চোঙাকৃতি ধারকের ধারকত্ব কত?", opts: ["Kl / 2ln(b/a)", "K / ln(b/a)", "2Kl / ln(b/a)", "Kl / 4&pi;"], ans: 0, exp: "ব্যাখ্যা: SI পদ্ধতিতে 2&pi;&epsilon;<sub>0</sub> পদটি থাকে। CGS পদ্ধতিতে &epsilon;<sub>0</sub> &rarr; 1 / 4&pi; বসালে ধারকত্বের রাশিমালা Kl / 2ln(b/a) দাঁড়ায়।" },
+{ q: "৯. গোলীয় ধারকের ভেতরের গোলকটিকে +q আধান দিলে বাইরের ভূসংলগ্ন গোলকের ভেতরের পৃষ্ঠে কী আধান আবিষ্ট হয়?", opts: ["+q", "-q", "+q/2", "শূন্য"], ans: 1, exp: "ব্যাখ্যা: তড়িদাবেশের নিয়মানুযায়ী, ভেতরের গোলকের ধনাত্মক আধান বাইরের গোলকের ভেতরের পৃষ্ঠে সমপরিমাণ ঋণাত্মক আধান (-q) আবিষ্ট করে।" },
+{ q: "১০. সমান্তরাল পাত ধারকের মাঝে t=d বেধের ধাতব ফলক (পরিবাহী) প্রবেশ করালে তাত্ত্বিকভাবে ধারকত্ব কী হবে?", opts: ["বৃদ্ধি পাবে", "অসীম হবে", "শূন্য হবে", "অপরিবর্তিত থাকবে"], ans: 1, exp: "ব্যাখ্যা: পরিবাহী ফলক প্রবেশ করালে ধারকত্ব C = &epsilon;<sub>0</sub> A / (d-t)। পরিবাহীটি পুরো স্থান জুড়ে থাকলে (t=d), d-t = 0 হয়ে ধারকত্ব অসীম (&infin;) হয়ে যায়।" },
+{ q: "১১. একটি গোলীয় ধারকের অন্তঃব্যাসার্ধ 2 cm এবং বহির্ব্যাসার্ধ 3 cm (বায়ু মাধ্যম)। অন্তঃগোলকটি ভূসংলগ্ন হলে এর ধারকত্ব কত?", opts: ["6 pF", "5 pF", "10 pF", "15 pF"], ans: 2, exp: "ব্যাখ্যা: ভেতরের গোলক ভূসংলগ্ন হলে C = 4&pi;&epsilon;<sub>0</sub> [b<sup>2</sup> / (b-a)] = (1 / 9&times;10<sup>9</sup>) &times; [0.03<sup>2</sup> / (0.03 - 0.01)] = 10 &times; 10<sup>-12</sup> F বা 10 pF।" },
+{ q: "১২. চোঙাকৃতি ধারকে তড়িৎ বলরেখাগুলি কীরূপ হয়?", opts: ["সমান্তরাল", "বৃত্তাকার", "অরীয়ভাবে (Radially) ভেতরের চোং থেকে বাইরের চোঙে পৌঁছায়", "কোনো বলরেখা থাকে না"], ans: 2, exp: "ব্যাখ্যা: চোঙের অক্ষের সাপেক্ষে প্রতিসাম্যের কারণে তড়িৎ বলরেখাগুলি ভেতরের পরিবাহী থেকে বাইরের পরিবাহীর দিকে ব্যাসার্ধ বরাবর বা অরীয়ভাবে গমন করে।" },
+{ q: "১৩. ধারকের পাত দুটির মাঝে পরাবৈদ্যুতিক ফলক প্রবেশ করালে বিভবপ্রভেদ ও ধারকত্বের কী পরিবর্তন হয় (ব্যাটারি বিচ্ছিন্ন অবস্থায়)?", opts: ["বিভবপ্রভেদ ও ধারকত্ব উভয়ই বৃদ্ধি পায়", "বিভবপ্রভেদ হ্রাস পায়, ধারকত্ব বৃদ্ধি পায়", "বিভবপ্রভেদ ও ধারকত্ব উভয়ই হ্রাস পায়", "বিভবপ্রভেদ বাড়ে, ধারকত্ব কমে"], ans: 1, exp: "ব্যাখ্যা: ব্যাটারি বিচ্ছিন্ন থাকায় আধান স্থির থাকে। পরাবিদ্যুৎ রাখলে ধারকত্ব K গুণ বৃদ্ধি পায়। যেহেতু V = q/C, ধারকত্ব বাড়ায় বিভবপ্রভেদ K গুণ হ্রাস পায়।" },
+{ q: "১৪. একটি সমান্তরাল পাত ধারকের আধান Q। পাত দুটির মধ্যে একটি ধাতব ফলক ঢোকালে আধানের কী পরিবর্তন হবে (ব্যাটারি বিচ্ছিন্ন)?", opts: ["আধান বৃদ্ধি পাবে", "আধান হ্রাস পাবে", "আধান শূন্য হবে", "আধান অপরিবর্তিত থাকবে"], ans: 3, exp: "ব্যাখ্যা: ব্যাটারি বিচ্ছিন্ন অবস্থায় ধারকের বাইরের সাথে কোনো তড়িৎ সংযোগ থাকে না, তাই আধানের সংরক্ষণ সূত্রানুযায়ী আধান অপরিবর্তিত থাকে।" },
+{ q: "১৫. গোলীয় ধারকে দুটি গোলকের মধ্যবর্তী স্থানে পরাবৈদ্যুতিক মাধ্যম (K) রাখলে ধারকত্ব কত গুণ বৃদ্ধি পায়?", opts: ["K গুণ", "K<sup>2</sup> গুণ", "1/K গুণ", "অপরিবর্তিত থাকে"], ans: 0, exp: "ব্যাখ্যা: যেকোনো ধারকের ক্ষেত্রেই মধ্যবর্তী স্থানে বায়ু বা শূন্যস্থানের বদলে K পরাবৈদ্যুতিক ধ্রুবকের মাধ্যম রাখলে তার ধারকত্ব C<sub>new</sub> = K &middot; C<sub>air</sub> অর্থাৎ K গুণ বৃদ্ধি পায়।" }
+]
+},
+6: {
+name: 'Set 6', icon: '🔗', topic: 'ধারকের সমবায়',
+questions: [
+{ q: "১. দুটি ধারকের ধারকত্ব C<sub>1</sub> ও C<sub>2</sub>। সমান্তরাল সমবায়ে এদের তুল্য ধারকত্ব কত?", opts: ["C<sub>1</sub> C<sub>2</sub>", "C<sub>1</sub> C<sub>2</sub> / (C<sub>1</sub> + C<sub>2</sub>)", "(C<sub>1</sub> + C<sub>2</sub>) / C<sub>1</sub> C<sub>2</sub>", "C<sub>1</sub> + C<sub>2</sub>"], ans: 3, exp: "ব্যাখ্যা: সমান্তরাল সমবায়ে যুক্ত ধারকগুলির তুল্য ধারকত্ব প্রতিটি ধারকের ধারকত্বের সরাসরি যোগফলের সমান হয়।" },
+{ q: "২. N-সংখ্যক অভিন্ন ধারককে সমান্তরাল সমবায়ে যুক্ত করে V বিভবপ্রভেদ প্রয়োগ করা হলো। এরপর আধান অপরিবর্তিত রেখে ধারকগুলিকে শ্রেণি সমবায়ে যুক্ত করা হলে নতুন বিভবপ্রভেদ কত হবে?", opts: ["V", "N<sup>2</sup> V", "V / N", "NV"], ans: 3, exp: "ব্যাখ্যা: প্রতিটি ধারকের আধান q=CV। শ্রেণি সমবায়ে তুল্য ধারকত্ব C' = C/N। আধান অপরিবর্তিত থাকলে নতুন বিভব V' = q/C' = q / (C/N) = N(q/C) = NV।" },
+{ q: "৩. 5 একক ও 4 একক ধারকত্ববিশিষ্ট দুটি ধারককে যথাক্রমে সমান্তরাল ও শ্রেণি সমবায়ে যুক্ত করলে, উভয়ক্ষেত্রে মোট ধারকত্বের অনুপাত কত হবে?", opts: ["5/9", "9/5", "20/81", "81/20"], ans: 3, exp: "ব্যাখ্যা: সমান্তরাল সমবায়ে C<sub>p</sub> = 5 + 4 = 9 একক। শ্রেণি সমবায়ে C<sub>s</sub> = (5 &times; 4)/(5 + 4) = 20/9 একক। অনুপাত C<sub>p</sub> : C<sub>s</sub> = 9 : (20/9) = 81/20।" },
+{ q: "৪. দুটি ধারকের শ্রেণি সমবায়ের তুল্য ধারকত্ব 2.4 &mu;F এবং সমান্তরাল সমবায়ের তুল্য ধারকত্ব 10 &mu;F। ধারক দুটির ধারকত্ব কত?", opts: ["2 &mu;F, 8 &mu;F", "3 &mu;F, 7 &mu;F", "5 &mu;F, 5 &mu;F", "4 &mu;F, 6 &mu;F"], ans: 3, exp: "ব্যাখ্যা: C<sub>1</sub> + C<sub>2</sub> = 10 এবং C<sub>1</sub>C<sub>2</sub> / (C<sub>1</sub> + C<sub>2</sub>) = 2.4 &rArr; C<sub>1</sub>C<sub>2</sub> = 24। সমাধান করলে C<sub>1</sub> = 6 এবং C<sub>2</sub> = 4 পাওয়া যায়।" },
+{ q: "৫. সমান ধারকত্বের 4টি ধারকের শ্রেণি সমবায়ে তুল্য ধারকত্ব C<sub>1</sub> এবং সমান্তরাল সমবায়ে তুল্য ধারকত্ব C<sub>2</sub>। C<sub>1</sub>/C<sub>2</sub> এর অনুপাত কত?", opts: ["1/4", "1/16", "1/8", "1/12"], ans: 1, exp: "ব্যাখ্যা: ধরি প্রতিটির ধারকত্ব C। শ্রেণিতে C<sub>1</sub> = C/4 এবং সমান্তরালে C<sub>2</sub> = 4C। অনুপাত C<sub>1</sub>/C<sub>2</sub> = (C/4) / 4C = 1/16।" },
+{ q: "৬. C এবং 2C ধারকত্বের দুটি সমান্তরাল পাত ধারককে সমান্তরাল সমবায়ে যুক্ত করে V বিভবে আহিত করা হলো। ব্যাটারি সংযোগ ছিন্ন করে C ধারকের মাঝে K পরাবৈদ্যুতিক মাধ্যম প্রবেশ করালে ধারক দুটির সাধারণ বিভব কত হবে?", opts: ["V / (K+2)", "2V / (K+2)", "V / 3(K+2)", "3V / (K+2)"], ans: 3, exp: "ব্যাখ্যা: প্রাথমিক মোট আধান q = (C+2C)V = 3CV। মাধ্যম দেওয়ার পর নতুন ধারকত্ব C<sub>new</sub> = KC + 2C = C(K+2)। নতুন বিভব V' = q / C<sub>new</sub> = 3CV / C(K+2) = 3V / (K+2)।" },
+{ q: "৭. 3 &mu;F, 9 &mu;F এবং 18 &mu;F ধারকত্বের তিনটি ধারককে একবার শ্রেণি সমবায়ে এবং পরে সমান্তরাল সমবায়ে যুক্ত করা হলো। শ্রেণি ও সমান্তরাল সমবায়ের তুল্য ধারকত্বের অনুপাত কত?", opts: ["1:15", "1:3", "1:9", "1:12"], ans: 0, exp: "ব্যাখ্যা: শ্রেণিতে 1/C<sub>s</sub> = 1/3 + 1/9 + 1/18 &rArr; C<sub>s</sub> = 2 &mu;F। সমান্তরালে C<sub>p</sub> = 3 + 9 + 18 = 30 &mu;F। অনুপাত C<sub>s</sub> : C<sub>p</sub> = 2 : 30 = 1:15।" },
+{ q: "৮. 2 &mu;F ধারকত্বের একটি ধারককে 20 V বিভবে আহিত করে 3 &mu;F ধারকত্বের একটি অনাহিত ধারকের সঙ্গে সমান্তরালে যুক্ত করা হলো। সাধারণ বিভব কত হবে?", opts: ["10 V", "8 V", "12 V", "6 V"], ans: 1, exp: "ব্যাখ্যা: মোট আধান q = 2 &times; 20 + 0 = 40 &mu;C। মোট ধারকত্ব C = 2 + 3 = 5 &mu;F। সাধারণ বিভব V = q/C = 40 / 5 = 8 V।" },
+{ q: "৯. 1.0 &mu;F ধারকত্বের অনেকগুলি ধারক আপনার কাছে আছে। এদের সাহায্যে 0.75 &mu;F তুল্য ধারকত্ব পেতে সর্বনিম্ন কতগুলি ধারক প্রয়োজন এবং কীভাবে যুক্ত করতে হবে?", opts: ["4টি ধারক, মিশ্র সমবায়ে", "6টি ধারক, সমান্তরাল সমবায়ে", "4টি ধারক, শ্রেণি সমবায়ে", "6টি ধারক, মিশ্র সমবায়ে"], ans: 0, exp: "ব্যাখ্যা: 0.75 &mu;F বা 3/4 &mu;F পেতে হলে, তিনটি 1 &mu;F ধারককে সমান্তরালে রাখলে (3 &mu;F) তার সাথে একটি 1 &mu;F শ্রেণিতে যুক্ত করলে তুল্য ধারকত্ব হবে (3 &times; 1) / (3 + 1) = 3/4 = 0.75 &mu;F। তাই 4টি ধারক মিশ্র সমবায়ে লাগবে।" },
+{ q: "১০. 20 &mu;F এবং 60 &mu;F ধারকত্বের দুটি ধারককে শ্রেণি সমবায়ে যুক্ত করা হয়েছে। সমবায়টির দুই প্রান্তের বিভবপ্রভেদ 40 V হলে, প্রত্যেকটি ধারকের দুইপ্রান্তের বিভবপ্রভেদ কত?", opts: ["20 V, 10 V", "25 V, 10 V", "30 V, 10 V", "30 V, 15 V"], ans: 2, exp: "ব্যাখ্যা: শ্রেণি সমবায়ে তুল্য ধারকত্ব C<sub>s</sub> = (20 &times; 60)/80 = 15 &mu;F। মোট আধান q = 15 &times; 40 = 600 &mu;C। প্রথমটির বিভব V<sub>1</sub> = 600/20 = 30 V এবং দ্বিতীয়টির V<sub>2</sub> = 600/60 = 10 V।" },
+{ q: "১১. সমান্তরাল সমবায়ে থাকা ধারকগুলির ক্ষেত্রে কোন্ রাশিটি ধ্রুবক বা স্থির থাকে?", opts: ["আধান", "ধারকত্ব", "বিভবপ্রভেদ", "সঞ্চিত শক্তি"], ans: 2, exp: "ব্যাখ্যা: সমান্তরাল সমবায়ে সমস্ত ধারক একই তড়িৎ উৎস এবং ভূমির সাথে সরাসরি যুক্ত থাকে, তাই প্রতিটি ধারকের দুই প্রান্তের বিভবপ্রভেদ সমান হয়।" },
+{ q: "১২. অসীম সংখ্যক ধারক যাদের ধারকত্ব 1 &mu;F, 2 &mu;F, 4 &mu;F, 8 &mu;F... সেগুলিকে শ্রেণি সমবায়ে যুক্ত করা হলে তুল্য ধারকত্ব কত হবে?", opts: ["1 &mu;F", "0.5 &mu;F", "0.75 &mu;F", "2 &mu;F"], ans: 1, exp: "ব্যাখ্যা: 1/C<sub>eq</sub> = 1/1 + 1/2 + 1/4 + 1/8 + ... এটি একটি অসীম গুণোত্তর প্রগতি যার যোগফল 1 / (1 - 1/2) = 2। সুতরাং C<sub>eq</sub> = 1/2 = 0.5 &mu;F।" },
+{ q: "১৩. 3 &mu;F, 6 &mu;F এবং 6 &mu;F ধারকত্ববিশিষ্ট তিনটি ধারককে শ্রেণি সমবায়ে যুক্ত করে 120 V উৎসের সঙ্গে সংযুক্ত করা হলো। 3 &mu;F ধারকের দুই প্রান্তে বিভবপ্রভেদ কত?", opts: ["24 V", "30 V", "40 V", "60 V"], ans: 3, exp: "ব্যাখ্যা: তুল্য ধারকত্ব 1/C = 1/3 + 1/6 + 1/6 &rArr; C = 1.5 &mu;F। মোট আধান q = 1.5 &times; 120 = 180 &mu;C। 3 &mu;F ধারকের বিভব V<sub>1</sub> = q/C<sub>1</sub> = 180/3 = 60 V।" },
+{ q: "১৪. 5 &mu;F ও 10 &mu;F ধারকত্বসম্পন্ন দুটি ধারককে শ্রেণি সমবায়ে রেখে 300 V বিভবপ্রভেদ প্রয়োগ করা হলে, আহিত ধারক দুটিতে মোট সঞ্চিত শক্তি কত হবে?", opts: ["15 J", "1.5 J", "0.15 J", "0.10 J"], ans: 2, exp: "ব্যাখ্যা: তুল্য ধারকত্ব C = (5 &times; 10)/15 = 10/3 &mu;F = 10/3 &times; 10<sup>-6</sup> F। মোট শক্তি U = 1/2 C V<sup>2</sup> = 1/2 &times; (10/3) &times; 10<sup>-6</sup> &times; (300)<sup>2</sup> = 0.15 J।" },
+{ q: "১৫. C ধারকত্ববিশিষ্ট একটি সমান্তরাল পাত ধারককে V বিভবে আহিত করা হলো। পাত দুটির মধ্যবর্তী দূরত্ব d হলে, এদের মধ্যে ক্রিয়াশীল বল কত হবে?", opts: ["CV<sup>2</sup> / d", "CV<sup>2</sup> / 2d", "2CV<sup>2</sup> / d", "CV<sup>2</sup> / 4d"], ans: 1, exp: "ব্যাখ্যা: পাতদ্বয়ের মধ্যে আকর্ষণ বল F = qE / 2। যেহেতু q = CV এবং E = V/d, তাই F = (CV)(V/d) / 2 = CV<sup>2</sup> / 2d।" }
+]
+},
+7: {
+name: 'Set 7', icon: '📻', topic: 'বিভিন্ন প্রকার ধারক, CR বর্তনী এবং ভ্যান ডি গ্রাফ জেনারেটর',
+questions: [
+{ q: "১. বেতার গ্রাহক যন্ত্রে (Radio receiver) টিউনিং করার জন্য কোন্ ধারক ব্যবহৃত হয়?", opts: ["অভ্র ধারক", "পরিবর্তনীয় বায়ু ধারক", "তড়িৎবিশ্লেষ্য ধারক", "কাগজ ধারক"], ans: 1, exp: "ব্যাখ্যা: বেতার গ্রাহক বা রেডিওতে নির্দিষ্ট কম্পাঙ্ক ধরার জন্য ধারকত্ব কমানো-বাড়ানোর প্রয়োজন হয়, তাই সেখানে নব (knob) যুক্ত পরিবর্তনীয় বায়ু ধারক ব্যবহার করা হয়।" },
+{ q: "২. কোন্ প্রকার ধারকের গায়ে ধনাত্মক ও ঋণাত্মক মেরু (Polarity) স্পষ্টভাবে চিহ্নিত করা থাকে?", opts: ["অভ্র ধারক", "কাগজ ধারক", "তড়িৎবিশ্লেষ্য ধারক", "সেরামিক ধারক"], ans: 2, exp: "ব্যাখ্যা: তড়িৎবিশ্লেষ্য ধারকের ক্ষেত্রে অ্যালুমিনিয়াম অক্সাইডের স্তরটি নষ্ট হয়ে যাওয়ার হাত থেকে বাঁচাতে এর অ্যানোড পাতটিকে সবসময় ধনাত্মক মেরুর সাথেই যুক্ত করতে হয়। তাই এতে চিহ্ন দেওয়া থাকে।" },
+{ q: "৩. AC-কে DC তে পরিবর্তনের সময় ফিল্টার (Filter) হিসেবে কোন্ ধারক বহুল ব্যবহৃত হয়?", opts: ["সমান্তরাল পাত ধারক", "অভ্র ধারক", "তড়িৎবিশ্লেষ্য ধারক", "বায়ু ধারক"], ans: 2, exp: "ব্যাখ্যা: তড়িৎবিশ্লেষ্য ধারকগুলি অত্যন্ত ক্ষুদ্র আয়তনের মধ্যে অনেক বেশি ধারকত্ব (কয়েক হাজার মাইক্রোফ্যারাড) দিতে পারে, যা রেক্টিফায়ার বর্তনীতে ফিল্টারের কাজে অত্যন্ত উপযোগী।" },
+{ q: "৪. 'ব্লক ধারক' (Block capacitor) কাকে বলা হয়?", opts: ["অভ্র ধারককে", "কাগজ ধারককে", "বায়ু ধারককে", "তড়িৎবিশ্লেষ্য ধারককে"], ans: 0, exp: "ব্যাখ্যা: অভ্র ধারকে টিন ও অভ্রের পাতগুলিকে একান্তরভাবে সাজিয়ে একটি ক্ষুদ্র ব্লক বা ফলকের আকার দেওয়া হয়, তাই একে ব্লক ধারকও বলা হয়।" },
+{ q: "৫. ধারকের চার্জিং বা ডিসচার্জিং-এর সময় C-R বর্তনীতে প্রবাহমাত্রা (Current) সময়ের সঙ্গে কীভাবে পরিবর্তিত হয়?", opts: ["রৈখিকভাবে বৃদ্ধি পায়", "রৈখিকভাবে হ্রাস পায়", "সূচকীয়ভাবে বৃদ্ধি পায়", "সূচকীয়ভাবে (Exponentially) হ্রাস পায়"], ans: 3, exp: "ব্যাখ্যা: চার্জিং বা ডিসচার্জিং উভয় ক্ষেত্রেই বর্তনীতে প্রবাহমাত্রা I = I<sub>0</sub> e<sup>-t/RC</sup> সমীকরণ মেনে সূচকীয়ভাবে হ্রাস পেতে থাকে।" },
+{ q: "৬. CR (ধারকত্ব &times; রোধ)-এর মাত্রীয় সংকেত কোন্ ভৌত রাশির মাত্রার সমান?", opts: ["সময়", "বেগ", "বল", "শক্তি"], ans: 0, exp: "ব্যাখ্যা: &tau; = RC কে বর্তনীর সময় ধ্রুবক (Time constant) বলা হয়। এর মাত্রা [T] বা সময়ের মাত্রার সমান।" },
+{ q: "৭. আহিতকরণের সময় C-R বর্তনীতে সময়াঙ্ক (Time constant, &tau;) সময়ে ধারক তার সর্বোচ্চ আধানের কত শতাংশ লাভ করে?", opts: ["37%", "73%", "36%", "63%"], ans: 3, exp: "ব্যাখ্যা: চার্জিং সমীকরণ q = q<sub>0</sub>(1 - e<sup>-t/RC</sup>) এ t = RC বসালে পাওয়া যায় q = q<sub>0</sub>(1 - 1/e) &approx; 0.63 q<sub>0</sub>, অর্থাৎ সর্বোচ্চ আধানের প্রায় 63%। (অনাহিতকরণের সময় এটি 37% এ নেমে আসে)।" },
+{ q: "৮. 2 &mu;F ধারক এবং 1 M&Omega; রোধ একটি 12 V ব্যাটারির সঙ্গে শ্রেণি সমবায়ে যুক্ত করলে বর্তনীর সময় ধ্রুবক (Time constant) কত হবে?", opts: ["1 s", "3 s", "4 s", "2 s"], ans: 3, exp: "ব্যাখ্যা: সময় ধ্রুবক &tau; = RC = (1 &times; 10<sup>6</sup> &Omega;) &times; (2 &times; 10<sup>-6</sup> F) = 2 s।" },
+{ q: "৯. স্থির তড়িৎ যন্ত্রের (Electrostatic machine) সাহায্যে মূলত কী সৃষ্টি করা হয়?", opts: ["নিম্নবিভব", "উচ্চ তড়িৎক্ষেত্র", "খুব বেশি পরিমাণে তড়িদাধান ও উচ্চবিভব", "চৌম্বকক্ষেত্র"], ans: 2, exp: "ব্যাখ্যা: যে যন্ত্রের সাহায্যে খুব বেশি পরিমাণে এবং দ্রুতহারে তড়িদাধান উৎপাদন করে উচ্চবিভব সৃষ্টি করা যায়, তাকে স্থির তড়িৎ যন্ত্র (যেমন- ভ্যান ডি গ্রাফ জেনারেটর) বলে।" },
+{ q: "১০. ভ্যান ডি গ্রাফ জেনারেটরের সাহায্যে সর্বোচ্চ কত মানের বিভবপার্থক্য সৃষ্টি করা সম্ভব?", opts: ["কয়েকশো ভোল্ট", "কয়েক মিলিয়ন ভোল্ট (কয়েক লক্ষ বা কোটি ভোল্ট)", "কয়েক হাজার ভোল্ট", "কয়েক ভোল্ট"], ans: 1, exp: "ব্যাখ্যা: ভ্যান ডি গ্রাফ জেনারেটর দিয়ে প্রায় 1 কোটি ভোল্ট (10 Million Volts) পর্যন্ত উচ্চ বিভববৈষম্য সৃষ্টি করা যায়।" },
+{ q: "১১. তড়িৎক্ষরণ রোধ করতে ভ্যান ডি গ্রাফ জেনারেটরের ধাতব প্রকোষ্ঠে কোন্ গ্যাস ভর্তি করে রাখা হয়?", opts: ["বায়ু", "হাইড্রোজেন", "ফ্রিয়ন গ্যাস বা উচ্চচাপের নাইট্রোজেন", "অক্সিজেন"], ans: 2, exp: "ব্যাখ্যা: উচ্চ বিভবে বায়ুতে তড়িৎমোক্ষণ ঘটে যেতে পারে। তাই প্রকোষ্ঠটিকে উচ্চচাপের নাইট্রোজেন বা ফ্রিয়ন গ্যাস দ্বারা পূর্ণ করা হয়, কারণ এরা সহজে তড়িদাহিত হয় না।" },
+{ q: "১২. ভ্যান ডি গ্রাফ যন্ত্রের ফাঁপা গোলক ও বেল্টটিকে যথাসম্ভব কীরূপ করা হয়?", opts: ["মসৃণ", "অমসৃণ", "কাঁটাযুক্ত", "অর্ধপরিবাহী"], ans: 0, exp: "ব্যাখ্যা: অমসৃণ তলে আধানের তলমাত্রিক ঘনত্ব বেশি হওয়ায় তড়িৎক্ষরণ হওয়ার সম্ভাবনা থাকে। তাই আধানের ক্ষরণ এড়াতে গোলক ও বেল্টকে অত্যন্ত মসৃণ করা হয়।" },
+{ q: "১৩. একটি 10 V DC উৎসকে 5 &Omega; রোধ ও 0.1 &mu;F ধারকত্বের শ্রেণি সমবায়ের সঙ্গে যুক্ত করা হলো। স্থিতাবস্থায় (Steady state) বর্তনীর মধ্য দিয়ে তড়িৎপ্রবাহমাত্রা কত হবে?", opts: ["2 A", "10 A", "1 A", "0 A"], ans: 3, exp: "ব্যাখ্যা: সমপ্রবাহ (DC) বর্তনীতে একটি ধারক সম্পূর্ণ আহিত হয়ে যাওয়ার পর স্থিতাবস্থায় তা অসীম রোধের মতো আচরণ করে, ফলে বর্তনীতে কোনো তড়িৎপ্রবাহ হয় না (I = 0)।" },
+{ q: "১৪. অনাহিতকরণের (Discharging) সময় C-R বর্তনীতে আধানের ক্ষয় কোন্ সূত্র মেনে চলে?", opts: ["ওহমের সূত্র", "কির্সফের সূত্র", "সূচকীয় সূত্র (Exponential law)", "ফ্যারাডের সূত্র"], ans: 2, exp: "ব্যাখ্যা: অনাহিতকরণের সময় আধান q = q<sub>0</sub> e<sup>-t/RC</sup> সূত্রানুযায়ী হ্রাস পায়, যা একটি সূচকীয় সূত্র বা Exponential decay law।" },
+{ q: "১৫. মাইকা বা অভ্রের পরাবৈদ্যুতিক শক্তির (Dielectric strength) পাল্লা প্রায় কত হয়?", opts: ["10-20 kV/mm", "30-50 kV/mm", "50-200 kV/mm", "300-500 kV/mm"], ans: 2, exp: "ব্যাখ্যা: ছক অনুযায়ী, অভ্রের পরাবৈদ্যুতিক শক্তি (Dielectric strength) প্রায় 80 kV/mm হয়, যা (50-200) kV/mm এর পাল্লার মধ্যে পড়ে।" }
+]
+},
+8: {
+name: 'Set 8', icon: '📝', topic: 'গাণিতিক সমস্যা (Level-I ও Level-II)',
+questions: [
+{ q: "১. 27টি একই ধরনের পারদের ফোঁটার প্রত্যেকটি 10 V বিভবে আহিত করা হলো। ফোঁটাগুলি সংযুক্ত হয়ে একটি বড়ো ফোঁটা গঠন করলে বড়ো ফোঁটার বিভব কত হবে?", opts: ["110 V", "90 V", "105 V", "98 V"], ans: 1, exp: "ব্যাখ্যা: n-সংখ্যক ফোঁটা যুক্ত হয়ে বড়ো ফোঁটা গঠন করলে বড়ো ফোঁটার বিভব V' = n<sup>2/3</sup> V হয়। এখানে n=27, তাই V' = (27)<sup>2/3</sup> &times; 10 = 9 &times; 10 = 90 V।" },
+{ q: "২. 10 cm ব্যাসার্ধের একটি গোলীয় ধারকের ধারকত্ব কত?", opts: ["9 &times; 10<sup>9</sup> F", "10 statF", "1/(9 &times; 10<sup>9</sup>) F", "10<sup>4</sup> F"], ans: 1, exp: "ব্যাখ্যা: CGS পদ্ধতিতে বায়ুমাধ্যমে গোলকের ধারকত্ব তার ব্যাসার্ধের সাংখ্যমানের সমান। তাই 10 cm ব্যাসার্ধের গোলকের ধারকত্ব 10 esu বা 10 statF হবে।" },
+{ q: "৩. একটি 20 &mu;F ধারকত্বসম্পন্ন ধারককে 20 V বিভবে আহিত করার পর সেটিকে একটি 10 &mu;F অনাহিত ধারকের সঙ্গে যুক্ত করা হলো। সাধারণ বিভব কত হবে?", opts: ["20/7 V", "40/3 V", "20 V", "10 V"], ans: 1, exp: "ব্যাখ্যা: মোট আধান q = C<sub>1</sub> V<sub>1</sub> = 20 &times; 20 = 400 &mu;C। মোট ধারকত্ব C<sub>1</sub> + C<sub>2</sub> = 20 + 10 = 30 &mu;F। সাধারণ বিভব V = q / (C<sub>1</sub>+C<sub>2</sub>) = 400 / 30 = 40/3 V।" },
+{ q: "৪. 6 cm এবং 4 cm ব্যাসার্ধের দুটি গোলীয় ধারককে সমভাবে (সমান আধানে) আহিত করা হলো। গোলক দুটির আধানের তলমাত্রিক ঘনত্বের অনুপাত হবে:", opts: ["2:3", "3:2", "4:9", "9:4"], ans: 2, exp: "ব্যাখ্যা: আধান সমান (q) হলে তলমাত্রিক ঘনত্ব &sigma; = q / (4&pi;r<sup>2</sup>) &rArr; &sigma; &propto; 1/r<sup>2</sup>। তাই &sigma;<sub>1</sub> : &sigma;<sub>2</sub> = r<sub>2</sub><sup>2</sup> : r<sub>1</sub><sup>2</sup> = 4<sup>2</sup> : 6<sup>2</sup> = 16 : 36 = 4:9।" },
+{ q: "৫. একটি ধারকে 10 esu তড়িদাধান দেওয়ায় তার বিভব শূন্য থেকে 150 V হলো। তাতে কত শক্তি সঞ্চিত হলো?", opts: ["2.5 erg", "1.8 erg", "2.0 erg", "5.0 erg"], ans: 0, exp: "ব্যাখ্যা: 150 V = 150/300 esu = 0.5 statV। আধান q = 10 esu। সঞ্চিত শক্তি U = 1/2 qV = 1/2 &times; 10 &times; 0.5 = 2.5 erg।" },
+{ q: "৬. একটি সমান্তরাল পাত ধারকের পাত দুটির ব্যবধান d। এদের সমান ক্ষেত্রফলবিশিষ্ট d/2 বেধের একটি ধাতব টুকরোকে পাত দুটির মধ্যে ঢুকিয়ে দেওয়া হলো। প্রথম ও দ্বিতীয় ক্ষেত্রের ধারকত্বের অনুপাত হবে:", opts: ["2:1", "1:4", "4:1", "1:2"], ans: 3, exp: "ব্যাখ্যা: প্রথমে ধারকত্ব C<sub>1</sub> = &epsilon;<sub>0</sub> A / d। ধাতব টুকরো ঢোকালে কার্যকরী দূরত্ব d - d/2 = d/2 হয়। নতুন ধারকত্ব C<sub>2</sub> = &epsilon;<sub>0</sub> A / (d/2) = 2&epsilon;<sub>0</sub> A / d = 2C<sub>1</sub>। অনুপাত C<sub>1</sub> : C<sub>2</sub> = 1 : 2।" },
+{ q: "৭. 1 cm ব্যাসার্ধের একটি ধাতব গোলককে 1 C আধান দেওয়া হলে সেটির বিভব কত হবে?", opts: ["9 &times; 10<sup>9</sup> V", "8.5 &times; 10<sup>11</sup> V", "9 &times; 10<sup>11</sup> V", "8 &times; 10<sup>9</sup> V"], ans: 2, exp: "ব্যাখ্যা: SI তে ধারকত্ব C = 4&pi;&epsilon;<sub>0</sub> r = (1 / 9&times;10<sup>9</sup>) &times; 0.01 F। বিভব V = q/C = 1 / [0.01 / (9&times;10<sup>9</sup>)] = 9 &times; 10<sup>11</sup> V।" },
+{ q: "৮. কোনো ধারকের পাতগুলির মধ্যে বিভবপার্থক্য 20% বৃদ্ধি করলে, ধারকের মধ্যে সঞ্চিত শক্তি কতটা বৃদ্ধি পাবে?", opts: ["44%", "40%", "20%", "21%"], ans: 0, exp: "ব্যাখ্যা: শক্তি U = 1/2 C V<sup>2</sup> &rArr; U &propto; V<sup>2</sup>। বিভব 1.2V হলে শক্তি হবে (1.2)<sup>2</sup> = 1.44 গুণ। অর্থাৎ বৃদ্ধি = 1.44 - 1 = 0.44 বা 44%।" },
+{ q: "৯. দুটি পরিবাহীর ধারকত্ব 2 &mu;F ও 3 &mu;F এবং বিভব যথাক্রমে 18 V ও 8 V। তার দিয়ে যুক্ত করলে সাধারণ বিভব কত হবে?", opts: ["12 V", "15 V", "16 V", "10 V"], ans: 0, exp: "ব্যাখ্যা: V = (C<sub>1</sub> V<sub>1</sub> + C<sub>2</sub> V<sub>2</sub>) / (C<sub>1</sub> + C<sub>2</sub>) = (2 &times; 18 + 3 &times; 8) / (2 + 3) = (36 + 24) / 5 = 60 / 5 = 12 V।" },
+{ q: "১০. 5 &mu;F ও 10 &mu;F ধারকত্ববিশিষ্ট দুটি ধারককে যথাক্রমে 16 V ও 10 V বিভব দ্বারা আহিত করা হলো। সমান্তরাল সমবায়ে যুক্ত করলে এদের সাধারণ বিভব হবে:", opts: ["10 V", "12 V", "18 V", "15 V"], ans: 1, exp: "ব্যাখ্যা: V = (5 &times; 16 + 10 &times; 10) / (5 + 10) = (80 + 100) / 15 = 180 / 15 = 12 V।" },
+{ q: "১১. কোনো ধারকের আধান 2 C বৃদ্ধি করলে এর শক্তি 21% বৃদ্ধি পায়। প্রথমে ধারকটিতে কত আধান ছিল?", opts: ["18 C", "22 C", "20 C", "14 C"], ans: 2, exp: "ব্যাখ্যা: U &propto; q<sup>2</sup>। শক্তি 21% বৃদ্ধি মানে নতুন শক্তি 1.21 U, যার মানে নতুন আধান &radic;1.21 q = 1.1 q। প্রশ্নমতে 1.1 q = q + 2 &rArr; 0.1 q = 2 &rArr; q = 20 C।" },
+{ q: "১২. 12 pF মানের একটি ধারককে 50 V ব্যাটারির সঙ্গে যুক্ত করা হয়েছে। ধারকটিতে কী পরিমাণ স্থির তড়িৎশক্তি সঞ্চিত হবে?", opts: ["1.5 &times; 10<sup>-8</sup> J", "2.5 &times; 10<sup>-8</sup> J", "3.0 &times; 10<sup>-8</sup> J", "1.0 &times; 10<sup>-8</sup> J"], ans: 0, exp: "ব্যাখ্যা: U = 1/2 C V<sup>2</sup> = 1/2 &times; 12 &times; 10<sup>-12</sup> &times; (50)<sup>2</sup> = 6 &times; 10<sup>-12</sup> &times; 2500 = 1.5 &times; 10<sup>-8</sup> J।" },
+{ q: "১৩. 4 একক ধারকত্বের একটি পরিবাহীকে -400 একক আধান এবং 2 একক ধারকত্বের অন্য একটি পরিবাহীকে -20 একক আধানে আহিত করা হলো। পরিবাহী দুটিকে স্পর্শ করালে সাধারণ বিভব কত হবে?", opts: ["-50 একক", "-70 একক", "-60 একক", "-80 একক"], ans: 1, exp: "ব্যাখ্যা: মোট আধান q = -400 + (-20) = -420 একক। মোট ধারকত্ব C = 4 + 2 = 6 একক। সাধারণ বিভব V = q/C = -420 / 6 = -70 একক।" },
+{ q: "১৪. একটি জলপূর্ণ অন্তরিত ধাতব পাত্র 3 V বিভবে তড়িদাহিত আছে। পাত্রের তলায় একটি ছিদ্রপথে 1 mm ব্যাসার্ধের ফোঁটা ফোঁটা জল পড়ছে। প্রতিটি ফোঁটার তড়িদাধান কত?", opts: ["0.005 esu", "0.01 esu", "0.05 esu", "0.001 esu"], ans: 3, exp: "ব্যাখ্যা: 3 V = 3/300 esu = 0.01 statV। জলের ফোঁটার ব্যাসার্ধ r = 1 mm = 0.1 cm। ধারকত্ব C = 0.1 esu। আধান q = CV = 0.1 &times; 0.01 = 0.001 esu।" },
+{ q: "১৫. একটি 5 &mu;F ধারককে 100 V বিভবের সঙ্গে যুক্ত করা হলো। সঞ্চিত শক্তি (joule এককে) হবে:", opts: ["0.025 J", "0.25 J", "2.5 J", "25 J"], ans: 0, exp: "ব্যাখ্যা: U = 1/2 C V<sup>2</sup> = 1/2 &times; 5 &times; 10<sup>-6</sup> &times; (100)<sup>2</sup> = 2.5 &times; 10<sup>-6</sup> &times; 10000 = 0.025 J।" }
+]
+},
+9: {
+name: 'Set 9', icon: '🎯', topic: 'অ্যাডভান্সড প্রশ্ন ও কম্পিটিটিভ এক্সাম',
+questions: [
+{ q: "১. (Assertion-Reasoning) বিবৃতি: কোনো ধারকের সমান্তরাল পাতের মধ্যে দূরত্ব যদি অর্ধেক হয়, তাহলে তার ধারকত্ব দ্বিগুণ হয়। কারণ: ধারকত্ব উপস্থিত পরাবৈদ্যুতিক পদার্থের উপর নির্ভরশীল।", opts: ["বিবৃতি ও কারণ উভয়েই সত্য এবং কারণটি বিবৃতির সঠিক ব্যাখ্যা", "বিবৃতি ও কারণ উভয়েই সত্য কিন্তু কারণটি বিবৃতির সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 1, exp: "ব্যাখ্যা: C = &epsilon;<sub>0</sub> A / d সূত্র থেকে দেখা যায় দূরত্ব (d) অর্ধেক হলে ধারকত্ব দ্বিগুণ হয় (বিবৃতি সত্য)। ধারকত্ব মাধ্যমের ওপরও নির্ভর করে (কারণ সত্য), কিন্তু সেটি দূরত্বের সাথে সম্পর্কিত ব্যাখ্যার কারণ নয়।" },
+{ q: "২. (Assertion-Reasoning) বিবৃতি: একটি সমান্তরাল পাত ধারকের পাত দুটি একটি ব্যাটারির সঙ্গে যুক্ত। একটি পরাবৈদ্যুতিক ফলক পাত দুটির মধ্যে প্রবেশ করানো হলে, পাত দুটিতে আধানের পরিমাণ বৃদ্ধি পায়। কারণ: পরাবৈদ্যুতিক মাধ্যমের অন্তর্ভুক্তি ধারকত্ব বৃদ্ধি করে। সুতরাং ব্যাটারি থেকে বেশি পরিমাণ আধান গৃহীত হয়।", opts: ["বিবৃতি ও কারণ উভয়েই সত্য এবং কারণ সঠিক ব্যাখ্যা", "বিবৃতি ও কারণ উভয়েই সত্য কিন্তু কারণ সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 0, exp: "ব্যাখ্যা: ব্যাটারি যুক্ত থাকায় বিভব ধ্রুবক থাকে। পরাবিদ্যুৎ রাখলে ধারকত্ব বাড়ে (C' = KC), ফলে আধানও বাড়ে (q' = KC &middot; V) যা ব্যাটারি থেকে আসে।" },
+{ q: "৩. (Assertion-Reasoning) বিবৃতি: একটি ধারকের একটি পাত অপর পাতের দিকে যে বল দ্বারা আকর্ষিত হয় তা শুধুমাত্র এর ধারকত্ব দ্বারা নির্ণীত হয়। কারণ: একটি ধারকের পাত দুটির মধ্যে স্থির তড়িদাকর্ষণ বল দ্বারা ধারকটির ধারকত্ব নির্ণীত হয়।", opts: ["বিবৃতি ও কারণ উভয়েই সত্য এবং কারণ সঠিক ব্যাখ্যা", "বিবৃতি ও কারণ উভয়েই সত্য কিন্তু কারণ সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 3, exp: "ব্যাখ্যা: আকর্ষণ বল ধারকত্বের সাথে সাথে বিভবের ওপরও নির্ভরশীল (F = CV<sup>2</sup> / 2d)। তাই বিবৃতি মিথ্যা।" },
+{ q: "৪. (WBJEE) ব্যাটারির সাহায্যে 900 pF ধারকত্ববিশিষ্ট কোনো ধারককে 100 V-এ আহিত করা হলো। ধারকটিতে কত শক্তি সঞ্চিত হবে?", opts: ["4.5 &times; 10<sup>-6</sup> J", "9.0 &times; 10<sup>-6</sup> J", "4.5 &times; 10<sup>-5</sup> J", "2.25 &times; 10<sup>-6</sup> J"], ans: 0, exp: "ব্যাখ্যা: U = 1/2 C V<sup>2</sup> = 1/2 &times; 900 &times; 10<sup>-12</sup> &times; (100)<sup>2</sup> = 450 &times; 10<sup>-12</sup> &times; 10000 = 4.5 &times; 10<sup>-6</sup> J।" },
+{ q: "৫. (NEET) একটি সমান্তরাল পাত বায়ু ধারকের ধারকত্ব C, পাত দুটির মধ্যবর্তী দূরত্ব d এবং পাত দুটির মধ্যে প্রযুক্ত বিভবপ্রভেদ V। ধারকটির পাত দুটির মধ্যে ক্রিয়াশীল আকর্ষণ বলের মান হবে:", opts: ["C<sup>2</sup>V<sup>2</sup> / 2d<sup>2</sup>", "C<sup>2</sup>V<sup>2</sup> / 2d", "CV<sup>2</sup> / 2d", "CV<sup>2</sup> / d"], ans: 2, exp: "ব্যাখ্যা: বল F = qE / 2 = (CV &times; V/d) / 2 = CV<sup>2</sup> / 2d।" },
+{ q: "৬. (JEE Main) C ধারকত্ববিশিষ্ট একটি সমান্তরাল পাত ধারকের দুটি প্লেটের মধ্যে প্রতিটি &delta; = d/N বেধসম্পন্ন N টি পরাবৈদ্যুতিক স্তর ঢোকানো হলো। m-তম স্তরে পরাবৈদ্যুতিক ধ্রুবক K<sub>m</sub> = K(1 + m/N)। খুব বড়ো মান N এর জন্য ধারকত্ব &alpha;(K&epsilon;<sub>0</sub> A / d ln 2)। &alpha; এর মান হবে:", opts: ["1.8", "2", "2.5", "1"], ans: 3, exp: "ব্যাখ্যা: ইন্টিগ্রেশন করে ক্যালকুলাস প্রয়োগ করলে ধারকত্বের রাশিমালা আসে C = K&epsilon;<sub>0</sub> A / d ln 2। তাই সহগ &alpha; = 1।" },
+{ q: "৭. (WBJEE) 5 &mu;F ও 10 &mu;F ধারকত্ব সম্পন্ন দুটি ধারককে শ্রেণি সমবায়ে রেখে সমবায়ের প্রান্তদ্বয়ে 300 V বিভবপ্রভেদ আরোপ করা হলে আহিত ধারক দুটির মোট সঞ্চিত শক্তি হবে:", opts: ["15 J", "1.5 J", "0.15 J", "0.10 J"], ans: 2, exp: "ব্যাখ্যা: শ্রেণি সমবায়ে তুল্য ধারকত্ব C = (5 &times; 10)/15 = 10/3 &mu;F। মোট শক্তি U = 1/2 C V<sup>2</sup> = 1/2 &times; (10/3) &times; 10<sup>-6</sup> &times; (300)<sup>2</sup> = 0.15 J।" },
+{ q: "৮. (AIEEE) একটি সমান্তরাল পাত ধারকের ধারকত্ব 9 pF। মধ্যবর্তী স্থান দুটি ভিন্ন মাধ্যম দ্বারা পূর্ণ করা হলো যাদের একটির বেধ d/3 ও পরাবৈদ্যুতিক ধ্রুবক 3 এবং অপরটির বেধ 2d/3 ও পরাবৈদ্যুতিক ধ্রুবক 6। বর্তমান ধারকত্ব হবে:", opts: ["1.8 pF", "45 pF", "40.5 pF", "20.25 pF"], ans: 2, exp: "ব্যাখ্যা: মিশ্র পরাবিদ্যুতের ক্ষেত্রে, C<sub>eq</sub> = &epsilon;<sub>0</sub>A / [ (d/3)/3 + (2d/3)/6 ] = &epsilon;<sub>0</sub>A / (d/9 + d/9) = &epsilon;<sub>0</sub>A / (2d/9) = 4.5 (&epsilon;<sub>0</sub>A / d) = 4.5 &times; 9 = 40.5 pF।" },
+{ q: "৯. (JEE Main) দুটি সমান মানের ধারককে প্রথমে শ্রেণিতে এবং পরে সমান্তরাল সমবায়ে যুক্ত করা হলো। উভয়ক্ষেত্রের জন্য তাদের তুল্য ধারকত্বের অনুপাত হবে:", opts: ["4:1", "2:1", "1:4", "1:2"], ans: 2, exp: "ব্যাখ্যা: ধরি উভয়ের মান C। শ্রেণিতে C<sub>s</sub> = C/2, সমান্তরালে C<sub>p</sub> = 2C। অনুপাত (C/2) / 2C = 1/4 বা 1:4।" },
+{ q: "১০. (WBJEE) একটি সম্পূর্ণভাবে আহিত ধারকের পাত দুটির মধ্যে K পরাবৈদ্যুতিক ধ্রুবক সম্পন্ন কোনো মাধ্যম রাখলে পাত দুটির মধ্যে প্রাবল্য হবে:", opts: ["E", "K &middot; E", "K&sup2; &middot; E", "E / K"], ans: 3, exp: "ব্যাখ্যা: মাধ্যম রাখলে তড়িৎক্ষেত্র প্রাবল্য E' = E<sub>0</sub> / K হয়ে যায়।" },
+{ q: "১১. (HOTS) 4 V বিভবে আহিত একটি কল থেকে ফোঁটা ফোঁটা জল (ব্যাসার্ধ = r) একটি ফাঁপা পরিবাহী গোলকের মধ্যে জমেছে। ফাঁপা গোলকটির ব্যাসার্ধ R। গোলকটি জলে পূর্ণ হলে এর বিভবের মান হবে:", opts: ["(2R<sup>2</sup>/r<sup>2</sup>)V", "(4R/r)V", "(R<sup>3</sup>/4r<sup>3</sup>)V", "(R<sup>2</sup>/r<sup>2</sup>)V"], ans: 3, exp: "ব্যাখ্যা: সাধারণ সূত্রটি হলো V' = (R<sup>2</sup>/r<sup>2</sup>)V।" },
+{ q: "১২. (HOTS) C ধারকত্ব ও V বিভবের n-সংখ্যক বিন্দু যুক্ত হয়ে একটি বড়ো বিন্দু তৈরি হলে, ওই বড়ো বিন্দু ও প্রতিটি ছোটো বিন্দুর মধ্যে শক্তির অনুপাত হবে:", opts: ["n<sup>5/3</sup>:1", "n<sup>1/2</sup>:1", "n:1", "n<sup>3/2</sup>:1"], ans: 0, exp: "ব্যাখ্যা: বড় বিন্দুর শক্তি U' = n<sup>5/3</sup> U। তাই অনুপাত n<sup>5/3</sup> : 1।" },
+{ q: "১৩. (WBJEE) 3 &mu;F, 6 &mu;F, 6 &mu;F ধারকত্ববিশিষ্ট তিনটি ধারককে শ্রেণি সমবায়ে যুক্ত করে 120 V উৎসের সঙ্গে সংযুক্ত করা হলো। 3 &mu;F ধারকত্ববিশিষ্ট ধারকের দুই প্রান্তে বিভবপ্রভেদ হবে:", opts: ["24 V", "30 V", "40 V", "60 V"], ans: 3, exp: "ব্যাখ্যা: 6 ও 6 এর তুল্য 3, আর 3 ও 3 এর তুল্য 1.5 &mu;F। মোট আধান = 1.5 &times; 120 = 180 &mu;C। 3 &mu;F এর বিভব = 180/3 = 60 V।" },
+{ q: "১৪. (NEET) একটি তড়িৎবর্তনীতে 2 &mu;F ধারকটিকে আহিত করার পর একটি অনাহিত 8 &mu;F ধারকের সাথে যুক্ত করলে সঞ্চিত শক্তির যে শতাংশ নষ্ট হবে তা হলো:", opts: ["20%", "75%", "80%", "0%"], ans: 2, exp: "ব্যাখ্যা: শক্তি হ্রাসের অনুপাত = C<sub>2</sub> / (C<sub>1</sub> + C<sub>2</sub>) = 8 / (2 + 8) = 8/10 = 80%।" },
+{ q: "১৫. (JEE Main) 4 &mu;F ও 9 &mu;F ধারকত্ব বিশিষ্ট দুটি ধারক শ্রেণিতে একটি 8V ব্যাটারির সাথে যুক্ত। সঞ্চিত মোট আধানের সমান আধান 2 বিন্দু আধানে সঞ্চিত থাকলে ওই বিন্দু আধান থেকে 30 m দূরে সৃষ্ট তড়িৎক্ষেত্রের মান কত?", opts: ["240 N/C", "360 N/C", "420 N/C", "480 N/C"], ans: 3, exp: "ব্যাখ্যা: তুল্য ধারকত্ব C = (4&times;9)/(4+9) = 36/13 &mu;F। মোট আধান q = C &times; V = (36/13) &times; 8 &mu;C। বিন্দু আধানের জন্য প্রাবল্য নির্ণয়ের সূত্রে বসালে 480 N/C পাওয়া যায়।" }
+]
+}
+};
+
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+function getGlobalUsers() {
+const data = localStorage.getItem("testBazarGlobalUsers");
+return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+const data = localStorage.getItem("testBazarAttemptsPhys3_U1C4_v1");
+return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+attempts[key] = (attempts[key] || 0) + 1;
+localStorage.setItem("testBazarAttemptsPhys3_U1C4_v1", JSON.stringify(attempts));
+return attempts[key];
+}
+
+window.onload = () => { renderHub(); };
+
+function renderHub() {
+const grid = document.getElementById("setGrid");
+grid.innerHTML = "";
+for(let id in ALL_SETS) {
+const set = ALL_SETS[id];
+const div = document.createElement("div");
+div.className = "set-card";
+let attemptCount = 0;
+let isLocked = false;
+
+if (currentUser) {
+attemptCount = getAttemptCount(currentUser, id);
+isLocked = attemptCount >= MAX_ATTEMPTS;
+if (isLocked) div.classList.add("locked");
+}
+
+div.innerHTML = `
+<div class="icon">${set.icon}</div>
+<div class="set-num">${set.name}</div>
+<div class="set-title">${set.topic}</div>
+<div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+`;
+
+div.onclick = () => {
+if (isLocked) { alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return; }
+handleSetClick(id);
+};
+grid.appendChild(div);
+}
+}
+
+function handleSetClick(setId) {
+activeSetId = setId;
+if (!currentUser) {
+document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+document.getElementById("loginOverlay").classList.add("active");
+document.getElementById("loginUsername").value = "";
+document.getElementById("loginPassword").value = "";
+document.getElementById("loginError").style.display = "none";
+} else { startQuiz(setId); }
+}
+
+function doLogin() {
+const u = document.getElementById("loginUsername").value.trim();
+const p = document.getElementById("loginPassword").value.trim();
+const err = document.getElementById("loginError");
+const GLOBAL_USERS = getGlobalUsers();
+
+if(!u || !p) { err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!"; err.style.display = "block"; return; }
+if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+let attempts = getAttemptCount(u, activeSetId);
+if (attempts >= MAX_ATTEMPTS) {
+err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+err.style.display = "block";
+return;
+}
+currentUser = u;
+document.getElementById("loginOverlay").classList.remove("active");
+document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+document.getElementById("userDisplay").classList.remove("hidden");
+renderHub();
+startQuiz(activeSetId);
+} else {
+err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+err.style.display = "block";
+}
+}
+
+function closeLogin() { document.getElementById("loginOverlay").classList.remove("active"); }
+
+function goToHub() {
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("hubPage").style.display = "block";
+document.getElementById("timerBox").classList.add("hidden");
+clearInterval(timerInterval);
+renderHub();
+}
+
+function startQuiz(setId) {
+incrementAttempt(currentUser, setId);
+questions = ALL_SETS[setId].questions;
+currentQIndex = 0; score = 0; wrongAnswers = 0; userAnswers = {}; isReviewMode = false; timeLeft = TIME_LIMIT;
+document.getElementById("hubPage").style.display = "none";
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+document.getElementById("timerBox").classList.remove("hidden");
+document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+startTimer();
+loadQuestion();
+}
+
+function loadQuestion() {
+const qData = questions[currentQIndex];
+document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+document.getElementById("qText").innerHTML = qData.q;
+const progress = ((currentQIndex) / questions.length) * 100;
+document.getElementById("progressFill").style.width = `${progress}%`;
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+const optsBox = document.getElementById("qOpts");
+optsBox.innerHTML = "";
+document.getElementById("explanation").classList.remove("show");
+document.getElementById("nextBtn").disabled = true;
+document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+qData.opts.forEach((optText, idx) => {
+const btn = document.createElement("button");
+btn.className = "opt";
+btn.innerHTML = `<div class="opt-circle">${LABELS[idx]}</div> <div class="opt-text">${optText}</div>`;
+if (isReviewMode) {
+btn.classList.add("disabled");
+if (idx === qData.ans) btn.classList.add("correct");
+else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+} else {
+btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+}
+optsBox.appendChild(btn);
+});
+
+if (isReviewMode) {
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+if (currentQIndex === questions.length - 1) { document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন"; }
+}
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+allBtns.forEach(b => b.classList.add("disabled"));
+userAnswers[currentQIndex] = selectedIdx;
+if (selectedIdx === correctIdx) { btn.classList.add("correct"); score++; } 
+else { btn.classList.add("wrong"); allBtns[correctIdx].classList.add("correct"); wrongAnswers++; }
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+}
+
+function nextQ() {
+if (isReviewMode && currentQIndex === questions.length - 1) {
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show"); return;
+}
+if (!isReviewMode && currentQIndex === questions.length - 1) { finishQuiz(); return; }
+currentQIndex++; loadQuestion();
+}
+
+function startTimer() {
+clearInterval(timerInterval);
+const tBox = document.getElementById("timerBox");
+tBox.classList.remove("danger");
+timerInterval = setInterval(() => {
+if (timeLeft <= 0) { clearInterval(timerInterval); finishQuiz(); return; }
+timeLeft--;
+const m = Math.floor(timeLeft / 60); const s = timeLeft % 60;
+document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+if (timeLeft < 60) tBox.classList.add("danger");
+}, 1000);
+}
+
+function finishQuiz() {
+clearInterval(timerInterval);
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("timerBox").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show");
+const total = questions.length; const skipped = total - (score + wrongAnswers);
+const percent = Math.round((score / total) * 100);
+document.getElementById("finalScore").innerText = `${percent}%`;
+document.getElementById("rbCorrect").innerText = score;
+document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+const gradeEl = document.getElementById("resultGrade");
+if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return;
+}
+startQuiz(activeSetId);
+}
+
+function showReview() {
+isReviewMode = true; currentQIndex = 0;
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+loadQuestion();
+}
+</script>
+</body>
+</html>
