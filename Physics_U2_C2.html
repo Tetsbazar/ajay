@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Physics 3rd Sem | U2 C2</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main);}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; }
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header class="top-bar">
+<div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+<div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+<div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+<div class="main">
+
+<!-- LOGIN MODAL -->
+<div class="login-overlay" id="loginOverlay">
+<div class="login-modal">
+<h2>লগইন করুন</h2>
+<p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+<div class="login-set-name" id="loginSetName">📚 Set 1</div>
+<div class="input-group">
+<label>ইউজারনেম</label>
+<input type="text" id="loginUsername" placeholder="Username">
+</div>
+<div class="input-group">
+<label>পাসওয়ার্ড</label>
+<input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+</div>
+<button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+<button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+<div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+</div>
+</div>
+
+<!-- HUB PAGE -->
+<div id="hubPage">
+<div class="hub-header">
+<h1>পদার্থবিজ্ঞান 3rd Sem Unit 2:<br>অধ্যায় ২: কির্সফের সূত্র ও পরিমাপ</h1>
+<p>মোট ১০৫টি প্রশ্ন সম্বলিত ৭টি সেট। Test শুরু করতে সেটে ক্লিক করুন।</p>
+</div>
+<div class="set-grid" id="setGrid"></div>
+<div style="text-align: center; margin-top: 30px;">
+<button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+</div>
+</div>
+
+<!-- QUIZ AREA -->
+<div id="testArea" class="hidden">
+<div class="quiz-info">
+<div class="info-item">🎓 <strong>Physics</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+<div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+</div>
+<div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="q-card">
+<div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+<div class="q-text" id="qText">Question Text</div>
+<div class="opts" id="qOpts"></div>
+<div class="explanation" id="explanation"><p id="explanationText"></p></div>
+<div class="nav-row">
+<div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+<button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+</div>
+</div>
+</div>
+
+<!-- RESULT AREA -->
+<div class="result-wrap" id="resultWrap">
+<div class="result-icon" id="resultIcon">🏆</div>
+<div class="result-score en-font" id="finalScore">100%</div>
+<div class="result-total">স্কোর</div>
+<div class="result-grade" id="resultGrade">অসাধারণ!</div>
+<div class="result-bars">
+<div class="result-bar">
+<div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+<div class="rb-label">সঠিক</div>
+</div>
+<div class="result-bar">
+<div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+<div class="rb-label">ভুল/স্কিপ</div>
+</div>
+</div>
+<div class="attempt-info-box" id="attemptInfo"></div>
+<div class="action-btns">
+<button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+<button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+<button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+</div>
+</div>
+
+</div>
+
+<script>
+const MAX_ATTEMPTS = 10;
+const TIME_LIMIT = 10 * 60;
+const LABELS = ['(a)', '(b)', '(c)', '(d)'];
+
+const ALL_SETS = {
+1: {
+name: 'Set 1', icon: '⚡', topic: 'কির্সফের সূত্র ও তার প্রয়োগ',
+questions: [
+{ q: "১. কির্সফের প্রথম সূত্র বা তড়িৎপ্রবাহমাত্রার সূত্র (KCL) কোন নীতির ওপর প্রতিষ্ঠিত?", opts: ["ভরবেগের সংরক্ষণ", "আধানের সংরক্ষণ", "শক্তির সংরক্ষণ", "ভরের সংরক্ষণ"], ans: 1, exp: "ব্যাখ্যা: কির্সফের প্রথম সূত্র অনুযায়ী, বর্তনীর কোনো সংযোগ বিন্দুতে মোট আগত তড়িৎপ্রবাহ এবং নির্গত তড়িৎপ্রবাহ সমান হয়, অর্থাৎ সংযোগ বিন্দুতে কোনো আধান জমা হয় না বা নষ্ট হয় না। এটি আধানের সংরক্ষণ সূত্রকেই নির্দেশ করে।" },
+{ q: "২. কির্সফের দ্বিতীয় সূত্র বা ভোল্টেজ সূত্র (KVL) কোন নীতির ওপর প্রতিষ্ঠিত?", opts: ["ভরবেগের সংরক্ষণ", "আধানের সংরক্ষণ", "শক্তির সংরক্ষণ", "কৌণিক ভরবেগের সংরক্ষণ"], ans: 2, exp: "ব্যাখ্যা: KVL অনুযায়ী, কোনো বদ্ধ লুপে তড়িৎচালক বলের যোগফল বিভবপতনের যোগফলের সমান (&Sigma;E = &Sigma;V)। অর্থাৎ উৎপন্ন তড়িৎশক্তি ব্যয়িত তড়িৎশক্তির সমান, যা শক্তির সংরক্ষণ নীতি মেনে চলে।" },
+{ q: "৩. কির্সফের সূত্র দুটি বর্তনীর কোন অংশে প্রযোজ্য হয়?", opts: ["KCL সংযোগ বিন্দুতে এবং KVL বদ্ধ লুপে", "KCL বদ্ধ লুপে এবং KVL সংযোগ বিন্দুতে", "উভয়েই বদ্ধ লুপে", "উভয়েই সংযোগ বিন্দুতে"], ans: 0, exp: "ব্যাখ্যা: প্রথম সূত্রটি নোড বা সংযোগ বিন্দুতে (Junction) প্রবাহের বণ্টন নির্ণয় করে এবং দ্বিতীয় সূত্রটি একটি বদ্ধ লুপ বা মেস (Mesh)-এর বিভবপতন নির্ণয় করে।" },
+{ q: "৪. কির্সফের প্রথম সূত্র অনুযায়ী একটি সংযোগ বিন্দুতে &Sigma;I এর মান কত?", opts: ["অসীম", "1", "0", "বর্তনীর মোট প্রবাহের সমান"], ans: 2, exp: "ব্যাখ্যা: সংযোগ বিন্দুতে মিলিত তড়িৎপ্রবাহগুলির বীজগাণিতিক যোগফল সর্বদা শূন্য হয় (&Sigma;I = 0)।" },
+{ q: "৫. কির্সফের দ্বিতীয় সূত্র প্রয়োগের সময় কোনো বদ্ধ লুপে লুপ-প্রবাহের অভিমুখ এবং পরিমাপের অভিমুখ একই হলে তড়িৎপ্রবাহ ও রোধের গুণফল (Ir) কী ধরা হয়?", opts: ["ঋণাত্মক", "ধনাত্মক", "শূন্য", "অসীম"], ans: 1, exp: "ব্যাখ্যা: নিয়ম অনুযায়ী, কোনো লুপের মধ্যে তড়িৎপ্রবাহমাত্রার দিক যদি পরিমাপের দিকে হয়, তবে I &middot; r গুণফলকে ধনাত্মক ধরা হয় এবং বিপরীত দিকে হলে ঋণাত্মক ধরা হয়।" },
+{ q: "৬. কির্সফের সূত্র কোন ধরনের বর্তনীতে প্রযোজ্য?", opts: ["শুধুমাত্র রৈখিক (DC) বর্তনীতে", "শুধুমাত্র অরৈখিক (AC) বর্তনীতে", "রৈখিক এবং অরৈখিক উভয় বর্তনীতেই", "কোনোটিই নয়"], ans: 2, exp: "ব্যাখ্যা: কির্সফের সূত্র ওহমীয় (রৈখিক) এবং অ-ওহমীয় (অরৈখিক) উভয় প্রকার পরিবাহীর ক্ষেত্রেই প্রযোজ্য, তবে অ-ওহমীয় ক্ষেত্রে V=IR সমীকরণে R ধ্রুবক থাকে না।" },
+{ q: "৭. একটি সংযোগ বিন্দুতে 5A এবং 4A তড়িৎপ্রবাহ প্রবেশ করছে এবং 3A প্রবাহ বেরিয়ে যাচ্ছে। অবশিষ্ট তার দিয়ে প্রবাহের মান কত হবে?", opts: ["12A প্রবেশ করবে", "6A বেরিয়ে যাবে", "6A প্রবেশ করবে", "2A বেরিয়ে যাবে"], ans: 1, exp: "ব্যাখ্যা: আগত প্রবাহ = নির্গত প্রবাহ। 5 + 4 = 3 + I &rArr; 9 = 3 + I &rArr; I = 6A (নির্গত)।" },
+{ q: "৮. 12টি সমান রোধ (r) দিয়ে গঠিত একটি ঘনকাকার কাঠামোর দীর্ঘতম কর্ণের দুই বিপরীত বিন্দুর মধ্যে তুল্যরোধ কত?", opts: ["5r/6", "7r/12", "3r/4", "12r"], ans: 0, exp: "ব্যাখ্যা: কির্সফের সূত্র (KCL ও KVL) প্রয়োগ করে প্রমাণ করা যায় যে, ঘনকের মূল কর্ণের সাপেক্ষে তুল্যরোধ 5r/6 হয়।" },
+{ q: "৯. ঘনকাকার তারের কাঠামোর (প্রতিটি তারের রোধ r) একই ধারের (edge) দুটি সংলগ্ন বিন্দুর মধ্যে তুল্যরোধ কত?", opts: ["5r/6", "7r/12", "3r/4", "r"], ans: 1, exp: "ব্যাখ্যা: হিসাব অনুযায়ী ঘনকের একই ধারের দুটি প্রান্তের মধ্যে তুল্যরোধ 7r/12 হয়।" },
+{ q: "১০. ঘনকাকার তারের কাঠামোর যে-কোনো তলের কর্ণের (Face diagonal) দুই বিপরীত বিন্দুর মধ্যে তুল্যরোধ কত?", opts: ["5r/6", "7r/12", "3r/4", "4r/3"], ans: 2, exp: "ব্যাখ্যা: ঘনকের কোনো একটি পৃষ্ঠতলের কর্ণের দুই বিপরীত বিন্দুর মধ্যে তুল্যরোধের মান 3r/4 হয়।" },
+{ q: "১১. দুটি কোশ (তড়িৎচালক বল E<sub>1</sub>, E<sub>2</sub> এবং অভ্যন্তরীণ রোধ r<sub>1</sub>, r<sub>2</sub>) সমান্তরাল সমবায়ে যুক্ত থাকলে সমবায়টির তুল্য তড়িৎচালক বল কত হয়?", opts: ["E<sub>1</sub> + E<sub>2</sub>", "(E<sub>1</sub>r<sub>2</sub> + E<sub>2</sub>r<sub>1</sub>) / (r<sub>1</sub> + r<sub>2</sub>)", "(E<sub>1</sub>r<sub>1</sub> + E<sub>2</sub>r<sub>2</sub>) / (r<sub>1</sub> + r<sub>2</sub>)", "E<sub>1</sub> - E<sub>2</sub>"], ans: 1, exp: "ব্যাখ্যা: কির্সফের সূত্র প্রয়োগ করে প্রমাণ করা যায় যে, সমান্তরাল সমবায়ে যুক্ত দুটি কোশের তুল্য তড়িৎচালক বল E<sub>eq</sub> = (E<sub>1</sub>r<sub>2</sub> + E<sub>2</sub>r<sub>1</sub>) / (r<sub>1</sub> + r<sub>2</sub>)।" },
+{ q: "১২. কির্সফের দ্বিতীয় সূত্র প্রয়োগের সময় কোনো কোশ পরিমাপের বিপরীতে তড়িৎপ্রবাহ সৃষ্টি করলে তার তড়িৎচালক বলকে কী ধরা হয়?", opts: ["ধনাত্মক", "ঋণাত্মক", "শূন্য", "অসীম"], ans: 1, exp: "ব্যাখ্যা: লুপের অন্তর্ভুক্ত কোনো উৎস যদি পরিমাপের অভিমুখে প্রবাহ সৃষ্টি করে তবে তা ধনাত্মক এবং বিপরীত দিকে করলে তা ঋণাত্মক ধরা হয়।" },
+{ q: "১৩. কির্সফের সূত্র কি ওহমের সূত্রের পরিপূরক কোনো নতুন তাত্ত্বিক সূত্র?", opts: ["হ্যাঁ, এটি সম্পূর্ণ নতুন সূত্র", "না, এটি ওহমের সূত্রকে ভিত্তি করেই জটিল বর্তনীকে সহজ করার নিয়ম", "এটি শুধুমাত্র পরিবর্তী প্রবাহের জন্য", "এটি কেবল ডায়োডের জন্য"], ans: 1, exp: "ব্যাখ্যা: কির্সফের সূত্র দুটি কোনো নতুন তাত্ত্বিক সূত্র নয়, এটি ওহমের সূত্রকে ভিত্তি করেই জটিল তড়িৎ জালক (Network) সমাধানের নিয়ম।" },
+{ q: "১৪. কোনো বর্তনীর বিশ্লেষণের সময় এর প্রতিটি পৃথক বদ্ধ লুপের জন্য একটি করে প্রবাহ ধরে নেওয়া হলে, তাকে কী বলে?", opts: ["মেরু প্রবাহ", "লুপ প্রবাহ", "শাখা প্রবাহ", "সান্ট প্রবাহ"], ans: 1, exp: "ব্যাখ্যা: কির্সফের ভোল্টেজ সূত্র সহজে প্রয়োগ করার জন্য প্রতিটি বদ্ধ লুপের জন্য একটি প্রবাহ ধরে নেওয়া হয়, একে লুপ কারেন্ট (Loop current) বা মেস কারেন্ট বলে।" },
+{ q: "১৫. কোনো তড়িৎ বর্তনীর সংযোগ বিন্দুতে তড়িদাধানের কোনো সঞ্চয় হয় না কেন?", opts: ["আধান ধ্বংস হয়ে যায়", "আগত ও নির্গত তড়িৎপ্রবাহ সমান হয়", "আধান গ্যাসে পরিণত হয়", "রোধ খুব বেশি থাকে"], ans: 1, exp: "ব্যাখ্যা: সংযোগ বিন্দুতে অন্তর্মুখী ও বহির্মুখী প্রবাহমাত্রা সমান হওয়ায়, ওই বিন্দুতে কোনো আধান জমা থাকতে পারে না, ফলে বিভবও স্থির থাকে।" }
+]
+},
+2: {
+name: 'Set 2', icon: '🎛️', topic: 'হুইটস্টোন ব্রিজ ও পোস্ট অফিস বক্স',
+questions: [
+{ q: "১. সাধারণ মানের রোধ (1 &Omega; থেকে 10<sup>3</sup> &Omega;) নির্ভুলভাবে পরিমাপের জন্য কোন নীতি ব্যবহৃত হয়?", opts: ["কেলভিন ডবল ব্রিজ", "হুইটস্টোন ব্রিজ", "কুলম্বের সূত্র", "অ্যামিটার-ভোল্টমিটার পদ্ধতি"], ans: 1, exp: "ব্যাখ্যা: সাধারণ মানের রোধ সূক্ষ্ম ও নির্ভুলভাবে পরিমাপ করার জন্য হুইটস্টোন ব্রিজের নীতি ব্যবহৃত হয়।" },
+{ q: "২. হুইটস্টোন ব্রিজের চারটি বাহুর রোধ যথাক্রমে P, Q, R এবং S হলে নিস্পন্দ অবস্থার (Null condition) শর্ত কী?", opts: ["P+Q = R+S", "P/R = S/Q", "P/Q = R/S", "PQ = RS"], ans: 2, exp: "ব্যাখ্যা: নিস্পন্দ অবস্থায় গ্যালভানোমিটারের মধ্য দিয়ে কোনো প্রবাহ যায় না (I<sub>g</sub>=0), তখন ব্রিজের প্রথম ও দ্বিতীয় বাহুর রোধের অনুপাত, তৃতীয় ও চতুর্থ বাহুর অনুপাতের সমান হয়।" },
+{ q: "৩. হুইটস্টোন ব্রিজে ব্যাটারি ও গ্যালভানোমিটারের অবস্থান অদলবদল করলে নিস্পন্দ অবস্থার কী পরিবর্তন হয়?", opts: ["নিস্পন্দ অবস্থা নষ্ট হয়ে যায়", "অপরিবর্তিত থাকে", "গ্যালভানোমিটার পুড়ে যায়", "সমীকরণ P/Q = S/R হয়ে যায়"], ans: 1, exp: "ব্যাখ্যা: ব্যাটারি এবং গ্যালভানোমিটারের অবস্থান অদলবদল করলেও নিস্পন্দ অবস্থার গাণিতিক শর্ত (P/Q = R/S) অপরিবর্তিত থাকে, তবে সুবেদিতা ভিন্ন হতে পারে।" },
+{ q: "৪. একটি হুইটস্টোন ব্রিজ কখন সবচেয়ে বেশি সুবেদী (Sensitive) হয়?", opts: ["যখন চারটি বাহুর রোধ প্রায় সমান হয়", "যখন P এবং Q অনেক বড়ো হয়", "যখন গ্যালভানোমিটারের রোধ শূন্য হয়", "যখন ব্যাটারির ভোল্টেজ খুব বেশি হয়"], ans: 0, exp: "ব্যাখ্যা: যখন ব্রিজের চারটি বাহুর রোধের মান প্রায় সমান বা কাছাকাছি হয়, তখন সামান্য রোধের পরিবর্তনেও গ্যালভানোমিটারে বড়ো বিক্ষেপ দেখা যায়, ফলে ব্রিজটি সর্বাধিক সুবেদী হয়।" },
+{ q: "৫. হুইটস্টোন ব্রিজের সাহায্যে কী পরিমাপ করা যায় না?", opts: ["সাধারণ মানের রোধ", "অতি উচ্চমানের এবং অতি নিম্নমানের রোধ", "তড়িৎচালক বল", "বিভবপ্রভেদ"], ans: 1, exp: "ব্যাখ্যা: অতি উচ্চমানের রোধে ব্রিজের সুবেদিতা কমে যায় এবং অতি নিম্নমানের রোধে তারের নিজস্ব রোধ পরিমাপে ত্রুটি তৈরি করে, তাই এই দুই ক্ষেত্রে হুইটস্টোন ব্রিজ ব্যবহার করা যায় না।" },
+{ q: "৬. পোস্ট অফিস বক্সে (PO Box) কোন যন্ত্রের কার্যনীতি প্রয়োগ করা হয়?", opts: ["পোটেনসিওমিটার", "মিটার ব্রিজ", "হুইটস্টোন ব্রিজ", "কেলভিন ব্রিজ"], ans: 2, exp: "ব্যাখ্যা: পোস্ট অফিস বক্সে মূলত হুইটস্টোন ব্রিজের নীতি প্রয়োগ করে অজ্ঞাত রোধ নির্ণয় করা হয়। পূর্বে ডাকবিভাগে টেলিগ্রাফ তারের রোধ মাপতে এটি ব্যবহৃত হতো।" },
+{ q: "৭. পোস্ট অফিস বক্সে অজ্ঞাত রোধ (S) কোন বিন্দু দুটির মধ্যে যুক্ত করা হয়?", opts: ["A ও B", "A ও C", "C ও D", "B ও D"], ans: 2, exp: "ব্যাখ্যা: পোস্ট অফিস বক্সে অজ্ঞাত রোধ S-কে C ও D বিন্দুর মধ্যে যুক্ত করা হয় যা ব্রিজের চতুর্থ বাহু হিসেবে কাজ করে।" },
+{ q: "৮. পোস্ট অফিস বক্সে পরীক্ষা করার সময় প্রথমে কোন চাবিটি টিপতে হয়?", opts: ["গ্যালভানোমিটারের চাবি (K2)", "ব্যাটারি বর্তনীর চাবি (K1)", "দুটি চাবি একসাথে", "যেকোনো একটি টিপলেই হয়"], ans: 1, exp: "ব্যাখ্যা: রোধকুণ্ডলীগুলির স্বাবেশ ক্রিয়া (Self induction) দূর করার জন্য সবসময় ব্যাটারি বর্তনীর চাবি K1 প্রথমে টিপে তড়িৎপ্রবাহকে স্থির হতে দিতে হয়, তারপর গ্যালভানোমিটারের চাবি K2 টিপতে হয়।" },
+{ q: "৯. পোস্ট অফিস বক্সের অনুপাত বাহুদ্বয়ে (P ও Q) কী কী রোধকুণ্ডলী থাকে?", opts: ["1, 2, 5", "10, 100, 1000", "100, 500, 1000", "10, 20, 50"], ans: 1, exp: "ব্যাখ্যা: PO Box-এর অনুপাত বাহুদ্বয়ের (P এবং Q) প্রতিটিতে 10 &Omega;, 100 &Omega; এবং 1000 &Omega; মানের তিনটি করে রোধকুণ্ডলী থাকে।" },
+{ q: "১০. পোস্ট অফিস বক্সের পরীক্ষায় কোন ধরনের তড়িৎকোশ ব্যবহার করা সবচেয়ে সুবিধাজনক?", opts: ["সঞ্চয়ক কোশ", "লেকল্যান্স কোশ", "ড্যানিয়েল কোশ", "পরিবর্তনশীল AC উৎস"], ans: 1, exp: "ব্যাখ্যা: সঞ্চয়ক কোশ বেশি তড়িৎ দিলে রোধগুলি গরম হয়ে মান বদলাতে পারে। তাই কম তড়িৎচালক বলের লেকল্যান্স কোশ ব্যবহার করা হয়।" },
+{ q: "১১. হুইটস্টোন ব্রিজের নিস্পন্দ অবস্থার শর্তটি কিসের ওপর নির্ভর করে না?", opts: ["P ও Q এর মান", "R ও S এর মান", "ব্যাটারির তড়িৎচালক বলের মান", "গ্যালভানোমিটারের রোধের ওপর"], ans: 2, exp: "ব্যাখ্যা: নিস্পন্দ অবস্থার শর্ত P/Q = R/S, এটি ব্যাটারির তড়িৎচালক বল বা গ্যালভানোমিটারের রোধের ওপর আদৌ নির্ভর করে না।" },
+{ q: "১২. অপ্রতিমিত অবস্থায় হঠাৎ গ্যালভানোমিটারের মধ্য দিয়ে প্রচুর তড়িৎপ্রবাহ গিয়ে যাতে যন্ত্রের ক্ষতি না হয়, সেজন্য প্রাথমিকভাবে কী করা উচিত?", opts: ["গ্যালভানোমিটারের সমান্তরালে উচ্চরোধ যুক্ত করা", "গ্যালভানোমিটারের শ্রেণিতে উচ্চরোধ যুক্ত করা", "ব্যাটারি খুলে দেওয়া", "তারের দৈর্ঘ্য বাড়ানো"], ans: 1, exp: "ব্যাখ্যা: যন্ত্রের সুরক্ষার্থে প্রথমে গ্যালভানোমিটারের সাথে শ্রেণিতে একটি উচ্চরোধ যোগ করা হয়। নিস্পন্দ অবস্থার কাছাকাছি পৌঁছালে ওই রোধটি শর্ট (short) করে দেওয়া হয়।" },
+{ q: "১৩. নিম্নমানের রোধ (Low resistance, <1 &Omega;) পরিমাপের জন্য কোনটি ব্যবহৃত হয়?", opts: ["কেলভিন ডবল ব্রিজ", "পোস্ট অফিস বক্স", "পোটেনসিওমিটার", "সাধারণ হুইটস্টোন ব্রিজ"], ans: 0, exp: "ব্যাখ্যা: 1 ওহমের চেয়ে কম রোধ (নিম্নমানের রোধ) পরিমাপের জন্য কেলভিন ডবল ব্রিজ ব্যবহৃত হয়।" },
+{ q: "১৪. অতি উচ্চমানের রোধ (High resistance, >10<sup>3</sup> &Omega;) পরিমাপে কোন পদ্ধতি ব্যবহৃত হয়?", opts: ["কেলভিন ডবল ব্রিজ", "লিকেজ বা ক্ষরণ পদ্ধতিতে ক্ষেপক গ্যালভানোমিটার", "মিটার ব্রিজ", "ওহমমিটার"], ans: 1, exp: "ব্যাখ্যা: অতি উচ্চমানের রোধ পরিমাপ করার জন্য ক্ষেপক গ্যালভানোমিটার (Ballistic galvanometer) ব্যবহার করে লিকেজ পদ্ধতিতে পরোক্ষভাবে নির্ণয় করা হয়।" },
+{ q: "১৫. যখন হুইটস্টোন ব্রিজ প্রতিমিত (Balanced) অবস্থায় থাকে, তখন গ্যালভানোমিটারের দুই প্রান্তের বিভবপ্রভেদ কত হয়?", opts: ["ব্যাটারির বিভবের সমান", "অসীম", "শূন্য", "I &times; R এর সমান"], ans: 2, exp: "ব্যাখ্যা: নিস্পন্দ অবস্থায় গ্যালভানোমিটারের দুই প্রান্তের (B ও D বিন্দুর) বিভব সমান হয়ে যায়, ফলে বিভবপ্রভেদ শূন্য হয় এবং কোনো তড়িৎ প্রবাহিত হয় না।" }
+]
+},
+3: {
+name: 'Set 3', icon: '📏', topic: 'মিটার ব্রিজ (Meter Bridge)',
+questions: [
+{ q: "১. মিটার ব্রিজের তারটির দৈর্ঘ্য সাধারণত কত হয়?", opts: ["50 সেমি", "100 সেমি (1 মিটার)", "150 সেমি", "2 মিটার"], ans: 1, exp: "ব্যাখ্যা: এই যন্ত্রে ব্যবহৃত সুষম তারটির দৈর্ঘ্য 1 মিটার বা 100 সেমি হয় বলেই এর নাম 'মিটার ব্রিজ' রাখা হয়েছে।" },
+{ q: "২. মিটার ব্রিজের তারটি সাধারণত কোন উপাদানের তৈরি হয়?", opts: ["তামা", "অ্যালুমিনিয়াম", "ম্যাঙ্গানিন বা জার্মান সিলভার", "লোহা"], ans: 2, exp: "ব্যাখ্যা: ম্যাঙ্গানিন বা জার্মান সিলভারের রোধাঙ্ক বেশি এবং রোধের উষ্ণতা গুণাঙ্ক অত্যন্ত কম হওয়ায় সামান্য তাপমাত্রার পরিবর্তনে এদের রোধ প্রায় বদলায় না, তাই এরা উপযুক্ত।" },
+{ q: "৩. একটি মিটার ব্রিজের বাম ফাঁকে P এবং ডান ফাঁকে Q মানের রোধ রাখলে বাম প্রান্ত থেকে l সেমি দূরত্বে নিস্পন্দ বিন্দু পাওয়া গেল। সম্পর্কটি কী হবে?", opts: ["P/Q = (100-l)/l", "P/Q = l/(100-l)", "P/Q = 100/l", "P/l = Q/100"], ans: 1, exp: "ব্যাখ্যা: বামদিকের তারের দৈর্ঘ্য l এবং ডানদিকের তারের দৈর্ঘ্য (100-l)। হুইটস্টোন ব্রিজের নীতি অনুযায়ী P/Q = R<sub>left</sub> / R<sub>right</sub> = l / (100-l)।" },
+{ q: "৪. মিটার ব্রিজে সৃষ্ট 'প্রান্তীয় ত্রুটি' বা End error-এর মূল কারণ কী?", opts: ["তারের অতিরিক্ত দৈর্ঘ্য", "ব্যাটারির উচ্চ বিভব", "তারের দুই প্রান্তে থাকা তামার পাতের নিজস্ব রোধ এবং ত্রুটিপূর্ণ ঝালাই", "জকির ঘর্ষণ"], ans: 2, exp: "ব্যাখ্যা: তারের দুই প্রান্তে তামার পাতগুলির নিজস্ব সামান্য রোধ এবং ঝালাইয়ের কারণে যে ক্ষুদ্র রোধের সৃষ্টি হয়, তা হিসেবে ধরা হয় না বলেই প্রান্তীয় ত্রুটি আসে।" },
+{ q: "৫. মিটার ব্রিজের প্রান্তীয় ত্রুটি দূর করার জন্য কী করা হয় (End correction)?", opts: ["তারের দৈর্ঘ্য অর্ধেক করা হয়", "জানা ও অজানা রোধের (R এবং X) স্থান অদলবদল করে পাঠ নেওয়া হয়", "মোটা তার ব্যবহার করা হয়", "ভোল্টেজ কমানো হয়"], ans: 1, exp: "ব্যাখ্যা: ডান ও বাম ফাঁকে দুটি জানা রোধের স্থান অদলবদল করে দুইবার নিস্পন্দ বিন্দুর পাঠ নিলে প্রান্তীয় ত্রুটি &lambda;<sub>1</sub> ও &lambda;<sub>2</sub> সঠিকভাবে নির্ণয় ও সংশোধন করা যায়।" },
+{ q: "৬. মিটার ব্রিজে নিস্পন্দ বিন্দু তারের কোন অংশে থাকলে যন্ত্রটি সবচেয়ে বেশি সুবেদী হয় এবং ত্রুটি সর্বনিম্ন হয়?", opts: ["10 cm থেকে 20 cm", "80 cm থেকে 90 cm", "40 cm থেকে 60 cm", "ঠিক 100 cm এ"], ans: 2, exp: "ব্যাখ্যা: নিস্পন্দ বিন্দু তারের মধ্যবর্তী স্থানে (বিশেষ করে 50 cm এর কাছাকাছি) থাকলে তারের দুই অংশের রোধ সমান হয় এবং মাপের আনুপাতিক ত্রুটি সর্বনিম্ন হয়।" },
+{ q: "৭. মিটার ব্রিজে তড়িৎপ্রবাহের অভিমুখ পরিবর্তন করে তাপতড়িৎ ক্রিয়াজনিত (Thermoelectric effect) ত্রুটি দূর করতে কী ব্যবহৃত হয়?", opts: ["রিওস্ট্যাট", "কম্যুটেটর", "গ্যালভানোমিটার", "ভোল্টমিটার"], ans: 1, exp: "ব্যাখ্যা: দুটি ভিন্ন ধাতুর সংযোগস্থলে তাপতড়িৎ ক্রিয়ার জন্য বিভব সৃষ্টি হয়। কম্যুটেটরের সাহায্যে তড়িৎপ্রবাহ বিপরীতমুখী করে পাঠ নিলে এই ত্রুটি দূর হয় (পেলটিয়ার ক্রিয়া প্রত্যাবর্তক হওয়ায়)।" },
+{ q: "৮. মিটার ব্রিজের ফাঁকগুলিতে তামার মোটা পাত ব্যবহার করা হয় কেন?", opts: ["তামার রোধাঙ্ক বেশি তাই", "পাত মোটা হওয়ায় এদের রোধ নগণ্য হয়, ফলে অজানা রোধ নির্ণয়ে ত্রুটি কম হয়", "দেখতে ভালো লাগে তাই", "তামা সস্তা ধাতু"], ans: 1, exp: "ব্যাখ্যা: তামার রোধাঙ্ক এমনিতেই কম, তার ওপর পাতগুলি মোটা হলে প্রস্থচ্ছেদের ক্ষেত্রফল বাড়ে, ফলে রোধ (R &propto; 1/A) প্রায় শূন্য বা নগণ্য হয়।" },
+{ q: "৯. মিটার ব্রিজের সাহায্যে অতি উচ্চমানের রোধ নির্ণয় করা যায় না কেন?", opts: ["তার গলে যায়", "তারের রোধের তুলনায় ওই রোধ খুব বেশি হওয়ায় মূল প্রবাহের প্রায় পুরোটাই তার দিয়ে যায়, ফলে ব্রিজের সুবেদিতা ভীষণভাবে হ্রাস পায়", "গ্যালভানোমিটার কাজ করে না", "উচ্চ বিভব তৈরি হয়"], ans: 1, exp: "ব্যাখ্যা: একটি বাহুর রোধ অনেক বেশি হলে হুইটস্টোন ব্রিজ নীতি অনুযায়ী ব্রিজটি অসামঞ্জস্যপূর্ণ হয়ে পড়ে এবং সুবেদিতা নষ্ট হয়।" },
+{ q: "১০. মিটার ব্রিজের সাহায্যে অতি নিম্নমানের রোধও সঠিকভাবে নির্ণয় করা যায় না কেন?", opts: ["তার গলে যায়", "সংযোগী তার বা পাতের সামান্য রোধ নির্ণেয় নিম্ন রোধের সাথে তুলনীয় হয়ে গিয়ে হিসেবে মারাত্মক ত্রুটি ঘটায়", "প্রবাহ শূন্য হয়ে যায়", "ভোল্টেজ বাড়ে"], ans: 1, exp: "ব্যাখ্যা: রোধ খুব কম হলে সংযোগকারী পাত ও ঝালাইয়ের ক্ষুদ্র রোধকে অগ্রাহ্য করা যায় না, তাই সঠিক মান পাওয়া যায় না। শর্ট সার্কিট হওয়ারও সম্ভাবনা থাকে।" },
+{ q: "১১. মিটার ব্রিজে একটানা অনেকক্ষণ তড়িৎপ্রবাহ পাঠানো উচিত নয় কেন?", opts: ["ব্যাটারি ফুরিয়ে যায়", "জুল তাপন ক্রিয়ার ফলে তারটি উত্তপ্ত হয়ে তার রোধ পরিবর্তিত হয়ে যায়", "তারটি চুম্বকে পরিণত হয়", "গ্যালভানোমিটার পুড়ে যায়"], ans: 1, exp: "ব্যাখ্যা: তড়িৎপ্রবাহ দীর্ঘক্ষণ চললে I<sup>2</sup>Rt অনুযায়ী তারে তাপ উৎপন্ন হয়। তাপমাত্রা বাড়লে তারের রোধ বদলে গিয়ে নিস্পন্দ বিন্দুর অবস্থান পাল্টে যায়।" },
+{ q: "১২. মিটার ব্রিজের তারটি সম্পূর্ণ সুষম না হলে যে ত্রুটি হয়, তা এড়ানোর উপায় কী?", opts: ["তারটি ছোট করে দেওয়া", "তারটিকে আগেই ক্রমাঙ্কিত (Calibration) করে নেওয়া", "ব্যাটারি পালটে ফেলা", "তারটিকে জলে চুবিয়ে রাখা"], ans: 1, exp: "ব্যাখ্যা: তার সুষম না হলে প্রতি সেমিতে রোধ সমান থাকে না। ক্রমাঙ্কন করে নিলে তারের বিভিন্ন অংশের প্রকৃত রোধ আগে থেকেই জানা যায়।" },
+{ q: "১৩. একটি মিটার ব্রিজের বাম ফাঁকে R<sub>1</sub> এবং ডান ফাঁকে R<sub>2</sub> রোধ যুক্ত করলে বাম প্রান্ত থেকে 40 cm দূরে নিস্পন্দ বিন্দু পাওয়া যায়। R<sub>1</sub>/R<sub>2</sub> এর অনুপাত কত?", opts: ["3:2", "2:3", "1:1", "4:5"], ans: 1, exp: "ব্যাখ্যা: সূত্র R<sub>1</sub>/R<sub>2</sub> = l / (100-l)। এখানে l=40, তাই R<sub>1</sub>/R<sub>2</sub> = 40 / 60 = 2/3।" },
+{ q: "১৪. মিটার ব্রিজের কোনো ফাঁকে নিম্নমানের রোধ এবং অপর তিনটি বাহুতে উচ্চমানের রোধ যুক্ত করলে কী অসুবিধা হয়?", opts: ["কিছুই হয় না", "শর্ট সার্কিট হওয়ার সম্ভাবনা থাকে এবং ব্রিজের সুবেদিতা নষ্ট হয়", "গ্যালভানোমিটারের বিক্ষেপ বেড়ে যায়", "তার গলে যায়"], ans: 1, exp: "ব্যাখ্যা: গ্যালভানোমিটারের রোধ খুব কম হয়। এমন অবস্থায় তড়িৎপ্রবাহ সবচেয়ে কম বাধার পথ খুঁজতে গিয়ে শর্ট সার্কিট ঘটাতে পারে।" },
+{ q: "১৫. মিটার ব্রিজে ব্যবহৃত তারের একক দৈর্ঘ্যের রোধের মান সাধারণত কত হয়?", opts: ["0.02 - 0.03 &Omega;&middot;cm<sup>-1</sup>", "2 - 3 &Omega;&middot;cm<sup>-1</sup>", "100 &Omega;&middot;cm<sup>-1</sup>", "0.0001 &Omega;&middot;cm<sup>-1</sup>"], ans: 0, exp: "ব্যাখ্যা: একটি 1 m দীর্ঘ ও 0.5 mm ব্যাসযুক্ত সুষম ম্যাঙ্গানিন তারের মোট রোধ প্রায় 2 &Omega; হয়, তাই একক দৈর্ঘ্যের (1 cm) রোধ প্রায় 0.02 &Omega; হয়।" }
+]
+},
+4: {
+name: 'Set 4', icon: '🔋', topic: 'পোটেনসিওমিটার (Potentiometer)',
+questions: [
+{ q: "১. পোটেনসিওমিটারের সাহায্যে মূলত কোন রাশিটি সবচেয়ে নিখুঁতভাবে মাপা যায়?", opts: ["তড়িৎপ্রবাহ", "রোধ", "তড়িৎচালক বল এবং বিভবপ্রভেদ", "ধারকত্ব"], ans: 2, exp: "ব্যাখ্যা: পোটেনসিওমিটার হলো এমন একটি যন্ত্র যা বর্তনী থেকে কোনো তড়িৎ না টেনেই (নিস্পন্দ অবস্থায়) তড়িৎচালক বল বা বিভবপ্রভেদ অত্যন্ত সূক্ষ্মভাবে পরিমাপ করতে পারে।" },
+{ q: "২. পোটেনসিওমিটারকে একটি 'আদর্শ ভোল্টমিটার' হিসেবে ধরা হয় কেন?", opts: ["এর দাম খুব বেশি", "এটি নিস্পন্দ অবস্থায় উৎস থেকে কোনো তড়িৎপ্রবাহ গ্রহণ করে না", "এটি আকারে খুব ছোট", "এর নিজস্ব কোনো রোধ নেই"], ans: 1, exp: "ব্যাখ্যা: ভোল্টমিটার নিজে কিছু তড়িৎ টেনে নেয় বলে সঠিক তড়িৎচালক বল মাপা যায় না। কিন্তু পোটেনসিওমিটার নিস্পন্দ অবস্থায় মুক্ত বর্তনীর ন্যায় আচরণ করে, যা অসীম রোধের আদর্শ ভোল্টমিটারের কাজ করে।" },
+{ q: "৩. পোটেনসিওমিটারের তারের 'বিভবের নতিমাত্রা' (Potential gradient) বলতে কী বোঝায়?", opts: ["তারের মোট বিভব", "তারের প্রতি একক দৈর্ঘ্যে বিভব পতন", "তারের রোধ", "তারের তড়িৎপ্রবাহ"], ans: 1, exp: "ব্যাখ্যা: পোটেনসিওমিটার তারের মধ্য দিয়ে স্থির তড়িৎ প্রবাহিত হলে এর প্রতি একক দৈর্ঘ্যে যে পরিমাণ বিভব হ্রাস পায়, তাকে বিভবের নতিমাত্রা (k = V/L) বলে।" },
+{ q: "৪. পোটেনসিওমিটারের সুবেদিতা (Sensitivity) কীভাবে বৃদ্ধি করা যায়?", opts: ["তারের দৈর্ঘ্য হ্রাস করে", "বিভবের নতিমাত্রা বৃদ্ধি করে", "নির্দিষ্ট বিভবপার্থক্যের জন্য তারের দৈর্ঘ্য বৃদ্ধি করে বা বর্তনীতে প্রবাহমাত্রা কমিয়ে বিভবের নতিমাত্রা হ্রাস করে", "মোটা তার ব্যবহার করে"], ans: 2, exp: "ব্যাখ্যা: বিভবের নতিমাত্রা (V/L) যত কম হবে, সামান্য বিভব পরিবর্তনের জন্যও নিস্পন্দ দৈর্ঘ্য তত বেশি সরবে, ফলে যন্ত্রটি তত বেশি সুবেদী হবে।" },
+{ q: "৫. পোটেনসিওমিটারে চালক কোশের (Driver cell) তড়িৎচালক বল (E) এবং পরীক্ষাধীন কোশের তড়িৎচালক বলের (E<sub>1</sub>) মধ্যে সম্পর্ক কেমন হওয়া আবশ্যিক?", opts: ["E < E<sub>1</sub>", "E > E<sub>1</sub>", "E = E<sub>1</sub>", "কোনো সম্পর্ক নেই"], ans: 1, exp: "ব্যাখ্যা: চালক কোশের তড়িৎচালক বল বা তারের প্রান্তীয় বিভবপ্রভেদ পরীক্ষাধীন কোশের তড়িৎচালক বল অপেক্ষা কম হলে তারের মধ্যে কখনোই নিস্পন্দ বিন্দু পাওয়া যাবে না।" },
+{ q: "৬. পোটেনসিওমিটারের চালক কোশ হিসেবে সাধারণত কোনটি ব্যবহৃত হয়?", opts: ["লেকল্যান্স কোশ", "ড্যানিয়েল কোশ", "সঞ্চয়ক কোশ", "পরিবর্তনশীল AC উৎস"], ans: 2, exp: "ব্যাখ্যা: চালক কোশের তড়িৎচালক বল সময়ের সঙ্গে স্থির ও অপরিবর্তিত থাকা বাঞ্ছনীয়, তাই এখানে লেড-অ্যাসিড সঞ্চয়ক কোশ ব্যবহৃত হয়।" },
+{ q: "৭. দুটি কোশের তড়িৎচালক বলের তুলনার ক্ষেত্রে, পোটেনসিওমিটারে তাদের নিস্পন্দ দৈর্ঘ্য যথাক্রমে l<sub>1</sub> ও l<sub>2</sub> হলে সম্পর্কটি কী?", opts: ["E<sub>1</sub> &middot; l<sub>1</sub> = E<sub>2</sub> &middot; l<sub>2</sub>", "E<sub>1</sub> / E<sub>2</sub> = l<sub>1</sub> / l<sub>2</sub>", "E<sub>1</sub> / E<sub>2</sub> = l<sub>2</sub> / l<sub>1</sub>", "E<sub>1</sub> - E<sub>2</sub> = l<sub>1</sub> - l<sub>2</sub>"], ans: 1, exp: "ব্যাখ্যা: কোশের তড়িৎচালক বল নিস্পন্দ দৈর্ঘ্যের সমানুপাতিক (E &propto; l)। তাই দুটি কোশের ক্ষেত্রে E<sub>1</sub>/E<sub>2</sub> = l<sub>1</sub>/l<sub>2</sub> হয়।" },
+{ q: "৮. পোটেনসিওমিটার ব্যবহার করে কোশের অভ্যন্তরীণ রোধ (r) নির্ণয়ের সূত্র কোনটি?", opts: ["r = R (l<sub>2</sub> / l<sub>1</sub> - 1)", "r = R (l<sub>1</sub> / l<sub>2</sub> + 1)", "r = R (l<sub>1</sub> / l<sub>2</sub> - 1)", "r = (l<sub>1</sub> - l<sub>2</sub>) / R"], ans: 2, exp: "ব্যাখ্যা: খোলা বর্তনীতে নিস্পন্দ দৈর্ঘ্য l<sub>1</sub> এবং R রোধ দ্বারা সান্ট করা অবস্থায় নিস্পন্দ দৈর্ঘ্য l<sub>2</sub> হলে, অভ্যন্তরীণ রোধ r = R(E/V - 1) = R(l<sub>1</sub>/l<sub>2</sub> - 1)।" },
+{ q: "৯. পোটেনসিওমিটারের তারগুলি সাধারণত কোন উপাদানের তৈরি হয়?", opts: ["খাঁটি তামা", "অ্যালুমিনিয়াম", "ম্যাঙ্গানিন বা কনস্ট্যানট্যান", "সোনা"], ans: 2, exp: "ব্যাখ্যা: এই সংকর ধাতুগুলির রোধের উষ্ণতা গুণাঙ্ক খুব কম হওয়ায় তড়িৎপ্রবাহের ফলে তাপমাত্রা বাড়লেও এদের রোধ সহজে পরিবর্তিত হয় না।" },
+{ q: "১০. পোটেনসিওমিটারের বর্তনীতে সমস্ত কোশের (চালক ও পরীক্ষাধীন) কোন মেরুটিকে তারের একই প্রান্তে যুক্ত করতে হয়?", opts: ["ঋণাত্মক মেরু", "ধনাত্মক মেরু", "যেকোনো একটি", "কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: নিস্পন্দ বিন্দু পেতে গেলে তারের যে বিন্দু থেকে বিভব পতন মাপা শুরু হচ্ছে, সেখানে সব কোশের একই মেরু (সাধারণত ধনাত্মক মেরু) যুক্ত করা বাধ্যতামূলক।" },
+{ q: "১১. পোটেনসিওমিটারের পরীক্ষা করার সময় নিস্পন্দ বিন্দুটি যদি ক্রমশ তারের উচ্চ বিভব প্রান্তের দিকে সরে আসতে থাকে, তবে কী বুঝতে হবে?", opts: ["চালক কোশের ক্ষমতা কমে যাচ্ছে", "পরীক্ষাধীন কোশের ক্ষমতা বেড়ে যাচ্ছে", "তার গলে যাচ্ছে", "গ্যালভানোমিটার খারাপ"], ans: 0, exp: "ব্যাখ্যা: চালক কোশের তড়িৎচালক বল সময়ের সাথে কমে গেলে বিভব নতিমাত্রা কমে যায়, ফলে একই তড়িৎচালক বলকে প্রতিমিত করতে বেশি দৈর্ঘ্য লাগে না, বরং নিস্পন্দ বিন্দু সরে আসে।" },
+{ q: "১২. পোটেনসিওমিটারের সম্পূর্ণ অপ্রতিমিত অবস্থায় গ্যালভানোমিটারের সুরক্ষার জন্য কী করা হয়?", opts: ["সমান্তরালে সান্ট যোগ করা হয়", "গ্যালভানোমিটারের সাথে শ্রেণিতে একটি উচ্চমানের রোধ যুক্ত করা হয়", "ভোল্টেজ কমানো হয়", "তার কেটে দেওয়া হয়"], ans: 1, exp: "ব্যাখ্যা: প্রাথমিকভাবে গ্যালভানোমিটারকে উচ্চ প্রবাহ থেকে বাঁচাতে একটি উচ্চ রোধ শ্রেণিতে রাখা হয়। নিস্পন্দ অবস্থার কাছাকাছি পৌঁছালে এই রোধ শূন্য করে সুবেদিতা বাড়ানো হয়।" },
+{ q: "১৩. পোটেনসিওমিটারের তারের দৈর্ঘ্য যত বেশি হয়, যন্ত্রটির বিভব পরিমাপের সুবেদিতা—", opts: ["তত কমে যায়", "তত বৃদ্ধি পায়", "অপরিবর্তিত থাকে", "শূন্য হয়ে যায়"], ans: 1, exp: "ব্যাখ্যা: দৈর্ঘ্য বাড়লে প্রতি একক দৈর্ঘ্যে বিভবপতন বা বিভব-নতিমাত্রা হ্রাস পায়। ফলে সামান্য বিভব মাপার জন্যও যন্ত্রটি সংবেদনশীল হয়ে ওঠে।" },
+{ q: "১৪. পোটেনসিওমিটারে 1.25 V তড়িৎচালক বলের একটি কোশ 35 cm দৈর্ঘ্যে প্রতিমিত হয়। অন্য একটি কোশ 63 cm এ প্রতিমিত হলে তার তড়িৎচালক বল কত?", opts: ["2.25 V", "2.50 V", "1.80 V", "1.25 V"], ans: 0, exp: "ব্যাখ্যা: E<sub>2</sub> = E<sub>1</sub> &times; (l<sub>2</sub>/l<sub>1</sub>) = 1.25 &times; (63/35) = 1.25 &times; 1.8 = 2.25 V।" },
+{ q: "১৫. পোটেনসিওমিটার তারের মধ্য দিয়ে একটানা দীর্ঘক্ষণ তড়িৎপ্রবাহ পাঠানো উচিত নয় কেন?", opts: ["ব্যাটারি পুড়ে যাবে", "জুল তাপনের জন্য তারের রোধ বেড়ে যাবে এবং নিস্পন্দ বিন্দুর অবস্থান পরিবর্তিত হবে", "তারটি গ্যালভানোমিটারকে ধ্বংস করবে", "তারের দৈর্ঘ্য কমে যাবে"], ans: 1, exp: "ব্যাখ্যা: একটানা প্রবাহ চললে তার উত্তপ্ত হয়ে রোধ বদলে দেয়, যার ফলে বিভব নতিমাত্রা স্থির থাকে না এবং পাঠে মারাত্মক ত্রুটি আসে।" }
+]
+},
+5: {
+name: 'Set 5', icon: '📝', topic: 'গাণিতিক সমস্যা (Level-I ও II)',
+questions: [
+{ q: "১. 4 m দীর্ঘ একটি পোটেনসিওমিটার তারের দুই প্রান্তের বিভবপতন 4 V। 4 &Omega; রোধকের ওপর বিভবপতন মাপতে গেলে নিস্পন্দ দৈর্ঘ্য 8 mm হয়। দ্বিতীয় বর্তনীতে কত তড়িৎপ্রবাহ চলছিল?", opts: ["2 mA", "4 mA", "1 mA", "5 mA"], ans: 0, exp: "ব্যাখ্যা: বিভব নতিমাত্রা = 4V / 4000 mm = 1 mV/mm। 8 mm তারে বিভবপতন = 8 mV। প্রবাহমাত্রা I = V/R = 8 mV / 4 &Omega; = 2 mA।" },
+{ q: "২. খোলা বর্তনী অবস্থায় একটি কোশ পোটেনসিওমিটারের 200 cm দৈর্ঘ্যে প্রতিমিত হয়। 14 &Omega; রোধ দ্বারা সান্ট করলে 175 cm দৈর্ঘ্যে প্রতিমিত হয়। অভ্যন্তরীণ রোধ কত?", opts: ["1.5 &Omega;", "2 &Omega;", "1.8 &Omega;", "2.5 &Omega;"], ans: 1, exp: "ব্যাখ্যা: অভ্যন্তরীণ রোধ r = R (l<sub>1</sub>/l<sub>2</sub> - 1) = 14 (200/175 - 1) = 14 &times; 25/175 = 14/7 = 2 &Omega;।" },
+{ q: "৩. একটি হুইটস্টোন ব্রিজের তিন বাহুর রোধ P = 20 &Omega;, Q = 100 &Omega; এবং R = 15 &Omega;। নিস্পন্দ অবস্থা পেতে চতুর্থ বাহুর রোধ (S) কত হতে হবে?", opts: ["60 &Omega;", "80 &Omega;", "75 &Omega;", "100 &Omega;"], ans: 2, exp: "ব্যাখ্যা: P/Q = R/S &rArr; 20/100 = 15/S &rArr; 1/5 = 15/S &rArr; S = 75 &Omega;।" },
+{ q: "৪. একটি PO বক্সে P=10 &Omega;, Q=10 &Omega;, R=30 &Omega; এবং S=40 &Omega;। S রোধটির সঙ্গে কত রোধ সমান্তরালে যুক্ত করলে ব্রিজটি সাম্যাবস্থায় আসবে?", opts: ["80 &Omega;", "100 &Omega;", "120 &Omega;", "60 &Omega;"], ans: 2, exp: "ব্যাখ্যা: সাম্যাবস্থায় S<sub>eq</sub> = 30 &Omega; হতে হবে। 40x / (40+x) = 30 &rArr; 40x = 1200 + 30x &rArr; 10x = 1200 &rArr; x = 120 &Omega;।" },
+{ q: "৫. একটি মিটার ব্রিজের বাম ফাঁকে অজ্ঞাত রোধ X এবং ডান ফাঁকে 30 &Omega; যুক্ত করলে 40 cm দূরে নিস্পন্দ বিন্দু পাওয়া যায়। অজ্ঞাত রোধের মান কত?", opts: ["15 &Omega;", "25 &Omega;", "20 &Omega;", "10 &Omega;"], ans: 2, exp: "ব্যাখ্যা: X/30 = 40/60 &rArr; X = 30 &times; (2/3) = 20 &Omega;।" },
+{ q: "৬. 100 cm দীর্ঘ এবং 10 &Omega; রোধের পোটেনসিওমিটার তার 2 V ব্যাটারি ও R রোধের সাথে শ্রেণিতে যুক্ত। 15 mV এর একটি উৎস 30 cm এ প্রতিমিত হলে R এর মান কত?", opts: ["390 &Omega;", "380 &Omega;", "400 &Omega;", "395 &Omega;"], ans: 0, exp: "ব্যাখ্যা: 30 cm এ বিভবপতন 15 mV, 100 cm এ 50 mV = 0.05 V। মূল প্রবাহ I = 0.05 / 10 = 0.005 A। I = E/(R+r) &rArr; 0.005 = 2/(R+10) &rArr; R = 390 &Omega;।" },
+{ q: "৭. একটি মিটার ব্রিজের ডান ফাঁকে 60 &Omega; রোধ রাখলে নিস্পন্দ বিন্দু 40 cm-এ পাওয়া যায়। স্কেলের লঘিষ্ঠ ধ্রুবক 1 mm হলে অজ্ঞাত রোধ (X) ও তার ত্রুটি কত?", opts: ["40 &plusmn; 0.17 &Omega;", "40 &plusmn; 0.25 &Omega;", "60 &plusmn; 0.17 &Omega;", "60 &plusmn; 0.25 &Omega;"], ans: 0, exp: "ব্যাখ্যা: X = (40/60)&times;60 = 40 &Omega;। &Delta;X/X = &Delta;l/l + &Delta;l/(100-l) = 0.1/40 + 0.1/60 = 1/240। &Delta;X = 40/240 &approx; 0.17 &Omega;।" },
+{ q: "৮. একটি পোটেনসিওমিটারে E<sub>1</sub> 80 cm এ এবং E<sub>2</sub> 60 cm এ প্রতিমিত হয়। যদি E<sub>1</sub> - E<sub>2</sub> = 0.5 V হয়, তবে E<sub>1</sub> ও E<sub>2</sub> কত?", opts: ["1.5 V, 1.0 V", "2.0 V, 1.5 V", "2.5 V, 2.0 V", "3.0 V, 2.5 V"], ans: 1, exp: "ব্যাখ্যা: E<sub>1</sub>/E<sub>2</sub> = 80/60 = 4/3। E<sub>1</sub> - E<sub>2</sub> = 0.5 &rArr; 4/3 E<sub>2</sub> - E<sub>2</sub> = 0.5 &rArr; E<sub>2</sub> = 1.5 V। E<sub>1</sub> = 2.0 V।" },
+{ q: "৯. 18 &Omega; রোধের 12টি তার দিয়ে একটি ঘনকাকার ফ্রেম তৈরি করা হলো। দীর্ঘতম কর্ণের দুই প্রান্তের মধ্যে তুল্যরোধ কত?", opts: ["15 &Omega;", "12 &Omega;", "10 &Omega;", "24 &Omega;"], ans: 0, exp: "ব্যাখ্যা: ঘনকের দীর্ঘতম কর্ণের সাপেক্ষে তুল্যরোধ 5r/6। r = 18 &Omega; হওয়ায় R<sub>eq</sub> = (5/6) &times; 18 = 15 &Omega;।" },
+{ q: "১০. হুইটস্টোন ব্রিজের চার বাহুর রোধ P=4 &Omega;, Q=6 &Omega;, R=8 &Omega;, S=12 &Omega;। গ্যালভানোমিটারের রোধ 50 &Omega; হলে প্রবাহমাত্রা (I<sub>g</sub>) কত?", opts: ["0.5 A", "0 A", "1 A", "0.2 A"], ans: 1, exp: "ব্যাখ্যা: P/Q = 4/6 = 2/3 এবং R/S = 8/12 = 2/3। ব্রিজটি প্রতিমিত অবস্থায় আছে, তাই গ্যালভানোমিটার প্রবাহ শূন্য হবে।" },
+{ q: "১১. সংযোগ বিন্দুতে 10 A এবং 5 A প্রবেশ করছে, 8 A বেরিয়ে যাচ্ছে এবং অপর একটি তার দিয়ে I তড়িৎ প্রবাহিত হচ্ছে। I এর মান ও দিক কত?", opts: ["7 A, প্রবেশ করছে", "3 A, বেরিয়ে যাচ্ছে", "7 A, বেরিয়ে যাচ্ছে", "3 A, প্রবেশ করছে"], ans: 2, exp: "ব্যাখ্যা: 10 + 5 = 8 + I &rArr; I = 7 A। ধনাত্মক হওয়ায় এটি বেরিয়ে যাচ্ছে।" },
+{ q: "১২. পোটেনসিওমিটার তারের দৈর্ঘ্য L, কোশ L/2 এ প্রতিমিত হয়। দৈর্ঘ্য L/2 বৃদ্ধি করা হলে, ওই কোশটি নতুন তারের কোন্ দৈর্ঘ্যে প্রতিমিত হবে?", opts: ["2L/3", "3L/4", "L/4", "L"], ans: 1, exp: "ব্যাখ্যা: E = (V/L)&times;(L/2) = V/2। নতুন দৈর্ঘ্য 1.5L। নতুন নতিমাত্রা V/1.5L। l' = E / (V/1.5L) = (V/2) &times; (1.5L/V) = 0.75L = 3L/4।" },
+{ q: "১৩. দুটি কোশ 4 V (r=2 &Omega;) এবং 6 V (r=3 &Omega;) সমান্তরালে 5 &Omega; রোধের সাথে যুক্ত। 5 &Omega; এর মধ্য দিয়ে প্রবাহমাত্রা কত?", opts: ["1.25 A", "0.77 A", "1.0 A", "0.55 A"], ans: 1, exp: "ব্যাখ্যা: E<sub>eq</sub> = (4&times;3 + 6&times;2)/5 = 4.8 V। r<sub>eq</sub> = 1.2 &Omega;। I = 4.8 / (5+1.2) = 4.8 / 6.2 &approx; 0.77 A।" },
+{ q: "১৪. মিটার ব্রিজে R<sub>1</sub>, R<sub>2</sub> এর জন্য নিস্পন্দ 40 cm। R<sub>1</sub>+5, R<sub>2</sub>-5 এর জন্য 60 cm। R<sub>1</sub> ও R<sub>2</sub> এর মান কত?", opts: ["15 &Omega;, 25 &Omega;", "10 &Omega;, 15 &Omega;", "12 &Omega;, 18 &Omega;", "20 &Omega;, 30 &Omega;"], ans: 1, exp: "ব্যাখ্যা: R<sub>1</sub>/R<sub>2</sub> = 40/60 = 2/3। (R<sub>1</sub>+5)/(R<sub>2</sub>-5) = 60/40 = 3/2। সমাধান করলে R<sub>2</sub> = 15 &Omega;, R<sub>1</sub> = 10 &Omega;।" },
+{ q: "১৫. 0&deg;C এ রোধ 10 &Omega; এবং 100&deg;C এ 15 &Omega;। রোধের উষ্ণতা গুণাঙ্ক (&alpha;) কত?", opts: ["0.005 /&deg;C", "0.05 /&deg;C", "0.001 /&deg;C", "0.025 /&deg;C"], ans: 0, exp: "ব্যাখ্যা: &alpha; = (15 - 10) / (10 &times; 100) = 5 / 1000 = 0.005 /&deg;C।" }
+]
+},
+6: {
+name: 'Set 6', icon: '🧠', topic: 'অ্যাডভান্সড প্রশ্ন ও বিবৃতি-কারণ',
+questions: [
+{ q: "১. (Assertion-Reasoning) বিবৃতি: একটি প্রতিমিত হুইটস্টোন ব্রিজের P ও Q-এর রোধ অদলবদল করা হলেও ওই প্রতিমিত অবস্থাটি বজায় থাকে। কারণ: প্রতিমিত অবস্থা গ্যালভানোমিটারের রোধের ওপর নির্ভরশীল নয়।", opts: ["উভয়ই সত্য এবং সঠিক ব্যাখ্যা", "উভয়ই সত্য কিন্তু সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 3, exp: "ব্যাখ্যা: P ও Q অদলবদল করলে অনুপাত P/Q পালটে Q/P হয়ে যায়, ফলে প্রতিমিত অবস্থা নষ্ট হতে পারে। তাই বিবৃতি মিথ্যা। কিন্তু কারণ সত্য।" },
+{ q: "২. (Assertion-Reasoning) বিবৃতি: তড়িৎবর্তনীর যে-কোনো সংযোগ বিন্দুতে মিলিত তড়িৎপ্রবাহগুলির বীজগাণিতিক যোগফল শূন্য হয়। কারণ: তড়িৎপ্রবাহ চলার সময় মোট শক্তি সংরক্ষিত থাকে।", opts: ["উভয়ই সত্য এবং সঠিক ব্যাখ্যা", "উভয়ই সত্য কিন্তু সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 1, exp: "ব্যাখ্যা: সংযোগ বিন্দুতে প্রবাহ শূন্য হওয়া (KCL) মূলত 'আধানের সংরক্ষণ' সূত্রকে নির্দেশ করে, শক্তির সংরক্ষণকে নয়। তাই কারণটি সত্য হলেও তা বিবৃতির সঠিক ব্যাখ্যা নয়।" },
+{ q: "৩. (Assertion-Reasoning) বিবৃতি: তড়িৎচালক বল পরিমাপের ক্ষেত্রে ভোল্টমিটার অপেক্ষা পোটেনসিওমিটার বেশি উপযোগী। কারণ: পোটেনসিওমিটার বর্তনীতে কোশের মধ্য দিয়ে কোনো প্রবাহ যায় না।", opts: ["উভয়ই সত্য এবং সঠিক ব্যাখ্যা", "উভয়ই সত্য কিন্তু সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 0, exp: "ব্যাখ্যা: পোটেনসিওমিটার নিস্পন্দ অবস্থায় বর্তনী থেকে কোনো তড়িৎ টানে না, ফলে অভ্যন্তরীণ রোধের দরুন নষ্ট ভোল্ট (Ir) থাকে না, এবং সঠিক EMF পাওয়া যায়।" },
+{ q: "৪. (Assertion-Reasoning) বিবৃতি: কির্সফের ভোল্টেজ সূত্র নির্দেশ করে যে স্থির তড়িৎক্ষেত্র সংরক্ষী। কারণ: বর্তনীর দুটি বিন্দুর মধ্যে বিভব বৈষম্য পথের ওপর নির্ভরশীল নয়।", opts: ["উভয়ই সত্য এবং সঠিক ব্যাখ্যা", "উভয়ই সত্য কিন্তু সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 0, exp: "ব্যাখ্যা: KVL মূলত স্থির তড়িৎক্ষেত্রের সংরক্ষী প্রকৃতির উপরই প্রতিষ্ঠিত, যেখানে বদ্ধ লুপে মোট কার্য শূন্য হয়। তাই উভয়ই সত্য এবং সঠিক ব্যাখ্যা।" },
+{ q: "৫. (Assertion-Reasoning) বিবৃতি: দীর্ঘ পোটেনসিওমিটার নির্ভুল পরিমাপ করতে সক্ষম। কারণ: দীর্ঘ পোটেনসিওমিটারের দরুন বিভব নতিমাত্রা ক্ষুদ্র হয়।", opts: ["উভয়ই সত্য এবং সঠিক ব্যাখ্যা", "উভয়ই সত্য কিন্তু সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 0, exp: "ব্যাখ্যা: বিভব নতিমাত্রা ক্ষুদ্র হলে সামান্য বিভব পরিবর্তনেও নিস্পন্দ বিন্দু অনেকটা সরে যায়, ফলে সুবেদিতা ও নির্ভুলতা বাড়ে।" },
+{ q: "৬. (True/False) বিবৃতি I: জালিকা (Mesh) বিশ্লেষণ করার জন্য KVL ব্যবহার করা হয়। বিবৃতি II: জালিকা বিশ্লেষণের সূত্রকে আধান সংরক্ষণ সূত্র বলা হয়।", opts: ["TT", "TF", "FT", "FF"], ans: 1, exp: "ব্যাখ্যা: জালিকা বিশ্লেষণে KVL ব্যবহৃত হয়, যা সত্য। কিন্তু KVL আধান সংরক্ষণের নয়, শক্তি সংরক্ষণের ওপর ভিত্তি করে প্রতিষ্ঠিত, তাই বিবৃতি II মিথ্যা।" },
+{ q: "৭. (True/False) বিবৃতি I: হুইটস্টোন ব্রিজের সাহায্যে খুব উচ্চ ও নিম্নমানের রোধ নিখুঁতভাবে নির্ণয় করা যায়। বিবৃতি II: নিস্পন্দ অবস্থায় গ্যালভানোমিটারের প্রান্তদ্বয়ের বিভব পার্থক্য শূন্য হয়।", opts: ["TT", "TF", "FT", "FF"], ans: 2, exp: "ব্যাখ্যা: খুব উচ্চ বা নিম্নমানের রোধ মাপতে হুইটস্টোন ব্রিজ কাজ করে না, তাই বিবৃতি I মিথ্যা। তবে নিস্পন্দ অবস্থায় বিভব পার্থক্য শূন্য হয়, এটি সত্য।" },
+{ q: "৮. (True/False) বিবৃতি I: মিটার ব্রিজে নিস্পন্দ বিন্দুটি 40-60 cm-এর মধ্যে থাকলে ব্রিজটি সুবেদী থাকে। বিবৃতি II: নিস্পন্দ বিন্দু মধ্যবর্তী হলে বাম ও ডান প্রান্তের রোধ সমান হয়।", opts: ["TT", "TF", "FT", "FF"], ans: 0, exp: "ব্যাখ্যা: উভয় বিবৃতিই সম্পূর্ণ সত্য এবং মিটার ব্রিজের সুবেদিতার শর্ত নির্দেশ করে।" },
+{ q: "৯. (True/False) বিবৃতি I: পোটেনসিওমিটার ও ভোল্টমিটার উভয় দ্বারাই EMF নির্ণয় করা যায়। বিবৃতি II: পোটেনসিওমিটার no deflection পদ্ধতিতে এবং ভোল্টমিটার deflection পদ্ধতিতে কাজ করে।", opts: ["TT", "TF", "FT", "FF"], ans: 2, exp: "ব্যাখ্যা: ভোল্টমিটার তড়িৎচালক বল মাপতে পারে না (এটি শুধু প্রান্তীয় বিভবপ্রভেদ মাপে), তাই I মিথ্যা। বিবৃতি II সত্য।" },
+{ q: "১০. (HOTS) দুটি পোটেনসিওমিটার X ও Y-এর V-l লেখচিত্রে X-এর নতি (Slope) Y-এর চেয়ে বেশি। কোন্টি ব্যবহার করা বেশি সুবিধাজনক?", opts: ["X পোটেনসিওমিটার", "Y পোটেনসিওমিটার", "উভয়ই সমান", "বলা সম্ভব নয়"], ans: 1, exp: "ব্যাখ্যা: নতি (V/l) হলো বিভব নতিমাত্রা। নতিমাত্রা যত কম হবে, যন্ত্র তত বেশি সুবেদী হবে। Y-এর নতি কম, তাই এটি বেশি সুবিধাজনক।" },
+{ q: "১১. (HOTS) একটি পোটেনসিওমিটারে চালক কোশ (Driver cell) হিসেবে সঞ্চয়ক কোশ ব্যবহার করা হয় কেন?", opts: ["এর ভোল্টেজ অনেক বেশি", "এর অভ্যন্তরীণ রোধ অসীম", "এর তড়িৎচালক বল সময়ের সঙ্গে স্থির বা ধ্রুবক থাকে", "এটি ওজনে হালকা"], ans: 2, exp: "ব্যাখ্যা: চালক কোশের বিভব পতন স্থির না থাকলে পোটেনসিওমিটারের পাঠ ভুল আসবে। সঞ্চয়ক কোশ দীর্ঘক্ষণ ধরে স্থির ভোল্টেজ দিতে পারে।" },
+{ q: "১২. (HOTS) মিটার ব্রিজে তড়িৎপ্রবাহের অভিমুখ পরিবর্তন করার জন্য কম্যুটেটর ব্যবহার করা হয় কেন?", opts: ["প্রান্তীয় ত্রুটি এড়াতে", "তাপতড়িৎ ক্রিয়ার (Thermoelectric) ত্রুটি দূর করতে", "জকির ঘর্ষণ কমাতে", "তারের দৈর্ঘ্য বাড়াতে"], ans: 1, exp: "ব্যাখ্যা: ভিন্ন ধাতুর সংযোগস্থলে তাপীয় প্রভাবের ফলে অবাঞ্ছিত বিভব তৈরি হয়, তড়িৎ বিপরীতমুখী করে পাঠ নিলে এই ত্রুটি বাতিল হয়ে যায়।" },
+{ q: "১৩. (HOTS) একটি অ্যামিটার ও একটি ভোল্টমিটারকে শ্রেণিতে যুক্ত করা হলে ভোল্টমিটারের পাঠ 10 V এবং অ্যামিটারের পাঠ শূন্য পাওয়া গেল। এর কারণ কী?", opts: ["অ্যামিটারটি খারাপ", "ভোল্টমিটারের রোধ প্রায় অসীম, তাই প্রবাহ শূন্য", "সার্কিটে কোনো তড়িৎকোশ নেই", "ভোল্টমিটারটি শর্ট সার্কিট হয়ে আছে"], ans: 1, exp: "ব্যাখ্যা: আদর্শ ভোল্টমিটারের রোধ অসীম হয়। একে শ্রেণিতে দিলে পুরো সার্কিটের রোধ এত বেশি হয়ে যায় যে প্রবাহমাত্রা শূন্যের কাছাকাছি নেমে আসে।" },
+{ q: "১৪. (HOTS) একটি ধারক (Capacitor) যুক্ত DC বর্তনীতে স্থিতাবস্থায় (Steady state) ধারকটি থাকা শাখায় তড়িৎপ্রবাহ কত হয়?", opts: ["অসীম", "বর্তনীর মূল প্রবাহের সমান", "শূন্য", "ভোল্টেজ ও রোধের অনুপাতের সমান"], ans: 2, exp: "ব্যাখ্যা: স্থিতাবস্থায় ধারক সম্পূর্ণ চার্জ হয়ে গেলে তা একটি ওপেন সার্কিট (মুক্ত পথ)-এর মতো আচরণ করে, ফলে ওই শাখায় কোনো প্রবাহ যায় না।" },
+{ q: "১৫. (HOTS) কির্সফের সূত্র ওহমের সূত্রের পরিপূরক একটি সম্পূর্ণ নতুন তাত্ত্বিক সূত্র - কথাটি কি সত্য?", opts: ["হ্যাঁ, এটি নতুন সূত্র", "না, এটি ওহমের সূত্র ও সংরক্ষণ নীতির ওপর ভিত্তি করে জটিল জালক সমাধানের নিয়ম", "এটি শুধুমাত্র AC কারেন্টের জন্য", "এটি ডায়োডের সূত্র"], ans: 1, exp: "ব্যাখ্যা: কির্সফের সূত্র কোনো মৌলিক তাত্ত্বিক সূত্র নয়, এটি ওহমের সূত্র ও শক্তির/আধানের সংরক্ষণ নীতির একটি প্রয়োগ মাত্র।" }
+]
+},
+7: {
+name: 'Set 7', icon: '🏆', topic: 'কম্পিটিটিভ এক্সাম স্পেশাল',
+questions: [
+{ q: "১. [WBJEE] 10, 20, 30 এবং 40 &Omega; রোধ দিয়ে একটি বর্গাকার কাঠামো তৈরি করা হলো। দুই কর্ণের দুই প্রান্তের মধ্যে সর্বাধিক কত তুল্যরোধ পাওয়া যেতে পারে?", opts: ["100 &Omega;", "50 &Omega;", "25 &Omega;", "24 &Omega;"], ans: 2, exp: "ব্যাখ্যা: সর্বাধিক রোধ পেতে হলে চতুর্ভুজকে (10+40) = 50 &Omega; এবং (20+30) = 50 &Omega; তে ভাগ করতে হবে। দুটি 50 &Omega; সমান্তরালে থাকলে তুল্যরোধ 25 &Omega; হয়।" },
+{ q: "২. [NEET] L দৈর্ঘ্য ও R রোধের পোটেনসিওমিটার তার E<sub>0</sub> ও r রোধের ব্যাটারির সাথে যুক্ত। E তড়িৎচালক বল l দৈর্ঘ্যে প্রতিমিত হলে E = ?", opts: ["[E<sub>0</sub> R / (R+r)] &middot; (l/L)", "E<sub>0</sub> l / L", "[E<sub>0</sub> r / (R+r)] &middot; (l/L)", "L E<sub>0</sub> r / l R"], ans: 0, exp: "ব্যাখ্যা: তারের বিভবপতন V = E<sub>0</sub> R / (R+r)। বিভব নতিমাত্রা k = V/L। প্রতিমিত বল E = k &middot; l = [E<sub>0</sub> R / (R+r)] &middot; (l/L)।" },
+{ q: "৩. [AIPMT] পোটেনসিওমিটারে দুটি কোশকে একই অভিমুখে যুক্ত করলে নিস্পন্দ বিন্দু 60 cm এবং বিপরীত অভিমুখে 20 cm-এ পাওয়া যায়। E<sub>1</sub>/E<sub>2</sub> কত?", opts: ["5:1", "3:1", "2:1", "4:3"], ans: 2, exp: "ব্যাখ্যা: (E<sub>1</sub>+E<sub>2</sub>)/(E<sub>1</sub>-E<sub>2</sub>) = 60/20 = 3। সমাধান করলে 2E<sub>1</sub> = 4E<sub>2</sub> বা E<sub>1</sub>/E<sub>2</sub> = 2:1।" },
+{ q: "৪. [JEE Main] 20 &Omega; তারের ভোল্টেজ 4 V। মূল বর্তনীতে দুটি 3 V কোশ (প্রতিটির অভ্যন্তরীণ রোধ r) শ্রেণিতে যুক্ত আছে। r এর মান কত?", opts: ["1 &Omega;", "2 &Omega;", "2.5 &Omega;", "5 &Omega;"], ans: 3, exp: "ব্যাখ্যা: I = 4/20 = 0.2A। মোট EMF = 6V। V = E - I(2r) &rArr; 4 = 6 - 0.2(2r) &rArr; 0.4r = 2 &rArr; r = 5 &Omega;।" },
+{ q: "৫. [JEE Main] একটি মিটার ব্রিজের প্রতিমিত দৈর্ঘ্য 40 cm। তারটির ব্যাসার্ধ দ্বিগুণ করা হলে নতুন প্রতিমিত দৈর্ঘ্য কত হবে?", opts: ["20 cm", "10 cm", "80 cm", "40 cm"], ans: 3, exp: "ব্যাখ্যা: তারের ব্যাসার্ধ বৃদ্ধি করলে তারের সামগ্রিক রোধ কমবে ঠিকই, কিন্তু যেহেতু তারটি সুষম, তাই দৈর্ঘ্য বরাবর রোধের অনুপাত একই থাকবে। ফলে নিস্পন্দ বিন্দুর পরিবর্তন হবে না।" },
+{ q: "৬. [WBJEE] প্রতিমিত হুইটস্টোন ব্রিজের R-কে 4 থেকে 6 &Omega; করা হলো। S-এর মান 4 &Omega; বাড়ালে ব্রিজটি পুনরায় প্রতিমিত হয়। S-এর প্রাথমিক মান কত?", opts: ["4 &Omega;", "6 &Omega;", "8 &Omega;", "10 &Omega;"], ans: 2, exp: "ব্যাখ্যা: 4/S = 6/(S+4) &rArr; 4S + 16 = 6S &rArr; 2S = 16 &rArr; S = 8 &Omega;।" },
+{ q: "৭. [NEET] হুইটস্টোন ব্রিজে অজানা রোধ X-এর সর্বাধিক সঠিক (precise) মাপের জন্য, অনুপাত বাহু P এবং Q কীরূপ হওয়া উচিত?", opts: ["খুব বড়ো এবং অসমান", "কার্যকরী ভূমিকা নেই", "মোটামুটি সমান এবং ছোটো হতে হবে", "P >> Q হতে হবে"], ans: 2, exp: "ব্যাখ্যা: হুইটস্টোন ব্রিজের চারটি বাহুর রোধের মান যখন কাছাকাছি বা সমান হয়, তখন ব্রিজটি সর্বাধিক সুবেদী হয় এবং ত্রুটি সবচেয়ে কম হয়।" },
+{ q: "৮. [AIPMT] পোটেনসিওমিটারে 2.0 V কোশ 40 cm এ নিস্পন্দ বিন্দু দেয়। 3.0 V-এর কোশ লাগালে কত দৈর্ঘ্যে নিস্পন্দ বিন্দু পাওয়া যাবে?", opts: ["60 cm", "50 cm", "80 cm", "70 cm"], ans: 0, exp: "ব্যাখ্যা: E<sub>1</sub>/E<sub>2</sub> = l<sub>1</sub>/l<sub>2</sub> &rArr; 2/3 = 40/l<sub>2</sub> &rArr; l<sub>2</sub> = 60 cm।" },
+{ q: "৯. [WBJEE] হুইটস্টোন ব্রিজের বর্তনীতে সুইচ (K) বন্ধ করলে গ্যালভানোমিটার (G) দিয়ে কোনো তড়িৎ প্রবাহিত হয় না। এর মানে হলো:", opts: ["গ্যালভানোমিটারের রোধ অসীম", "ব্র্রিজটি প্রতিমিত (Balanced) অবস্থায় আছে", "বর্তনীতে কোনো ব্যাটারি নেই", "G-এর রোধ শূন্য"], ans: 1, exp: "ব্যাখ্যা: গ্যালভানোমিটারে কোনো তড়িৎপ্রবাহ না যাওয়ার অর্থ হলো সংযোগ বিন্দু দুটির বিভব সমান, অর্থাৎ ব্রিজটি নিস্পন্দ বা প্রতিমিত অবস্থায় আছে।" },
+{ q: "১০. [JEE] পোটেনসিওমিটারে 1.25 V কোশ 30 cm এ নিস্পন্দ বিন্দু দেয়। অন্য কোশ 40 cm এ প্রতিমিত হয়। দ্বিতীয় কোশটির তড়িৎচালক বল কত?", opts: ["1.67 V", "1.50 V", "1.75 V", "1.33 V"], ans: 0, exp: "ব্যাখ্যা: E<sub>2</sub> = 1.25 &times; (40/30) = 1.25 &times; 1.333 &approx; 1.67 V।" },
+{ q: "১১. [NEET] 10 m দীর্ঘ পোটেনসিওমিটার তারকে 2 V ব্যাটারির (r=0) সাথে যুক্ত করা হলো। তারের বিভবের নতিমাত্রা কত?", opts: ["0.5 V/m", "0.2 V/m", "0.1 V/m", "0.05 V/m"], ans: 1, exp: "ব্যাখ্যা: পুরো 2V বিভব পতন 10 m তার জুড়েই ঘটবে। বিভব নতিমাত্রা = 2V / 10m = 0.2 V/m।" },
+{ q: "১২. [CBSE] মিটার ব্রিজের বাম ফাঁকে 12 &Omega; ও X সমান্তরালে এবং ডান ফাঁকে 9 &Omega; ও 7 &Omega; শ্রেণিতে যুক্ত। নিস্পন্দ বিন্দু 36 cm হলে X = ?", opts: ["18 &Omega;", "24 &Omega;", "36 &Omega;", "48 &Omega;"], ans: 2, exp: "ব্যাখ্যা: ডান ফাঁকে 16 &Omega;। R<sub>left</sub>/16 = 36/64 = 9/16 &rArr; R<sub>left</sub> = 9 &Omega;। 12X/(12+X) = 9 &rArr; 12X = 108 + 9X &rArr; X = 36 &Omega;।" },
+{ q: "১৩. [AIEEE] কির্সফের সূত্র প্রয়োগের সময় কোনো বদ্ধ লুপে তড়িৎপ্রবাহের দিক পরিমাপের দিকে হলে I&middot;r গুণফলকে কীরূপ ধরা হয়?", opts: ["ঋণাত্মক", "শূন্য", "ধনাত্মক", "অসীম"], ans: 2, exp: "ব্যাখ্যা: চিহ্নের রীতি অনুযায়ী, লুপে ঘোরার দিক এবং প্রবাহের দিক একই হলে বিভবপতন (Ir) ধনাত্মক ধরা হয়।" },
+{ q: "১৪. [WBJEE] 100, 200, 300 ও 400 &Omega; রোধ দিয়ে ব্রিজ তৈরি হলো। কোন ক্ষেত্রে গ্যালভানোমিটারের বিক্ষেপ শূন্য হবে?", opts: ["P=100, Q=200, R=300, S=400", "P=100, Q=300, R=200, S=400", "P=100, Q=200, R=200, S=400", "কোনোভাবেই শূন্য হবে না"], ans: 2, exp: "ব্যাখ্যা: নিস্পন্দ অবস্থার জন্য P/Q = R/S হতে হবে। অপশন (c) তে 100/200 = 1/2 এবং 200/400 = 1/2, যা শর্ত পূরণ করে।" },
+{ q: "১৫. [JEE Main] নিচের কোন্ বিবৃতিটি কির্সফের সূত্রের ক্ষেত্রে সত্য নয়?", opts: ["প্রথম সূত্রটি আধানের সংরক্ষণ নীতি মেনে চলে", "দ্বিতীয় সূত্রটি শক্তির সংরক্ষণ নীতি মেনে চলে", "সূত্রগুলি শুধুমাত্র DC প্রবাহের জন্যই প্রযোজ্য, AC প্রবাহে নয়", "সূত্রগুলি রৈখিক ও অরৈখিক উভয় বর্তনীর জন্যই প্রযোজ্য"], ans: 2, exp: "ব্যাখ্যা: বিবৃতি (c) মিথ্যা। কারণ কির্সফের সূত্রাবলি AC এবং DC উভয় প্রকার তড়িৎ প্রবাহের ক্ষেত্রেই প্রযোজ্য।" }
+]
+}
+};
+
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+function getGlobalUsers() {
+const data = localStorage.getItem("testBazarGlobalUsers");
+return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+const data = localStorage.getItem("testBazarAttemptsPhys3_U2C2_v1");
+return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+attempts[key] = (attempts[key] || 0) + 1;
+localStorage.setItem("testBazarAttemptsPhys3_U2C2_v1", JSON.stringify(attempts));
+return attempts[key];
+}
+
+window.onload = () => { renderHub(); };
+
+function renderHub() {
+const grid = document.getElementById("setGrid");
+grid.innerHTML = "";
+for(let id in ALL_SETS) {
+const set = ALL_SETS[id];
+const div = document.createElement("div");
+div.className = "set-card";
+let attemptCount = 0;
+let isLocked = false;
+
+if (currentUser) {
+attemptCount = getAttemptCount(currentUser, id);
+isLocked = attemptCount >= MAX_ATTEMPTS;
+if (isLocked) div.classList.add("locked");
+}
+
+div.innerHTML = `
+<div class="icon">${set.icon}</div>
+<div class="set-num">${set.name}</div>
+<div class="set-title">${set.topic}</div>
+<div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+`;
+
+div.onclick = () => {
+if (isLocked) { alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return; }
+handleSetClick(id);
+};
+grid.appendChild(div);
+}
+}
+
+function handleSetClick(setId) {
+activeSetId = setId;
+if (!currentUser) {
+document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+document.getElementById("loginOverlay").classList.add("active");
+document.getElementById("loginUsername").value = "";
+document.getElementById("loginPassword").value = "";
+document.getElementById("loginError").style.display = "none";
+} else { startQuiz(setId); }
+}
+
+function doLogin() {
+const u = document.getElementById("loginUsername").value.trim();
+const p = document.getElementById("loginPassword").value.trim();
+const err = document.getElementById("loginError");
+const GLOBAL_USERS = getGlobalUsers();
+
+if(!u || !p) { err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!"; err.style.display = "block"; return; }
+if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+let attempts = getAttemptCount(u, activeSetId);
+if (attempts >= MAX_ATTEMPTS) {
+err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+err.style.display = "block";
+return;
+}
+currentUser = u;
+document.getElementById("loginOverlay").classList.remove("active");
+document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+document.getElementById("userDisplay").classList.remove("hidden");
+renderHub();
+startQuiz(activeSetId);
+} else {
+err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+err.style.display = "block";
+}
+}
+
+function closeLogin() { document.getElementById("loginOverlay").classList.remove("active"); }
+
+function goToHub() {
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("hubPage").style.display = "block";
+document.getElementById("timerBox").classList.add("hidden");
+clearInterval(timerInterval);
+renderHub();
+}
+
+function startQuiz(setId) {
+incrementAttempt(currentUser, setId);
+questions = ALL_SETS[setId].questions;
+currentQIndex = 0; score = 0; wrongAnswers = 0; userAnswers = {}; isReviewMode = false; timeLeft = TIME_LIMIT;
+document.getElementById("hubPage").style.display = "none";
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+document.getElementById("timerBox").classList.remove("hidden");
+document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+startTimer();
+loadQuestion();
+}
+
+function loadQuestion() {
+const qData = questions[currentQIndex];
+document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+document.getElementById("qText").innerHTML = qData.q;
+const progress = ((currentQIndex) / questions.length) * 100;
+document.getElementById("progressFill").style.width = `${progress}%`;
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+const optsBox = document.getElementById("qOpts");
+optsBox.innerHTML = "";
+document.getElementById("explanation").classList.remove("show");
+document.getElementById("nextBtn").disabled = true;
+document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+qData.opts.forEach((optText, idx) => {
+const btn = document.createElement("button");
+btn.className = "opt";
+btn.innerHTML = `<div class="opt-circle">${LABELS[idx]}</div> <div class="opt-text">${optText}</div>`;
+if (isReviewMode) {
+btn.classList.add("disabled");
+if (idx === qData.ans) btn.classList.add("correct");
+else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+} else {
+btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+}
+optsBox.appendChild(btn);
+});
+
+if (isReviewMode) {
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+if (currentQIndex === questions.length - 1) { document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন"; }
+}
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+allBtns.forEach(b => b.classList.add("disabled"));
+userAnswers[currentQIndex] = selectedIdx;
+if (selectedIdx === correctIdx) { btn.classList.add("correct"); score++; } 
+else { btn.classList.add("wrong"); allBtns[correctIdx].classList.add("correct"); wrongAnswers++; }
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+}
+
+function nextQ() {
+if (isReviewMode && currentQIndex === questions.length - 1) {
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show"); return;
+}
+if (!isReviewMode && currentQIndex === questions.length - 1) { finishQuiz(); return; }
+currentQIndex++; loadQuestion();
+}
+
+function startTimer() {
+clearInterval(timerInterval);
+const tBox = document.getElementById("timerBox");
+tBox.classList.remove("danger");
+timerInterval = setInterval(() => {
+if (timeLeft <= 0) { clearInterval(timerInterval); finishQuiz(); return; }
+timeLeft--;
+const m = Math.floor(timeLeft / 60); const s = timeLeft % 60;
+document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+if (timeLeft < 60) tBox.classList.add("danger");
+}, 1000);
+}
+
+function finishQuiz() {
+clearInterval(timerInterval);
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("timerBox").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show");
+const total = questions.length; const skipped = total - (score + wrongAnswers);
+const percent = Math.round((score / total) * 100);
+document.getElementById("finalScore").innerText = `${percent}%`;
+document.getElementById("rbCorrect").innerText = score;
+document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+const gradeEl = document.getElementById("resultGrade");
+if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return;
+}
+startQuiz(activeSetId);
+}
+
+function showReview() {
+isReviewMode = true; currentQIndex = 0;
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+loadQuestion();
+}
+</script>
+</body>
+</html>
