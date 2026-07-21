@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Physics 3rd Sem | U2 C1</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+.user-info { font-size: 0.85rem; font-weight: 700; color: white; background: rgba(0,0,0,0.15); padding: 4px 10px; border-radius: 20px;}
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif;}
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.set-card:hover:not(.locked) { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card.locked { opacity: 0.6; cursor: not-allowed; border-color: var(--alert-danger); }
+.set-card .icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-main); margin: 0.3rem 0 0.8rem; line-height: 1.3; height: 35px; display: flex; align-items: center; justify-content: center;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.75rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.6rem; border-radius: 6px; }
+.attempt-badge { position: absolute; top: 10px; right: 10px; background: #ffeeba; color: #856404; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+.attempt-badge.locked-badge { background: var(--alert-danger); color: white; }
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main);}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; }
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.attempt-info-box { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; margin-bottom: 1.5rem; font-family: 'Tiro Bangla', serif; border: 1px solid #ffeeba;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+.login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); }
+.login-overlay.active { display: flex; }
+.login-modal { background: white; padding: 2.5rem 2rem; border-radius: 16px; width: 90%; max-width: 380px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); text-align: center; }
+.login-modal h2 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.4rem; margin-bottom: 0.5rem; }
+.login-modal p { font-family: 'Tiro Bangla', serif; color: var(--text-meta); font-size: 0.9rem; margin-bottom: 1.5rem; }
+.login-set-name { background: var(--bg-main); color: var(--primary); padding: 10px; border-radius: 8px; font-weight: 700; font-family: 'Tiro Bangla', serif; margin-bottom: 1.5rem; font-size: 0.95rem; }
+.input-group { text-align: left; margin-bottom: 1.2rem; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; font-family: 'Tiro Bangla', serif;}
+.input-group input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border-color); border-radius: 8px; font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none; transition: 0.2s; }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+.login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+.login-btn:hover { background: var(--primary-hover); }
+.cancel-btn { width: 100%; background: transparent; color: var(--text-meta); border: none; padding: 10px; margin-top: 5px; font-family: 'Tiro Bangla', serif; font-weight: 700; cursor: pointer;}
+.error-msg { color: var(--alert-danger); font-size: 0.85rem; font-weight: 700; margin-top: 10px; font-family: 'Tiro Bangla', serif; display: none; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header class="top-bar">
+<div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+<div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+<div class="user-info en-font hidden" id="userDisplay"></div>
+</header>
+<div class="main">
+
+<!-- LOGIN MODAL -->
+<div class="login-overlay" id="loginOverlay">
+<div class="login-modal">
+<h2>লগইন করুন</h2>
+<p>Test শুরু করতে আপনার ইউজারনেম ও পাসওয়ার্ড দিন</p>
+<div class="login-set-name" id="loginSetName">📚 Set 1</div>
+<div class="input-group">
+<label>ইউজারনেম</label>
+<input type="text" id="loginUsername" placeholder="Username">
+</div>
+<div class="input-group">
+<label>পাসওয়ার্ড</label>
+<input type="password" id="loginPassword" placeholder="Password" onkeydown="if(event.key==='Enter') doLogin()">
+</div>
+<button class="login-btn" onclick="doLogin()">✅ লগইন করে Test শুরু করো</button>
+<button class="cancel-btn" onclick="closeLogin()">বাতিল</button>
+<div class="error-msg" id="loginError">❌ ভুল ইউজারনেম বা পাসওয়ার্ড! (Index থেকে চেক করুন)</div>
+</div>
+</div>
+
+<!-- HUB PAGE -->
+<div id="hubPage">
+<div class="hub-header">
+<h1>পদার্থবিজ্ঞান 3rd Sem Unit 2:<br>অধ্যায় ১: তড়িৎকোশ, ওহমের সূত্র ও রোধ</h1>
+<p>মোট ১৩৫টি প্রশ্ন সম্বলিত ৯টি সেট। Test শুরু করতে সেটে ক্লিক করুন।</p>
+</div>
+<div class="set-grid" id="setGrid"></div>
+<div style="text-align: center; margin-top: 30px;">
+<button onclick="window.history.back()" style="background: white; border: 1.5px solid var(--border-color); padding: 10px 20px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: bold; cursor: pointer; color: var(--text-meta);">← Main Dashboard-এ ফিরুন</button>
+</div>
+</div>
+
+<!-- QUIZ AREA -->
+<div id="testArea" class="hidden">
+<div class="quiz-info">
+<div class="info-item">🎓 <strong>Physics</strong> — 3rd Sem | <span id="testSetLabel">Set 1</span></div>
+<div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+</div>
+<div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="q-card">
+<div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+<div class="q-text" id="qText">Question Text</div>
+<div class="opts" id="qOpts"></div>
+<div class="explanation" id="explanation"><p id="explanationText"></p></div>
+<div class="nav-row">
+<div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+<button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+</div>
+</div>
+</div>
+
+<!-- RESULT AREA -->
+<div class="result-wrap" id="resultWrap">
+<div class="result-icon" id="resultIcon">🏆</div>
+<div class="result-score en-font" id="finalScore">100%</div>
+<div class="result-total">স্কোর</div>
+<div class="result-grade" id="resultGrade">অসাধারণ!</div>
+<div class="result-bars">
+<div class="result-bar">
+<div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+<div class="rb-label">সঠিক</div>
+</div>
+<div class="result-bar">
+<div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+<div class="rb-label">ভুল/স্কিপ</div>
+</div>
+</div>
+<div class="attempt-info-box" id="attemptInfo"></div>
+<div class="action-btns">
+<button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+<button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+<button class="btn-home" onclick="goToHub()">← Hub এ ফিরে যাও</button>
+</div>
+</div>
+
+</div>
+
+<script>
+const MAX_ATTEMPTS = 10;
+const TIME_LIMIT = 10 * 60;
+const LABELS = ['(a)', '(b)', '(c)', '(d)'];
+
+const ALL_SETS = {
+1: {
+name: 'Set 1', icon: '🔋', topic: 'তড়িৎকোশ ও তড়িৎচালক বল',
+questions: [
+{ q: "১. সরল ভোল্টীয় কোশের প্রধান দুটি ত্রুটি কী কী?", opts: ["ছদন ও মেরুকরণ", "স্থানীয় ক্রিয়া ও ছদন", "স্থানীয় ক্রিয়া ও শর্ট সার্কিট", "মেরুকরণ ও তড়িৎক্ষরণ"], ans: 1, exp: "ব্যাখ্যা: সরল কোশের দুটি প্রধান ত্রুটি হলো স্থানীয় ক্রিয়া (Local action), যা দস্তার পাতে অপদ্রব্যের জন্য ঘটে এবং ছদন (Polarization), যা তামার পাতে হাইড্রোজেন জমার কারণে ঘটে।" },
+{ q: "২. লেকল্যান্স কোশে ছদন নিবারক (Depolarizer) হিসেবে কোনটি ব্যবহৃত হয়?", opts: ["লঘু H<sub>2</sub>SO<sub>4</sub>", "CuSO<sub>4</sub> দ্রবণ", "কঠিন MnO<sub>2</sub>", "Hg<sub>2</sub>SO<sub>4</sub>"], ans: 2, exp: "ব্যাখ্যা: লেকল্যান্স কোশে ছদন নিবারক হিসেবে কঠিন MnO<sub>2</sub> ব্যবহৃত হয় যা উৎপন্ন হাইড্রোজেনকে জারিত করে জলে পরিণত করে।" },
+{ q: "৩. লেড-অ্যাসিড সঞ্চয়ক কোশের পূর্ণ আহিত অবস্থায় তড়িৎচালক বল কত হয়?", opts: ["1.08 V", "1.5 V", "2.2 V", "1.018 V"], ans: 2, exp: "ব্যাখ্যা: পূর্ণ আহিত অবস্থায় একটি লেড-অ্যাসিড সঞ্চয়ক কোশের তড়িৎচালক বল প্রায় 2.2 ভোল্ট হয় এবং সালফিউরিক অ্যাসিডের আপেক্ষিক গুরুত্ব দাঁড়ায় 1.28।" },
+{ q: "৪. প্রমাণ কোশ (Standard Cell) হিসেবে সাধারণত কোনটি সর্বাধিক ব্যবহৃত হয়?", opts: ["ড্যানিয়েল কোশ", "লেকল্যান্স কোশ", "ওয়েস্টন-ক্যাডমিয়াম কোশ", "এডিসন কোশ"], ans: 2, exp: "ব্যাখ্যা: তড়িৎচালক বলের স্থির মান পাওয়ার জন্য প্রমাণ কোশ হিসেবে ওয়েস্টন-ক্যাডমিয়াম কোশ সর্বাধিক স্বীকৃত, যার 20&deg;C উষ্ণতায় তড়িৎচালক বল 1.01830 V।" },
+{ q: "৫. তড়িৎচালক বলের (EMF) SI একক কী?", opts: ["নিউটন", "অ্যাম্পিয়ার", "ভোল্ট (বা জুল/কুলম্ব)", "ওহম"], ans: 2, exp: "ব্যাখ্যা: একক পরিমাণ ধনাত্মক আধান স্থানান্তর করতে সম্পাদিত কার্যের পরিমাণই হলো তড়িৎচালক বল, তাই এর একক জুল/কুলম্ব বা ভোল্ট।" },
+{ q: "৬. কোশের তড়িৎচালক বল কিসের ওপর নির্ভর করে না?", opts: ["সক্রিয় তরলের প্রকৃতি", "তড়িদ্দ্বারের আকার বা ক্ষেত্রফল", "তড়িদ্দ্বারের উপাদান", "রাসায়নিক বিক্রিয়া"], ans: 1, exp: "ব্যাখ্যা: কোনো তড়িৎকোশের তড়িৎচালক বল তড়িদ্দ্বারের আকারের বা তরলের পরিমাণের ওপর নির্ভর করে না, এটি কেবল উপাদানের প্রকৃতির ওপর নির্ভর করে।" },
+{ q: "৭. একটি গৌণ কোশের সামর্থ্য (Capacity) বা ক্ষমতা মাপা হয় কোন এককে?", opts: ["অ্যাম্পিয়ার", "ভোল্ট-অ্যাম্পিয়ার", "অ্যাম্পিয়ার-ঘণ্টা (A-h)", "জুল"], ans: 2, exp: "ব্যাখ্যা: গৌণকোশ পূর্ণ আহিত থেকে সম্পূর্ণ ক্ষরিত হওয়া পর্যন্ত যে তড়িদাধান পাঠায় তা অ্যাম্পিয়ার-ঘণ্টা (A-h) এককে মাপা হয়। 1 A-h = 3600 কুলম্ব।" },
+{ q: "৮. লেড-অ্যাসিড সঞ্চয়ক কোশ চার্জিং বা আহিতকরণের সময় ধনাত্মক পাতে কী উৎপন্ন হয়?", opts: ["Pb", "PbO", "PbSO<sub>4</sub>", "PbO<sub>2</sub>"], ans: 3, exp: "ব্যাখ্যা: চার্জিং বা আহিতকরণের সময় ধনাত্মক পাতে জারণ ঘটে এবং লেড ডাইঅক্সাইড (PbO<sub>2</sub>) উৎপন্ন হয়, এবং ঋণাত্মক পাতে ছিদ্রবহুল লেড (Pb) তৈরি হয়।" },
+{ q: "৯. প্রাথমিক কোশ এবং গৌণ কোশের মধ্যে প্রধান পার্থক্য কী?", opts: ["প্রাথমিক কোশের বিক্রিয়া প্রত্যাবর্তক", "গৌণ কোশের অভ্যন্তরীণ রোধ বেশি", "গৌণ কোশকে পুনরায় চার্জ করা যায় কিন্তু প্রাথমিক কোশকে যায় না", "গৌণ কোশের বিক্রিয়া অপ্রত্যাবর্তক"], ans: 2, exp: "ব্যাখ্যা: গৌণ কোশের রাসায়নিক বিক্রিয়া প্রত্যাবর্তক, তাই একে পুনরায় চার্জ করা যায়। প্রাথমিক কোশে বিক্রিয়া অপ্রত্যাবর্তক হওয়ায় তা একবারই ব্যবহারযোগ্য।" },
+{ q: "১০. তড়িৎকোশে প্রকৃতপক্ষে কোন শক্তির রূপান্তর ঘটে?", opts: ["যান্ত্রিক শক্তি থেকে তড়িৎশক্তি", "রাসায়নিক শক্তি থেকে তড়িৎশক্তি", "তাপশক্তি থেকে তড়িৎশক্তি", "আলোকশক্তি থেকে তড়িৎশক্তি"], ans: 1, exp: "ব্যাখ্যা: তড়িৎকোশ রাসায়নিক শক্তিকে তড়িৎশক্তিতে রূপান্তরিত করে বর্তনীতে স্থায়ী তড়িৎপ্রবাহ সৃষ্টি করে।" },
+{ q: "১১. মুক্ত বর্তনীতে (Open Circuit) কোশের প্রান্তীয় বিভবপ্রভেদ (V) ও তড়িৎচালক বলের (E) সম্পর্ক কী?", opts: ["V < E", "V > E", "V = E", "V = 0"], ans: 2, exp: "ব্যাখ্যা: মুক্ত বর্তনীতে প্রবাহমাত্রা শূন্য (I=0) হওয়ায়, অভ্যন্তরীণ বিভবপতন (Ir) শূন্য হয়। ফলে V = E - Ir সূত্রানুযায়ী V = E হয়।" },
+{ q: "১২. তড়িৎচালক বল (EMF) সম্পর্কে কোনটি সঠিক?", opts: ["এটি একটি যান্ত্রিক বল (Force)", "এটি বিভবপ্রভেদের কারণ", "এটি বর্তনীর রোধের ওপর নির্ভর করে", "এর মান বিভবপ্রভেদের চেয়ে সর্বদা কম হয়"], ans: 1, exp: "ব্যাখ্যা: তড়িৎচালক বল আসলে কোনো বল নয়, এটি শক্তির রূপ। এটি বিভবপ্রভেদের উৎপত্তির কারণ, এবং এর মান বর্তনীর রোধের ওপর নির্ভর করে না।" },
+{ q: "১৩. লেড-অ্যাসিড কোশ তড়িৎক্ষরণ (Discharging) করলে অ্যাসিডের আপেক্ষিক গুরুত্বের কী হয়?", opts: ["বৃদ্ধি পায়", "হ্রাস পায়", "অপরিবর্তিত থাকে", "শূন্য হয়ে যায়"], ans: 1, exp: "ব্যাখ্যা: ডিসচার্জিং এর সময় কোশের উভয় পাতেই PbSO<sub>4</sub> এবং জল উৎপন্ন হয়, যার ফলে H<sub>2</sub>SO<sub>4</sub> এর গাঢ়ত্ব ও আপেক্ষিক গুরুত্ব ক্রমশ কমতে থাকে।" },
+{ q: "১৪. কোন্ ধরনের কোশের অভ্যন্তরীণ রোধ সবচেয়ে কম হয়?", opts: ["লেকল্যান্স কোশ", "ড্যানিয়েল কোশ", "নির্জল কোশ", "সঞ্চয়ক কোশ (গৌণকোশ)"], ans: 3, exp: "ব্যাখ্যা: সঞ্চয়ক কোশের অভ্যন্তরীণ রোধ (প্রায় 0.01 &Omega;) প্রাথমিক কোশের তুলনায় অনেক কম হওয়ায় এটি অধিকমাত্রার তড়িৎপ্রবাহ দিতে সক্ষম।" },
+{ q: "১৫. একটি কোশকে চার্জ করার সময় এর প্রান্তীয় বিভবপ্রভেদ (V) এবং তড়িৎচালক বলের (E) সম্পর্ক কী হয়?", opts: ["V = E", "V = E - Ir", "V > E", "V < E"], ans: 2, exp: "ব্যাখ্যা: কোশকে আহিত বা চার্জ করার সময় তড়িৎপ্রবাহ কোশের ধনাত্মক মেরু দিয়ে প্রবেশ করে, তখন V = E + Ir হয়, ফলে প্রান্তীয় বিভবপ্রভেদ তড়িৎচালক বলের চেয়ে বেশি হয়।" }
+]
+},
+2: {
+name: 'Set 2', icon: '⚡', topic: 'তড়িৎপ্রবাহ, বিচলন বেগ ও সচলতা',
+questions: [
+{ q: "১. তড়িৎপ্রবাহমাত্রা (Electric current) কোন্ ধরনের রাশি?", opts: ["স্কেলার", "ভেক্টর", "টেন্সর", "কোনোটিই নয়"], ans: 0, exp: "ব্যাখ্যা: তড়িৎপ্রবাহের নির্দিষ্ট দিক থাকলেও এটি ভেক্টর যোগের সূত্র মেনে চলে না, সাধারণ বীজগাণিতিক সূত্র মেনে চলে, তাই এটি স্কেলার রাশি।" },
+{ q: "২. 1 অ্যাম্পিয়ার সমান কত স্থির-তড়িৎ একক (esu) তড়িৎপ্রবাহ?", opts: ["10<sup>8</sup>", "3 &times; 10<sup>9</sup>", "3 &times; 10<sup>10</sup>", "10"], ans: 1, exp: "ব্যাখ্যা: 1 কুলম্ব = 3 &times; 10<sup>9</sup> esu আধান। তাই 1 অ্যাম্পিয়ার = 1 কুলম্ব/সেকেন্ড = 3 &times; 10<sup>9</sup> esu প্রবাহমাত্রা।" },
+{ q: "৩. তড়িৎপ্রবাহ ঘনত্ব (Current density, J) এর মাত্রা কী?", opts: ["[L<sup>-2</sup>I]", "[L<sup>2</sup>I]", "[LI<sup>-2</sup>]", "[L<sup>-3</sup>I]"], ans: 0, exp: "ব্যাখ্যা: তড়িৎপ্রবাহ ঘনত্ব J = I / A। I এর মাত্রা [I] এবং ক্ষেত্রফল A এর মাত্রা [L<sup>2</sup>]। তাই J এর মাত্রা [L<sup>-2</sup>I]। " },
+{ q: "৪. পরিবাহীতে মুক্ত ইলেকট্রনের বিচলন বেগের (Drift velocity) মান সাধারণত কত হয়?", opts: ["আলোর বেগের সমান", "প্রায় 10<sup>5</sup> m/s", "অতি মন্থর, প্রায় 10<sup>-4</sup> m/s", "শূন্য"], ans: 2, exp: "ব্যাখ্যা: ইলেকট্রনের তাপীয় বেগ খুব বেশি (10<sup>5</sup> m/s) হলেও, তড়িৎক্ষেত্রের প্রভাবে কার্যকর বিচলন বেগ বা অনুপ্রবাহ বেগ অতি সামান্য হয়, যার মান প্রায় 10<sup>-4</sup> m/s।" },
+{ q: "৫. তড়িৎপ্রবাহমাত্রা (I) এবং বিচলন বেগের (v<sub>d</sub>) সঠিক সম্পর্ক কোনটি?", opts: ["I = n e v<sub>d</sub>", "I = v<sub>d</sub> / (neA)", "I = n e A v<sub>d</sub>", "I = (n e A) / v<sub>d</sub>"], ans: 2, exp: "ব্যাখ্যা: যেখানে n = ইলেকট্রনের ঘনত্ব, e = আধান, A = প্রস্থচ্ছেদের ক্ষেত্রফল এবং v<sub>d</sub> = বিচলন বেগ। এই সূত্রটি প্রবাহ ও বিচলন বেগের মধ্যে সম্পর্ক স্থাপন করে।" },
+{ q: "৬. তড়িৎপ্রবাহের বেগ বলতে মূলত কী বোঝায়?", opts: ["ইলেকট্রনের বিচলন বেগ", "পরিবাহীর মধ্যে তড়িৎক্ষেত্রের বেগ", "পরমাণুর কম্পন বেগ", "প্রোটনের বেগ"], ans: 1, exp: "ব্যাখ্যা: তড়িৎপ্রবাহের বেগ হলো পরিবাহীর মধ্যে তড়িৎঘাত বা তড়িৎক্ষেত্রের প্রবাহের বেগ, যা আলোর বেগের (3&times;10<sup>8</sup> m/s) প্রায় সমান। ইলেকট্রন স্রোতের মন্থর বেগকে তড়িৎপ্রবাহের বেগ বলা যায় না।" },
+{ q: "৭. মুক্ত ইলেকট্রনের সচলতার (Mobility, &mu;) SI একক কী?", opts: ["m V<sup>-1</sup> s<sup>-1</sup>", "m<sup>2</sup> V<sup>-1</sup> s<sup>-1</sup>", "A m<sup>-2</sup>", "&Omega; &middot; m"], ans: 1, exp: "ব্যাখ্যা: সচলতা &mu; = v<sub>d</sub> / E। v<sub>d</sub>-এর একক m/s এবং E-এর একক V/m। এদের ভাগ করলে m<sup>2</sup> V<sup>-1</sup> s<sup>-1</sup> পাওয়া যায়।" },
+{ q: "৮. অসম প্রস্থচ্ছেদের পরিবাহীর মধ্য দিয়ে স্থির প্রবাহ চললে, পরিবাহীর সরু অংশে বিচলন বেগের কী পরিবর্তন হবে?", opts: ["একই থাকবে", "কমে যাবে", "শূন্য হবে", "বেড়ে যাবে"], ans: 3, exp: "ব্যাখ্যা: v<sub>d</sub> = I / (neA)। প্রবাহমাত্রা (I) ধ্রুবক হলে বিচলন বেগ ক্ষেত্রফলের (A) ব্যস্তানুপাতিক (v<sub>d</sub> &propto; 1/A) হয়। তাই অংশটি সরু হলে (A কমলে) বিচলন বেগ বৃদ্ধি পায়।" },
+{ q: "৯. ওহমের সূত্রের ভেক্টর রূপটি কোনটি?", opts: ["<strong>E</strong> = &sigma; <strong>J</strong>", "<strong>J</strong> = &sigma; <strong>E</strong>", "<strong>J</strong> = &rho; <strong>E</strong>", "<strong>V</strong> = <strong>I</strong> R"], ans: 1, exp: "ব্যাখ্যা: তড়িৎপ্রবাহ ঘনত্ব (<strong>J</strong>) এবং তড়িৎক্ষেত্র প্রাবল্যের (<strong>E</strong>) সম্পর্ক হলো <strong>J</strong> = &sigma; <strong>E</strong>, যেখানে &sigma; হলো তড়িৎ পরিবাহিতাঙ্ক।" },
+{ q: "১০. সচলতা (&mu;) এবং শিথিল সময়ের বা শ্লথনকালের (&tau;) মধ্যে সম্পর্ক কী?", opts: ["&mu; = e&tau; / m<sup>*</sup>", "&mu; = m<sup>*</sup> / e&tau;", "&mu; = e&tau;m<sup>*</sup>", "&mu; = e / (&tau;m<sup>*</sup>)"], ans: 0, exp: "ব্যাখ্যা: বিচলন বেগ v<sub>d</sub> = (eE / m<sup>*</sup>)&tau; এবং &mu; = v<sub>d</sub> / E, সুতরাং &mu; = e&tau; / m<sup>*</sup>।" },
+{ q: "১১. কোনো পরিবাহীর দুই প্রান্তের বিভবপ্রভেদ দ্বিগুণ করলে বিচলন বেগের কী হবে?", opts: ["একই থাকবে", "চারগুণ হবে", "দ্বিগুণ হবে", "অর্ধেক হবে"], ans: 2, exp: "ব্যাখ্যা: বিচলন বেগ v<sub>d</sub> = &mu; E = &mu; (V/l)। অর্থাৎ বিচলন বেগ বিভবপ্রভেদের (V) সমানুপাতিক। তাই বিভব দ্বিগুণ হলে বিচলন বেগও দ্বিগুণ হবে।" },
+{ q: "১২. সাধারণ উষ্ণতায় একটি আদর্শ ধাতব পরিবাহীতে মুক্ত ইলেকট্রনের ঘনত্ব প্রায় কত হয়?", opts: ["10<sup>15</sup> m<sup>-3</sup>", "10<sup>20</sup> m<sup>-3</sup>", "10<sup>28</sup> m<sup>-3</sup>", "10<sup>-8</sup> m<sup>-3</sup>"], ans: 2, exp: "ব্যাখ্যা: ধাতুতে মুক্ত ইলেকট্রনের ঘনত্ব প্রচুর বেশি থাকে, যা প্রতি ঘনমিটারে প্রায় 10<sup>28</sup> সংখ্যক হয়।" },
+{ q: "১৩. তড়িৎপ্রবাহ ঘনত্ব (<strong>J</strong>) কীরূপ রাশি?", opts: ["স্কেলার রাশি", "ভেক্টর রাশি", "মাত্রাহীন রাশি", "ধ্রুবক"], ans: 1, exp: "ব্যাখ্যা: তড়িৎপ্রবাহমাত্রা স্কেলার হলেও, তড়িৎপ্রবাহ ঘনত্ব (<strong>J</strong>) একটি আণুবীক্ষণিক ভেক্টর রাশি, যার দিক তড়িৎপ্রবাহের অভিমুখে ক্রিয়াশীল।" },
+{ q: "১৪. তাপমাত্রা বৃদ্ধি করলে ধাতব পরিবাহীর শ্লথনকাল (Relaxation time, &tau;)-এর কী পরিবর্তন হয়?", opts: ["বৃদ্ধি পায়", "হ্রাস পায়", "অপরিবর্তিত থাকে", "অসীম হয়"], ans: 1, exp: "ব্যাখ্যা: তাপমাত্রা বাড়লে পরমাণু ও ইলেকট্রনের তাপীয় গতিবেগ বৃদ্ধি পায়, ফলে ইলেকট্রনের সংঘর্ষের হার বাড়ে এবং পর পর দুটি সংঘর্ষের মধ্যবর্তী সময় বা শ্লথনকাল হ্রাস পায়।" },
+{ q: "১৫. একটি তারের দৈর্ঘ্য টেনে দ্বিগুণ করলে এবং একই বিভবপ্রভেদ দিলে বিচলন বেগের কী হবে?", opts: ["দ্বিগুণ হবে", "অর্ধেক হবে", "চারগুণ হবে", "অপরিবর্তিত থাকবে"], ans: 1, exp: "ব্যাখ্যা: v<sub>d</sub> = (eV / m<sup>*</sup>l)&tau;। যেহেতু বিভব (V) স্থির, তাই v<sub>d</sub> &propto; 1/l। দৈর্ঘ্য (l) দ্বিগুণ হলে বিচলন বেগ অর্ধেক হয়ে যাবে।" }
+]
+},
+3: {
+name: 'Set 3', icon: '📏', topic: 'ওহমের সূত্র, রোধ ও রোধাঙ্ক',
+questions: [
+{ q: "১. ওহমের সূত্র মেনে চলা পরিবাহীর (ওহমীয় পরিবাহী) V-I লেখচিত্রটি কীরূপ হয়?", opts: ["বৃত্তাকার", "অধিবৃত্তাকার", "মূলবিন্দুগামী সরলরেখা", "V-অক্ষের সমান্তরাল"], ans: 2, exp: "ব্যাখ্যা: ওহমের সূত্রানুযায়ী V &propto; I। তাই V-I লেখচিত্রটি একটি মূলবিন্দুগামী সরলরেখা হয়, যার নতি পরিবাহীর রোধ (R) নির্দেশ করে।" },
+{ q: "২. রোধের (Resistance) মাত্রীয় সংকেত কী?", opts: ["[ML<sup>2</sup>T<sup>-3</sup>I<sup>-2</sup>]", "[ML<sup>2</sup>T<sup>-2</sup>I<sup>-1</sup>]", "[MLT<sup>-3</sup>I<sup>-2</sup>]", "[M<sup>-1</sup>L<sup>-2</sup>T<sup>3</sup>I<sup>2</sup>]"], ans: 0, exp: "ব্যাখ্যা: রোধ R = V/I। বিভবের মাত্রা [ML<sup>2</sup>T<sup>-3</sup>I<sup>-1</sup>] এবং তড়িৎপ্রবাহের মাত্রা [I]। এদের ভাগ করলে [ML<sup>2</sup>T<sup>-3</sup>I<sup>-2</sup>] পাওয়া যায়।" },
+{ q: "৩. পরিবাহীর রোধাঙ্কের (Resistivity, &rho;) SI একক কী?", opts: ["ওহম (&Omega;)", "ওহম/মিটার (&Omega; &middot; m<sup>-1</sup>)", "ওহম-মিটার (&Omega; &middot; m)", "মো-মিটার"], ans: 2, exp: "ব্যাখ্যা: R = &rho; (l/A) &rArr; &rho; = RA/l। এর একক হলো (&Omega; &middot; m<sup>2</sup>)/m = &Omega; &middot; m।" },
+{ q: "৪. একটি তারকে টেনে তার দৈর্ঘ্য n গুণ বৃদ্ধি করলে (আয়তন অপরিবর্তিত থাকলে) নতুন রোধ কত হবে?", opts: ["n R", "n<sup>2</sup> R", "R/n", "R/n<sup>2</sup>"], ans: 1, exp: "ব্যাখ্যা: আয়তন স্থির থাকলে দৈর্ঘ্য n গুণ হলে প্রস্থচ্ছেদ A/n হয়ে যায়। ফলে নতুন রোধ R' = &rho; [nl / (A/n)] = n<sup>2</sup> (&rho; l/A) = n<sup>2</sup> R।" },
+{ q: "৫. পরিবাহিতাঙ্কের (Conductivity, &sigma;) একক কোনটি?", opts: ["&Omega; &middot; m", "&Omega;<sup>-1</sup> &middot; m", "mho &middot; m<sup>-1</sup> (বা S &middot; m<sup>-1</sup>)", "S &middot; m"], ans: 2, exp: "ব্যাখ্যা: পরিবাহিতাঙ্ক হলো রোধাঙ্কের অনন্যোক (&sigma; = 1/&rho;)। তাই এর একক 1 / (&Omega; &middot; m) = &Omega;<sup>-1</sup> &middot; m<sup>-1</sup> বা মো&middot;মিটার<sup>-1</sup> (mho &middot; m<sup>-1</sup> বা S &middot; m<sup>-1</sup>)।" },
+{ q: "৬. রোধাঙ্কের মান কিসের ওপর নির্ভর করে?", opts: ["পরিবাহীর দৈর্ঘ্য", "পরিবাহীর প্রস্থচ্ছেদের ক্ষেত্রফল", "উপাদান এবং উষ্ণতা", "পরিবাহীর ভর"], ans: 2, exp: "ব্যাখ্যা: রোধাঙ্ক পরিবাহীর আকার বা মাত্রার ওপর নির্ভর করে না, এটি কেবল উপাদানের প্রকৃতি এবং উষ্ণতার ওপর নির্ভর করে।" },
+{ q: "৭. কোন উপাদানের রোধাঙ্ক শূন্য তাপমাত্রায় (0 K) প্রায় শূন্য হয়ে যায়?", opts: ["অন্তরক", "অর্ধপরিবাহী", "অতিপরিবাহী (Superconductor)", "কাঠ"], ans: 2, exp: "ব্যাখ্যা: একটি নির্দিষ্ট সংকট তাপমাত্রার (Critical temperature) নীচে অতিপরিবাহী পদার্থের রোধ বা রোধাঙ্ক হঠাৎ প্রায় শূন্য হয়ে যায়।" },
+{ q: "৮. 1 ওহম (&Omega;) রোধ সমান কত esu রোধ?", opts: ["3 &times; 10<sup>9</sup> esu", "1 / (9 &times; 10<sup>11</sup>) esu", "10<sup>9</sup> esu", "9 &times; 10<sup>11</sup> esu"], ans: 1, exp: "ব্যাখ্যা: 1 &Omega; = 1 Volt / 1 Ampere = (1/300 statV) / (3 &times; 10<sup>9</sup> statA) = 1 / (9 &times; 10<sup>11</sup>) esu রোধ।" },
+{ q: "৯. অর্ধপরিবাহীর (Semiconductor) ক্ষেত্রে তাপমাত্রা বৃদ্ধি করলে তার রোধাঙ্কের কী পরিবর্তন হয়?", opts: ["বৃদ্ধি পায়", "শূন্য হয়ে যায়", "হ্রাস পায়", "একই থাকে"], ans: 2, exp: "ব্যাখ্যা: অর্ধপরিবাহীর রোধের উষ্ণতা গুণাঙ্ক ঋণাত্মক। তাই উষ্ণতা বৃদ্ধি পেলে এদের রোধাঙ্ক বা রোধ উভয়ই হ্রাস পায়।" },
+{ q: "১০. তড়িৎ পরিবাহিতাঙ্কের সাথে ইলেকট্রন ঘনত্ব (n) এবং শ্লথনকাল (&tau;) এর সম্পর্ক কী?", opts: ["&sigma; = ne<sup>2</sup>&tau; / m<sup>*</sup>", "&sigma; = m<sup>*</sup> / ne<sup>2</sup>&tau;", "&sigma; = ne&tau; / m<sup>*</sup>", "&sigma; = ne<sup>2</sup> / m<sup>*</sup>&tau;"], ans: 0, exp: "ব্যাখ্যা: প্রবাহ ঘনত্ব J = (ne<sup>2</sup>&tau; / m<sup>*</sup>) E এবং ওহমের ভেক্টর রূপ J = &sigma; E তুলনা করলে পাওয়া যায় &sigma; = ne<sup>2</sup>&tau; / m<sup>*</sup>।" },
+{ q: "১১. কোনো পরিবাহীর প্রস্থচ্ছেদের ক্ষেত্রফল দ্বিগুণ করলে তার রোধের কী পরিবর্তন হবে (দৈর্ঘ্য স্থির)?", opts: ["দ্বিগুণ হবে", "চারগুণ হবে", "অর্ধেক হবে", "অপরিবর্তিত থাকবে"], ans: 2, exp: "ব্যাখ্যা: পরিবাহীর রোধ তার প্রস্থচ্ছেদের ব্যস্তানুপাতিক (R &propto; 1/A)। ক্ষেত্রফল দ্বিগুণ হলে রোধ অর্ধেক হয়ে যায়।" },
+{ q: "১২. নিচের কোন্ পদার্থটি সবচেয়ে ভালো তড়িৎপরিবাহী?", opts: ["তামা", "অ্যালুমিনিয়াম", "রূপো", "লোহা"], ans: 2, exp: "ব্যাখ্যা: রূপোর রোধাঙ্ক (1.63 &times; 10<sup>-8</sup> &Omega; &middot; m) অন্যান্য ধাতুর তুলনায় সবচেয়ে কম, তাই এটি সবচেয়ে ভালো তড়িৎপরিবাহী।" },
+{ q: "১৩. 100V মেইন লাইনের সাথে একটি বাল্ব যুক্ত করলে এর রোধ এবং প্রবাহমাত্রায় কী পরিবর্তন দেখা যায়?", opts: ["তাপমাত্রা বৃদ্ধি পাওয়ায় রোধ বাড়ে, প্রবাহমাত্রা কমে", "রোধ কমে, প্রবাহমাত্রা বাড়ে", "রোধ ও প্রবাহ উভয়েই বাড়ে", "কোনোটিই নয়"], ans: 0, exp: "ব্যাখ্যা: বাল্ব জ্বললে তার ফিলামেন্টের তাপমাত্রা অনেক বেড়ে যায়। ধাতব পরিবাহী হওয়ায় তাপমাত্রা বৃদ্ধিতে রোধ বেড়ে যায় এবং ওহমের সূত্রানুযায়ী প্রবাহমাত্রা কমে যায়।" },
+{ q: "১৪. কোন পদার্থের রোধাঙ্কের মান 10<sup>10</sup> &Omega; &middot; m থেকে 10<sup>17</sup> &Omega; &middot; m এর মধ্যে থাকে?", opts: ["পরিবাহী", "অন্তরক (Insulator)", "অর্ধপরিবাহী", "অতিপরিবাহী"], ans: 1, exp: "ব্যাখ্যা: অন্তরক পদার্থের মুক্ত ইলেকট্রন থাকে না বললেই চলে, তাই এদের রোধাঙ্কের মান অত্যন্ত বেশি হয়।" },
+{ q: "১৫. একটি তারের রোধ R। তারটির দৈর্ঘ্য স্থির রেখে ব্যাসার্ধ অর্ধেক করলে রোধ কত হবে?", opts: ["2R", "R/2", "4R", "R/4"], ans: 2, exp: "ব্যাখ্যা: R = &rho; l / (&pi;r<sup>2</sup>) &rArr; R &propto; 1/r<sup>2</sup>। ব্যাসার্ধ অর্ধেক (r/2) হলে রোধ 1/(1/2)<sup>2</sup> = 4 গুণ বৃদ্ধি পাবে।" }
+]
+},
+4: {
+name: 'Set 4', icon: '🌡️', topic: 'রোধের ওপর বিভিন্ন বিষয়ের প্রভাব',
+questions: [
+{ q: "১. ম্যাঙ্গানিন বা কনস্ট্যানটান সংকর ধাতুগুলি প্রমাণ রোধক (Standard resistor) তৈরিতে ব্যবহৃত হয় কেন?", opts: ["এদের রোধাঙ্ক কম", "এদের রোধের উষ্ণতা গুণাঙ্ক খুব কম এবং রোধাঙ্ক উচ্চ", "এগুলো খুব সস্তা", "এদের রোধাঙ্ক ঋণাত্মক"], ans: 1, exp: "ব্যাখ্যা: ম্যাঙ্গানিন ও কনস্ট্যানটানের রোধের উষ্ণতা গুণাঙ্ক প্রায় শূন্য হওয়ায় তাপমাত্রার পরিবর্তনে এদের রোধ প্রায় বদলায় না এবং রোধাঙ্ক বেশি হওয়ায় অল্প দৈর্ঘ্যের তারে বেশি রোধ পাওয়া যায়।" },
+{ q: "২. রোধের উষ্ণতা গুণাঙ্কের (Temperature coefficient of resistance, &alpha;) একক কী?", opts: ["&Omega;/&deg;C", "V/&deg;C", "&deg;C<sup>-1</sup> বা প্রতি ডিগ্রি সেলসিয়াস", "মাত্রাহীন"], ans: 2, exp: "ব্যাখ্যা: &alpha; = (R<sub>t</sub> - R<sub>0</sub>) / (R<sub>0</sub> t)। রোধের একক কেটে যাওয়ায় এর একক শুধু তাপমাত্রার এককের অন্যোন্যক অর্থাৎ /&deg;C বা K<sup>-1</sup> হয়।" },
+{ q: "৩. থার্মিস্টর (Thermistor) কী কাজে ব্যবহৃত হয়?", opts: ["উচ্চ বিভব তৈরি করতে", "খুব সূক্ষ্মভাবে উষ্ণতার পরিবর্তন পরিমাপ এবং ভোল্টেজ নিয়ন্ত্রণে", "রোধ কমাতে", "চৌম্বকক্ষেত্র মাপতে"], ans: 1, exp: "ব্যাখ্যা: থার্মিস্টর হলো উচ্চ তাপমাত্রা-নির্ভর রোধক। এর উষ্ণতা গুণাঙ্ক খুব বেশি হওয়ায় সামান্য তাপমাত্রার পরিবর্তনে রোধের ব্যাপক পরিবর্তন ঘটে, যা সূক্ষ্ম পরিমাপে কাজে লাগে।" },
+{ q: "৪. কার্বন গুঁড়োর ওপর চাপ বৃদ্ধি করলে তার রোধের কী পরিবর্তন হয়?", opts: ["রোধ বেড়ে যায়", "রোধ কমে যায়", "একই থাকে", "শূন্য হয়"], ans: 1, exp: "ব্যাখ্যা: কার্বন গুঁড়োর ওপর চাপ বাড়ালে রোধ কমে যায়। কার্বনের এই ধর্মকে কাজে লাগিয়ে কার্বন মাইক্রোফোন তৈরি করা হয়।" },
+{ q: "৫. সেলেনিয়াম (Selenium) ধাতুর ওপর আলো পড়লে তার রোধের কী পরিবর্তন ঘটে?", opts: ["রোধ বাড়ে", "রোধ অসীম হয়", "রোধ কমে যায়", "কোনো প্রভাব পড়ে না"], ans: 2, exp: "ব্যাখ্যা: সেলেনিয়ামের ওপর আলোর তীব্রতা যত বাড়ে, তার রোধ তত কমে। সম্পূর্ণ অন্ধকারে এর রোধ সবচেয়ে বেশি হয়।" },
+{ q: "৬. কার্বন রোধকের কালার কোডে (Colour code) 'সবুজ' রঙের সাংকেতিক সংখ্যা কত?", opts: ["3", "4", "5", "6"], ans: 2, exp: "ব্যাখ্যা: B B ROY of Great Britain... সূত্রানুযায়ী: Black(0), Brown(1), Red(2), Orange(3), Yellow(4), Green(5)।" },
+{ q: "৭. একটি কার্বন রোধকের গায়ে যথাক্রমে হলুদ, বেগুনি, এবং কমলা রঙের বন্ধনী আছে এবং চতুর্থ কোনো বন্ধনী নেই। রোধটির মান ও টলারেন্স কত?", opts: ["47 &times; 10<sup>3</sup> &Omega; &plusmn; 20%", "47 &times; 10<sup>2</sup> &Omega; &plusmn; 10%", "47 &times; 10<sup>3</sup> &Omega; &plusmn; 5%", "74 &times; 10<sup>3</sup> &Omega; &plusmn; 20%"], ans: 0, exp: "ব্যাখ্যা: হলুদ (4), বেগুনি (7), কমলা (10<sup>3</sup> গুণক)। চতুর্থ বন্ধনী না থাকলে টলারেন্স &plusmn; 20% হয়। তাই রোধ 47 &times; 10<sup>3</sup> &Omega; &plusmn; 20% বা 47 k&Omega; &plusmn; 20%।" },
+{ q: "৮. বিসমাথ ধাতুর ওপর চৌম্বকক্ষেত্র প্রয়োগ করলে এর রোধের কী পরিবর্তন হয়?", opts: ["কমে যায়", "বেড়ে যায়", "একই থাকে", "শূন্য হয়"], ans: 1, exp: "ব্যাখ্যা: বিসমাথের ওপর উচ্চশক্তিসম্পন্ন চৌম্বকক্ষেত্র প্রয়োগ করলে তার রোধ বেড়ে যায়, এটি চৌম্বকক্ষেত্রের প্রাবল্য মাপতে ব্যবহৃত হয়।" },
+{ q: "৯. অতিপরিবাহিতা (Superconductivity) কাকে বলে?", opts: ["উচ্চ তাপমাত্রায় রোধ শূন্য হওয়া", "একটি নির্দিষ্ট সংকট তাপমাত্রার নীচে রোধ প্রায় শূন্য হয়ে যাওয়া", "রোধ অসীম হয়ে যাওয়া", "ভোল্টেজ শূন্য হওয়া"], ans: 1, exp: "ব্যাখ্যা: যে ধর্মের জন্য নির্দিষ্ট সংকট উষ্ণতায় (Critical temp) ধাতু বা যৌগের রোধ প্রায় শূন্য হয়, তাকে অতিপরিবাহিতা বলে।" },
+{ q: "১০. একটি কার্বন রোধকের চতুর্থ বন্ধনী রূপোলি (Silver) রঙের হলে এর টলারেন্স কত?", opts: ["&plusmn; 5%", "&plusmn; 10%", "&plusmn; 20%", "&plusmn; 1%"], ans: 1, exp: "ব্যাখ্যা: সোনালি রঙের জন্য টলারেন্স &plusmn; 5%, রূপোলির জন্য &plusmn; 10% এবং কোনো রঙ না থাকলে &plusmn; 20% হয়।" },
+{ q: "১১. কোনটির রোধের উষ্ণতা গুণাঙ্ক ধনাত্মক?", opts: ["তামা", "জার্মেনিয়াম", "কার্বন", "কাচ"], ans: 0, exp: "ব্যাখ্যা: তামা একটি বিশুদ্ধ ধাতু বা পরিবাহী, তাই তাপমাত্রা বাড়লে এর রোধ বাড়ে (উষ্ণতা গুণাঙ্ক ধনাত্মক)। বাকিগুলো অর্ধপরিবাহী বা অন্তরক, এদের উষ্ণতা গুণাঙ্ক ঋণাত্মক।" },
+{ q: "১২. কার্বন রোধকের ব্যবহারিক সুবিধা কী?", opts: ["এরা উচ্চ ক্ষমতার বর্তনীতে ব্যবহৃত হয়", "এরা খুব সস্তা, আকারে ছোটো এবং এদের পাল্লা অনেক বেশি", "এদের রোধ উষ্ণতার ওপর নির্ভর করে না", "এদের ক্ষমতা 10W এর বেশি হয়"], ans: 1, exp: "ব্যাখ্যা: কার্বন রোধকগুলি সাধারণত 2 W বা তার কম ক্ষমতার বর্তনীতে ব্যবহৃত হয়, এরা দামে সস্তা এবং খুব ছোট আকারের হয়।" },
+{ q: "১৩. কোন তাপমাত্রার নীচে পারদ অতিপরিবাহী হিসেবে আচরণ করে?", opts: ["273 K", "7.2 K", "4.2 K", "100 K"], ans: 2, exp: "ব্যাখ্যা: অতিপরিবাহিতা আবিষ্কারের সময় বিজ্ঞানী কামারলিং ওনেস দেখেন যে 4.2 K উষ্ণতায় পারদের রোধ শূন্য হয়ে যায়।" },
+{ q: "১৪. যদি কোনো পরিবাহীর রোধের উষ্ণতা গুণাঙ্ক &alpha; ঋণাত্মক হয়, তবে তাপমাত্রা বৃদ্ধিতে এর রোধ—", opts: ["বৃদ্ধি পাবে", "অপরিবর্তিত থাকবে", "হ্রাস পাবে", "শূন্য হবে"], ans: 2, exp: "ব্যাখ্যা: ঋণাত্মক উষ্ণতা গুণাঙ্ক এর অর্থ হলো R<sub>t</sub> = R<sub>0</sub>(1 - &alpha; t), অর্থাৎ তাপমাত্রা (t) বাড়লে রোধ হ্রাস পাবে। এটি অর্ধপরিবাহী ও অন্তরকের বৈশিষ্ট্য।" },
+{ q: "১৫. একটি তারের প্রাথমিক রোধ R। তাকে টেনে ব্যাসার্ধ অর্ধেক করলে নতুন রোধ কত হবে (আয়তন স্থির)?", opts: ["2R", "4R", "8R", "16R"], ans: 3, exp: "ব্যাখ্যা: আয়তন স্থির থাকলে, R &propto; 1/r<sup>4</sup> হয়। ব্যাসার্ধ অর্ধেক (r/2) হলে, নতুন রোধ R' = 1/(1/2)<sup>4</sup> R = 16 R হবে।" }
+]
+},
+5: {
+name: 'Set 5', icon: '🔗', topic: 'রোধের সমবায় ও সান্ট',
+questions: [
+{ q: "১. রোধের শ্রেণি সমবায়ে (Series combination) বর্তনীর কোন্ রাশিটি সমস্ত রোধের জন্য সমান থাকে?", opts: ["বিভবপ্রভেদ", "তড়িৎপ্রবাহমাত্রা", "ব্যয়িত ক্ষমতা", "রোধাঙ্ক"], ans: 1, exp: "ব্যাখ্যা: শ্রেণি সমবায়ে তড়িৎ চলাচলের কেবল একটিই পথ থাকে, তাই সমবায়ের অন্তর্গত প্রতিটি রোধের মধ্য দিয়ে একই তড়িৎপ্রবাহমাত্রা প্রবাহিত হয়।" },
+{ q: "২. তিনটি রোধ r<sub>1</sub>, r<sub>2</sub>, r<sub>3</sub> সমান্তরাল সমবায়ে যুক্ত থাকলে তুল্যরোধ (R) নির্ণয়ের সমীকরণ কোনটি?", opts: ["R = r<sub>1</sub> + r<sub>2</sub> + r<sub>3</sub>", "R = (r<sub>1</sub> r<sub>2</sub> r<sub>3</sub>) / (r<sub>1</sub> + r<sub>2</sub> + r<sub>3</sub>)", "1/R = 1/r<sub>1</sub> + 1/r<sub>2</sub> + 1/r<sub>3</sub>", "R = 1/r<sub>1</sub> + 1/r<sub>2</sub> + 1/r<sub>3</sub>"], ans: 2, exp: "ব্যাখ্যা: সমান্তরাল সমবায়ে তুল্যরোধের অনন্যোক প্রতিটি রোধের অনন্যোকের যোগফলের সমান হয়।" },
+{ q: "৩. সান্ট (Shunt) কাকে বলে?", opts: ["গ্যালভানোমিটারের সঙ্গে শ্রেণিতে যুক্ত উচ্চ রোধ", "বর্তনীর মূল রোধ", "সুবেদী যন্ত্রকে রক্ষা করতে তার সঙ্গে সমান্তরালে যুক্ত নিম্নমানের রোধ", "ভোল্টমিটারের রোধ"], ans: 2, exp: "ব্যাখ্যা: সুবেদী যন্ত্রের (যেমন গ্যালভানোমিটার) মধ্য দিয়ে প্রবল তড়িৎপ্রবাহ গেলে যন্ত্রটি নষ্ট হতে পারে, তাই বিকল্প পথ হিসেবে এর সমান্তরালে একটি নিম্নমানের রোধ বা সান্ট যুক্ত করা হয়।" },
+{ q: "৪. গ্যালভানোমিটারের রোধ G এবং সান্টের রোধ S হলে, সান্টের মধ্য দিয়ে প্রবাহিত তড়িৎ (I<sub>S</sub>) ও মূল প্রবাহের (I) সম্পর্ক কী?", opts: ["I<sub>S</sub> = I [S / (S+G)]", "I<sub>S</sub> = I [G / (S+G)]", "I<sub>S</sub> = I [(S+G) / G]", "I<sub>S</sub> = I [G / S]"], ans: 1, exp: "ব্যাখ্যা: সমান্তরাল সমবায়ে প্রবাহমাত্রা রোধের ব্যস্তানুপাতিকভাবে বিভক্ত হয়। তাই সান্টের মধ্য দিয়ে প্রবাহমাত্রা I<sub>S</sub> = I [G / (S+G)] হয়।" },
+{ q: "৫. n-সংখ্যক সমমানের R রোধকে সমান্তরাল সমবায়ে যুক্ত করলে তুল্যরোধ কত হবে?", opts: ["nR", "R/n", "n<sup>2</sup> R", "R/n<sup>2</sup>"], ans: 1, exp: "ব্যাখ্যা: সমান্তরাল সমবায়ের ক্ষেত্রে, 1/R<sub>eq</sub> = 1/R + 1/R + ... n বার = n/R। অতএব R<sub>eq</sub> = R/n।" },
+{ q: "৬. একটি অ্যামিটারকে আদর্শ হিসেবে ধরতে গেলে তার রোধ কেমন হওয়া উচিত?", opts: ["অসীম", "বর্তনীর রোধের সমান", "শূন্য বা অত্যন্ত নগণ্য", "100 &Omega;"], ans: 2, exp: "ব্যাখ্যা: অ্যামিটার বর্তনীতে শ্রেণিতে যুক্ত থাকে। এর নিজস্ব রোধ বেশি হলে মূল প্রবাহ কমে গিয়ে পাঠে ত্রুটি আসবে। তাই আদর্শ অ্যামিটারের রোধ শূন্য বা খুব নগণ্য হওয়া বাঞ্ছনীয়।" },
+{ q: "৭. মূল প্রবাহের 1/n অংশ গ্যালভানোমিটারের মধ্য দিয়ে পাঠাতে হলে প্রয়োজনীয় সান্টের মান (S) কত হতে হবে? (গ্যালভানোমিটারের রোধ G)", opts: ["G / n", "G / (n-1)", "G / (n+1)", "n &middot; G"], ans: 1, exp: "ব্যাখ্যা: I<sub>G</sub> = I/n হলে, সান্টের পরিবর্ধন গুণক n। সমীকরণ I<sub>G</sub> = I [S / (S+G)] থেকে সমাধান করলে S = G / (n-1) পাওয়া যায়।" },
+{ q: "৮. ডেল্টা-স্টার (Delta-star) রূপান্তর কী কাজে লাগে?", opts: ["তড়িৎপ্রবাহ বাড়াতে", "জটিল নেটওয়ার্ক বর্তনীকে সরল করে তুল্যরোধ নির্ণয় করতে", "ভোল্টেজ মাপতে", "ব্যাটারির চার্জিং করতে"], ans: 1, exp: "ব্যাখ্যা: অনেক লুপ থাকা জটিল বর্তনীতে যেখানে কির্সফের সূত্র প্রয়োগ কঠিন, সেখানে ডেল্টা সংযোগকে স্টার সংযোগে রূপান্তর করে বর্তনী সরল করা হয়।" },
+{ q: "৯. দুটি রোধ সমান্তরাল সমবায়ে যুক্ত থাকলে তাদের তুল্যরোধ সম্পর্কে কোনটি সত্য?", opts: ["তুল্যরোধ তাদের যোগফলের সমান", "তুল্যরোধ বৃহত্তর রোধটির চেয়ে বড় হয়", "তুল্যরোধ সমবায়ের ক্ষুদ্রতর রোধটির চেয়েও ছোট হয়", "তুল্যরোধ তাদের গড় মানের সমান"], ans: 2, exp: "ব্যাখ্যা: সমান্তরাল সমবায়ে 1/R = 1/r<sub>1</sub> + 1/r<sub>2</sub>। গাণিতিকভাবে প্রমাণ করা যায় যে তুল্যরোধ R সর্বদা r<sub>1</sub> এবং r<sub>2</sub> উভয়ের চেয়েই ছোট হয়।" },
+{ q: "১০. 6 &Omega; এবং 3 &Omega; এর দুটি রোধ সমান্তরাল সমবায়ে যুক্ত থাকলে তাদের তুল্যরোধ কত?", opts: ["9 &Omega;", "2 &Omega;", "4.5 &Omega;", "18 &Omega;"], ans: 1, exp: "ব্যাখ্যা: দুটি রোধের সমান্তরাল সমবায়ের সূত্র R = (r<sub>1</sub> r<sub>2</sub>) / (r<sub>1</sub> + r<sub>2</sub>) = (6 &times; 3) / (6 + 3) = 18 / 9 = 2 &Omega;।" },
+{ q: "১১. কোনো বর্তনীতে ভোল্টমিটারকে কীভাবে যুক্ত করা হয় এবং কেন?", opts: ["শ্রেণিতে, প্রবাহ মাপার জন্য", "সমান্তরালে, বিভবপ্রভেদ মাপার জন্য এবং এর রোধ খুব বেশি হয়", "শ্রেণিতে, বিভব মাপার জন্য", "সমান্তরালে, প্রবাহ মাপার জন্য"], ans: 1, exp: "ব্যাখ্যা: ভোল্টমিটার দুটি বিন্দুর বিভবপ্রভেদ মাপে তাই তাকে ওই বিন্দু দুটির সাথে সমান্তরালে যোগ করতে হয়। এর রোধ খুব উচ্চ হয় যাতে মূল প্রবাহ নষ্ট না হয়।" },
+{ q: "১২. সান্টের ক্ষমতা (Power) বা পরিবর্ধন গুণক বলতে কী বোঝায়?", opts: ["S/G", "গ্যালভানোমিটারের প্রবাহমাত্রাকে যে সংখ্যা দ্বারা গুণ করলে মূল প্রবাহমাত্রা পাওয়া যায়", "সান্টে উৎপন্ন তাপ", "গ্যালভানোমিটারের মোট রোধ"], ans: 1, exp: "ব্যাখ্যা: I = n &middot; I<sub>G</sub>। এই n = (S+G)/S কেই সান্টের ক্ষমতা বা পরিবর্ধন গুণক (Multiplying factor) বলে।" },
+{ q: "১৩. 10 &Omega; এর চারটি রোধকে প্রথমে শ্রেণিতে এবং পরে সমান্তরাল সমবায়ে যুক্ত করা হলো। উভয় ক্ষেত্রে তুল্যরোধের অনুপাত (R<sub>s</sub> : R<sub>p</sub>) কত?", opts: ["1:1", "4:1", "16:1", "1:16"], ans: 2, exp: "ব্যাখ্যা: শ্রেণিতে R<sub>s</sub> = 4 &times; 10 = 40 &Omega;। সমান্তরালে R<sub>p</sub> = 10 / 4 = 2.5 &Omega;। অনুপাত 40 / 2.5 = 16 : 1।" },
+{ q: "১৪. একটি তারকে সমান n টুকরো করে সমান্তরাল সমবায়ে যুক্ত করলে তুল্যরোধ প্রাথমিক রোধের (R) কত অংশ হবে?", opts: ["R/n", "R/n<sup>2</sup>", "n<sup>2</sup> R", "R"], ans: 1, exp: "ব্যাখ্যা: সমান n টুকরো করলে প্রতিটি টুকরোর রোধ হবে R/n। এদের সমান্তরাল সমবায়ে যুক্ত করলে তুল্যরোধ হবে (R/n)/n = R/n<sup>2</sup>।" },
+{ q: "১৫. একটি গ্যালভানোমিটারের রোধ 100 &Omega;। মূল প্রবাহের 10% গ্যালভানোমিটারের মধ্য দিয়ে পাঠাতে হলে কত মানের সান্ট যুক্ত করতে হবে?", opts: ["10 &Omega;", "11.1 &Omega;", "9.9 &Omega;", "100 &Omega;"], ans: 1, exp: "ব্যাখ্যা: 10% বা 1/10 অংশ পাঠাতে হলে পরিবর্ধন গুণক n = 10। সান্টের সূত্র S = G / (n-1) = 100 / (10-1) = 100 / 9 &approx; 11.11 &Omega;।" }
+]
+},
+6: {
+name: 'Set 6', icon: '⚙️', topic: 'অভ্যন্তরীণ রোধ ও তড়িৎকোশের সমবায়',
+questions: [
+{ q: "১. কোনো তড়িৎকোশের অভ্যন্তরীণ রোধ (Internal resistance) নীচের কোন্ বিষয়টির ওপর নির্ভর করে না?", opts: ["তড়িদ্দ্বার দুটির মধ্যবর্তী দূরত্ব", "তড়িদ্দ্বার দুটির ক্ষেত্রফল", "তড়িৎবিশ্লেষ্য তরলের ঘনত্ব", "কোশের বাইরের বর্তনীর রোধ"], ans: 3, exp: "ব্যাখ্যা: কোশের অভ্যন্তরীণ রোধ কোশের নিজস্ব গঠন (তড়িদ্দ্বারের দূরত্ব, ক্ষেত্রফল এবং তরলের প্রকৃতি ও ঘনত্ব)-এর ওপর নির্ভর করে, বাইরের বর্তনীতে কী রোধ যুক্ত আছে তার ওপর নয়।" },
+{ q: "২. একটি তড়িৎকোশের তড়িৎচালক বল E এবং প্রান্তীয় বিভবপ্রভেদ V। মুক্ত বর্তনীতে (Open circuit) এদের সম্পর্ক কী?", opts: ["V < E", "V > E", "V = E", "V = 0"], ans: 2, exp: "ব্যাখ্যা: মুক্ত বর্তনীতে কোনো তড়িৎপ্রবাহ হয় না (I = 0)। সমীকরণ V = E - Ir অনুযায়ী, I = 0 বসালে V = E পাওয়া যায়।" },
+{ q: "৩. তড়িৎকোশকে চার্জ বা আহিত করার সময় এর প্রান্তীয় বিভবপ্রভেদ (V) ও তড়িৎচালক বলের (E) সম্পর্কটি কীরূপ হয়?", opts: ["V = E", "V = E - Ir", "V = E + Ir", "V = Ir"], ans: 2, exp: "ব্যাখ্যা: চার্জ করার সময় বাইরের উৎস থেকে কোশের ধনাত্মক মেরু দিয়ে তড়িৎপ্রবাহ ঢোকে, ফলে অভ্যন্তরীণ রোধের বিভবপতন তড়িৎচালক বলের সঙ্গে যুক্ত হয়ে প্রান্তীয় বিভব বৃদ্ধি করে।" },
+{ q: "৪. নষ্ট ভোল্ট (Lost Volt) বলতে কী বোঝায়?", opts: ["কোশের তড়িৎচালক বল", "কোশের অভ্যন্তরীণ বিভব পতন (Ir)", "বাহ্যিক রোধের বিভব পতন", "কোশের তড়িদ্দ্বারের বিভব"], ans: 1, exp: "ব্যাখ্যা: কোশের নিজস্ব অভ্যন্তরীণ রোধের (r) কারণে এর অভ্যন্তরে যে বিভবের পতন (Ir) হয় তা বহির্বর্তনীর কোনো কাজে লাগে না, একেই নষ্ট ভোল্ট বলে।" },
+{ q: "৫. একটি কোশকে শর্ট সার্কিট (Short circuit) করা হলে তড়িৎপ্রবাহমাত্রার মান কত হয়?", opts: ["0", "E/r", "অসীম", "E/R"], ans: 1, exp: "ব্যাখ্যা: শর্ট সার্কিট করার অর্থ হলো বহির্বর্তনীর রোধ R = 0 করে দেওয়া। তখন I = E / (R+r) সমীকরণে R=0 বসালে সর্বোচ্চ প্রবাহ I<sub>sc</sub> = E/r পাওয়া যায়।" },
+{ q: "৬. উচ্চ তড়িৎচালক বল (High EMF) পাওয়ার জন্য তড়িৎকোশগুলিকে কোন্ সমবায়ে যুক্ত করা উচিত?", opts: ["সমান্তরাল সমবায়", "শ্রেণি সমবায়", "মিশ্র সমবায়", "কোনোটিই নয়"], ans: 1, exp: "ব্যাখ্যা: শ্রেণি সমবায়ে n-সংখ্যক কোশ যুক্ত করলে মোট তড়িৎচালক বল nE হয়, অর্থাৎ তড়িৎচালক বল বহুগুণ বৃদ্ধি পায়।" },
+{ q: "৭. বহির্বর্তনীর রোধ (R) তড়িৎকোশের অভ্যন্তরীণ রোধের (r) তুলনায় অনেক কম হলে (R << r) কোন্ সমবায় ব্যবহার করলে বেশি তড়িৎপ্রবাহ পাওয়া যায়?", opts: ["শ্রেণি সমবায়", "সমান্তরাল সমবায়", "মিশ্র সমবায়", "সবক্ষেত্রেই সমান"], ans: 1, exp: "ব্যাখ্যা: যখন অভ্যন্তরীণ রোধ বেশি থাকে, তখন সমান্তরাল সমবায়ে যুক্ত করলে কোশগুলির তুল্য অভ্যন্তরীণ রোধ (r/n) অনেক কমে যায়, ফলে বহির্বর্তনীতে অনেক বেশি প্রবাহমাত্রা পাওয়া যায়।" },
+{ q: "৮. অব্যবহৃত অবস্থায় তড়িৎকোশগুলিকে কখনোই সমান্তরাল সমবায়ে যুক্ত করে রাখা উচিত নয় কেন?", opts: ["তড়িৎচালক বল শূন্য হয়ে যায়", "কোশগুলির মধ্যে তড়িৎপ্রবাহ চলতে থাকে এবং এরা দ্রুত নিঃশেষ হয়", "অভ্যন্তরীণ রোধ অসীম হয়ে যায়", "কোশগুলি বিস্ফোরিত হতে পারে"], ans: 1, exp: "ব্যাখ্যা: সমান্তরাল সমবায়ে যুক্ত কোশগুলির তড়িৎচালক বল সামান্য আলাদা হলেই উচ্চ বিভবের কোশ থেকে নিম্ন বিভবের কোশে অভ্যন্তরীণ তড়িৎপ্রবাহ চলতে থাকে এবং শক্তি ক্ষয় হয়।" },
+{ q: "৯. মিশ্র সমবায়ে সর্বোচ্চ তড়িৎপ্রবাহ পাওয়ার শর্ত কী? (যেখানে m = সমান্তরাল সারির সংখ্যা, n = প্রতি সারিতে কোশ সংখ্যা)", opts: ["mR = nr", "R = nr", "nR = mr", "R = r"], ans: 0, exp: "ব্যাখ্যা: মিশ্র সমবায়ে বহির্বর্তনীর রোধ (R) যখন ব্যাটারির মোট তুল্য অভ্যন্তরীণ রোধের (nr/m) সমান হয়, তখন প্রবাহমাত্রা সর্বোচ্চ হয়।" },
+{ q: "১০. n-সংখ্যক একই তড়িৎকোশকে শ্রেণি সমবায়ে যুক্ত করার সময় ভুলবশত x-সংখ্যক কোশ উলটো লাগানো হলে সমবায়টির মোট তড়িৎচালক বল কত হবে?", opts: ["(n-x)E", "(n-2x)E", "nE", "xE"], ans: 1, exp: "ব্যাখ্যা: x-টি কোশ উলটো লাগালে তারা সঠিক দিকের (n-x)-টি কোশের তড়িৎচালক বল থেকে x-টি কোশের তড়িৎচালক বল বিয়োগ করে দেয়। মোট EMF = (n-x)E - xE = (n-2x)E।" },
+{ q: "১১. শীতকালের চেয়ে গরমের দিনে গাড়ির ইঞ্জিন সহজে স্টার্ট দেওয়া যায় কেন?", opts: ["গরমের দিনে ব্যাটারির তড়িৎচালক বল বেড়ে যায়", "গরমের দিনে ব্যাটারির অভ্যন্তরীণ রোধ কমে যায়", "গরমের দিনে ব্যাটারির অভ্যন্তরীণ রোধ বেড়ে যায়", "বাইরের বর্তনীর রোধ শূন্য হয়"], ans: 1, exp: "ব্যাখ্যা: তাপমাত্রা বাড়লে তড়িৎবিশ্লেষ্য তরলের পরিবাহিতা বাড়ে এবং অভ্যন্তরীণ রোধ কমে যায়, ফলে মোটরকে চালু করতে ব্যাটারি বেশি তড়িৎপ্রবাহ সরবরাহ করতে পারে।" },
+{ q: "১২. n-সংখ্যক অভিন্ন কোশ সমান্তরাল সমবায়ে যুক্ত থাকলে সমবায়টির তুল্য তড়িৎচালক বল কত?", opts: ["nE", "E/n", "E", "n<sup>2</sup> E"], ans: 2, exp: "ব্যাখ্যা: সমান্তরাল সমবায়ে সবগুলি কোশের ধনাত্মক মেরু এক বিন্দুতে এবং ঋণাত্মক মেরু এক বিন্দুতে যুক্ত থাকে, তাই প্রান্তীয় বিভব বা তুল্য তড়িৎচালক বল একটিমাত্র কোশের তড়িৎচালক বলের (E) সমানই থাকে।" },
+{ q: "১৩. তড়িৎকোশের অভ্যন্তরীণ রোধের একক কী?", opts: ["ভোল্ট", "অ্যাম্পিয়ার", "ওহম", "সিমেন্স"], ans: 2, exp: "ব্যাখ্যা: অভ্যন্তরীণ রোধ একপ্রকার তড়িৎবাধা, তাই এর একক সাধারণ রোধের এককের মতোই ওহম (&Omega;)।" },
+{ q: "১৪. দুটি ভিন্ন তড়িৎচালক বলের কোশ E<sub>1</sub> এবং E<sub>2</sub> (যেখানে E<sub>1</sub> > E<sub>2</sub>) কে পরস্পরের সঙ্গে সমান্তরালে যুক্ত করা হলে তুল্য তড়িৎচালক বলের মান—", opts: ["E<sub>1</sub> + E<sub>2</sub> এর সমান", "E<sub>1</sub> এবং E<sub>2</sub> এর মধ্যবর্তী কোনো মান", "E<sub>2</sub> এর চেয়ে কম", "E<sub>1</sub> এর চেয়ে বেশি"], ans: 1, exp: "ব্যাখ্যা: দুটি কোশ সমান্তরালে থাকলে তুল্য EMF E<sub>eq</sub> = (E<sub>1</sub>r<sub>2</sub> + E<sub>2</sub>r<sub>1</sub>) / (r<sub>1</sub> + r<sub>2</sub>) হয়, যা গাণিতিকভাবে E<sub>1</sub> ও E<sub>2</sub> এর মধ্যবর্তী একটি মান প্রদান করে।" },
+{ q: "১৫. একটি আদর্শ ভোল্টমিটার দিয়ে কোনো তড়িৎকোশের প্রান্তীয় বিভব মাপলে তা কিসের সমান হবে?", opts: ["নষ্ট ভোল্টের", "তড়িৎচালক বলের", "অভ্যন্তরীণ রোধের", "শূন্য"], ans: 1, exp: "ব্যাখ্যা: আদর্শ ভোল্টমিটারের রোধ অসীম হয়, ফলে বর্তনীতে কোনো তড়িৎপ্রবাহ হয় না (I=0)। তাই এটি সরাসরি তড়িৎচালক বলের (E) মান পরিমাপ করে।" }
+]
+},
+7: {
+name: 'Set 7', icon: '📝', topic: 'গাণিতিক সমস্যা (Level-I ও Level-II)',
+questions: [
+{ q: "১. 3 &Omega;, 6 &Omega; এবং 10 &Omega; মানের তিনটি রোধককে সমান্তরাল সমবায়ে যুক্ত করা হলে তুল্যরোধ কত হবে?", opts: ["19 &Omega;", "5/3 &Omega;", "18/30 &Omega;", "1.67 &Omega;"], ans: 3, exp: "ব্যাখ্যা: 1/R<sub>eq</sub> = 1/3 + 1/6 + 1/10 = (10+5+3)/30 = 18/30। অতএব, R<sub>eq</sub> = 30/18 = 5/3 &approx; 1.67 &Omega;।" },
+{ q: "২. 15 V তড়িৎচালক বল এবং 0.5 &Omega; অভ্যন্তরীণ রোধযুক্ত একটি তড়িৎকোশকে শর্ট সার্কিট করা হলে সর্বোচ্চ কত তড়িৎপ্রবাহ পাওয়া যাবে?", opts: ["7.5 A", "30 A", "15 A", "25 A"], ans: 1, exp: "ব্যাখ্যা: শর্ট সার্কিটের ক্ষেত্রে বহিস্থ রোধ R = 0। সর্বোচ্চ প্রবাহ I<sub>sc</sub> = E/r = 15/0.5 = 30 A।" },
+{ q: "৩. 12 V তড়িৎচালক বল এবং 2 &Omega; অভ্যন্তরীণ রোধের একটি ব্যাটারির সঙ্গে একটি বহিস্থ রোধ যুক্ত করায় বর্তনীতে 0.4 A প্রবাহমাত্রা চলছে। বহিস্থ রোধটির মান কত?", opts: ["28 &Omega;", "30 &Omega;", "26 &Omega;", "18 &Omega;"], ans: 0, exp: "ব্যাখ্যা: I = E / (R+r) &rArr; 0.4 = 12 / (R+2) &rArr; R+2 = 12/0.4 = 30 &rArr; R = 28 &Omega;।" },
+{ q: "৪. 100 &Omega; রোধের একটি হিটার 1.5 A প্রবাহমাত্রায় কাজ করতে পারে। একে 240 V ডিসি মেইনের সঙ্গে যুক্ত করতে হলে শ্রেণিতে কমপক্ষে কত মানের অতিরিক্ত রোধ যুক্ত করতে হবে?", opts: ["140 &Omega;", "40 &Omega;", "60 &Omega;", "100 &Omega;"], ans: 2, exp: "ব্যাখ্যা: মোট প্রয়োজনীয় রোধ R<sub>total</sub> = V/I = 240/1.5 = 160 &Omega;। হিটারের রোধ 100 &Omega; হওয়ায় অতিরিক্ত রোধ লাগবে (160 - 100) = 60 &Omega;।" },
+{ q: "৫. 120 &Omega; রোধের একটি গ্যালভানোমিটারের সমান্তরালে 4 &Omega; মানের একটি সান্ট যুক্ত করা হলো। বর্তনীর মূল প্রবাহ 3.1 A হলে সান্টের মধ্য দিয়ে কত প্রবাহ যাবে?", opts: ["0.1 A", "2.9 A", "3.0 A", "2.5 A"], ans: 2, exp: "ব্যাখ্যা: সান্টের মধ্য দিয়ে প্রবাহ I<sub>s</sub> = I &times; G / (G+S) = 3.1 &times; 120 / (120+4) = 3.1 &times; 120 / 124 = 3.1 &times; 30 / 31 = 3 A।" },
+{ q: "৬. একটি তারকে টেনে এর দৈর্ঘ্য 0.2% বৃদ্ধি করা হলে আয়তন অপরিবর্তিত থাকলে তার রোধের শতকরা বৃদ্ধি কত হবে?", opts: ["0.2%", "0.4%", "0.1%", "0.8%"], ans: 1, exp: "ব্যাখ্যা: দৈর্ঘ্য সামান্য বৃদ্ধি পেলে রোধের শতকরা পরিবর্তন &approx; 2 &times; দৈর্ঘ্যের শতকরা পরিবর্তন। তাই বৃদ্ধি হবে 2 &times; 0.2% = 0.4%।" },
+{ q: "৭. একটি কার্বন রোধকের গায়ে যথাক্রমে কমলা, সাদা, লাল এবং রূপোলি রঙের বন্ধনী আছে। রোধকটির মান কত?", opts: ["3.9 k&Omega; &plusmn; 5%", "3.9 k&Omega; &plusmn; 10%", "39 k&Omega; &plusmn; 10%", "390 &Omega; &plusmn; 20%"], ans: 1, exp: "ব্যাখ্যা: কমলা = 3, সাদা = 9, লাল = 10<sup>2</sup>, রূপোলি = &plusmn; 10%। অতএব মান 39 &times; 10<sup>2</sup> &Omega; &plusmn; 10% = 3900 &Omega; &plusmn; 10% = 3.9 k&Omega; &plusmn; 10%।" },
+{ q: "৮. 2 V তড়িৎচালক বল এবং 1 &Omega; অভ্যন্তরীণ রোধের 10 টি অভিন্ন কোশকে একবার শ্রেণিতে এবং একবার সমান্তরালে একটি বহিস্থ রোধ R এর সাথে যুক্ত করা হলো। উভয় ক্ষেত্রেই প্রবাহমাত্রা সমান হলে R এর মান কত?", opts: ["1 &Omega;", "2 &Omega;", "10 &Omega;", "0.5 &Omega;"], ans: 0, exp: "ব্যাখ্যা: শ্রেণি এবং সমান্তরাল উভয় সমবায়ে একই প্রবাহ পাওয়ার শর্ত হলো বহিস্থ রোধ (R) = একটি কোশের অভ্যন্তরীণ রোধ (r)। তাই R = 1 &Omega;।" },
+{ q: "৯. একটি তারের মধ্য দিয়ে প্রবাহমাত্রা I = 2t<sup>2</sup> + 4t + 3 সমীকরণ মেনে চলে। t=0 থেকে t=3 সেকেন্ড সময়ে তারের মধ্য দিয়ে প্রবাহিত মোট আধানের পরিমাণ কত?", opts: ["27 C", "36 C", "45 C", "54 C"], ans: 2, exp: "ব্যাখ্যা: Q = &int; I dt = &int; (2t<sup>2</sup> + 4t + 3) dt = [2t<sup>3</sup>/3 + 4t<sup>2</sup>/2 + 3t] from 0 to 3 = 18 + 18 + 9 = 45 C।" },
+{ q: "১০. 10 V তড়িৎচালক বল ও 2 &Omega; অভ্যন্তরীণ রোধের একটি কোশের সঙ্গে একটি রোধক যুক্ত করলে কোশের প্রান্তীয় বিভব 8 V হয়। রোধকটির রোধ কত?", opts: ["4 &Omega;", "6 &Omega;", "8 &Omega;", "10 &Omega;"], ans: 2, exp: "ব্যাখ্যা: V = ER / (R+r) &rArr; 8 = 10R / (R+2) &rArr; 8R + 16 = 10R &rArr; 2R = 16 &rArr; R = 8 &Omega;।" },
+{ q: "১১. 4 &Omega; রোধের একটি তারকে টেনে দ্বিগুণ করা হলো। তারটির বর্তমান রোধ কত?", opts: ["8 &Omega;", "16 &Omega;", "2 &Omega;", "12 &Omega;"], ans: 1, exp: "ব্যাখ্যা: তার টেনে n গুণ লম্বা করলে নতুন রোধ n<sup>2</sup> R হয়। এখানে n=2, তাই নতুন রোধ 2<sup>2</sup> &times; 4 = 16 &Omega;।" },
+{ q: "১২. 2 V তড়িৎচালক বল এবং 1 &Omega; অভ্যন্তরীণ রোধযুক্ত 12 টি কোশকে কীভাবে মিশ্র সমবায়ে যুক্ত করলে 3 &Omega; রোধের বহির্বর্তনীতে সর্বোচ্চ প্রবাহ পাওয়া যাবে?", opts: ["6 টি কোশ শ্রেণিতে, 2 টি সারি সমান্তরালে", "3 টি কোশ শ্রেণিতে, 4 টি সারি সমান্তরালে", "4 টি কোশ শ্রেণিতে, 3 টি সারি সমান্তরালে", "2 টি কোশ শ্রেণিতে, 6 টি সারি সমান্তরালে"], ans: 0, exp: "ব্যাখ্যা: শর্ত R = nr/m &rArr; 3 = n(1)/m &rArr; n = 3m। মোট কোশ mn = 12 &rArr; m(3m) = 12 &rArr; 3m<sup>2</sup> = 12 &rArr; m = 2। সুতরাং n = 6।" },
+{ q: "১৩. একটি তড়িৎকোশ 4 &Omega; রোধের সঙ্গে 1 A এবং 9 &Omega; রোধের সঙ্গে 0.5 A তড়িৎপ্রবাহ পাঠাতে পারে। কোশটির তড়িৎচালক বল কত?", opts: ["4 V", "6 V", "5 V", "4.5 V"], ans: 2, exp: "ব্যাখ্যা: E = I<sub>1</sub>(R<sub>1</sub>+r) &rArr; E = 1(4+r) এবং E = 0.5(9+r)। সমাধান করলে 4+r = 4.5+0.5r &rArr; 0.5r = 0.5 &rArr; r = 1 &Omega;। তাহলে E = 4+1 = 5 V।" },
+{ q: "১৪. 30&deg;C তাপমাত্রায় একটি তারের রোধ 5 &Omega; এবং 100&deg;C তাপমাত্রায় 6 &Omega;। তারটির রোধের উষ্ণতা গুণাঙ্কের মান কত?", opts: ["0.0031 &deg;C<sup>-1</sup>", "0.0045 &deg;C<sup>-1</sup>", "0.0025 &deg;C<sup>-1</sup>", "0.0015 &deg;C<sup>-1</sup>"], ans: 0, exp: "ব্যাখ্যা: R<sub>100</sub> = R<sub>0</sub>(1+100&alpha;) এবং R<sub>30</sub> = R<sub>0</sub>(1+30&alpha;)। ভাগ করলে 6/5 = (1+100&alpha;)/(1+30&alpha;) &rArr; 6+180&alpha; = 5+500&alpha; &rArr; 320&alpha; = 1 &rArr; &alpha; &approx; 0.0031 &deg;C<sup>-1</sup>।" },
+{ q: "১৫. একটি অ্যালুমিনিয়াম তারের রোধ 20&deg;C-এ 10 &Omega; এবং 75&deg;C-এ 12.2 &Omega;। এর রোধের উষ্ণতা গুণাঙ্ক কত?", opts: ["0.002 /&deg;C", "0.004 /&deg;C", "0.005 /&deg;C", "0.001 /&deg;C"], ans: 1, exp: "ব্যাখ্যা: &alpha; = (R<sub>2</sub> - R<sub>1</sub>) / [R<sub>1</sub>(t<sub>2</sub> - t<sub>1</sub>)] = (12.2 - 10) / [10(75 - 20)] = 2.2 / 550 = 0.004 /&deg;C।" }
+]
+},
+8: {
+name: 'Set 8', icon: '🧠', topic: 'অ্যাডভান্সড প্রশ্ন ও বিবৃতি-কারণ',
+questions: [
+{ q: "১. (Assertion-Reasoning) বিবৃতি: কোনো পরিবাহী তারকে টেনে এর দৈর্ঘ্য দ্বিগুণ করলে রোধও ঠিক দ্বিগুণ হয়। কারণ: কোনো নির্দিষ্ট পরিবাহীর রোধ এর দৈর্ঘ্যের সমানুপাতিক।", opts: ["বিবৃতি ও কারণ উভয়ই সত্য এবং কারণটি সঠিক ব্যাখ্যা", "বিবৃতি ও কারণ উভয়ই সত্য কিন্তু কারণটি সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 3, exp: "ব্যাখ্যা: তারকে টানলে শুধু দৈর্ঘ্য বাড়ে না, প্রস্থচ্ছেদও কমে যায়। ফলে আয়তন স্থির থাকায় রোধ n<sup>2</sup> গুণ বা চারগুণ হয়ে যায়, দ্বিগুণ নয়। তাই বিবৃতি মিথ্যা, তবে কারণ সত্য।" },
+{ q: "২. (Assertion-Reasoning) বিবৃতি: একটি ভোল্টমিটারের রোধ সর্বদা খুব উচ্চমানের হওয়া উচিত। কারণ: ভোল্টমিটারকে বর্তনীতে সমান্তরাল সমবায়ে যুক্ত করা হয়।", opts: ["বিবৃতি ও কারণ উভয়ই সত্য এবং কারণটি সঠিক ব্যাখ্যা", "বিবৃতি ও কারণ উভয়ই সত্য কিন্তু কারণটি সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 0, exp: "ব্যাখ্যা: সমান্তরাল সমবায়ে ভোল্টমিটার লাগালে যাতে মূল প্রবাহের খুব সামান্য অংশই এর মধ্য দিয়ে যায় এবং মূল বর্তনীর বিভবপতন বিঘ্নিত না হয়, তাই এর রোধ খুব উচ্চ হতে হয়।" },
+{ q: "৩. (Assertion-Reasoning) বিবৃতি: তড়িৎচালক বল (EMF) আসলে একটি যান্ত্রিক বল যা ইলেকট্রনগুলিকে সরাতে সাহায্য করে। কারণ: তড়িৎচালক বলের একক হলো ভোল্ট (বা জুল/কুলম্ব)।", opts: ["উভয়ই সত্য এবং সঠিক ব্যাখ্যা", "উভয়ই সত্য কিন্তু সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 3, exp: "ব্যাখ্যা: তড়িৎচালক বল কোনো যান্ত্রিক বল (Force) নয়, এটি আসলে একক আধান স্থানান্তরের জন্য প্রয়োজনীয় শক্তি বা কার্য। তাই বিবৃতি মিথ্যা কিন্তু কারণ সত্য।" },
+{ q: "৪. (HOTS) একটি 10 &Omega; রোধের সুষম তারকে বাঁকিয়ে একটি সম্পূর্ণ বৃত্তাকার লুপ তৈরি করা হলো। ওই লুপের যে-কোনো একটি ব্যাসের দুই প্রান্তবিন্দুর মধ্যে তুল্যরোধ কত হবে?", opts: ["10 &Omega;", "5 &Omega;", "2.5 &Omega;", "20 &Omega;"], ans: 2, exp: "ব্যাখ্যা: লুপটিকে ব্যাস বরাবর ভাগ করলে এটি দুটি অর্ধবৃত্তাকার অংশে পরিণত হয়, প্রতিটির রোধ 10/2 = 5 &Omega;। এই 5 &Omega; সমান্তরাল সমবায়ে থাকায় তুল্যরোধ = 5/2 = 2.5 &Omega;।" },
+{ q: "৫. (Assertion-Reasoning) বিবৃতি: অর্ধপরিবাহীর উষ্ণতা বৃদ্ধি করলে এর পরিবাহিতা বৃদ্ধি পায়। কারণ: অর্ধপরিবাহীর ক্ষেত্রে উষ্ণতা বৃদ্ধি পেলে ইলেকট্রনের শ্লথনকাল বৃদ্ধি পায়।", opts: ["উভয়ই সত্য এবং সঠিক ব্যাখ্যা", "উভয়ই সত্য কিন্তু সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 2, exp: "ব্যাখ্যা: উষ্ণতা বাড়লে অর্ধপরিবাহীর সমযোজী বন্ধন ভেঙে অনেক বেশি মুক্ত আধান তৈরি হয় বলে পরিবাহিতা বাড়ে (বিবৃতি সত্য)। কিন্তু তাপমাত্রা বাড়লে সব পদার্থেই সংঘর্ষের হার বাড়ে ফলে শ্লথনকাল সর্বদা হ্রাস পায় (কারণ মিথ্যা)।" },
+{ q: "৬. (HOTS) সমান দৈর্ঘ্যের ও একই উপাদানের চারটি তার দিয়ে একটি বর্গক্ষেত্র তৈরি করা হলো। তারগুলির প্রতিটির রোধ r। বর্গক্ষেত্রটির একটি কর্ণের দুই প্রান্তের মধ্যে তুল্যরোধ কত?", opts: ["4r", "r", "r/2", "2r"], ans: 1, exp: "ব্যাখ্যা: কর্ণের দুই প্রান্ত ধরলে বর্গক্ষেত্রটি দুটি শাখায় বিভক্ত হয়, প্রতিটি শাখায় দুটি করে তার শ্রেণিতে থাকে। তাই উপরের শাখার রোধ 2r এবং নিচের শাখার রোধ 2r। এরা সমান্তরালে থাকায় তুল্যরোধ = r।" },
+{ q: "৭. (HOTS) কোনো তারের মধ্য দিয়ে স্থির তড়িৎপ্রবাহ চলছে। তারটির ব্যাসার্ধ দ্বিগুণ করা হলে মুক্ত ইলেকট্রনগুলির বিচলন বেগের কী পরিবর্তন হবে?", opts: ["দ্বিগুণ হবে", "অর্ধেক হবে", "চারগুণ হবে", "এক-চতুর্থাংশ হবে"], ans: 3, exp: "ব্যাখ্যা: প্রবাহমাত্রা I স্থির থাকলে I = neA v<sub>d</sub> &rArr; v<sub>d</sub> &propto; 1/A &propto; 1/r<sup>2</sup>। ব্যাসার্ধ r দ্বিগুণ হলে ক্ষেত্রফল চারগুণ হয়, তাই বিচলন বেগ ১/৪ গুণ হয়ে যাবে।" },
+{ q: "৮. (Assertion-Reasoning) বিবৃতি: একটি নির্দিষ্ট সংকট তাপমাত্রার নিচে অতিপরিবাহী পদার্থের রোধাঙ্ক প্রায় শূন্য হয়ে যায়। কারণ: অতি নিম্ন তাপমাত্রায় অতিপরিবাহীর মধ্যে থাকা আধান বাহকগুলি ল্যাটিসের সাথে কোনো সংঘর্ষ ছাড়াই চলাচল করতে পারে।", opts: ["উভয়ই সত্য এবং সঠিক ব্যাখ্যা", "উভয়ই সত্য কিন্তু সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 0, exp: "ব্যাখ্যা: বিবৃতি ও কারণ উভয়ই সত্য এবং কারণটি বিবৃতির সঠিক ব্যাখ্যা।" },
+{ q: "৯. (HOTS) 60 W এবং 100 W ক্ষমতার দুটি একই ভোল্টেজ রেটিং-এর বৈদ্যুতিক বাল্বকে শ্রেণি সমবায়ে একটি মেইন লাইনের সাথে যুক্ত করা হলো। কোন্ বাল্বটি বেশি উজ্জ্বলভাবে জ্বলবে?", opts: ["100 W", "60 W", "দুটিই সমান উজ্জ্বলতায়", "বলা সম্ভব নয়"], ans: 1, exp: "ব্যাখ্যা: R = V<sup>2</sup>/P সূত্র অনুযায়ী 60 W বাল্বটির রোধ 100 W বাল্বের চেয়ে বেশি। শ্রেণি সমবায়ে তড়িৎপ্রবাহ (I) সমান থাকায় উৎপন্ন তাপ H = I<sup>2</sup>R রোধের সমানুপাতিক হয়। রোধ বেশি হওয়ায় 60 W বাল্বটি বেশি উজ্জ্বলভাবে জ্বলবে।" },
+{ q: "১০. (Assertion-Reasoning) বিবৃতি: সুইচে অন করার প্রায় সঙ্গে সঙ্গেই বর্তনীর দূরবর্তী স্থানে রাখা বাতি জ্বলে ওঠে। কারণ: তারের মধ্যে থাকা মুক্ত ইলেকট্রনগুলি আলোর বেগে যাতায়াত করতে পারে।", opts: ["উভয়ই সত্য এবং সঠিক ব্যাখ্যা", "উভয়ই সত্য কিন্তু সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 2, exp: "ব্যাখ্যা: সুইচ অন করার সঙ্গে সঙ্গে তড়িৎক্ষেত্র আলোর বেগে পুরো বর্তনীতে ছড়িয়ে পড়ে, তাই বাতি জ্বলে (বিবৃতি সত্য)। কিন্তু ইলেকট্রনগুলোর বিচলন বেগ অতি মন্থর হয়, তারা আলোর বেগে ছোটে না। তাই কারণ মিথ্যা।" },
+{ q: "১১. (HOTS) একটি ব্যাটারির (E, r) সঙ্গে একটি পরিবর্তনশীল রোধ (R) যুক্ত আছে। R এর মান শূন্য থেকে অসীম পর্যন্ত পরিবর্তন করলে ব্যাটারির প্রান্তীয় বিভব (V) কীভাবে পরিবর্তিত হবে?", opts: ["শূন্য থেকে E পর্যন্ত বাড়বে", "E থেকে শূন্য পর্যন্ত কমবে", "সর্বদা E থাকবে", "শূন্য থেকে অসীম পর্যন্ত বাড়বে"], ans: 0, exp: "ব্যাখ্যা: V = E / (1 + r/R)। R=0 হলে V=0 (শর্ট সার্কিট)। R বাড়লে V বাড়ে এবং R &rarr; &infin; হলে V &rarr; E (ওপেন সার্কিট) হয়।" },
+{ q: "১২. (Assertion-Reasoning) বিবৃতি: ওহমের সূত্র একটি সর্বজনীন (Universal) সূত্র নয়। কারণ: অর্ধপরিবাহী ডায়োড, ট্রানজিস্টার ইত্যাদি ক্ষেত্রে ভোল্টেজ ও কারেন্টের মধ্যে রৈখিক সম্পর্ক থাকে না।", opts: ["উভয়ই সত্য এবং সঠিক ব্যাখ্যা", "উভয়ই সত্য কিন্তু সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 0, exp: "ব্যাখ্যা: ওহমের সূত্র সব পদার্থের জন্য খাটে না (অ-ওহমীয় পরিবাহী যেমন ডায়োড), তাই এটি সর্বজনীন মৌলিক সূত্র নয়।" },
+{ q: "১৩. (HOTS) দুটি অসমান রোধকে শ্রেণি সমবায়ে যুক্ত করে প্রবাহ পাঠালে কোন্ রোধে তাপ বেশি উৎপন্ন হবে?", opts: ["ছোটো রোধে", "বড়ো রোধে", "উভয়ে সমান", "বলা সম্ভব নয়"], ans: 1, exp: "ব্যাখ্যা: শ্রেণিতে I ধ্রুবক। উৎপন্ন তাপ H = I<sup>2</sup>Rt &rArr; H &propto; R। তাই বড়ো রোধে বেশি তাপ উৎপন্ন হবে।" },
+{ q: "১৪. (Assertion-Reasoning) বিবৃতি: প্রমাণ রোধক তৈরিতে ম্যাঙ্গানিন বা কনস্ট্যানটান সংকর ধাতু ব্যবহৃত হয়। কারণ: এদের রোধাঙ্ক উচ্চ এবং রোধের উষ্ণতা গুণাঙ্ক প্রায় শূন্য।", opts: ["উভয়ই সত্য এবং সঠিক ব্যাখ্যা", "উভয়ই সত্য কিন্তু সঠিক ব্যাখ্যা নয়", "বিবৃতি সত্য কিন্তু কারণ মিথ্যা", "বিবৃতি মিথ্যা কিন্তু কারণ সত্য"], ans: 0, exp: "ব্যাখ্যা: এদের রোধের উষ্ণতা গুণাঙ্ক প্রায় শূন্য হওয়ায় তাপমাত্রার পরিবর্তনে রোধ বদলায় না, তাই বিবৃতি ও কারণ উভয়ই সত্য এবং সঠিক ব্যাখ্যা।" },
+{ q: "১৫. (HOTS) একটি সুষম তারের রোধ R। একে ৫টি সমান টুকরো করে সমান্তরাল সমবায়ে যুক্ত করলে নতুন তুল্যরোধ কত হবে?", opts: ["5R", "R/5", "R/25", "25R"], ans: 2, exp: "ব্যাখ্যা: প্রতিটি টুকরোর রোধ হবে R/5। ৫টি এমন টুকরো সমান্তরালে যুক্ত করলে তুল্যরোধ হবে (R/5) / 5 = R/25।" }
+]
+},
+9: {
+name: 'Set 9', icon: '🏆', topic: 'কম্পিটিটিভ এক্সাম স্পেশাল',
+questions: [
+{ q: "১. [WBJEE Concept] 200 &Omega; মানবিশিষ্ট দুটি রোধ শ্রেণি সমবায়ে 10 V তড়িৎচালক বল বিশিষ্ট একটি ব্যাটারির সঙ্গে যুক্ত আছে। প্রথম রোধটিকে 1% বাড়ানো হলে দ্বিতীয় রোধটির বিভবপ্রভেদ একই রাখতে এটিকে—", opts: ["1 &Omega; বাড়াতে হবে", "2 &Omega; বাড়াতে হবে", "1 &Omega; কমাতে হবে", "2 &Omega; কমাতে হবে"], ans: 1, exp: "ব্যাখ্যা: শ্রেণি সমবায়ে বিভব পতন রোধের অনুপাতের সমান হয়। দ্বিতীয় রোধের বিভব একই রাখতে হলে, প্রথম রোধ যে অনুপাতে বাড়ে দ্বিতীয়টিকেও সেই অনুপাতে বাড়াতে হবে। 200 &Omega;-এর 1% হলো 2 &Omega;। তাই দ্বিতীয় রোধটিকেও 2 &Omega; বাড়াতে হবে।" },
+{ q: "২. [NEET Concept] একটি কার্বন রোধকের রোধের মান বর্ণসংক্রান্ত নিয়ম অনুযায়ী (25000 &plusmn; 5%) &Omega;। এর বন্ধনীর রং ক্রমানুসারে কীরূপ হবে?", opts: ["লাল, সবুজ, কমলা, সোনালি", "লাল, সবুজ, লাল, রূপোলি", "সবুজ, লাল, কমলা, সোনালি", "কমলা, সবুজ, লাল, সোনালি"], ans: 0, exp: "ব্যাখ্যা: 2 = লাল, 5 = সবুজ, 10<sup>3</sup> (তিনটি শূন্য) = কমলা। এবং 5% টলারেন্স = সোনালি।" },
+{ q: "৩. [JEE Main Concept] তামা (Copper) ও জার্মেনিয়াম (Ge)-কে ঘরের তাপমাত্রা (300 K) থেকে শীতল করে 50 K তাপমাত্রায় আনা হলে এদের রোধাঙ্কের কী পরিবর্তন হবে?", opts: ["উভয়ের রোধাঙ্ক কমবে", "উভয়ের রোধাঙ্ক বাড়বে", "তামার রোধাঙ্ক কমবে, জার্মেনিয়ামের রোধাঙ্ক বাড়বে", "তামার রোধাঙ্ক বাড়বে, জার্মেনিয়ামের রোধাঙ্ক কমবে"], ans: 2, exp: "ব্যাখ্যা: তামা পরিবাহী তাই তাপমাত্রা কমালে রোধাঙ্ক কমে। অন্যদিকে জার্মেনিয়াম অর্ধপরিবাহী হওয়ায় তাপমাত্রা কমালে এর রোধাঙ্ক বৃদ্ধি পায়।" },
+{ q: "৪. [AIPMT Concept] তিনটি একই উপাদানের তৈরি তারের ভরের অনুপাত 1:3:5 এবং দৈর্ঘ্যের অনুপাত 5:3:1। তার তিনটির রোধের অনুপাত কত হবে?", opts: ["1 : 9 : 25", "125 : 15 : 1", "25 : 9 : 1", "5 : 1 : 1/5"], ans: 1, exp: "ব্যাখ্যা: রোধ R &propto; l<sup>2</sup>/m। অনুপাত হবে (5<sup>2</sup>/1) : (3<sup>2</sup>/3) : (1<sup>2</sup>/5) = 25 : 3 : 1/5 = 125 : 15 : 1।" },
+{ q: "৫. [CBSE Concept] 2 m দীর্ঘ এবং 0.2 mm ব্যাসবিশিষ্ট একটি তারের রোধ 5 &Omega;। তারটির উপাদানের রোধাঙ্ক কত?", opts: ["7.85 &times; 10<sup>-8</sup> &Omega;m", "3.14 &times; 10<sup>-8</sup> &Omega;m", "1.57 &times; 10<sup>-8</sup> &Omega;m", "6.28 &times; 10<sup>-8</sup> &Omega;m"], ans: 0, exp: "ব্যাখ্যা: R = &rho; l / (&pi;r<sup>2</sup>) &rArr; &rho; = R&pi;r<sup>2</sup>/l = (5 &times; 3.14 &times; (0.1 &times; 10<sup>-3</sup>)<sup>2</sup>) / 2 = 7.85 &times; 10<sup>-8</sup> &Omega;m।" },
+{ q: "৬. [NEET Concept] 16 &Omega; রোধের একটি সুষম তার দিয়ে একটি বৃত্তাকার রিং তৈরি করা হলো। রিং-এর যে-কোনো ব্যাসের দুই প্রান্তবিন্দু সাপেক্ষে রোধ কত হবে?", opts: ["8 &Omega;", "4 &Omega;", "2 &Omega;", "16 &Omega;"], ans: 1, exp: "ব্যাখ্যা: ব্যাস বরাবর তারটি 8 &Omega; এবং 8 &Omega; রোধের দুটি অর্ধবৃত্তে ভাগ হয়ে সমান্তরালে কাজ করে। তুল্যরোধ (8 &times; 8)/(8 + 8) = 4 &Omega;।" },
+{ q: "৭. [JEE Concept] 8টি অভিন্ন কোশ (যাদের প্রতিটির EMF = 3V এবং অভ্যন্তরীণ রোধ 1 &Omega;) শ্রেণি সমবায়ে একটি 4 &Omega; বহিস্থ রোধের সাথে যুক্ত। বর্তনীতে যদি 1.5 A তড়িৎপ্রবাহ পাওয়া যায়, তবে কতগুলি কোশ ভুলবশত উলটো দিকে যুক্ত আছে?", opts: ["1 টি", "2 টি", "3 টি", "4 টি"], ans: 0, exp: "ব্যাখ্যা: n টি কোশের মধ্যে x টি উলটো থাকলে, I = (n-2x)E / (R+nr)। মান বসালে 1.5 = (8-2x)*3 / (4 + 8*1) &rArr; 1.5 = (24-6x)/12 &rArr; 18 = 24-6x &rArr; 6x = 6 &rArr; x = 1।" },
+{ q: "৮. [WBJEE Concept] 12টি সদৃশ কোশ (2V EMF, 1 &Omega; অভ্যন্তরীণ রোধ) দিয়ে একটি মিশ্র সমবায় গঠন করা হলো। 3 &Omega; রোধের বহির্বর্তনীতে সর্বোচ্চ তড়িৎপ্রবাহ পাঠাতে হলে সর্বোচ্চ প্রবাহের মান কত হবে?", opts: ["1 A", "2 A", "4 A", "3 A"], ans: 1, exp: "ব্যাখ্যা: সর্বোচ্চ প্রবাহের শর্ত R = nr/m &rArr; 3 = n/m &rArr; n = 3m। মোট কোশ mn = 12 &rArr; 3m<sup>2</sup> = 12 &rArr; m = 2, n = 6। সর্বোচ্চ প্রবাহ I = mnE / 2mR = (12 &times; 2) / (2 &times; 2 &times; 3) = 24/12 = 2 A।" },
+{ q: "৯. [NEET Concept] সমদৈর্ঘ্য ও সমপ্রস্থচ্ছেদের দুটি ধাতব তার শ্রেণি সমবায়ে যুক্ত আছে। তার দুটির তড়িৎ পরিবাহিতাঙ্ক যথাক্রমে &sigma;<sub>1</sub> ও &sigma;<sub>2</sub> হলে সমবায়টির তুল্য পরিবাহিতাঙ্কের মান হবে—", opts: ["(&sigma;<sub>1</sub> + &sigma;<sub>2</sub>) / 2", "(&sigma;<sub>1</sub>&sigma;<sub>2</sub>) / (&sigma;<sub>1</sub> + &sigma;<sub>2</sub>)", "2&sigma;<sub>1</sub>&sigma;<sub>2</sub> / (&sigma;<sub>1</sub> + &sigma;<sub>2</sub>)", "(&sigma;<sub>1</sub> + &sigma;<sub>2</sub>) / 2&sigma;<sub>1</sub>&sigma;<sub>2</sub>"], ans: 2, exp: "ব্যাখ্যা: শ্রেণিতে তুল্যরোধ R<sub>eq</sub> = R<sub>1</sub> + R<sub>2</sub> &rArr; 2l/(&sigma;<sub>eq</sub>A) = l/(&sigma;<sub>1</sub>A) + l/(&sigma;<sub>2</sub>A) &rArr; 2/&sigma;<sub>eq</sub> = 1/&sigma;<sub>1</sub> + 1/&sigma;<sub>2</sub>। সমাধান করলে &sigma;<sub>eq</sub> = 2&sigma;<sub>1</sub>&sigma;<sub>2</sub> / (&sigma;<sub>1</sub> + &sigma;<sub>2</sub>)।" },
+{ q: "১০. [JEE Concept] G রোধের একটি গ্যালভানোমিটারের সমান্তরালে একটি সান্ট S যুক্ত করা হলো। যদি বর্তনীর মূল প্রবাহের 20% গ্যালভানোমিটারের মধ্য দিয়ে প্রবাহিত হয়, তবে S এর মান G এর সাপেক্ষে কত হবে?", opts: ["G/5", "G/4", "4G", "G/2"], ans: 1, exp: "ব্যাখ্যা: I<sub>g</sub> = 20% of I = I/5। সূত্র I<sub>g</sub> = I &times; S/(G+S) &rArr; 1/5 = S/(G+S) &rArr; G+S = 5S &rArr; 4S = G &rArr; S = G/4।" },
+{ q: "১১. [AIEEE Concept] দুটি ভিন্ন তাপমাত্রায় (T<sub>1</sub> এবং T<sub>2</sub>) একটি ধাতব তারের V-I লেখচিত্র অঙ্কন করা হলো (Y-অক্ষে V এবং X-অক্ষে I)। যদি T<sub>1</sub> তাপমাত্রার লেখচিত্রটি T<sub>2</sub> এর চেয়ে বেশি খাড়া (steeper) হয়, তবে—", opts: ["T<sub>1</sub> > T<sub>2</sub>", "T<sub>1</sub> < T<sub>2</sub>", "T<sub>1</sub> = T<sub>2</sub>", "সম্পর্কটি বলা সম্ভব নয়"], ans: 0, exp: "ব্যাখ্যা: V-I লেখচিত্রের নতি (Slope) রোধ R কে নির্দেশ করে। T<sub>1</sub> এর নতি বেশি হওয়ায় এর রোধ বেশি। ধাতব পরিবাহীর ক্ষেত্রে তাপমাত্রা বাড়লে রোধ বাড়ে, তাই T<sub>1</sub> > T<sub>2</sub>।" },
+{ q: "১২. [JEE Main Concept] পোটেনশিওমিটারের তারের দৈর্ঘ্য যত বড়ো হয়, যন্ত্রটির বিভব পরিমাপের সুবেদিতা (Sensitivity)—", opts: ["তত কমে যায়", "অপরিবর্তিত থাকে", "তত বৃদ্ধি পায়", "প্রথমে বাড়ে তারপর কমে"], ans: 2, exp: "ব্যাখ্যা: তারের দৈর্ঘ্য বাড়লে প্রতি একক দৈর্ঘ্যে বিভবপতন বা বিভব-নতিমাত্রা (Potential gradient) হ্রাস পায়, ফলে যন্ত্রটি অনেক সূক্ষ্ম বিভবও পরিমাপ করতে পারে এবং সুবেদিতা বৃদ্ধি পায়।" },
+{ q: "১৩. [WBJEE Concept] পাঁচটি সমমানের রোধ R কে হুইটস্টোন ব্রিজের আকারে যুক্ত করা হলো। ব্রিজটি সাম্যাবস্থায় থাকলে (balanced condition) গ্যালভানোমিটারের জায়গায় থাকা মাঝের রোধটির মধ্য দিয়ে তড়িৎপ্রবাহ কত হবে?", opts: ["V/R", "V/2R", "2V/R", "0 (শূন্য)"], ans: 3, exp: "ব্যাখ্যা: ব্রিজ সাম্যাবস্থায় থাকলে (P/Q = R/S), গ্যালভানোমিটারের দুই প্রান্তের বিন্দুর বিভব সমান হয়ে যায়। ফলে ওই শাখার মধ্য দিয়ে কোনো তড়িৎ প্রবাহিত হয় না।" },
+{ q: "১৪. [NEET Concept] 100 &Omega; এবং 200 &Omega; রোধের দুটি রোধককে একটি ব্যাটারির সঙ্গে সমান্তরাল সমবায়ে যুক্ত করা হলো। একই সময়ে এদের মধ্যে উৎপন্ন তাপের অনুপাত কত হবে?", opts: ["1 : 2", "2 : 1", "1 : 4", "4 : 1"], ans: 1, exp: "ব্যাখ্যা: সমান্তরাল সমবায়ে বিভব (V) সমান থাকে। উৎপন্ন তাপ H = (V<sup>2</sup>/R)t &rArr; H &propto; 1/R। তাই H<sub>1</sub> : H<sub>2</sub> = R<sub>2</sub> : R<sub>1</sub> = 200 : 100 = 2 : 1।" },
+{ q: "১৫. [JEE Main Concept] একটি আদর্শ তড়িৎ উৎস (Ideal Current Source)-এর নিজস্ব অভ্যন্তরীণ রোধ তাত্ত্বিকভাবে কত হওয়া উচিত?", opts: ["শূন্য", "অসীম", "100 &Omega;", "বর্তনীর রোধের সমান"], ans: 1, exp: "ব্যাখ্যা: আদর্শ ভোল্টেজ উৎসের অভ্যন্তরীণ রোধ শূন্য হয়। কিন্তু আদর্শ কারেন্ট বা তড়িৎ উৎসের ক্ষেত্রে অভ্যন্তরীণ রোধ অসীম হয়, যাতে করে এর মধ্য দিয়ে কোনো কারেন্ট লিকেজ না হয় এবং এটি বর্তনীতে সম্পূর্ণ স্থির তড়িৎপ্রবাহ পাঠাতে পারে।" }
+]
+}
+};
+
+let currentUser = "";
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+function getGlobalUsers() {
+const data = localStorage.getItem("testBazarGlobalUsers");
+return data ? JSON.parse(data) : {};
+}
+
+function getAttemptsData() {
+const data = localStorage.getItem("testBazarAttemptsPhys3_U2C1_v1");
+return data ? JSON.parse(data) : {};
+}
+
+function getAttemptCount(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+return attempts[key] || 0;
+}
+
+function incrementAttempt(username, setId) {
+const attempts = getAttemptsData();
+const key = username + '|' + setId;
+attempts[key] = (attempts[key] || 0) + 1;
+localStorage.setItem("testBazarAttemptsPhys3_U2C1_v1", JSON.stringify(attempts));
+return attempts[key];
+}
+
+window.onload = () => { renderHub(); };
+
+function renderHub() {
+const grid = document.getElementById("setGrid");
+grid.innerHTML = "";
+for(let id in ALL_SETS) {
+const set = ALL_SETS[id];
+const div = document.createElement("div");
+div.className = "set-card";
+let attemptCount = 0;
+let isLocked = false;
+
+if (currentUser) {
+attemptCount = getAttemptCount(currentUser, id);
+isLocked = attemptCount >= MAX_ATTEMPTS;
+if (isLocked) div.classList.add("locked");
+}
+
+div.innerHTML = `
+<div class="icon">${set.icon}</div>
+<div class="set-num">${set.name}</div>
+<div class="set-title">${set.topic}</div>
+<div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+${currentUser ? `<div class="attempt-badge ${isLocked?'locked-badge':''}">${isLocked ? '🔒 Locked' : attemptCount + '/' + MAX_ATTEMPTS}</div>` : ''}
+`;
+
+div.onclick = () => {
+if (isLocked) { alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return; }
+handleSetClick(id);
+};
+grid.appendChild(div);
+}
+}
+
+function handleSetClick(setId) {
+activeSetId = setId;
+if (!currentUser) {
+document.getElementById("loginSetName").innerText = `📚 ${ALL_SETS[setId].name}`;
+document.getElementById("loginOverlay").classList.add("active");
+document.getElementById("loginUsername").value = "";
+document.getElementById("loginPassword").value = "";
+document.getElementById("loginError").style.display = "none";
+} else { startQuiz(setId); }
+}
+
+function doLogin() {
+const u = document.getElementById("loginUsername").value.trim();
+const p = document.getElementById("loginPassword").value.trim();
+const err = document.getElementById("loginError");
+const GLOBAL_USERS = getGlobalUsers();
+
+if(!u || !p) { err.innerText = "ইউজারনেম এবং পাসওয়ার্ড দিন!"; err.style.display = "block"; return; }
+if(GLOBAL_USERS[u] && GLOBAL_USERS[u] === p) {
+let attempts = getAttemptCount(u, activeSetId);
+if (attempts >= MAX_ATTEMPTS) {
+err.innerText = `আপনি এই সেটে সর্বোচ্চ ${MAX_ATTEMPTS} বার পরীক্ষা দিয়েছেন!`;
+err.style.display = "block";
+return;
+}
+currentUser = u;
+document.getElementById("loginOverlay").classList.remove("active");
+document.getElementById("userDisplay").innerHTML = `👤 ${u}`;
+document.getElementById("userDisplay").classList.remove("hidden");
+renderHub();
+startQuiz(activeSetId);
+} else {
+err.innerText = "ইউজারনেম বা পাসওয়ার্ড ভুল! (Index থেকে চেক করুন)";
+err.style.display = "block";
+}
+}
+
+function closeLogin() { document.getElementById("loginOverlay").classList.remove("active"); }
+
+function goToHub() {
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("hubPage").style.display = "block";
+document.getElementById("timerBox").classList.add("hidden");
+clearInterval(timerInterval);
+renderHub();
+}
+
+function startQuiz(setId) {
+incrementAttempt(currentUser, setId);
+questions = ALL_SETS[setId].questions;
+currentQIndex = 0; score = 0; wrongAnswers = 0; userAnswers = {}; isReviewMode = false; timeLeft = TIME_LIMIT;
+document.getElementById("hubPage").style.display = "none";
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+document.getElementById("timerBox").classList.remove("hidden");
+document.getElementById("testSetLabel").innerText = ALL_SETS[setId].name;
+document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+startTimer();
+loadQuestion();
+}
+
+function loadQuestion() {
+const qData = questions[currentQIndex];
+document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+document.getElementById("qText").innerHTML = qData.q;
+const progress = ((currentQIndex) / questions.length) * 100;
+document.getElementById("progressFill").style.width = `${progress}%`;
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+const optsBox = document.getElementById("qOpts");
+optsBox.innerHTML = "";
+document.getElementById("explanation").classList.remove("show");
+document.getElementById("nextBtn").disabled = true;
+document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+qData.opts.forEach((optText, idx) => {
+const btn = document.createElement("button");
+btn.className = "opt";
+btn.innerHTML = `<div class="opt-circle">${LABELS[idx]}</div> <div class="opt-text">${optText}</div>`;
+if (isReviewMode) {
+btn.classList.add("disabled");
+if (idx === qData.ans) btn.classList.add("correct");
+else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+} else {
+btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+}
+optsBox.appendChild(btn);
+});
+
+if (isReviewMode) {
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+if (currentQIndex === questions.length - 1) { document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন"; }
+}
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+allBtns.forEach(b => b.classList.add("disabled"));
+userAnswers[currentQIndex] = selectedIdx;
+if (selectedIdx === correctIdx) { btn.classList.add("correct"); score++; } 
+else { btn.classList.add("wrong"); allBtns[correctIdx].classList.add("correct"); wrongAnswers++; }
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp.replace('ব্যাখ্যা: ', '')}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+}
+
+function nextQ() {
+if (isReviewMode && currentQIndex === questions.length - 1) {
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show"); return;
+}
+if (!isReviewMode && currentQIndex === questions.length - 1) { finishQuiz(); return; }
+currentQIndex++; loadQuestion();
+}
+
+function startTimer() {
+clearInterval(timerInterval);
+const tBox = document.getElementById("timerBox");
+tBox.classList.remove("danger");
+timerInterval = setInterval(() => {
+if (timeLeft <= 0) { clearInterval(timerInterval); finishQuiz(); return; }
+timeLeft--;
+const m = Math.floor(timeLeft / 60); const s = timeLeft % 60;
+document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+if (timeLeft < 60) tBox.classList.add("danger");
+}, 1000);
+}
+
+function finishQuiz() {
+clearInterval(timerInterval);
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("timerBox").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show");
+const total = questions.length; const skipped = total - (score + wrongAnswers);
+const percent = Math.round((score / total) * 100);
+document.getElementById("finalScore").innerText = `${percent}%`;
+document.getElementById("rbCorrect").innerText = score;
+document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+const gradeEl = document.getElementById("resultGrade");
+if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+const remaining = MAX_ATTEMPTS - getAttemptCount(currentUser, activeSetId);
+document.getElementById("attemptInfo").innerHTML = `👤 ${currentUser} — বাকি আছে <strong>${remaining}</strong> বার Test দেওয়ার সুযোগ।`;
+}
+
+function restartQuiz() {
+if (getAttemptCount(currentUser, activeSetId) >= MAX_ATTEMPTS) {
+alert(`⚠️ আপনি এই সেটের সর্বোচ্চ ${MAX_ATTEMPTS} বার Test দিয়েছেন।`); return;
+}
+startQuiz(activeSetId);
+}
+
+function showReview() {
+isReviewMode = true; currentQIndex = 0;
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+loadQuestion();
+}
+</script>
+</body>
+</html>
