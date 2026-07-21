@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Bazar — Free Demo Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Bangla&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+--primary: #1a7a4a;
+--primary-hover: #2aad68;
+--accent: #f9a825;
+--bg-main: #f0faf4;
+--bg-card: #ffffff;
+--bg-correct: #e8f7ef;
+--bg-wrong: #fdf0f0;
+--text-main: #1c2e24;
+--text-meta: #5a7a66;
+--text-exp: #2c4035;
+--alert-danger: #dc3545;
+--alert-warning: #e8730a;
+--border-color: #c5dccb;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Syne', sans-serif; background: var(--bg-main); min-height: 100vh; color: var(--text-main); }
+.en-font { font-family: 'Syne', sans-serif; }
+a { text-decoration: none; }
+
+.top-bar { background: var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.top-logo { font-size: 1.2rem; font-weight: 800; color: white; cursor: pointer; }
+.top-logo span { color: var(--accent); }
+.timer-box { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 8px; color: white; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.timer-box.danger { background: var(--alert-danger); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+.main { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+
+/* Promotional Banner */
+.promo-banner { background: linear-gradient(135deg, #f9a825, #f57f17); padding: 25px; border-radius: 16px; text-align: center; margin-bottom: 30px; box-shadow: 0 8px 20px rgba(249, 168, 37, 0.3); color: white;}
+.promo-banner h2 { font-family: 'Syne', sans-serif; font-size: 1.8rem; margin-bottom: 10px; font-weight: 800; letter-spacing: 1px;}
+.promo-banner p { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px;}
+.wa-btn { background: #25D366; color: white; padding: 12px 25px; border-radius: 8px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; font-family: 'Syne', sans-serif; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2);}
+.wa-btn:hover { background: #128C7E; transform: translateY(-2px);}
+.wa-btn svg { width: 20px; height: 20px; fill: white;}
+
+.hub-header { text-align: center; margin-bottom: 2rem; }
+.hub-header h1 { font-family: 'Tiro Bangla', serif; color: var(--primary); font-size: 1.6rem; margin-bottom: 0.5rem; line-height: 1.4; }
+.hub-header p { color: var(--text-meta); font-size: 0.95rem; font-family: 'Tiro Bangla', serif; font-weight: bold;}
+
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+.set-card { background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.set-card:hover { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 15px rgba(26,122,74,0.1); }
+.set-card .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.set-card .set-num { font-weight: 800; font-size: 1.2rem; color: var(--primary); font-family: 'Syne', sans-serif;}
+.set-card .set-title { font-family: 'Tiro Bangla', serif; font-size: 0.95rem; color: var(--text-main); margin: 0.5rem 0 0.8rem; line-height: 1.3; font-weight: bold;}
+.set-card .set-meta { display: flex; justify-content: center; gap: 1rem; font-size: 0.8rem; color: var(--text-meta); font-weight: bold; }
+.set-card .set-meta span { background: var(--bg-main); padding: 0.2rem 0.8rem; border-radius: 6px; }
+.free-badge { position: absolute; top: 10px; right: 10px; background: #28a745; color: white; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+
+/* Quiz View */
+.quiz-info { background: white; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; border: 1px solid var(--border-color); display: flex; gap: 1rem; flex-wrap: wrap; }
+.info-item { font-family: 'Tiro Bangla', serif; font-size: 0.95rem; color: var(--text-meta); font-weight: 600;}
+.info-item strong { color: var(--primary); }
+.progress-wrap { background: var(--border-color); border-radius: 4px; height: 6px; margin-bottom: 1.2rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--primary); transition: width 0.3s ease; }
+.q-card { background: white; border-radius: 14px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.q-num { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.8rem; }
+.q-text { font-family: 'Tiro Bangla', serif; font-size: 1.1rem; color: var(--text-main); font-weight: 700; line-height: 1.6; margin-bottom: 1.2rem; }
+.opts { display: flex; flex-direction: column; gap: 0.6rem; }
+.opt { display: flex; align-items: center; gap: 12px; padding: 0.8rem 1rem; border: 1.5px solid var(--border-color); border-radius: 10px; background: transparent; cursor: pointer; text-align: left; transition: all 0.2s; width: 100%; font-family: 'Tiro Bangla', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-main);}
+.opt:not(.disabled):hover { border-color: var(--primary); background: var(--bg-main); }
+.opt-circle { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; font-family: 'Syne', sans-serif; background: white; }
+.opt.correct { border-color: var(--primary); background: var(--bg-correct); }
+.opt.correct .opt-circle { background: var(--primary); border-color: var(--primary); color: white; }
+.opt.wrong { border-color: var(--alert-danger); background: var(--bg-wrong); }
+.opt.wrong .opt-circle { background: var(--alert-danger); border-color: var(--alert-danger); color: white; }
+.opt.disabled { cursor: default; }
+.explanation { background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; padding: 1rem; margin-top: 1rem; display: none; }
+.explanation.show { display: block; }
+.explanation p { font-family: 'Tiro Bangla', serif; font-size: 0.9rem; color: var(--text-exp); line-height: 1.6; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+.score-show { font-family: 'Tiro Bangla', serif; font-size: 0.85rem; color: var(--text-meta); font-weight: bold;}
+.next-btn { background: var(--primary); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+.next-btn:disabled { background: var(--border-color); cursor: not-allowed; }
+
+/* Result View */
+.result-wrap { background: white; border-radius: 14px; padding: 2rem 1.5rem; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto; display: none; }
+.result-wrap.show { display: block; }
+.result-icon { font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1;}
+.result-score { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+.result-total { font-size: 1rem; color: var(--text-meta); font-weight: bold; margin-bottom: 1rem; }
+.result-grade { font-family: 'Tiro Bangla', serif; font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; }
+.result-bars { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; }
+.result-bar { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.8rem; min-width: 80px; }
+.rb-num { font-size: 1.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px;}
+.rb-label { font-family: 'Tiro Bangla', serif; font-size: 0.8rem; color: var(--text-meta); font-weight: bold;}
+.action-btns { display: flex; flex-direction: column; gap: 10px; }
+.action-btns button { width: 100%; padding: 12px; border-radius: 8px; font-family: 'Tiro Bangla', serif; font-size: 1rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+.btn-retry { background: #17a2b8; color: white; }
+.btn-review { background: #28a745; color: white; }
+.btn-home { background: var(--bg-main); color: var(--text-main); border: 1.5px solid var(--border-color) !important; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+<div class="top-logo" onclick="location.reload()">Test<span>Bazar</span></div>
+<div class="timer-box en-font hidden" id="timerBox">⏱ <span id="timerDisplay">10:00</span></div>
+</header>
+
+<div class="main">
+
+<!-- HUB PAGE -->
+<div id="hubPage">
+<div class="promo-banner">
+<h2>🎯 PRACTICE MAKES PERFECT!</h2>
+<p>এটি একটি ফ্রি ডেমো টেস্ট। মূল টেস্টগুলো আনলক করতে এবং আপনার Username ও Password পেতে এখনই আমাদের WhatsApp-এ মেসেজ করুন।</p>
+<a href="https://wa.me/918710032880?text=Hello%20Test%20Bazar,%20I%20want%20my%20username%20and%20password." target="_blank" class="wa-btn">
+<svg viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0.068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.921l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.865-.583-.43-1.022-1.006-1.141-1.144-.119-.137-.013-.21.085-.308.088-.089.197-.23.296-.346.099-.114.133-.197.197-.326.065-.133.033-.248-.016-.346-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>
+WhatsApp করুন
+</a>
+</div>
+
+<div class="hub-header">
+<h1>Science 3rd Semester — Free Demo</h1>
+<p>৪টি বিষয়ের ডেমো টেস্ট নিচে দেওয়া হলো। কোনো লগইন ছাড়াই পরীক্ষা দেওয়া যাবে।</p>
+</div>
+
+<div class="set-grid" id="setGrid"></div>
+</div>
+
+<!-- QUIZ AREA -->
+<div id="testArea" class="hidden">
+<div class="quiz-info">
+<div class="info-item">🎓 <strong id="testSubject">Subject</strong> — Demo Test</div>
+<div class="info-item">📝 <span id="testTopic">Topic Name</span></div>
+</div>
+<div class="progress-wrap"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="q-card">
+<div class="q-num en-font" id="qNum">প্রশ্ন ১ / ১৫</div>
+<div class="q-text" id="qText">Question Text</div>
+<div class="opts" id="qOpts"></div>
+<div class="explanation" id="explanation"><p id="explanationText"></p></div>
+<div class="nav-row">
+<div class="score-show" id="scoreShow">সঠিক: ০ | ভুল: ০</div>
+<button class="next-btn" id="nextBtn" onclick="nextQ()" disabled>পরবর্তী →</button>
+</div>
+</div>
+</div>
+
+<!-- RESULT AREA -->
+<div class="result-wrap" id="resultWrap">
+<div class="result-icon" id="resultIcon">🏆</div>
+<div class="result-score en-font" id="finalScore">100%</div>
+<div class="result-total">স্কোর</div>
+<div class="result-grade" id="resultGrade">অসাধারণ!</div>
+<div class="result-bars">
+<div class="result-bar">
+<div class="rb-num en-font" id="rbCorrect" style="color:var(--primary)">15</div>
+<div class="rb-label">সঠিক</div>
+</div>
+<div class="result-bar">
+<div class="rb-num en-font" id="rbWrong" style="color:var(--alert-danger)">0</div>
+<div class="rb-label">ভুল/স্কিপ</div>
+</div>
+</div>
+<div style="background: #e8f7ef; padding: 12px; border-radius: 8px; margin-bottom: 15px; color: var(--primary); font-family: 'Tiro Bangla', serif; font-weight: bold; border: 1px solid var(--border-color);">
+💡 Practice Makes Perfect! আরও টেস্ট দিতে WhatsApp-এ আপনার Username ও Password সংগ্রহ করুন।
+</div>
+<div class="action-btns">
+<button class="btn-retry" onclick="restartQuiz()">আবার চেষ্টা করো</button>
+<button class="btn-review" onclick="showReview()">উত্তর দেখো</button>
+<button class="btn-home" onclick="goToHub()">← ড্যাশবোর্ডে ফিরে যাও</button>
+</div>
+</div>
+
+</div>
+
+<script>
+const TIME_LIMIT = 10 * 60; // 10 Minutes
+const LABELS = ['(a)', '(b)', '(c)', '(d)'];
+
+const ALL_SETS = {
+"bio": {
+subject: 'Biology', icon: '🧬', topic: 'সপুষ্পক উদ্ভিদের যৌন জনন',
+questions: [
+{ q: "১. একটি আদর্শ ফুলের কয়টি স্তবক থাকে?", opts: ["২টি", "৩টি", "৪টি", "৫টি"], ans: 2, exp: "একটি আদর্শ বা সম্পূর্ণ ফুলে পুষ্পাক্ষের ওপর ক্রমান্বয়ে চারটি স্তবক—বৃতি, দলমণ্ডল, পুংস্তবক ও স্ত্রীস্তবক সজ্জিত থাকে।" },
+{ q: "২. ডাইথেকাস (Dithecous) পরাগধানীতে মোট কয়টি পরাগথলি বা মাইক্রোস্পোরাঞ্জিয়াম থাকে?", opts: ["১টি", "২টি", "৪টি", "৮টি"], ans: 2, exp: "ডাইথেকাস পরাগধানীর দুটি খণ্ড থাকে এবং প্রতিটি খণ্ডে দুটি করে মোট ৪টি পরাগথলি থাকে, তাই একে টেট্রাস্পোরাঞ্জিয়েট পরাগধানী বলে।" },
+{ q: "৩. পরাগধানীর প্রাচীরের কোন্ স্তরটি পরিণত পরাগরেণুকে পুষ্টি প্রদান করে?", opts: ["এপিডারমিস", "এন্ডোথেসিয়াম", "মধ্যস্তর", "ট্যাপেটাম"], ans: 3, exp: "পরাগধানীর প্রাচীরের সবচেয়ে ভেতরের স্তর হলো ট্যাপেটাম। এই স্তরটি রেণুধর কলা ও অপরিণত পরাগরেণুকে পুষ্টির জোগান দেয়।" },
+{ q: "৪. পরাগরেণুর বহিঃপ্রাচীর (Exine) কোন্ অত্যন্ত সুদৃঢ় ও কঠিন রাসায়নিক পদার্থ দ্বারা গঠিত?", opts: ["সেলুলোজ", "পেকটিন", "স্পোরোপোলেনিন", "সুবেরিন"], ans: 2, exp: "পরাগরেণুর বহিঃপ্রাচীর বা একজাইন স্পোরোপোলেনিন নামক ফ্যাটি পদার্থ দিয়ে গঠিত, যা তীব্র রাসায়নিক পদার্থ বা উৎসেচকে দ্রবীভূত হয় না এবং রেণুকে রক্ষা করে।" },
+{ q: "৫. স্পোরোপোলেনিন গঠনে সাহায্যকারী 'ইউবিস বডি' (Ubisch body) কে ক্ষরণ করে?", opts: ["এন্ডোথেসিয়াম", "ট্যাপেটাম", "রেণুমাতৃকোশ", "যোজক"], ans: 1, exp: "ট্যাপেটাম স্তরের ক্ষরণকারী কোষগুলি থেকে ইউবিস বডি ক্ষরিত হয় যা স্পোরোপোলেনিন গঠনে এবং পরাগরেণুর বহিঃপ্রাচীর তৈরিতে সাহায্য করে।" },
+{ q: "৬. পুংরেণু বা মাইক্রোস্পোর মাতৃকোশ থেকে হ্যাপ্লয়েড পরাগরেণু উৎপন্ন হওয়ার পদ্ধতিকে কী বলে?", opts: ["মেগাস্পোরোজেনেসিস", "মাইক্রোস্পোরোজেনেসিস", "মাইক্রোগ্যামেটোজেনেসিস", "উজেনেসিস"], ans: 1, exp: "পরাগধানীর রেণুধর কলায় রেণুমাতৃকোশ (2n) থেকে মিয়োসিস প্রক্রিয়ায় হ্যাপ্লয়েড পরাগরেণু (n) উৎপন্ন হওয়ার পদ্ধতিকে মাইক্রোস্পোরোজেনেসিস বলে।" },
+{ q: "৭. পতঙ্গপরাগী ফুলের পরাগরেণুর বাইরের দিকে থাকা হলুদ, চটচটে ও তৈলাক্ত পদার্থটিকে কী বলে?", opts: ["পোলেনকিট", "একজাইন", "ইনটাইন", "স্পোরোপোলেনিন"], ans: 0, exp: "পতঙ্গপরাগী ফুলের ট্যাপেটাম থেকে নিঃসৃত তৈলাক্ত ও চটচটে বিশেষ পদার্থকে পোলেনকিট বলে, যা রেণুকে পতঙ্গের গায়ে আটকে যেতে সাহায্য করে।" },
+{ q: "৮. পরাগধানীর আর্কিষ্পোরিয়াল কোশ বিভাজিত হয়ে কী কী গঠন করে?", opts: ["কেবল পরাগরেণু", "প্রাথমিক প্যারাইটাল কোশ ও স্পোরোজেনাস কোশ", "কেবল ট্যাপেটাম", "কেবল যোজক"], ans: 1, exp: "আর্কিষ্পোরিয়াল কোষ বিভাজিত হয়ে পরিধির দিকে প্রাথমিক প্যারাইটাল কোশ এবং ভেতরের দিকে প্রাথমিক স্পোরোজেনাস কোশ গঠন করে।" },
+{ q: "৯. পলিনিয়াম (Pollinium) কোন্ ফুলের পরাগধানীতে দেখা যায়?", opts: ["জবা", "সূর্যমুখী", "অর্কিড", "মটর"], ans: 2, exp: "অর্কিড ফুলে অনেকগুলি পরাগরেণু যখন একটি সাধারণ পরাগরেণু থলির মধ্যে একত্রে আবৃত থাকে, তখন সেই গঠনকে পলিনিয়াম বলে।" },
+{ q: "১০. পরাগরেণুর মসৃণ অন্তঃপ্রাচীর বা ইনটাইন প্রধানত কী দিয়ে গঠিত?", opts: ["কাইটিন", "সেলুলোজ ও পেকটিন", "স্পোরোপোলেনিন", "লিগনিন"], ans: 1, exp: "পরাগরেণুর অন্তঃপ্রাচীর বা ইনটাইন পেক্টো-সেলুলোজিক প্রকৃতির, অর্থাৎ এটি পেকটিন ও সেলুলোজ দিয়ে গঠিত।" },
+{ q: "১১. একগুচ্ছ বা মনোডেলফাস (Monodelphous) পুংকেশর কোন্ ফুলে দেখা যায়?", opts: ["মটর", "শিমুল", "জবা", "সূর্যমুখী"], ans: 2, exp: "জবা বা কার্পাস ফুলে সব পুংকেশরের পুংদণ্ডগুলি পরস্পরের সঙ্গে যুক্ত হয়ে একটিমাত্র গুচ্ছ তৈরি করে, তাই একে মনোডেলফাস পুংকেশর বলে।" },
+{ q: "১২. পরাগধানীর দুটি পরাগথলির মাঝে থাকা যে খাঁজ বরাবর পরাগধানী বিদীর্ণ হয়ে রেণু মুক্ত হয়, তাকে কী বলে?", opts: ["স্টোমিয়াম", "যোজক", "এন্ডোথেসিয়াম", "ট্যাপেটাম"], ans: 0, exp: "দুটি মাইক্রোস্পোরাঞ্জিয়ামের মাঝে যে খাঁজটি থাকে তাকে স্টোমিয়াম বলে। এই অংশটি বিদীর্ণ হয়েই পরাগরেণু বাতাসে মুক্ত হয়।" },
+{ q: "১৩. ক্যালেজ (Callase) নামক উৎসেচক যা রেণুচতুষ্টয়ের ক্যালোজ প্রাচীরকে দ্রবীভূত করে, তা কোথা থেকে ক্ষরিত হয়?", opts: ["পরাগ মাতৃকোশ", "ট্যাপেটামের অ্যামিবয়েড কোশ", "মধ্যস্তর", "এন্ডোথেসিয়াম"], ans: 1, exp: "ট্যাপেটামের অ্যামিবয়েড কোশগুলি ক্যালেজ নামক উৎসেচক ক্ষরণ করে, যা রেণুচতুষ্টয়ের চারদিকের ক্যালোজ প্রাচীর দ্রবীভূত করে।" },
+{ q: "১৪. পরাগরেণু মাতৃকোশ (2n) থেকে রেণুচতুষ্টয় সৃষ্টি হওয়ার সময় কোন্ কোশ বিভাজন ঘটে?", opts: ["মাইটোসিস", "অ্যামাইটোসিস", "মিয়োসিস", "দ্বিবিভাজন"], ans: 2, exp: "ডিপ্লয়েড পরাগরেণু মাতৃকোশ (2n) মিয়োসিস প্রক্রিয়ায় বিভাজিত হয়ে চারটি হ্যাপ্লয়েড (n) পরাগরেণু বা রেণুচতুষ্টয় গঠন করে।" },
+{ q: "১৫. পুষ্পাক্ষ ও পুংকেশরের পরাগধানীর মধ্যবর্তী দণ্ডাকার অংশটিকে কী বলে?", opts: ["যোজক", "পুংদণ্ড (Filament)", "গর্ভদণ্ড", "বৃন্ত"], ans: 1, exp: "পুংকেশরের যে সরু দণ্ডাকার অংশে পরাগধানী সংলগ্ন থাকে এবং যা পুষ্পাক্ষের সাথে যুক্ত থাকে, তাকে পুংদণ্ড বা ফিলামেন্ট বলে।" }
+]
+},
+"phy": {
+subject: 'Physics', icon: '⚛️', topic: 'স্থির তড়িৎ: তড়িদাধান',
+questions: [
+{ q: "১. পশম দিয়ে এবোনাইটকে ঘষলে এবোনাইটে কী তড়িৎ সৃষ্টি হয়?", opts: ["ধনাত্মক", "প্রশম", "ঋণাত্মক", "কোনোটিই নয়"], ans: 2, exp: "স্থির তড়িৎ শ্রেণির তালিকা অনুযায়ী, পশম (১ নম্বরে) এবং এবোনাইট (১১ নম্বরে) অবস্থিত। ঘর্ষণ করলে তালিকার নীচের বস্তুটি ঋণাত্মক আধানে আহিত হয়।" },
+{ q: "২. একটি কাচদণ্ডকে সিল্ক বা রেশম দিয়ে ঘষলে কাচদণ্ডটি ধনাত্মক আধানে আহিত হয়। এর কারণ কী?", opts: ["কাচদণ্ড থেকে কিছু সংখ্যক প্রোটন সিল্কে যায়", "সিল্ক থেকে কিছু সংখ্যক প্রোটন কাচদণ্ডে যায়", "কাচদণ্ড থেকে কিছু সংখ্যক ইলেকট্রন সিল্কে যায়", "উভয়েই ইলেকট্রন গ্রহণ করে"], ans: 2, exp: "ঘর্ষণের ফলে কাচের পরমাণু থেকে কিছু ইলেকট্রন সিল্ক বা রেশমের কাপড়ে স্থানান্তরিত হয়। ইলেকট্রনের ঘাটতির কারণে কাচদণ্ড ধনাত্মক আধানে আহিত হয়।" },
+{ q: "৩. বস্তুর তড়িদ্‌গ্রস্ততার নিশ্চিততর প্রমাণ কোনটি?", opts: ["আকর্ষণ", "বিকর্ষণ", "উভয়ই", "কোনোটিই নয়"], ans: 1, exp: "একটি আহিত বস্তু বিপরীত আধানযুক্ত বস্তু বা অনাহিত বস্তু উভয়কেই আকর্ষণ করতে পারে। কিন্তু সমজাতীয় আধানে আহিত দুটি বস্তুর মধ্যেই কেবল বিকর্ষণ হয়।" },
+{ q: "৪. স্থির তড়িৎ-সারণির প্রথম ও শেষ পদার্থ দুটির নাম কী?", opts: ["সেলুলয়েড ও পশম", "রেশম ও কাচদণ্ড", "পশম ও সেলুলয়েড", "পশম ও কাচদণ্ড"], ans: 2, exp: "স্থির তড়িৎ শ্রেণির তালিকায় মোট ১৩টি পদার্থের নাম আছে, যার প্রথমেই রয়েছে পশম (১ নম্বর) এবং শেষে রয়েছে সেলুলয়েড (১৩ নম্বর)।" },
+{ q: "৫. একটি ধনাত্মক তড়িদাহিত কাচদণ্ড দণ্ডায়মান একটি বস্তুকে বিকর্ষণ করে। বস্তুটি কী প্রকৃতির?", opts: ["ঋণাত্মক আধানে আহিত", "নিস্তড়িৎ", "ধনাত্মক আধানে আহিত", "অন্তরক এবং নিস্তড়িৎ"], ans: 2, exp: "সমজাতীয় আধান পরস্পরকে বিকর্ষণ করে। যেহেতু কাচদণ্ডটি ধনাত্মক আধানযুক্ত, তাই বিকর্ষিত বস্তুটিও নিশ্চিতভাবে ধনাত্মক আধানযুক্ত হবে।" },
+{ q: "৬. একটি বস্তুকে ঘর্ষণের দ্বারা ঋণাত্মক আধানে আহিত করা হলো। এর ভরের কী পরিবর্তন হবে?", opts: ["হ্রাস পাবে", "বৃদ্ধি পাবে", "একই থাকবে", "বলা সম্ভব নয়"], ans: 1, exp: "ঋণাত্মক আধানে আহিত হওয়ার অর্থ হলো বস্তুটি অতিরিক্ত ইলেকট্রন গ্রহণ করেছে। ইলেকট্রনের নিজস্ব ভর থাকায় বস্তুর ভর সামান্য বৃদ্ধি পাবে।" },
+{ q: "৭. ঘর্ষণের ফলে উৎপন্ন তড়িতের ক্ষেত্রে কোনটি সঠিক?", opts: ["শুধুমাত্র এক ধরনের আধান উৎপন্ন হয়", "দু-ধরনের আধান সমপরিমাণে উৎপন্ন হয়", "নতুন আধানের সৃষ্টি হয়", "আধানের বিনাশ ঘটে"], ans: 1, exp: "আধানের সংরক্ষণ নীতি অনুযায়ী, ঘর্ষণের ফলে একটি বস্তু ঠিক যতগুলি ইলেকট্রন বর্জন করে, অপর বস্তুটি ঠিক ততগুলি ইলেকট্রন গ্রহণ করে।" },
+{ q: "৮. একটি ধনাত্মক তড়িদাহিত কাচদণ্ড একটি ঝুলন্ত বস্তুকে আকর্ষণ করে এবং তারপর তাকে বিকর্ষণ করে। বস্তুটি প্রথমে কেমন ছিল?", opts: ["ঋণাত্মক তড়িদাহিত", "ধনাত্মক তড়িদাহিত", "অনাহিত ও অন্তরিত", "ভূসংলগ্ন"], ans: 2, exp: "প্রথমে বস্তুটি অনাহিত থাকায় আবেশের কারণে আকর্ষিত হয়। কিন্তু স্পর্শ করার পর পরিবহণের মাধ্যমে ধনাত্মক আধান গ্রহণ করে সম-আধানযুক্ত হয়ে বিকর্ষিত হয়।" },
+{ q: "৯. ঘর্ষণের সাহায্যে বস্তুকে আহিত করার সময় প্রধানত কোনটি স্থানান্তরিত হয়?", opts: ["প্রোটন", "নিউট্রন", "ইলেকট্রন", "পরমাণু"], ans: 2, exp: "পরমাণুর নিউক্লিয়াসের বাইরের কক্ষপথে থাকা ইলেকট্রনগুলি সহজেই বিচ্ছিন্ন হতে পারে। তাই ঘর্ষণের ফলে কেবল ইলেকট্রনের আদান-প্রদান ঘটে।" },
+{ q: "১০. পলিথিনকে উল দিয়ে ঘষলে পলিথিন কী আধানে আহিত হয়?", opts: ["ধনাত্মক", "ঋণাত্মক", "নিস্তড়িৎ", "কোনোটিই নয়"], ans: 1, exp: "স্থির তড়িৎ শ্রেণি অনুযায়ী পলিথিনকে উল দিয়ে ঘষলে উল থেকে ইলেকট্রন পলিথিনে স্থানান্তরিত হয়, যার ফলে পলিথিন ঋণাত্মক আধানে আহিত হয়।" },
+{ q: "১১. ঘর্ষণের ফলে স্থির তড়িৎ উৎপন্ন হওয়ার ঘটনাটি সর্বপ্রথম কে লক্ষ করেন?", opts: ["বেঞ্জামিন ফ্র্যাঙ্কলিন", "থেল্স", "উইলিয়াম গিলবার্ট", "কুলম্ব"], ans: 1, exp: "গ্রিক দার্শনিক থেল্স সর্বপ্রথম খ্রিস্টপূর্ব ৬০০ অব্দে লক্ষ করেন যে, অ্যামবারকে পশম দিয়ে ঘষলে সেটি ছোটো ও হালকা বস্তুকে আকর্ষণ করতে পারে।" },
+{ q: "১২. নিচের কোন জোড়া বস্তুকে ঘষলে প্রথমটিতে ধনাত্মক ও দ্বিতীয়টিতে ঋণাত্মক আধান উৎপন্ন হবে?", opts: ["কাচ ও রেশম", "রেশম ও কাচ", "গালা ও কাঠ", "রবার ও পশম"], ans: 0, exp: "স্থির তড়িৎ শ্রেণি অনুযায়ী, কাচ (৩ নম্বর) এবং রেশম (৯ নম্বর)-এ আছে। তাই কাচকে রেশম দিয়ে ঘষলে কাচ ধনাত্মক এবং রেশম ঋণাত্মক আধানে আহিত হবে।" },
+{ q: "১৩. ঘর্ষণের ফলে বস্তুর আহিতকরণের মূল কারণ হলো—", opts: ["ভরের স্থানান্তর", "পদার্থের উষ্ণতা বৃদ্ধি", "নিউক্লিয়াস থেকে প্রোটনের নির্গমন", "নিউক্লিয়াস ও ইলেকট্রনের মধ্যে আকর্ষণ বল কম থাকায় ইলেকট্রন বিচ্ছিন্ন হয়ে যাওয়া"], ans: 3, exp: "যে পদার্থের পরমাণুতে নিউক্লিয়াস ও বহিস্থ ইলেকট্রনের আকর্ষণ বল তুলনামূলকভাবে কম থাকে, ঘর্ষণের ফলে সেই পদার্থটি সহজেই ইলেকট্রন বর্জন করে ধনাত্মক আহিত হয়।" },
+{ q: "১৪. স্থির তড়িৎবিজ্ঞানে q<sub>1</sub> + q<sub>2</sub> = 0 সমীকরণটির অর্থ কী?", opts: ["দুটি আধানই শূন্য", "আধান দুটির মান অসমান", "আধান দুটি সমপরিমাণ ও বিপরীতধর্মী", "আধান দুটি সমপরিমাণ ও সমধর্মী"], ans: 2, exp: "সমীকরণটিকে q<sub>1</sub> = -q<sub>2</sub> আকারে লেখা যায়। এর অর্থ আধান দুটির মান সমান কিন্তু এদের প্রকৃতি বিপরীত।" },
+{ q: "১৫. একটি নিস্তড়িৎ বস্তু থেকে ইলেকট্রন সরিয়ে নেওয়া হলে বস্তুটি—", opts: ["ঋণাত্মক আধানে আহিত হবে", "ধনাত্মক আধানে আহিত হবে", "নিস্তড়িৎ থাকবে", "ভর বৃদ্ধি পাবে"], ans: 1, exp: "ইলেকট্রন সরিয়ে নিলে পরমাণুতে প্রোটনের (ধনাত্মক আধান) আধিক্য ঘটে এবং বস্তুটি ধনাত্মক আধানে আহিত হয়।" }
+]
+},
+"chem": {
+subject: 'Chemistry', icon: '🧪', topic: 'পদার্থের তরল অবস্থা ও দ্রবণ',
+questions: [
+{ q: "১. 20 g গ্লুকোজকে কত গ্রাম জলে দ্রবীভূত করলে উৎপন্ন দ্রবণের ওজনগত শতকরা গাঢ়ত্ব (W/W) 10% হবে?", opts: ["100 g", "150 g", "180 g", "210 g"], ans: 2, exp: "যদি জলের পরিমাণ W g হয়, তবে দ্রবণের মোট ভর = (W + 20) g। শর্তানুযায়ী, [20/(W+20)] × 100 = 10 বা, W+20=200 বা, W=180 g।" },
+{ q: "২. সাধারণ স্যালাইন হল 0.9% (W/V) NaCl-এর জলীয় দ্রবণ। উক্ত স্যালাইনের 300 mL আয়তনে যদি আরও 1.8 g NaCl দ্রবীভূত করা হয়, তবে উৎপন্ন দ্রবণের (W/V) শতকরা গাঢ়ত্ব হবে-", opts: ["1.1%", "1.5%", "1.8%", "2.1%"], ans: 1, exp: "300 mL দ্রবণে NaCl = 2.7 g। আরও 1.8 g যোগ করার পর মোট NaCl = 4.5 g। উৎপন্ন দ্রবণের শতকরা গাঢ়ত্ব = (4.5/300)×100 = 1.5%।" },
+{ q: "৩. 50°C উয়তায় 250 mL জলে 3.25 g গ্লুকোজ দ্রবীভূত আছে। দ্রবণটির ওজনগত শতকরা গাঢ়ত্ব (W/W) হল (জলের ঘনত্ব 0.987 g/mL)-", opts: ["1.14%", "1.30%", "1.83%", "2.05%"], ans: 1, exp: "250 mL জলের ভর = 246.75 g। দ্রবণের মোট ভর = 246.75+3.25=250 g। ওজনগত শতকরা গাঢ়ত্ব = (3.25/250)×100 = 1.30%।" },
+{ q: "৪. 200 mL জলে কত পরিমাণ (g এককে) গ্লুকোজ দ্রবীভূত করলে দ্রবণের (W/V) শতকরা গাঢ়ত্ব 0.6% হবে? (জলের ঘনত্ব = 1 g/mL)", opts: ["0.83 g", "1.20 g", "1.53 g", "1.63 g"], ans: 1, exp: "জলের ঘনত্ব 1 হওয়ায় W/V এবং W/W সমান ধরা যায়। [W/(W+200)]×100=0.6, যা থেকে W = 1.2 g পাওয়া যায়।" },
+{ q: "৫. 20°C উয়তায় 49% (W/W) H<sub>2</sub>SO<sub>4</sub> দ্রবণের আপেক্ষিক গুরুত্ব 1.385। 277 mL 2 N H<sub>2</sub>SO<sub>4</sub> দ্রবণ প্রস্তুত করতে উক্ত দ্রবণের কত আয়তন প্রয়োজন?", opts: ["40 mL", "52 mL", "56 mL", "60 mL"], ans: 0, exp: "277 mL 2 N দ্রবণে H2SO4 প্রয়োজন = (2×49/1000)×277 g। সমীকরণ সমাধান করলে প্রয়োজনীয় আয়তন 40 mL পাওয়া যায়।" },
+{ q: "৬. Na<sub>2</sub>CO<sub>3</sub>-এর 250 mL 0.5 N জলীয় দ্রবণের ওজন-আয়তনগত (W/V) শতকরা গাঢ়ত্ব হল-", opts: ["1.86%", "2.65%", "2.94%", "3.12%"], ans: 1, exp: "1000 mL 0.5 N দ্রবণে Na2CO3 আছে 26.5 g। 250 mL এ আছে 6.625 g। W/V গাঢ়ত্ব = (6.625/250)×100 = 2.65%।" },
+{ q: "৭. ইথানলের একটি জলীয় দ্রবণের শতকরা গাঢ়ত্ব 23% (V/V) এবং বিশুদ্ধ ইথানলের ঘনত্ব 0.8 g/mL। দ্রবণটির মোলার গাঢ়ত্ব হল-", opts: ["3.2 M", "3.5 M", "4.0 M", "4.2 M"], ans: 2, exp: "100 mL দ্রবণে ইথানল 23 mL। ভর = 23×0.8=18.4 g। মোল = 18.4/46 = 0.4 mol। 1000 mL এ থাকবে 4.0 mol।" },
+{ q: "৮. 388.9 g জল ও 35.1 g NaCl-এর একটি দ্রবণের ঘনত্ব 1.06 g/mL। ওর মোলার গাঢ়ত্ব কত?", opts: ["1.18 M", "1.50 M", "1.62 M", "1.93 M"], ans: 1, exp: "দ্রবণের মোট ভর = 424 g। আয়তন = 424/1.06 = 400 mL। NaCl-এর মোল = 0.6 mol। মোলার গাঢ়ত্ব = (0.6/400)×1000 = 1.50 M।" },
+{ q: "৯. H<sub>2</sub>SO<sub>4</sub>-এর একটি জলীয় দ্রবণ ওজনগতভাবে 40% SO<sub>3</sub> ধারণ করে। দ্রবণের ঘনত্ব 1.30 g/mL হলে ওর মোলারিটি কত?", opts: ["5.8 M", "6.5 M", "7.0 M", "7.4 M"], ans: 1, exp: "100 g দ্রবণের আয়তন = 100/1.3 mL। 40 g SO3 = 0.5 mol SO3, যা থেকে 0.5 mol H2SO4 উৎপন্ন হয়। মোলারিটি = 0.5 / (100/1.3) × 1000 = 6.5 M।" },
+{ q: "১০. ইউরিয়ার 20% (W/W) জলীয় দ্রবণের মোলালিটি হল-", opts: ["3.82 m", "4.17 m", "4.96 m", "5.26 m"], ans: 1, exp: "100 g দ্রবণে ইউরিয়া 20 g (1/3 mol) এবং জল 80 g (0.08 kg)। মোলালিটি = (1/3)/0.08 = 4.17 mol/kg।" },
+{ q: "১১. 20°C উয়তায় ফর্মিক অ্যাসিডের 5.0 M জলীয় দ্রবণের ঘনত্ব 1.15 g/mL। দ্রবণটির মোলালিটি এবং (W/W) শতকরা গাঢ়ত্ব হল-", opts: ["4.82 ও 24%", "5.43 ও 20%", "5.91 ও 26%", "6.07 ও 30%"], ans: 1, exp: "1 L দ্রবণের ভর 1150 g। 5 mol HCOOH = 230 g। জলের ভর = 920 g (0.92 kg)। মোলালিটি = 5/0.92 = 5.43 m। W/W = (230/1150)×100 = 20%।" },
+{ q: "১২. গ্লুকোজের একটি জলীয় দ্রবণের গাঢ়ত্ব 2 m। উক্ত দ্রবণের 50 g-এ দ্রবীভূত গ্লুকোজের পরিমাণ হল-", opts: ["12.65 g", "13.24 g", "13.97 g", "14.25 g"], ans: 1, exp: "2m দ্রবণের মোট ভর = 1000 g জল + 360 g গ্লুকোজ = 1360 g। 50 g এ থাকবে (360/1360)×50 = 13.24 g।" },
+{ q: "১৩. একটি দ্রাবের বেঞ্জিন দ্রবণে উক্ত পদার্থের মোল-ভগ্নাংশ 0.1। দ্রবণটির মোলাল গাঢ়ত্ব হল-", opts: ["1.276 m", "1.380 m", "1.424 m", "1.506 m"], ans: 2, exp: "n2/(n1+n2)=0.1 ⇒ n1 = 9n2। বেঞ্জিনের ভর = 9n2 × 78 g। মোলালিটি = n2/(9n2×78) × 1000 = 1.424 mol/kg।" },
+{ q: "১৪. ফর্মিক অ্যাসিডের একটি জলীয় দ্রবণের গাঢ়ত্ব 11M এবং ঘনত্ব 1.10 g/mL। দ্রবণে ফর্মিক অ্যাসিডের মোল-ভগ্নাংশ হল-", opts: ["0.16", "0.18", "0.22", "0.25"], ans: 3, exp: "1 L দ্রবণের ভর 1100 g। ফর্মিক অ্যাসিড = 11 mol = 506 g। জলের ভর = 594 g = 33 mol। মোল-ভগ্নাংশ = 11 / (11+33) = 0.25।" },
+{ q: "১৫. জলের একটি নমুনার 2.5 g-এ Zn<sup>2+</sup> আয়নের পরিমাণ 5.0 µg হলে, উক্ত নমুনায় ppm এককে গাঢ়ত্ব হবে-", opts: ["2 ppm", "2.2 ppm", "2.5 ppm", "5 ppm"], ans: 0, exp: "ppm = (দ্রাবের ওজন µg এককে) / (দ্রবণের ওজন g এককে) = 5.0 / 2.5 = 2 ppm।" }
+]
+},
+"math": {
+subject: 'Mathematics', icon: '📐', topic: 'সম্বন্ধ (Relations)',
+questions: [
+{ q: "১. শূন্য সেট নয় এমন যে-কোনো সেট A-এর ওপর সংজ্ঞাত একটি সম্বন্ধ R-কে সমতুল্যতা সম্বন্ধ বলা হবে যদি R সম্বন্ধটি-", opts: ["স্বসম হয়", "প্রতিসম হয়", "স্বসম, প্রতিসম এবং সংক্রমণ হয়", "কোনোটিই নয়"], ans: 2, exp: "সমতুল্যতা সম্বন্ধের গাণিতিক সংজ্ঞানুযায়ী, কোনো সম্বন্ধকে সমতুল্যতা হতে হলে তা একইসঙ্গে স্বসম (reflexive), প্রতিসম (symmetric) এবং সংক্রমণ (transitive) হতে হয়।" },
+{ q: "২. A={a,b,c} সেট থেকে B={d,e} সেটে সংজ্ঞাত মোট সম্বন্ধসমূহের সংখ্যা হয়-", opts: ["2<sup>6</sup>", "2<sup>8</sup>", "2<sup>4</sup>", "2<sup>15</sup>"], ans: 0, exp: "A সেটে ৩টি এবং B সেটে ২টি পদ আছে। A থেকে B সেটে সংজ্ঞাত মোট সম্বন্ধের সংখ্যা হবে উপসেটের সূত্র অনুযায়ী 2^(m×n) = 2^(3×2) = 2^6।" },
+{ q: "৩. A={8,9,10,11} এবং B={2,3,4,5} এবং A থেকে B-তে একটি সম্বন্ধ xRy ⇒ x, y দিয়ে বিভাজ্য। R-এর ক্ষেত্র (Domain) হবে-", opts: ["{2,3,4,5}", "{8,9,10,11}", "{8,9,10}", "{8,10}"], ans: 2, exp: "A সেটের ৪ বিভাজ্য 2 ও 4 দিয়ে; 9 বিভাজ্য 3 দিয়ে; 10 বিভাজ্য 2 ও 5 দিয়ে। কিন্তু 11, B সেটের কোনো পদ দিয়ে বিভাজ্য নয়। তাই ক্ষেত্র হলো {8,9,10}।" },
+{ q: "৪. R={(x,y) : x পূর্ণসংখ্যা, |x|<3 এবং y=|x-3|} হলে, R-এর পাল্লা (Range) হবে-", opts: ["{-2,-1,0}", "{4,3,2,1}", "{-2,-1,0,1,2}", "{5,4,3,2,1}"], ans: 3, exp: "|x|<3 এর জন্য x-এর সম্ভাব্য মান -2, -1, 0, 1, 2। সমীকরণে বসালে y-এর মানগুলি পাওয়া যায় 5, 4, 3, 2, 1। অতএব পাল্লা হবে {5,4,3,2,1}।" },
+{ q: "৫. A={1,2,3} সেটের ওপর R সম্বন্ধটির দুটি পদ (1,2) ও (1,3)। R সম্বন্ধটি স্বসম ও প্রতিসম হবে কিন্তু সংক্রমণ হবে না এরকম যতগুলি R পাওয়া যাবে তার সংখ্যা হল-", opts: ["1", "2", "3", "4"], ans: 0, exp: "স্বসম ও প্রতিসম করতে (1,1), (2,2), (3,3), (1,2), (2,1), (1,3), (3,1) রাখতে হবে। এটি সংক্রমণ নয় কারণ (2,3) নেই। এমন সম্বন্ধ কেবল ১টিই তৈরি করা সম্ভব।" },
+{ q: "৬. X={1,2,3,4} এবং X-এর ওপর একটি সম্বন্ধ R={(1,2),(3,4),(2,2),(4,3),(2,3)}; X-এর ওপর R সম্বন্ধ-", opts: ["স্বসম", "প্রতিসম নয়", "স্বসম নয় কিন্তু প্রতিসম", "সংক্রমণ"], ans: 1, exp: "R-এ (1,2) পদটি আছে কিন্তু তার বিপরীত (2,1) নেই। তাই এটি প্রতিসম নয়।" },
+{ q: "৭. {1,2,3,4} সেটের ওপর R={(1,2),(2,2),(1,1),(4,4),(1,3),(3,3),(3,2)}। তাহলে নীচের কোন্টি সঠিক উক্তি?", opts: ["স্বসম ও প্রতিসম কিন্তু সংক্রমণ নয়", "স্বসম এবং সংক্রমণ কিন্তু প্রতিসম নয়", "প্রতিসম ও সংক্রমণ কিন্তু স্বসম নয়", "সমতুল্যতা সম্বন্ধ"], ans: 1, exp: "সব উপাদানের জন্য জোড় থাকায় এটি স্বসম। (1,2) আছে কিন্তু (2,1) নেই তাই প্রতিসম নয়। এটি সংক্রমণের সব শর্ত সিদ্ধ করে।" },
+{ q: "৮. বাস্তব সংখ্যাসমূহের সেটের ওপর সংজ্ঞাত 'অপেক্ষা বড়ো (>)' সম্বন্ধটি কীরূপ?", opts: ["সংক্রমণ কিন্তু স্বসম বা প্রতিসম নয়", "স্বসম এবং প্রতিসম কিন্তু সংক্রমণ নয়", "প্রতিসম কিন্তু স্বসম বা সংক্রমণ নয়", "সমতুল্যতা"], ans: 0, exp: "কোনো সংখ্যা নিজের থেকে বড়ো হতে পারে না (স্বসম নয়)। x>y হলে y>x হতে পারে না (প্রতিসম নয়)। কিন্তু x>y এবং y>z হলে x>z হয়, তাই এটি কেবল সংক্রমণ।" },
+{ q: "৯. কোনো সমতলে অঙ্কিত সরলরেখাসমূহের ওপর 'লম্ব' সম্বন্ধ কীরূপ?", opts: ["সংক্রমণ কিন্তু স্বসম বা প্রতিসম নয়", "স্বসম এবং প্রতিসম কিন্তু সংক্রমণ নয়", "প্রতিসম কিন্তু স্বসম বা সংক্রমণ নয়", "সমতুল্যতা"], ans: 2, exp: "সরলরেখা নিজের ওপর লম্ব হতে পারে না (স্বসম নয়)। l1 ⊥ l2 হলে l2 ⊥ l1 হবেই (প্রতিসম)। কিন্তু l1 ⊥ l2 এবং l2 ⊥ l3 হলে l1 || l3 হয় (সংক্রমণ নয়)।" },
+{ q: "১০. স্বাভাবিক সংখ্যাসমূহের সেটে 'y, x দিয়ে বিভাজ্য' সম্বন্ধ কীরূপ?", opts: ["স্বসম এবং সংক্রমণ কিন্তু প্রতিসম নয়", "স্বসম এবং প্রতিসম কিন্তু সংক্রমণ নয়", "প্রতিসম এবং সংক্রমণ কিন্তু স্বসম নয়", "সমতুল্যতা"], ans: 0, exp: "সংখ্যা নিজেকে দিয়ে বিভাজ্য (স্বসম)। y, x দিয়ে এবং z, y দিয়ে বিভাজ্য হলে z, x দিয়েও বিভাজ্য হবে (সংক্রমণ)। 6, 3 দিয়ে বিভাজ্য হলেও 3, 6 দিয়ে বিভাজ্য নয় (প্রতিসম নয়)।" },
+{ q: "১১. স্বাভাবিক সংখ্যাসমূহের সেটে x+y=12 সম্বন্ধ কীরূপ?", opts: ["স্বসম এবং প্রতিসম কিন্তু সংক্রমণ নয়", "স্বসম কিন্তু প্রতিসম বা সংক্রমণ নয়", "প্রতিসম, কিন্তু স্বসম বা সংক্রমণ নয়", "সমতুল্যতা"], ans: 2, exp: "x+x=12 বা x=6 সব স্বাভাবিক সংখ্যার জন্য সত্য নয় (স্বসম নয়)। x+y=12 হলে y+x=12 হবেই (প্রতিসম)। (1,11) ও (11,1) থাকলে (1,1) থাকা সম্ভব নয় (সংক্রমণ নয়)।" },
+{ q: "১২. সেটসমূহের ওপর 'উপসেট' সম্বন্ধ কীরূপ?", opts: ["স্বসম এবং সংক্রমণ কিন্তু প্রতিসম নয়", "স্বসম এবং প্রতিসম কিন্তু সংক্রমণ নয়", "প্রতিসম কিন্তু স্বসম বা সংক্রমণ নয়", "সমতুল্যতা"], ans: 0, exp: "যেকোনো সেট তার নিজের উপসেট (স্বসম)। X ⊆ Y ও Y ⊆ Z হলে X ⊆ Z হবে (সংক্রমণ)। কিন্তু X ⊆ Y হলে Y ⊆ X সর্বদা সত্য হয় না (প্রতিসম নয়)।" },
+{ q: "১৩. পূর্ণসংখ্যাসমূহের সেট Z-এর ওপর (x-y)-এর মান জোড় হলে সম্বন্ধটি কীরূপ?", opts: ["প্রতিসম নয়", "স্বসম এবং প্রতিসম কিন্তু সংক্রমণ নয়", "প্রতিসম কিন্তু স্বসম বা সংক্রমণ নয়", "সমতুল্যতা"], ans: 3, exp: "x-x=0 জোড় (স্বসম)। x-y জোড় হলে y-x ও জোড় (প্রতিসম)। x-y ও y-z জোড় হলে তাদের যোগফল x-z ও জোড় (সংক্রমণ)। এটি সমতুল্যতা সম্বন্ধ।" },
+{ q: "১৪. A={1,2,3,4} সেটের ওপর উপাদানস্থির সম্বন্ধ I_A হলে নিচের কোনটি I_A -তে থাকবে?", opts: ["(1,2)", "(2,2)", "(2,1)", "(3,4)"], ans: 1, exp: "উপাদানস্থির সম্বন্ধে প্রতিটি উপাদান কেবল নিজের সাথেই সম্পর্কিত হয়, অর্থাৎ (x,x)। তাই (2,2) পদটি অবশ্যই থাকবে।" },
+{ q: "১৫. A={a,b,c,d} এবং R={(a,a),(a,c),(c,a),(c,c),(d,d)}; A-র ওপর R সম্বন্ধটি কীরূপ হবে?", opts: ["সার্বিক সম্বন্ধ", "স্বসম", "প্রতিসম ও সংক্রমণ", "শুধুমাত্র প্রতিসম"], ans: 2, exp: "সেটটিতে (b,b) নেই তাই এটি স্বসম নয়। তবে (a,c) ও (c,a) উপস্থিত থাকায় এটি প্রতিসম এবং এটি সংক্রমণের কোনো নিয়ম ভঙ্গ করছে না।" }
+]
+}
+};
+
+let activeSetId = null;
+let questions = [];
+let currentQIndex = 0;
+let score = 0;
+let wrongAnswers = 0;
+let isReviewMode = false;
+let timerInterval;
+let timeLeft = TIME_LIMIT;
+let userAnswers = {};
+
+window.onload = () => { renderHub(); };
+
+function renderHub() {
+const grid = document.getElementById("setGrid");
+grid.innerHTML = "";
+for(let id in ALL_SETS) {
+const set = ALL_SETS[id];
+const div = document.createElement("div");
+div.className = "set-card";
+
+div.innerHTML = `
+<div class="free-badge">FREE DEMO</div>
+<div class="icon">${set.icon}</div>
+<div class="set-num">${set.subject}</div>
+<div class="set-title">${set.topic}</div>
+<div class="set-meta"><span>15 Qs</span><span>10 Mins</span></div>
+`;
+
+div.onclick = () => { startQuiz(id); };
+grid.appendChild(div);
+}
+}
+
+function goToHub() {
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("hubPage").style.display = "block";
+document.getElementById("timerBox").classList.add("hidden");
+clearInterval(timerInterval);
+renderHub();
+}
+
+function startQuiz(setId) {
+activeSetId = setId;
+questions = ALL_SETS[setId].questions;
+currentQIndex = 0; score = 0; wrongAnswers = 0; userAnswers = {}; isReviewMode = false; timeLeft = TIME_LIMIT;
+document.getElementById("hubPage").style.display = "none";
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+document.getElementById("timerBox").classList.remove("hidden");
+document.getElementById("testSubject").innerText = ALL_SETS[setId].subject;
+document.getElementById("testTopic").innerText = ALL_SETS[setId].topic;
+startTimer();
+loadQuestion();
+}
+
+function loadQuestion() {
+const qData = questions[currentQIndex];
+document.getElementById("qNum").innerText = `প্রশ্ন ${currentQIndex + 1} / ${questions.length}`;
+document.getElementById("qText").innerHTML = qData.q;
+const progress = ((currentQIndex) / questions.length) * 100;
+document.getElementById("progressFill").style.width = `${progress}%`;
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+const optsBox = document.getElementById("qOpts");
+optsBox.innerHTML = "";
+document.getElementById("explanation").classList.remove("show");
+document.getElementById("nextBtn").disabled = true;
+document.getElementById("nextBtn").innerText = (currentQIndex === questions.length - 1) && !isReviewMode ? "টেস্ট জমা দিন" : "পরবর্তী →";
+
+qData.opts.forEach((optText, idx) => {
+const btn = document.createElement("button");
+btn.className = "opt";
+btn.innerHTML = `<div class="opt-circle">${LABELS[idx]}</div> <div class="opt-text">${optText}</div>`;
+if (isReviewMode) {
+btn.classList.add("disabled");
+if (idx === qData.ans) btn.classList.add("correct");
+else if (userAnswers[currentQIndex] === idx) btn.classList.add("wrong");
+} else {
+btn.onclick = () => selectOption(btn, idx, qData.ans, qData.exp);
+}
+optsBox.appendChild(btn);
+});
+
+if (isReviewMode) {
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${qData.exp}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+if (currentQIndex === questions.length - 1) { document.getElementById("nextBtn").innerText = "ফলাফলে ফিরুন"; }
+}
+}
+
+function selectOption(btn, selectedIdx, correctIdx, exp) {
+const allBtns = document.getElementById("qOpts").querySelectorAll(".opt");
+allBtns.forEach(b => b.classList.add("disabled"));
+userAnswers[currentQIndex] = selectedIdx;
+if (selectedIdx === correctIdx) { btn.classList.add("correct"); score++; }
+else { btn.classList.add("wrong"); allBtns[correctIdx].classList.add("correct"); wrongAnswers++; }
+document.getElementById("scoreShow").innerText = `সঠিক: ${score} | ভুল: ${wrongAnswers}`;
+document.getElementById("explanationText").innerHTML = `<strong>ব্যাখ্যা:</strong> ${exp}`;
+document.getElementById("explanation").classList.add("show");
+document.getElementById("nextBtn").disabled = false;
+}
+
+function nextQ() {
+if (isReviewMode && currentQIndex === questions.length - 1) {
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show"); return;
+}
+if (!isReviewMode && currentQIndex === questions.length - 1) { finishQuiz(); return; }
+currentQIndex++; loadQuestion();
+}
+
+function startTimer() {
+clearInterval(timerInterval);
+const tBox = document.getElementById("timerBox");
+tBox.classList.remove("danger");
+timerInterval = setInterval(() => {
+if (timeLeft <= 0) { clearInterval(timerInterval); finishQuiz(); return; }
+timeLeft--;
+const m = Math.floor(timeLeft / 60); const s = timeLeft % 60;
+document.getElementById("timerDisplay").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+if (timeLeft < 60) tBox.classList.add("danger");
+}, 1000);
+}
+
+function finishQuiz() {
+clearInterval(timerInterval);
+document.getElementById("testArea").classList.add("hidden");
+document.getElementById("timerBox").classList.add("hidden");
+document.getElementById("resultWrap").classList.add("show");
+const total = questions.length; const skipped = total - (score + wrongAnswers);
+const percent = Math.round((score / total) * 100);
+document.getElementById("finalScore").innerText = `${percent}%`;
+document.getElementById("rbCorrect").innerText = score;
+document.getElementById("rbWrong").innerText = wrongAnswers + skipped;
+const gradeEl = document.getElementById("resultGrade");
+if (percent >= 80) { gradeEl.innerText = "🌟 অসাধারণ পারফরম্যান্স!"; gradeEl.style.color = "#1a7a4a"; document.getElementById("resultIcon").innerText = "🏆"; }
+else if (percent >= 60) { gradeEl.innerText = "👍 খুব ভালো!"; gradeEl.style.color = "#2aad68"; document.getElementById("resultIcon").innerText = "⭐"; }
+else { gradeEl.innerText = "💪 চেষ্টা চালিয়ে যাও!"; gradeEl.style.color = "#e8730a"; document.getElementById("resultIcon").innerText = "📚"; }
+}
+
+function restartQuiz() {
+startQuiz(activeSetId);
+}
+
+function showReview() {
+isReviewMode = true; currentQIndex = 0;
+document.getElementById("resultWrap").classList.remove("show");
+document.getElementById("testArea").classList.remove("hidden");
+loadQuestion();
+}
+</script>
+</body>
+</html>
